@@ -1,0 +1,89 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Features.BlankCard.ViewModels"
+             xmlns:models="using:InfoID.Desktop.Features.BlankCard.Models"
+             xmlns:core="using:InfoID.Desktop.Core.Models"
+             xmlns:components="using:InfoID.Desktop.Shell.Components"
+             mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="820"
+             x:Class="InfoID.Desktop.Features.BlankCard.Views.BlankCardView"
+             x:DataType="vm:BlankCardViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <DockPanel Margin="40,28,40,0">
+
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,20">
+            <components:PageHeaderView Grid.Column="0" Title="Blank card" BackCommand="{Binding GoBackCommand}" />
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="24" VerticalAlignment="Bottom">
+                <StackPanel Spacing="4" Width="140">
+                    <TextBlock Text="Orientation" Classes="label" />
+                    <ComboBox ItemsSource="{Binding OrientationOptions}"
+                              SelectedItem="{Binding SelectedOrientationOption}"
+                              HorizontalAlignment="Stretch" />
+                </StackPanel>
+                <StackPanel Spacing="4" Width="140">
+                    <TextBlock Text="Format" Classes="label" />
+                    <ComboBox ItemsSource="{Binding FormatOptions}"
+                              SelectedItem="{Binding SelectedFormatOption}"
+                              HorizontalAlignment="Stretch" />
+                </StackPanel>
+                <Button Classes="primary" Content="Create my own card" VerticalAlignment="Bottom"
+                        Command="{Binding CreateMyOwnCardCommand}" />
+            </StackPanel>
+        </Grid>
+
+        <TextBlock DockPanel.Dock="Top" Text="Filter by type" Classes="label" Margin="0,0,0,10" />
+
+        <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding TypeChips}" Margin="0,0,0,20">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="core:FilterChipOption">
+                    <ToggleButton Classes="chip" Content="{Binding Label}" IsChecked="{Binding IsSelected}"
+                                  Margin="0,0,8,8" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding FilteredFormats}" Margin="0,0,0,32">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:CompileBindings="False">
+                        <Border Classes="tile" Width="220" Height="190" Margin="0,0,16,16">
+                            <Button Command="{Binding $parent[UserControl].DataContext.SelectFormatCommand}"
+                                    CommandParameter="{Binding}"
+                                    Background="Transparent" BorderThickness="0" Padding="16"
+                                    HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch">
+                                <DockPanel>
+                                    <Border DockPanel.Dock="Top" Height="90" CornerRadius="{StaticResource Radius.MD}"
+                                            Background="{DynamicResource BrushBackground}"
+                                            BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+                                        <TextBlock Text="{Binding PreviewLabel}" HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" Classes="caption" FontWeight="Medium" />
+                                    </Border>
+                                    <StackPanel DockPanel.Dock="Top" Margin="0,10,0,0" Spacing="4">
+                                        <TextBlock Text="{Binding Name}" Classes="body" FontWeight="Medium"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding CardSizeName}" Classes="caption" />
+                                    </StackPanel>
+                                </DockPanel>
+                            </Button>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+    </DockPanel>
+</UserControl>

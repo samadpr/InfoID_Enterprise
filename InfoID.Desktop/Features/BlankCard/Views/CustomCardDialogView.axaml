@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Features.BlankCard.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="420"
+             x:Class="InfoID.Desktop.Features.BlankCard.Views.CustomCardDialogView"
+             x:DataType="vm:CustomCardDialogViewModel"
+             Background="{DynamicResource BrushSurface}"
+             Width="420">
+
+    <StackPanel Margin="28" Spacing="20">
+
+        <TextBlock Text="Create my own card" Classes="h2" />
+
+        <StackPanel Spacing="10">
+            <TextBlock Text="Size" Classes="label" />
+            <Grid ColumnDefinitions="*,16,*">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="Width (mm)" Classes="caption" />
+                    <NumericUpDown Value="{Binding Width}" Minimum="1" Maximum="500"
+                                   Increment="0.1" FormatString="0.000" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Spacing="4">
+                    <TextBlock Text="Height (mm)" Classes="caption" />
+                    <NumericUpDown Value="{Binding Height}" Minimum="1" Maximum="500"
+                                   Increment="0.1" FormatString="0.000" />
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <StackPanel Spacing="10">
+            <TextBlock Text="Orientation" Classes="label" />
+            <StackPanel Orientation="Horizontal" Spacing="24">
+                <RadioButton GroupName="Orientation" Content="Landscape" IsChecked="{Binding IsLandscape}" />
+                <RadioButton GroupName="Orientation" Content="Portrait" IsChecked="{Binding IsPortrait}" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Spacing="10">
+            <TextBlock Text="Radius" Classes="label" />
+            <NumericUpDown Value="{Binding CornerRadius}" Minimum="0" Maximum="20"
+                           Increment="0.1" FormatString="0.000" HorizontalAlignment="Left" Width="180" />
+        </StackPanel>
+
+        <StackPanel Spacing="10">
+            <CheckBox Content="Save card to my models" IsChecked="{Binding SaveToMyModels}" />
+            <TextBox Text="{Binding ModelName}" Watermark="Model name" IsEnabled="{Binding SaveToMyModels}" />
+        </StackPanel>
+
+        <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource BrushError}"
+                    TextWrapping="Wrap" IsVisible="{Binding HasError}" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+            <Button Classes="secondary" Content="Cancel" Command="{Binding CancelCommand}" />
+            <Button Classes="primary" Content="OK" Command="{Binding OkCommand}" />
+        </StackPanel>
+
+    </StackPanel>
+</UserControl>

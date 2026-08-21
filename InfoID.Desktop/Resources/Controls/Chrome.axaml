@@ -1,0 +1,45 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Top application menu (InfoID | File | Edit | ...) -->
+  <Style Selector="Menu">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="FontSize" Value="13" />
+  </Style>
+  <Style Selector="Menu MenuItem">
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
+    <Setter Property="Padding" Value="10,6" />
+  </Style>
+  <Style Selector="MenuItem:selected /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource BrushHoverOverlay}" />
+  </Style>
+
+  <!-- Document / workspace tabs (future multi-document editor) -->
+  <Style Selector="TabControl">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="TabItem">
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Padding" Value="14,8" />
+  </Style>
+  <Style Selector="TabItem:selected">
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
+    <Setter Property="FontWeight" Value="Medium" />
+  </Style>
+
+  <!-- Scrollbars: slim, unobtrusive -->
+  <Style Selector="ScrollBar">
+    <Setter Property="MinWidth" Value="10" />
+    <Setter Property="MinHeight" Value="10" />
+  </Style>
+  <Style Selector="ScrollBar /template/ Thumb">
+    <Setter Property="Background" Value="{DynamicResource BrushScrollThumb}" />
+  </Style>
+
+  <!-- Dialog window chrome -->
+  <Style Selector="Window.dialogWindow">
+    <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+  </Style>
+
+</Styles>

@@ -1,0 +1,60 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <Style Selector="TextBox">
+    <Setter Property="Background" Value="{DynamicResource BrushInputBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushBorderStrong}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource Radius.SM}" />
+    <Setter Property="Padding" Value="10,7" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource BrushPrimary}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource BrushSelectionBackground}" />
+  </Style>
+  <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushPrimary}" />
+  </Style>
+
+  <Style Selector="ComboBox">
+    <Setter Property="Background" Value="{DynamicResource BrushInputBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushBorderStrong}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource Radius.SM}" />
+    <Setter Property="Padding" Value="10,7" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
+    <Setter Property="MinHeight" Value="36" />
+  </Style>
+
+  <Style Selector="CheckBox">
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
+    <Setter Property="FontSize" Value="14" />
+  </Style>
+  <Style Selector="CheckBox /template/ Border#NormalRectangle">
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushBorderStrong}" />
+  </Style>
+  <Style Selector="CheckBox:checked /template/ Border#NormalRectangle">
+    <Setter Property="Background" Value="{DynamicResource BrushPrimary}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushPrimary}" />
+  </Style>
+
+  <Style Selector="RadioButton">
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
+    <Setter Property="FontSize" Value="14" />
+  </Style>
+  <Style Selector="RadioButton /template/ Ellipse#OuterEllipse">
+    <Setter Property="Stroke" Value="{DynamicResource BrushBorderStrong}" />
+  </Style>
+  <Style Selector="RadioButton:checked /template/ Ellipse#OuterEllipse">
+    <Setter Property="Stroke" Value="{DynamicResource BrushPrimary}" />
+  </Style>
+  <Style Selector="RadioButton:checked /template/ Ellipse#CheckGlyphFill">
+    <Setter Property="Fill" Value="{DynamicResource BrushPrimary}" />
+  </Style>
+
+  <Style Selector="ToggleSwitch:checked /template/ Border#SwitchKnobBounds">
+    <Setter Property="Background" Value="{DynamicResource BrushPrimary}" />
+  </Style>
+
+</Styles>

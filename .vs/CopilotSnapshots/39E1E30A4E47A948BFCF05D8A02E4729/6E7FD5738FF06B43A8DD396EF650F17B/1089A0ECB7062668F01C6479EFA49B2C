@@ -1,0 +1,47 @@
+﻿using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Data.Core.Plugins;
+using Avalonia.Markup.Xaml;
+using InfoID.App.ViewModels.Shell;
+using InfoID.App.Views.Shell;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace InfoID.App;
+
+public partial class App : Avalonia.Application
+{
+    public override void Initialize()","explanation":"Fully-qualify base class to avoid namespace/type name conflict: Application may resolve to a namespace, use Avalonia.Application to reference the type."}
+    {
+        AvaloniaXamlLoader.Load(this);
+    }
+
+    public override void OnFrameworkInitializationCompleted()
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            // Avoid Avalonia's built-in data annotation validation duplicating
+            // CommunityToolkit.Mvvm's own [Required]/[NotifyDataErrorInfo] pipeline.
+            DisableAvaloniaDataAnnotationValidation();
+
+            var mainWindowViewModel = Program.Services.GetRequiredService<MainWindowViewModel>();
+            desktop.MainWindow = new MainWindow
+            {
+                DataContext = mainWindowViewModel
+            };
+        }
+
+        base.OnFrameworkInitializationCompleted();
+    }
+
+    private static void DisableAvaloniaDataAnnotationValidation()
+    {
+        var toRemove = BindingPlugins.DataValidators
+            .OfType<DataAnnotationsValidationPlugin>()
+            .ToArray();
+
+        foreach (var plugin in toRemove)
+        {
+            BindingPlugins.DataValidators.Remove(plugin);
+        }
+    }
+}

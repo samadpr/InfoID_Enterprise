@@ -1,0 +1,127 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Features.Welcome.ViewModels"
+             xmlns:models="using:InfoID.Desktop.Features.Welcome.Models"
+             mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="820"
+             x:Class="InfoID.Desktop.Features.Welcome.Views.WelcomeView"
+             x:DataType="vm:WelcomeViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <ScrollViewer>
+        <StackPanel MaxWidth="1180" HorizontalAlignment="Stretch" Margin="40,32,40,48" Spacing="40">
+
+            <!-- Hero -->
+            <Border Classes="heroSurface" MinHeight="220">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                        <GradientStop Color="#DA3025" Offset="0" />
+                        <GradientStop Color="#7A1710" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid Margin="48,0" ColumnDefinitions="260,*" ColumnSpacing="36">
+					<Border Grid.Column="0"
+                            Width="220"
+                            Height="220"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            CornerRadius="24"
+                            Padding="25">
+
+						<Image Source="avares://InfoID.Desktop/Assets/Images/InfoIDLogo.png"
+							   Stretch="Uniform"
+							   HorizontalAlignment="Center"
+							   VerticalAlignment="Center" />
+					</Border>
+
+					<StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="12" MaxWidth="640">
+                        <TextBlock Text="Welcome to InfoID" Classes="display" Foreground="White" />
+                        <TextBlock Text="Design, manage and print professional ID cards for your organization -- fully offline, enterprise-ready."
+                                   Foreground="#F3E7E6" FontSize="15" TextWrapping="Wrap" />
+                        <Button Classes="secondary" Content="Create New Card" Margin="0,12,0,0"
+                                Command="{Binding CreateBlankCardCommand}"
+                                Foreground="White" BorderBrush="White" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Recent cards -->
+            <StackPanel Spacing="16">
+                <TextBlock Text="Recent cards" Classes="h2" />
+
+                <WrapPanel>
+
+                    <Border Classes="tile" Width="220" Height="180" Padding="20" Margin="0,0,16,16">
+                        <StackPanel VerticalAlignment="Center" Spacing="12">
+                            <Button Classes="primary" Content="Blank card &gt;" HorizontalAlignment="Stretch"
+                                    Command="{Binding CreateBlankCardCommand}" />
+                            <Button Classes="secondary" Content="Use template &gt;" HorizontalAlignment="Stretch"
+                                    Command="{Binding UseTemplateCommand}" />
+                        </StackPanel>
+                    </Border>
+
+                    <ItemsControl ItemsSource="{Binding RecentCards}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:RecentCardItem">
+                                <Border Classes="tile" Width="220" Height="180" Padding="16" Margin="0,0,16,16">
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Text="{Binding Name}" Classes="h3" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Subtitle}" Classes="caption" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Border Classes="tile" Width="220" Height="180" Margin="0,0,16,16" IsVisible="{Binding !HasRecentCards}">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="6">
+                            <TextBlock Text="No recent cards yet" Classes="bodySecondary" HorizontalAlignment="Center" />
+                            <TextBlock Text="Your recently opened cards will appear here" Classes="caption"
+                                       TextWrapping="Wrap" TextAlignment="Center" MaxWidth="160" />
+                        </StackPanel>
+                    </Border>
+
+                </WrapPanel>
+            </StackPanel>
+
+            <!-- Go further -->
+            <StackPanel Spacing="16">
+                <TextBlock Text="Go further" Classes="h2" />
+
+                <WrapPanel>
+                    <Border Classes="tile" Width="260" Height="120" Padding="20" Margin="0,0,16,16">
+                        <StackPanel Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="Templates" Classes="h3" />
+                            <TextBlock Text="Browse ready-made designs by industry" Classes="caption" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="tile" Width="260" Height="120" Padding="20" Margin="0,0,16,16">
+                        <StackPanel Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="Cardholders" Classes="h3" />
+                            <TextBlock Text="Manage the people cards are issued to" Classes="caption" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="tile" Width="260" Height="120" Padding="20" Margin="0,0,16,16">
+                        <StackPanel Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="Printing" Classes="h3" />
+                            <TextBlock Text="Single, batch and reprint workflows" Classes="caption" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="tile" Width="260" Height="120" Padding="20" Margin="0,0,16,16">
+                        <StackPanel Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="Learning" Classes="h3" />
+                            <TextBlock Text="Guides and tips to get the most out of InfoID" Classes="caption" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </WrapPanel>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

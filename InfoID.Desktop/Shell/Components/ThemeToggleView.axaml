@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Shell.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="36" d:DesignHeight="36"
+             x:Class="InfoID.Desktop.Shell.Components.ThemeToggleView"
+             x:DataType="vm:ShellViewModel">
+
+    <Button Classes="icon" Command="{Binding ToggleThemeCommand}" ToolTip.Tip="Toggle light / dark theme">
+        <Grid Width="18" Height="18">
+            <!-- Sun: shown in Light mode -->
+            <Canvas Width="18" Height="18" IsVisible="{Binding !IsDarkTheme}">
+                <Ellipse Canvas.Left="5" Canvas.Top="5" Width="8" Height="8"
+                         Fill="{DynamicResource BrushTextPrimary}" />
+                <Line StartPoint="9,0" EndPoint="9,2.4" Stroke="{DynamicResource BrushTextPrimary}" StrokeThickness="1.4" StrokeLineCap="Round" />
+                <Line StartPoint="9,15.6" EndPoint="9,18" Stroke="{DynamicResource BrushTextPrimary}" StrokeThickness="1.4" StrokeLineCap="Round" />
+                <Line StartPoint="0,9" EndPoint="2.4,9" Stroke="{DynamicResource BrushTextPrimary}" StrokeThickness="1.4" StrokeLineCap="Round" />
+                <Line StartPoint="15.6,9" EndPoint="18,9" Stroke="{DynamicResource BrushTextPrimary}" StrokeThickness="1.4" StrokeLineCap="Round" />
+                <Line StartPoint="2.6,2.6" EndPoint="4.3,4.3" Stroke="{DynamicResource BrushTextPrimary}" StrokeThickness="1.4" StrokeLineCap="Round" />
+                <Line StartPoint="13.7,13.7" EndPoint="15.4,15.4" Stroke="{DynamicResource BrushTextPrimary}" StrokeThickness="1.4" StrokeLineCap="Round" />
+                <Line StartPoint="2.6,15.4" EndPoint="4.3,13.7" Stroke="{DynamicResource BrushTextPrimary}" StrokeThickness="1.4" StrokeLineCap="Round" />
+                <Line StartPoint="13.7,4.3" EndPoint="15.4,2.6" Stroke="{DynamicResource BrushTextPrimary}" StrokeThickness="1.4" StrokeLineCap="Round" />
+            </Canvas>
+
+            <!-- Moon: shown in Dark mode -->
+            <Path IsVisible="{Binding IsDarkTheme}" Fill="{DynamicResource BrushTextPrimary}">
+                <Path.Data>
+                    <GeometryGroup FillRule="EvenOdd">
+                        <EllipseGeometry Center="9,9" RadiusX="7" RadiusY="7" />
+                        <EllipseGeometry Center="12.2,6.6" RadiusX="6" RadiusY="6" />
+                    </GeometryGroup>
+                </Path.Data>
+            </Path>
+        </Grid>
+    </Button>
+</UserControl>

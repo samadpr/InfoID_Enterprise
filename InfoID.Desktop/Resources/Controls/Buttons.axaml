@@ -1,0 +1,90 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Base look shared by every button in the app -->
+  <Style Selector="Button">
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="CornerRadius" Value="{StaticResource Radius.MD}" />
+    <Setter Property="Padding" Value="16,9" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+
+  <!-- Primary: main call-to-action, uses the InfoID brand red sparingly -->
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{DynamicResource BrushPrimary}" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushPrimaryForeground}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="FontWeight" Value="Medium" />
+  </Style>
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BrushPrimaryHover}" />
+  </Style>
+  <Style Selector="Button.primary:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BrushPrimaryPressed}" />
+  </Style>
+  <Style Selector="Button.primary:disabled /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BrushDisabled}" />
+  </Style>
+
+  <!-- Secondary: outlined, for less prominent actions -->
+  <Style Selector="Button.secondary">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushBorderStrong}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+  <Style Selector="Button.secondary:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BrushHoverOverlay}" />
+  </Style>
+
+  <!-- Ghost: text-only button used inline (Back, See more, etc.) -->
+  <Style Selector="Button.ghost">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushPrimary}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="4,4" />
+  </Style>
+  <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="TextBlock.TextDecorations" Value="Underline" />
+  </Style>
+
+  <!-- Icon: square, chromeless, used in the header (theme toggle, notifications, ...) -->
+  <Style Selector="Button.icon">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Width" Value="36" />
+    <Setter Property="Height" Value="36" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="CornerRadius" Value="{StaticResource Radius.Round}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
+  </Style>
+  <Style Selector="Button.icon:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BrushHoverOverlay}" />
+  </Style>
+
+  <!-- Filter chip: pill-shaped toggle used for orientation/format/category filters -->
+  <Style Selector="ToggleButton.chip">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushBorderStrong}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource Radius.Round}" />
+    <Setter Property="Padding" Value="14,7" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="ToggleButton.chip:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BrushHoverOverlay}" />
+  </Style>
+  <Style Selector="ToggleButton.chip:checked /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource BrushSelectionBackground}" />
+  </Style>
+  <Style Selector="ToggleButton.chip:checked">
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushPrimary}" />
+    <Setter Property="Foreground" Value="{DynamicResource BrushPrimary}" />
+  </Style>
+
+</Styles>

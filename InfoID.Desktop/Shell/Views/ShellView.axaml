@@ -1,0 +1,25 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:InfoID.Desktop.Shell.ViewModels"
+        xmlns:components="using:InfoID.Desktop.Shell.Components"
+        mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="800"
+        x:Class="InfoID.Desktop.Shell.Views.ShellView"
+        x:DataType="vm:ShellViewModel"
+        Title="InfoID"
+		Icon="avares://InfoID.Desktop/Assets/Icons/InfoID.ico"
+        MinWidth="1024" MinHeight="640"
+        Width="1366" Height="800"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource BrushBackground}">
+
+    <DockPanel>
+        <components:AppHeaderView DockPanel.Dock="Top" />
+
+        <ContentControl Content="{Binding CurrentPage}"
+                         HorizontalContentAlignment="Stretch"
+                         VerticalContentAlignment="Stretch" />
+    </DockPanel>
+
+</Window>

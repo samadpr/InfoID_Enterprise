@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="InfoID.Application/InfoID.Application.csproj" />
+    <Project Path="InfoID.Desktop/InfoID.Desktop.csproj" />
+    <Project Path="InfoID.Domain/InfoID.Domain.csproj" />
+    <Project Path="InfoID.Infrastructure/InfoID.Infrastructure.csproj" />
+    <Project Path="InfoID.Shared/InfoID.Shared.csproj" />
+  </Folder>
+</Solution>

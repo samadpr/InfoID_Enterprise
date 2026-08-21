@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="70"
+             x:Class="InfoID.Desktop.Shell.Components.PageHeaderView"
+             x:CompileBindings="False"
+             x:Name="Root">
+
+    <StackPanel Spacing="6">
+        <Button Classes="ghost" Command="{Binding #Root.BackCommand}" HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <Path Data="M15,4 L7,12 L15,20" Stroke="{DynamicResource BrushPrimary}"
+                      StrokeThickness="2" StrokeLineCap="Round" StrokeJoin="Round"
+                      Width="10" Height="14" Stretch="Uniform" />
+                <TextBlock Text="Back" FontSize="13" Foreground="{DynamicResource BrushPrimary}" />
+            </StackPanel>
+        </Button>
+
+        <TextBlock Classes="h1" Text="{Binding #Root.Title}" />
+    </StackPanel>
+</UserControl>

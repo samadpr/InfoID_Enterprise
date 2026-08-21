@@ -1,0 +1,62 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Brand colors are identical in both themes - InfoID red stays InfoID red. -->
+  <Color x:Key="ColorPrimary">#DA3025</Color>
+  <Color x:Key="ColorPrimaryHover">#C22A21</Color>
+  <Color x:Key="ColorPrimaryPressed">#A8241C</Color>
+  <Color x:Key="ColorPrimaryForeground">#FFFFFF</Color>
+  <Color x:Key="ColorSuccess">#2E8B57</Color>
+  <Color x:Key="ColorWarning">#B8860B</Color>
+  <Color x:Key="ColorError">#DA3025</Color>
+
+  <SolidColorBrush x:Key="BrushPrimary" Color="{StaticResource ColorPrimary}" />
+  <SolidColorBrush x:Key="BrushPrimaryHover" Color="{StaticResource ColorPrimaryHover}" />
+  <SolidColorBrush x:Key="BrushPrimaryPressed" Color="{StaticResource ColorPrimaryPressed}" />
+  <SolidColorBrush x:Key="BrushPrimaryForeground" Color="{StaticResource ColorPrimaryForeground}" />
+  <SolidColorBrush x:Key="BrushSuccess" Color="{StaticResource ColorSuccess}" />
+  <SolidColorBrush x:Key="BrushWarning" Color="{StaticResource ColorWarning}" />
+  <SolidColorBrush x:Key="BrushError" Color="{StaticResource ColorError}" />
+
+  <ResourceDictionary.ThemeDictionaries>
+
+    <!-- ===================== LIGHT ===================== -->
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="BrushBackground" Color="#F4F5F7" />
+      <SolidColorBrush x:Key="BrushSurface" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="BrushSurfaceElevated" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="BrushHeaderBackground" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="BrushBorder" Color="#E3E5E9" />
+      <SolidColorBrush x:Key="BrushBorderStrong" Color="#CBCED4" />
+      <SolidColorBrush x:Key="BrushTextPrimary" Color="#1B1D22" />
+      <SolidColorBrush x:Key="BrushTextSecondary" Color="#6B7078" />
+      <SolidColorBrush x:Key="BrushTextDisabled" Color="#A6AAB2" />
+      <SolidColorBrush x:Key="BrushDisabled" Color="#E9EAED" />
+      <SolidColorBrush x:Key="BrushCardBackground" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="BrushSelectionBackground" Color="#FCEBEA" />
+      <SolidColorBrush x:Key="BrushInputBackground" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="BrushHoverOverlay" Color="#0A1B1D22" />
+      <SolidColorBrush x:Key="BrushScrollThumb" Color="#C7CAD1" />
+    </ResourceDictionary>
+
+    <!-- ===================== DARK ===================== -->
+    <ResourceDictionary x:Key="Dark">
+      <SolidColorBrush x:Key="BrushBackground" Color="#16171B" />
+      <SolidColorBrush x:Key="BrushSurface" Color="#1E2025" />
+      <SolidColorBrush x:Key="BrushSurfaceElevated" Color="#25272D" />
+      <SolidColorBrush x:Key="BrushHeaderBackground" Color="#1B1C21" />
+      <SolidColorBrush x:Key="BrushBorder" Color="#33353C" />
+      <SolidColorBrush x:Key="BrushBorderStrong" Color="#42454D" />
+      <SolidColorBrush x:Key="BrushTextPrimary" Color="#F1F2F4" />
+      <SolidColorBrush x:Key="BrushTextSecondary" Color="#A2A6AE" />
+      <SolidColorBrush x:Key="BrushTextDisabled" Color="#6B6E76" />
+      <SolidColorBrush x:Key="BrushDisabled" Color="#2A2C32" />
+      <SolidColorBrush x:Key="BrushCardBackground" Color="#25272D" />
+      <SolidColorBrush x:Key="BrushSelectionBackground" Color="#3A2422" />
+      <SolidColorBrush x:Key="BrushInputBackground" Color="#1B1C21" />
+      <SolidColorBrush x:Key="BrushHoverOverlay" Color="#14FFFFFF" />
+      <SolidColorBrush x:Key="BrushScrollThumb" Color="#44474F" />
+    </ResourceDictionary>
+
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

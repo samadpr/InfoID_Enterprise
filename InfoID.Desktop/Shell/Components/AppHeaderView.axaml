@@ -1,0 +1,96 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Shell.ViewModels"
+             xmlns:components="using:InfoID.Desktop.Shell.Components"
+             mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="44"
+             x:Class="InfoID.Desktop.Shell.Components.AppHeaderView"
+             x:DataType="vm:ShellViewModel">
+
+    <Border Background="{DynamicResource BrushHeaderBackground}"
+            BorderBrush="{DynamicResource BrushBorder}"
+            BorderThickness="0,0,0,1">
+        <Grid ColumnDefinitions="Auto,*,Auto" Height="44">
+
+            <!-- Brand + primary menu -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Margin="16,0,0,0">
+                <Button Classes="ghost" Command="{Binding GoHomeCommand}" Padding="0,0,16,0">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+						<Image Source="avares://InfoID.Desktop/Assets/Images/InfoID.png" Width="24" Height="24" Stretch="Uniform" VerticalAlignment="Center" />
+                        <TextBlock Text="InfoID" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource BrushTextPrimary}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Menu VerticalAlignment="Center">
+                    <MenuItem Header="File">
+                        <MenuItem Header="New Card" />
+                        <MenuItem Header="Open" />
+                        <MenuItem Header="Save" />
+                        <MenuItem Header="Save As" />
+                        <Separator />
+                        <MenuItem Header="Import" />
+                        <MenuItem Header="Export" />
+                        <MenuItem Header="Print" />
+                        <Separator />
+                        <MenuItem Header="Recent Files" />
+                        <MenuItem Header="Exit" />
+                    </MenuItem>
+                    <MenuItem Header="Edit">
+                        <MenuItem Header="Undo" />
+                        <MenuItem Header="Redo" />
+                        <Separator />
+                        <MenuItem Header="Cut" />
+                        <MenuItem Header="Copy" />
+                        <MenuItem Header="Paste" />
+                        <MenuItem Header="Duplicate" />
+                        <MenuItem Header="Delete" />
+                        <Separator />
+                        <MenuItem Header="Select All" />
+                    </MenuItem>
+                    <MenuItem Header="View">
+                        <MenuItem Header="Zoom In" />
+                        <MenuItem Header="Zoom Out" />
+                        <MenuItem Header="Fit to Window" />
+                        <Separator />
+                        <MenuItem Header="Grid" />
+                        <MenuItem Header="Guides" />
+                        <MenuItem Header="Rulers" />
+                        <MenuItem Header="Panels" />
+                        <Separator />
+                        <MenuItem Header="Full Screen" />
+                    </MenuItem>
+                    <MenuItem Header="Database">
+                        <MenuItem Header="Connections" />
+                        <MenuItem Header="Import Data" />
+                        <MenuItem Header="Field Mapping" />
+                    </MenuItem>
+                    <MenuItem Header="Tools">
+                        <MenuItem Header="Cardholders" />
+                        <MenuItem Header="Templates" />
+                        <MenuItem Header="Barcode" />
+                        <MenuItem Header="QR Code" />
+                        <MenuItem Header="Printing" />
+                        <MenuItem Header="Plugins" />
+                        <Separator />
+                        <MenuItem Header="Settings" />
+                    </MenuItem>
+                    <MenuItem Header="Windows" />
+                    <MenuItem Header="Help">
+                        <MenuItem Header="Documentation" />
+                        <MenuItem Header="About InfoID" />
+                    </MenuItem>
+                </Menu>
+            </StackPanel>
+
+            <!-- Reserved for future contextual page actions (save/print status, etc.) -->
+            <ContentControl Grid.Column="1" />
+
+            <!-- Utility area: theme toggle, future notifications/license/account -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" Margin="0,0,12,0" VerticalAlignment="Center">
+                <components:ThemeToggleView />
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

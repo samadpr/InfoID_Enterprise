@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "InfoID.Domain": {
+      "commandName": "Project",
+      "workingDirectory": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop",
+      "debugEngines": "managed-dotnet"
+    }
+  }
+}

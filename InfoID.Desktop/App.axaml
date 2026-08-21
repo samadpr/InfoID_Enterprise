@@ -1,0 +1,30 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:InfoID.Desktop"
+             x:Class="InfoID.Desktop.App"
+             RequestedThemeVariant="Light">
+    <!-- RequestedThemeVariant is set again at runtime by IThemeService once the OS
+         theme has been detected (see App.axaml.cs / ThemeService.InitializeFromSystem). -->
+
+    <Application.DataTemplates>
+        <local:ViewLocator />
+    </Application.DataTemplates>
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://InfoID.Desktop/Resources/Colors/Palette.axaml" />
+                <ResourceInclude Source="avares://InfoID.Desktop/Resources/Styles/Spacing.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://InfoID.Desktop/Resources/Styles/Typography.axaml" />
+        <StyleInclude Source="avares://InfoID.Desktop/Resources/Controls/Buttons.axaml" />
+        <StyleInclude Source="avares://InfoID.Desktop/Resources/Controls/Inputs.axaml" />
+        <StyleInclude Source="avares://InfoID.Desktop/Resources/Controls/Cards.axaml" />
+        <StyleInclude Source="avares://InfoID.Desktop/Resources/Controls/Chrome.axaml" />
+    </Application.Styles>
+</Application>

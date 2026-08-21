@@ -1,0 +1,34 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Static surface card (sections, panels) -->
+  <Style Selector="Border.card">
+    <Setter Property="Background" Value="{DynamicResource BrushCardBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource Radius.LG}" />
+  </Style>
+
+  <!-- Interactive tile (recent card, blank-card format, template) -->
+  <Style Selector="Border.tile">
+    <Setter Property="Background" Value="{DynamicResource BrushCardBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource Radius.LG}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.12" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Border.tile:pointerover">
+    <Setter Property="BorderBrush" Value="{DynamicResource BrushPrimary}" />
+  </Style>
+
+  <Style Selector="Border.heroSurface">
+    <Setter Property="CornerRadius" Value="{StaticResource Radius.XL}" />
+    <Setter Property="ClipToBounds" Value="True" />
+  </Style>
+
+</Styles>
