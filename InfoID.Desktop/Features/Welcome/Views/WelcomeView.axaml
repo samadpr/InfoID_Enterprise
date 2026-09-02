@@ -7,6 +7,7 @@
              mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="820"
              x:Class="InfoID.Desktop.Features.Welcome.Views.WelcomeView"
              x:DataType="vm:WelcomeViewModel"
+             x:Name="Root"
              Background="{DynamicResource BrushBackground}">
 
     <ScrollViewer>
@@ -68,14 +69,18 @@
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="models:RecentCardItem">
-                                <Border Classes="tile" Width="220" Height="180" Padding="16" Margin="0,0,16,16">
-                                    <StackPanel Spacing="8">
-                                        <TextBlock Text="{Binding Name}" Classes="h3" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Text="{Binding Subtitle}" Classes="caption" TextTrimming="CharacterEllipsis" />
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
+							<DataTemplate x:DataType="models:RecentCardItem">
+								<Button Classes="tile" Width="220" Height="180" Padding="16" Margin="0,0,16,16"
+										HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+										Command="{Binding #Root.((vm:WelcomeViewModel)DataContext).OpenRecentCommand}"
+										CommandParameter="{Binding}">
+									<StackPanel Spacing="8">
+										<TextBlock Text="{Binding Name}" Classes="h3" TextTrimming="CharacterEllipsis" />
+										<TextBlock Text="{Binding Subtitle}" Classes="caption" TextTrimming="CharacterEllipsis" />
+										<TextBlock Text="Pinned" Classes="caption" IsVisible="{Binding IsPinned}" />
+									</StackPanel>
+								</Button>
+							</DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 

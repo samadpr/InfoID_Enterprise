@@ -1,13 +1,14 @@
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InfoID.Desktop.Core.Navigation;
 using InfoID.Desktop.Features.BlankCard.ViewModels;
+using InfoID.Desktop.Features.CardDesigner.ViewModels;
 using InfoID.Desktop.Features.Templates.ViewModels;
 using InfoID.Desktop.Features.Welcome.Models;
 using InfoID.Desktop.Features.Welcome.Services;
 using InfoID.Desktop.ViewModels.Base;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace InfoID.Desktop.Features.Welcome.ViewModels;
 
@@ -46,6 +47,15 @@ public sealed partial class WelcomeViewModel : ViewModelBase
             RecentCards.Add(item);
         }
         HasRecentCards = RecentCards.Count > 0;
+    }
+
+    [RelayCommand]
+    private void OpenRecent(RecentCardItem item)
+    {
+        if (long.TryParse(item.Id, out var templateId))
+        {
+            _navigationService.NavigateTo<CardDesignerViewModel>(templateId);
+        }
     }
 
     [RelayCommand]

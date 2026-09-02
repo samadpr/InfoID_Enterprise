@@ -3,70 +3,542 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:InfoID.Desktop.Features.CardDesigner.ViewModels"
+             xmlns:doc="using:InfoID.Desktop.Features.CardDesigner.Models.Document"
+             xmlns:controls="using:InfoID.Desktop.Features.CardDesigner.Views.Controls"
+             xmlns:conv="using:InfoID.Desktop.Features.CardDesigner.Converters"
              mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="820"
              x:Class="InfoID.Desktop.Features.CardDesigner.Views.CardDesignerView"
              x:DataType="vm:CardDesignerViewModel"
+             x:Name="Root"
              Background="{DynamicResource BrushBackground}">
+
+    <UserControl.Styles>
+
+        <!-- Compact, icon-button-like sizing shared by every toolbar/tool-rail button. -->
+        <Style Selector="Button.toolbtn">
+            <Setter Property="MinWidth" Value="34" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+
+        <!-- Same footprint as .toolbtn but for buttons whose clearest label is still a
+             short word (e.g. "Copy", "Group") rather than a universally-recognized glyph.
+             The project has no icon/SVG package yet (Part 2 asks for "proper vector/icon
+             implementation" but per project policy no new NuGet package is added without
+             explicit confirmation) — this keeps every command legible in the meantime
+             instead of a bare two-letter abbreviation like "Cp"/"Gr"/"Ft". -->
+        <Style Selector="Button.toolbtn-wide">
+            <Setter Property="MinWidth" Value="34" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+
+        <Style Selector="ToggleButton.toolbtn">
+            <Setter Property="MinWidth" Value="34" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+
+    </UserControl.Styles>
+
+    <UserControl.DataTemplates>
+
+        <!-- IMPORTANT: these two DataTemplates are intentionally UNKEYED (no x:Key)
+             and live under DataTemplates (not Resources) - in Avalonia, Resources is
+             a strict key/value dictionary and cannot hold Style or unkeyed DataTemplate
+             objects at all (unlike WPF). DataTemplates is the dedicated collection
+             Avalonia uses for implicit, type-matched content templating: it auto-selects
+             a template for a bare ContentControl by matching DataType against the
+             content's runtime type. That's what makes
+             Content="{Binding ActiveTab.PrimarySelection}" automatically show the right
+             editor for whatever element type is selected. -->
+        <DataTemplate DataType="doc:TextElement">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Text content" Classes="caption" />
+                <TextBox Text="{Binding Text, Mode=TwoWay}" AcceptsReturn="True" MinHeight="60"
+                         Watermark="Type the text shown on the card..." />
+                <Grid ColumnDefinitions="*,*">
+                    <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                        <TextBlock Text="Font size" Classes="caption" />
+                        <NumericUpDown Value="{Binding FontSize, Mode=TwoWay}" Minimum="4" Maximum="200" Increment="1" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="4" Margin="4,0,0,0">
+                        <TextBlock Text="Color (hex)" Classes="caption" />
+                        <TextBox Text="{Binding ColorHex, Mode=TwoWay}" Watermark="#000000" />
+                    </StackPanel>
+                </Grid>
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <CheckBox Content="Bold" IsChecked="{Binding Bold, Mode=TwoWay}" />
+                    <CheckBox Content="Italic" IsChecked="{Binding Italic, Mode=TwoWay}" />
+                    <CheckBox Content="Underline" IsChecked="{Binding Underline, Mode=TwoWay}" />
+                </StackPanel>
+
+                <!-- Text alignment (paragraph alignment inside this text box) — deliberately
+                     a separate control from the "Align" buttons in the main toolbar, which move
+                     the OBJECT itself relative to other objects/the card (Part 1). Mixing the
+                     two under one ambiguous "Align" label was the original bug report. -->
+                <TextBlock Text="Text alignment" Classes="caption" Margin="0,4,0,0" />
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <ToggleButton Classes="toolbtn" Content="&#8676;" ToolTip.Tip="Text align left"
+                                  IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Left}" />
+                    <ToggleButton Classes="toolbtn" Content="&#8596;" ToolTip.Tip="Text align center"
+                                  IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Center}" />
+                    <ToggleButton Classes="toolbtn" Content="&#8677;" ToolTip.Tip="Text align right"
+                                  IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Right}" />
+                    <ToggleButton Classes="toolbtn" Content="&#8801;" ToolTip.Tip="Text justify"
+                                  IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Justify}" />
+                </StackPanel>
+                <TextBlock Text="Vertical alignment" Classes="caption" Margin="0,4,0,0" />
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <ToggleButton Classes="toolbtn" Content="&#8613;" ToolTip.Tip="Vertical align top"
+                                  IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Top}" />
+                    <ToggleButton Classes="toolbtn" Content="&#8597;" ToolTip.Tip="Vertical align middle"
+                                  IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Middle}" />
+                    <ToggleButton Classes="toolbtn" Content="&#8615;" ToolTip.Tip="Vertical align bottom"
+                                  IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Bottom}" />
+                </StackPanel>
+
+                <!-- Data binding (Part 24/42/43). Leave empty for ordinary static text.
+                     When set, the "Text content" box above is ignored while designing —
+                     the canvas shows this expression itself, and (with Data Preview on)
+                     the evaluated value against the selected sample record. -->
+                <TextBlock Text="Data binding expression" Classes="caption" Margin="0,4,0,0" />
+                <TextBox Text="{Binding DataBindingExpression, Mode=TwoWay}" Watermark="e.g. {{FirstName}} {{LastName}}" />
+
+                <!-- Conditional visibility (Part 25/44). Leave empty to always show.
+                     Only evaluated with Data Preview on — otherwise every element stays
+                     visible so a conditional element doesn't just vanish while designing. -->
+                <TextBlock Text="Visibility condition" Classes="caption" Margin="0,4,0,0" />
+                <TextBox Text="{Binding VisibilityCondition, Mode=TwoWay}" Watermark="e.g. Department == 'Security'" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="doc:ShapeElement">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Shape" Classes="caption" />
+                <Grid ColumnDefinitions="*,*">
+                    <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                        <TextBlock Text="Fill color (hex)" Classes="caption" />
+                        <TextBox Text="{Binding FillColorHex, Mode=TwoWay}" Watermark="#DA3025" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="4" Margin="4,0,0,0">
+                        <TextBlock Text="Corner radius" Classes="caption" />
+                        <NumericUpDown Value="{Binding CornerRadius, Mode=TwoWay}" Minimum="0" Maximum="50" Increment="0.5" />
+                    </StackPanel>
+                </Grid>
+                <CheckBox Content="Filled" IsChecked="{Binding FillEnabled, Mode=TwoWay}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="doc:ImageElement">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Image" Classes="caption" />
+                <TextBlock Text="{Binding AssetReference, StringFormat='File: {0}'}" Classes="caption" TextWrapping="Wrap" Opacity="0.7" />
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Fit mode" Classes="caption" />
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <ToggleButton Classes="toolbtn-wide" Content="Fit" ToolTip.Tip="Show the whole picture, letterboxed if needed"
+                                      IsChecked="{Binding FitMode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Fit}" />
+                        <ToggleButton Classes="toolbtn-wide" Content="Fill" ToolTip.Tip="Crop to fill the whole box"
+                                      IsChecked="{Binding FitMode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Fill}" />
+                        <ToggleButton Classes="toolbtn-wide" Content="Stretch" ToolTip.Tip="Stretch to fill, ignoring aspect ratio"
+                                      IsChecked="{Binding FitMode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Stretch}" />
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Corner radius (mm)" Classes="caption" />
+                    <NumericUpDown Value="{Binding CornerRadius, Mode=TwoWay}" Minimum="0" Maximum="50" Increment="0.5" />
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="doc:PhotoElement">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Photo" Classes="caption" />
+                <TextBlock Text="{Binding AssetReference, StringFormat='File: {0}'}" Classes="caption" TextWrapping="Wrap" Opacity="0.7" />
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Mask shape" Classes="caption" />
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <ToggleButton Classes="toolbtn-wide" Content="Rect" ToolTip.Tip="Rectangle mask"
+                                      IsChecked="{Binding MaskShape, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Rectangle}" />
+                        <ToggleButton Classes="toolbtn-wide" Content="Rounded" ToolTip.Tip="Rounded-rectangle mask (uses Corner radius below)"
+                                      IsChecked="{Binding MaskShape, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=RoundedRectangle}" />
+                        <ToggleButton Classes="toolbtn-wide" Content="Circle" ToolTip.Tip="Circular mask"
+                                      IsChecked="{Binding MaskShape, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Circle}" />
+                    </StackPanel>
+                </StackPanel>
+                <Grid ColumnDefinitions="*,*">
+                    <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                        <TextBlock Text="Corner radius (mm)" Classes="caption" />
+                        <NumericUpDown Value="{Binding CornerRadius, Mode=TwoWay}" Minimum="0" Maximum="50" Increment="0.5" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="4" Margin="4,0,0,0">
+                        <TextBlock Text="Crop zoom" Classes="caption" />
+                        <NumericUpDown Value="{Binding CropZoom, Mode=TwoWay}" Minimum="0.2" Maximum="5" Increment="0.1" />
+                    </StackPanel>
+                </Grid>
+                <Grid ColumnDefinitions="*,*">
+                    <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                        <TextBlock Text="Crop pan X" Classes="caption" />
+                        <NumericUpDown Value="{Binding CropX, Mode=TwoWay}" Increment="0.5" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="4" Margin="4,0,0,0">
+                        <TextBlock Text="Crop pan Y" Classes="caption" />
+                        <NumericUpDown Value="{Binding CropY, Mode=TwoWay}" Increment="0.5" />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="doc:SignatureElement">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Signature" Classes="caption" />
+                <TextBlock Text="{Binding AssetReference, StringFormat='File: {0}'}" Classes="caption" TextWrapping="Wrap" Opacity="0.7" />
+                <TextBlock Text="Rendered as-is from the source image. Use a signature file with a transparent background (PNG) for the cleanest result -- automatic background removal isn't implemented."
+                           Classes="caption" TextWrapping="Wrap" Opacity="0.6" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="doc:BarcodeElement">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Barcode" Classes="caption" />
+                <TextBlock Text="Shown as text for now -- real scannable bar rendering is pending a decision on how to generate it correctly (see project notes)."
+                           Classes="caption" TextWrapping="Wrap" Opacity="0.6" />
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Value" Classes="caption" />
+                    <TextBox Text="{Binding Value, Mode=TwoWay}" Watermark="e.g. 0000000000 or {{EmployeeId}}" />
+                </StackPanel>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Symbology" Classes="caption" />
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <ToggleButton Classes="toolbtn-wide" Content="Code128" ToolTip.Tip="Code 128"
+                                      IsChecked="{Binding Symbology, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Code128}" />
+                        <ToggleButton Classes="toolbtn-wide" Content="Code39" ToolTip.Tip="Code 39"
+                                      IsChecked="{Binding Symbology, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Code39}" />
+                        <ToggleButton Classes="toolbtn-wide" Content="EAN-13" ToolTip.Tip="EAN-13"
+                                      IsChecked="{Binding Symbology, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Ean13}" />
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="doc:DataFieldElement">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Data Field" Classes="caption" />
+                <TextBlock Text="A pure mail-merge placeholder — always shows &quot;{{FieldKey}}&quot; while designing, and the evaluated value with Data Preview on."
+                           Classes="caption" TextWrapping="Wrap" Opacity="0.6" />
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Field key" Classes="caption" />
+                    <TextBox Text="{Binding FieldKey, Mode=TwoWay}" Watermark="e.g. FirstName" />
+                </StackPanel>
+                <TextBlock Text="Visibility condition" Classes="caption" Margin="0,4,0,0" />
+                <TextBox Text="{Binding VisibilityCondition, Mode=TwoWay}" Watermark="e.g. Department == 'Security'" />
+            </StackPanel>
+        </DataTemplate>
+
+    </UserControl.DataTemplates>
 
     <DockPanel>
 
-        <!-- Document tab strip placeholder - future multi-document workspace will
-             replace this single-tab bar with a real TabControl bound to open documents. -->
+        <!-- Title bar -->
         <Border DockPanel.Dock="Top" Background="{DynamicResource BrushSurface}"
                 BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,0,0,1">
             <Grid ColumnDefinitions="Auto,*,Auto" Margin="12,8">
-                <Button Grid.Column="0" Classes="ghost" Content="&lt; Back to selection" Command="{Binding GoBackCommand}" />
-                <Border Grid.Column="1" Background="{DynamicResource BrushSelectionBackground}"
-                        CornerRadius="{StaticResource Radius.SM}" Padding="12,6" HorizontalAlignment="Left" Margin="16,0,0,0">
-                    <TextBlock Text="{Binding Title}" Classes="body" FontWeight="Medium" />
-                </Border>
-                <Button Grid.Column="2" Classes="secondary" Content="Home" Command="{Binding GoHomeCommand}" />
+                <Button Grid.Column="0" Classes="ghost" Content="&lt; Back to selection" Command="{Binding GoBackCommand}"
+                        ToolTip.Tip="Return to the format/template selection screen" />
+                <TextBlock Grid.Column="1" Text="Card Designer" Classes="body" FontWeight="Medium"
+                           HorizontalAlignment="Left" Margin="16,0,0,0" VerticalAlignment="Center" />
+                <Button Grid.Column="2" Classes="secondary" Content="Home" Command="{Binding GoHomeCommand}"
+                        ToolTip.Tip="Go to the InfoID home screen" />
             </Grid>
         </Border>
 
-        <!-- Reserved future toolbar row: Selection / Pan / Zoom / Text / Shape / Image /
-             Barcode / QR / Signature / Fingerprint / Background / Database Field /
-             Alignment / Grid / Guides / Layers / Print / Save -->
-        <Border DockPanel.Dock="Top" Height="48" Background="{DynamicResource BrushSurface}"
+        <!-- Document tab strip (Part 6) -->
+        <Border DockPanel.Dock="Top" Background="{DynamicResource BrushSurface}"
+                BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,0,0,1" Padding="8,6">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Classes="ghost" Content="+ New" Command="{Binding NewBlankTabCommand}"
+                        ToolTip.Tip="New blank design (Ctrl+N)" />
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Tabs}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:CardDesignTabViewModel">
+                                <Border CornerRadius="{StaticResource Radius.SM}" Padding="10,6"
+                                        Classes.active="{Binding IsActive}">
+                                    <Border.Styles>
+                                        <Style Selector="Border">
+                                            <Setter Property="Background" Value="Transparent" />
+                                        </Style>
+                                        <Style Selector="Border.active">
+                                            <Setter Property="Background" Value="{DynamicResource BrushSelectionBackground}" />
+                                        </Style>
+                                    </Border.Styles>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button Classes="ghost" Padding="0"
+                                                Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).SelectTabCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip.Tip="{Binding Title}">
+                                            <StackPanel Orientation="Horizontal" Spacing="0">
+                                                <TextBlock Text="{Binding Title}" />
+                                                <TextBlock Text=" *" IsVisible="{Binding IsDirty}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Classes="ghost" Content="x" Padding="4,0"
+                                                Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).CloseTabCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip.Tip="Close tab (Ctrl+W)" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- Toolbar -->
+        <Border DockPanel.Dock="Top" MinHeight="48" Background="{DynamicResource BrushSurface}"
                 BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" Spacing="8" Margin="16,0" VerticalAlignment="Center">
-                <TextBlock Text="Designer toolbar -- coming soon" Classes="caption" />
-            </StackPanel>
+            <WrapPanel Margin="12,6" VerticalAlignment="Center"
+                       IsEnabled="{Binding ActiveTab, Converter={x:Static ObjectConverters.IsNotNull}}">
+
+                <Button Classes="ghost toolbtn" Content="&#8630;" ToolTip.Tip="Undo (Ctrl+Z)"
+                        Command="{Binding ActiveTab.UndoCommand}" IsEnabled="{Binding ActiveTab.CanUndo}" />
+                <Button Classes="ghost toolbtn" Content="&#8631;" ToolTip.Tip="Redo (Ctrl+Y)"
+                        Command="{Binding ActiveTab.RedoCommand}" IsEnabled="{Binding ActiveTab.CanRedo}" />
+                <Button Classes="primary" Content="Save" ToolTip.Tip="Save design (Ctrl+S)" Command="{Binding ActiveTab.SaveCommand}" Margin="4,0" />
+                <TextBlock Text="{Binding ActiveTab.SaveStatusText}" Classes="caption" VerticalAlignment="Center" Margin="2,0,10,0" />
+
+                <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+
+                <Button Classes="ghost toolbtn" Content="T" ToolTip.Tip="Insert Text (T)" Command="{Binding ActiveTab.AddTextElementCommand}" />
+                <Button Classes="ghost toolbtn" Content="&#9645;" ToolTip.Tip="Insert Rectangle (R)" Command="{Binding ActiveTab.AddRectangleElementCommand}" />
+                <Button Classes="ghost toolbtn" Content="&#9711;" ToolTip.Tip="Insert Ellipse (E)" Command="{Binding ActiveTab.AddEllipseElementCommand}" />
+                <Button Classes="ghost toolbtn" Content="&#8211;" ToolTip.Tip="Insert Line (L)" Command="{Binding ActiveTab.AddLineElementCommand}" />
+                <Button Classes="ghost toolbtn" Content="&#8594;" ToolTip.Tip="Insert Arrow" Command="{Binding ActiveTab.AddArrowElementCommand}" />
+                <Button Classes="ghost toolbtn" Content="&#9650;" ToolTip.Tip="Insert Triangle" Command="{Binding ActiveTab.AddTriangleElementCommand}" />
+                <Button Classes="ghost toolbtn" Content="&#11041;" ToolTip.Tip="Insert Polygon" Command="{Binding ActiveTab.AddPolygonElementCommand}" />
+                <Button Classes="ghost toolbtn" Content="&#9733;" ToolTip.Tip="Insert Star" Command="{Binding ActiveTab.AddStarElementCommand}" />
+
+                <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+
+                <!-- Each of these opens the native file picker, copies the chosen file into
+                     InfoID's local assets folder, then inserts an element sized to the
+                     picture's own aspect ratio (Part 10/12/13). -->
+                <Button Classes="ghost toolbtn-wide" Content="Image" ToolTip.Tip="Insert Image (P)" Command="{Binding ActiveTab.InsertImageCommand}" />
+                <Button Classes="ghost toolbtn-wide" Content="Photo" ToolTip.Tip="Insert Photo (cardholder-style, with mask/crop)" Command="{Binding ActiveTab.InsertPhotoCommand}" />
+                <Button Classes="ghost toolbtn-wide" Content="Signature" ToolTip.Tip="Insert Signature image" Command="{Binding ActiveTab.InsertSignatureCommand}" />
+                <Button Classes="ghost toolbtn-wide" Content="Barcode" ToolTip.Tip="Insert Barcode (value shown as text pending real symbol rendering — see project notes)" Command="{Binding ActiveTab.AddBarcodeElementCommand}" />
+
+                <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+
+                <!-- Data Preview (Part 43): swaps every dynamic-field/data-bound text
+                     element and evaluates every element's conditional visibility against
+                     a sample record instead of showing raw "{{Field}}" placeholders.
+                     Sample records only — the real Cardholder Management module doesn't
+                     exist in this codebase yet, see SamplePreviewDataProvider. -->
+                <ToggleButton Classes="toolbtn-wide" Content="Preview" ToolTip.Tip="Toggle Data Preview"
+                              IsChecked="{Binding ActiveTab.PreviewModeEnabled, Mode=TwoWay}" />
+                <Button Classes="ghost toolbtn" Content="&#8592;" ToolTip.Tip="Previous sample record"
+                        Command="{Binding ActiveTab.PreviousPreviewRecordCommand}" IsVisible="{Binding ActiveTab.PreviewModeEnabled}" />
+                <TextBlock Text="{Binding ActiveTab.SelectedPreviewRecord.Label}" Classes="caption" VerticalAlignment="Center"
+                           IsVisible="{Binding ActiveTab.PreviewModeEnabled}" Margin="4,0" />
+                <Button Classes="ghost toolbtn" Content="&#8594;" ToolTip.Tip="Next sample record"
+                        Command="{Binding ActiveTab.NextPreviewRecordCommand}" IsVisible="{Binding ActiveTab.PreviewModeEnabled}" />
+
+                <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+
+                <Button Classes="ghost toolbtn" Content="&#10005;" ToolTip.Tip="Delete selected (Del)" Command="{Binding ActiveTab.DeleteSelectedCommand}" />
+                <Button Classes="ghost toolbtn-wide" Content="Copy" ToolTip.Tip="Copy (Ctrl+C)" Command="{Binding ActiveTab.CopyCommand}" />
+                <Button Classes="ghost toolbtn-wide" Content="Paste" ToolTip.Tip="Paste (Ctrl+V)" Command="{Binding ActiveTab.PasteCommand}" IsEnabled="{Binding ActiveTab.CanPaste}" />
+                <Button Classes="ghost toolbtn-wide" Content="Duplicate" ToolTip.Tip="Duplicate (Ctrl+D)" Command="{Binding ActiveTab.DuplicateSelectedCommand}" />
+
+                <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+
+                <Button Classes="ghost toolbtn-wide" Content="Group" ToolTip.Tip="Group selected objects (Ctrl+G)" Command="{Binding ActiveTab.GroupCommand}" IsEnabled="{Binding ActiveTab.HasMultiSelection}" />
+                <Button Classes="ghost toolbtn-wide" Content="Ungroup" ToolTip.Tip="Ungroup selected objects (Ctrl+Shift+G)" Command="{Binding ActiveTab.UngroupCommand}" />
+
+                <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+
+                <!-- OBJECT alignment: moves the selected element(s) relative to each other.
+                     Kept intentionally distinct from the "Text alignment" controls in the
+                     Properties panel, which set paragraph alignment inside a text box (Part 1). -->
+                <Button Classes="ghost toolbtn" Content="&#8676;" ToolTip.Tip="Align objects: left" Command="{Binding ActiveTab.AlignLeftCommand}" />
+                <Button Classes="ghost toolbtn" Content="&#8596;" ToolTip.Tip="Align objects: center (horizontal)" Command="{Binding ActiveTab.AlignCenterHorizontalCommand}" />
+                <Button Classes="ghost toolbtn" Content="&#8677;" ToolTip.Tip="Align objects: right" Command="{Binding ActiveTab.AlignRightCommand}" />
+                <Button Classes="ghost toolbtn" Content="&#8613;" ToolTip.Tip="Align objects: top" Command="{Binding ActiveTab.AlignTopCommand}" />
+                <Button Classes="ghost toolbtn" Content="&#8597;" ToolTip.Tip="Align objects: middle (vertical)" Command="{Binding ActiveTab.AlignMiddleVerticalCommand}" />
+                <Button Classes="ghost toolbtn" Content="&#8615;" ToolTip.Tip="Align objects: bottom" Command="{Binding ActiveTab.AlignBottomCommand}" />
+
+                <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+
+                <Button Classes="ghost toolbtn-wide" Content="To Front" ToolTip.Tip="Bring to front (Ctrl+Shift+])" Command="{Binding ActiveTab.BringToFrontCommand}" />
+                <Button Classes="ghost toolbtn-wide" Content="To Back" ToolTip.Tip="Send to back (Ctrl+Shift+[)" Command="{Binding ActiveTab.SendToBackCommand}" />
+
+                <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+
+                <Button Classes="ghost toolbtn-wide" Content="Front" ToolTip.Tip="Show Front only" Command="{Binding ActiveTab.SetSideFrontCommand}" />
+                <Button Classes="ghost toolbtn-wide" Content="Back" ToolTip.Tip="Show Back only" Command="{Binding ActiveTab.SetSideBackCommand}" />
+                <Button Classes="ghost toolbtn-wide" Content="Front+Back" ToolTip.Tip="Show Front + Back" Command="{Binding ActiveTab.SetSideBothCommand}" />
+
+                <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+
+                <Button Classes="ghost toolbtn" Content="&#8722;" ToolTip.Tip="Zoom out (Ctrl+-)" Command="{Binding ActiveTab.ZoomOutCommand}" />
+                <TextBlock Text="{Binding ActiveTab.Zoom, StringFormat={}{0:P0}}" VerticalAlignment="Center" Width="52" TextAlignment="Center" Classes="caption" />
+                <Button Classes="ghost toolbtn" Content="+" ToolTip.Tip="Zoom in (Ctrl++)" Command="{Binding ActiveTab.ZoomInCommand}" />
+                <Button Classes="ghost toolbtn" Content="1:1" ToolTip.Tip="Reset zoom to 100% (Ctrl+1)" Command="{Binding ActiveTab.ZoomResetCommand}" />
+
+            </WrapPanel>
         </Border>
 
-        <Grid ColumnDefinitions="56,*,260">
+        <Grid ColumnDefinitions="56,*,280">
 
-            <!-- Reserved future left tool rail: Text / Shape / Image / Barcode / QR /
-                 Signature / Fingerprint / Background / Database field -->
+            <!-- Left tool rail: Select / Pan are real, wired tool modes. Additional
+                 element tools (Photo/Barcode/QR/Signature/...) populate this rail once
+                 their renderers exist. -->
             <Border Grid.Column="0" Background="{DynamicResource BrushSurface}"
-                    BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,0,1,0" />
+                    BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,0,1,0">
+                <StackPanel Margin="0,8" Spacing="4" HorizontalAlignment="Center"
+                            IsEnabled="{Binding ActiveTab, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <Button Classes="ghost toolbtn" Content="V" Width="40"
+                            ToolTip.Tip="Select tool (V) -- click, drag-select and move elements"
+                            Command="{Binding ActiveTab.SelectToolCommand}" />
+                    <Button Classes="ghost toolbtn" Content="H" Width="40"
+                            ToolTip.Tip="Pan tool (H) -- drag to pan the canvas. Space+drag or middle-mouse also pans anytime."
+                            Command="{Binding ActiveTab.PanToolCommand}" />
+                </StackPanel>
+            </Border>
 
-            <!-- Canvas placeholder -->
-            <Grid Grid.Column="1">
-                <Border Width="428" Height="270" CornerRadius="{StaticResource Radius.LG}"
-                        Background="{DynamicResource BrushCardBackground}"
-                        BorderBrush="{DynamicResource BrushBorderStrong}" BorderThickness="1"
-                        HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="24">
-                        <TextBlock Text="Card design canvas" Classes="h3" HorizontalAlignment="Center" />
-                        <TextBlock Text="{Binding SourceDescription}" Classes="bodySecondary" HorizontalAlignment="Center" />
-                        <TextBlock Text="{Binding SizeDescription}" Classes="caption" HorizontalAlignment="Center" />
-                        <TextBlock Text="{Binding OrientationDescription}" Classes="caption" HorizontalAlignment="Center" />
-                        <TextBlock Text="The full design canvas, layers and tools arrive in a later phase."
-                                   Classes="caption" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="320"
-                                   Margin="0,8,0,0" />
-                    </StackPanel>
-                </Border>
+            <!-- Canvas, with mm rulers above/left of it (Part 22). Deliberately laid out
+                 so the horizontal ruler shares the canvas's exact Width and the vertical
+                 ruler shares its exact Height — RulerView's origin math only lines up
+                 with what the canvas draws because of that (see RulerView.cs's header
+                 comment and CardCanvasView.ComputeOriginX/Y). -->
+            <Grid Grid.Column="1" Name="CanvasHost" RowDefinitions="20,*" ColumnDefinitions="20,*">
+                <Border Grid.Row="0" Grid.Column="0" Background="#252526" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,0,1,1" />
+                <controls:RulerView Name="HorizontalRuler" Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Tab="{Binding ActiveTab}" />
+                <controls:RulerView Name="VerticalRuler" Grid.Row="1" Grid.Column="0" Orientation="Vertical" Tab="{Binding ActiveTab}" />
+
+                <Grid Grid.Row="1" Grid.Column="1" Name="CanvasArea">
+                    <controls:CardCanvasView Name="CardCanvas" Tab="{Binding ActiveTab}" />
+                    <TextBlock Text="Open a card from Home to start designing." Classes="caption"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               IsVisible="{Binding ActiveTab, Converter={x:Static ObjectConverters.IsNull}}" />
+
+                    <!-- Inline text-edit overlay (Part 3/80). A plain custom-drawn Control has no
+                         caret/selection/IME surface of its own, so double-clicking a TextElement on
+                         the canvas shows a real Avalonia TextBox positioned exactly over that
+                         element instead. Text is bound TwoWay straight to the element's own Text
+                         property, so typing here updates the document (and, via DesignerElement's
+                         PropertyChanged, the Properties panel) immediately — no separate "commit"
+                         copy of the string is kept while editing. Position/size are set from
+                         code-behind (CardDesignerView.axaml.cs) using CardCanvasView.GetElementScreenRect,
+                         which reuses the canvas's own layout math so the box can never drift.
+                         Single-line for this first version (Enter commits, matching Part 3's "Enter
+                         commits the edit"); multi-line text content can still be authored via the
+                         Properties panel's Text box, which does AcceptsReturn. -->
+                    <TextBox Name="InlineEditBox"
+                             DataContext="{Binding ActiveTab.InlineEditingElement}"
+                             Text="{Binding Text, Mode=TwoWay}"
+                             IsVisible="{Binding ., Converter={x:Static ObjectConverters.IsNotNull}}"
+                             HorizontalAlignment="Left" VerticalAlignment="Top"
+                             AcceptsReturn="False" TextWrapping="NoWrap"
+                             BorderThickness="1" BorderBrush="#3B82F6" Background="White"
+                             Padding="2" MinHeight="0" MinWidth="0" />
+                </Grid>
             </Grid>
 
-            <!-- Reserved future right properties panel -->
+
+            <!-- Right panel: Properties + Layers -->
             <Border Grid.Column="2" Background="{DynamicResource BrushSurface}"
                     BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1,0,0,0">
-                <StackPanel Margin="16" Spacing="8">
-                    <TextBlock Text="Properties" Classes="h3" />
-                    <TextBlock Text="Element and document properties will appear here."
-                               Classes="caption" TextWrapping="Wrap" />
-                </StackPanel>
+                <Grid RowDefinitions="*,1,*">
+
+                    <ScrollViewer Grid.Row="0">
+                        <StackPanel Margin="16" Spacing="12">
+                            <TextBlock Text="Properties" Classes="h3" />
+
+                            <StackPanel IsVisible="{Binding ActiveTab.PrimarySelection, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                        Spacing="12">
+                                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+                                    <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4" Margin="0,0,4,4">
+                                        <TextBlock Text="X (mm)" Classes="caption" />
+                                        <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.X, Mode=TwoWay}" Increment="0.5" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4" Margin="4,0,0,4">
+                                        <TextBlock Text="Y (mm)" Classes="caption" />
+                                        <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Y, Mode=TwoWay}" Increment="0.5" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                                        <TextBlock Text="Width (mm)" Classes="caption" />
+                                        <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Width, Mode=TwoWay}" Increment="0.5" Minimum="1" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4" Margin="4,0,0,0">
+                                        <TextBlock Text="Height (mm)" Classes="caption" />
+                                        <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Height, Mode=TwoWay}" Increment="0.5" Minimum="1" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="Rotation (deg)" Classes="caption" />
+                                    <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Rotation, Mode=TwoWay}" Increment="1"
+                                                   ToolTip.Tip="Type a value, or drag the small round handle above the selected element on the canvas" />
+                                </StackPanel>
+
+                                <Border Height="1" Background="{DynamicResource BrushBorder}" />
+
+                                <ContentControl Content="{Binding ActiveTab.PrimarySelection}" />
+                            </StackPanel>
+
+                            <TextBlock Text="Select an element to edit its properties, or nothing to see document settings."
+                                       Classes="caption" TextWrapping="Wrap"
+                                       IsVisible="{Binding ActiveTab.PrimarySelection, Converter={x:Static ObjectConverters.IsNull}}" />
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <Border Grid.Row="1" Background="{DynamicResource BrushBorder}" Height="1" />
+
+                    <ScrollViewer Grid.Row="2">
+                        <StackPanel Margin="16" Spacing="8">
+                            <TextBlock Text="Layers" Classes="h3" />
+                            <ItemsControl ItemsSource="{Binding ActiveTab.FocusedSideModel.Elements}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="doc:DesignerElement">
+                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,2">
+                                            <Button Grid.Column="0" Classes="ghost" Padding="4,0" Content="{Binding ElementType}"
+                                                    ToolTip.Tip="Select this layer"
+                                                    Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SelectOnlyLayerCommand}"
+                                                    CommandParameter="{Binding}" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Name}" Classes="body" VerticalAlignment="Center" Margin="6,0" />
+                                            <Button Grid.Column="2" Classes="ghost" Padding="4,0"
+                                                    Content="{Binding Visible, Converter={x:Static conv:EnumEqualsConverter.Instance}, ConverterParameter=True}"
+                                                    ToolTip.Tip="Show/hide this layer"
+                                                    Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.ToggleLayerVisibleCommand}"
+                                                    CommandParameter="{Binding}" />
+                                            <Button Grid.Column="3" Classes="ghost" Padding="4,0"
+                                                    Content="{Binding Locked, Converter={x:Static conv:EnumEqualsConverter.Instance}, ConverterParameter=True}"
+                                                    ToolTip.Tip="Lock/unlock this layer"
+                                                    Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.ToggleLayerLockedCommand}"
+                                                    CommandParameter="{Binding}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
             </Border>
 
         </Grid>

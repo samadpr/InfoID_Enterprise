@@ -20,4 +20,17 @@ public class Template : BaseEntity
     public string? BackDesignJson { get; set; }  // Serialized canvas state — back
     public bool IsGalleryTemplate { get; set; }  // Default 0
     public int CurrentVersionNumber { get; set; }  // Default 1, increments with each save
+
+    /// <summary>Card Designer document metadata that doesn't fit Template's existing
+    /// columns (custom width/height/orientation/bleed/grid/schema version) -- a small
+    /// JSON envelope rather than a schema explosion. FrontDesignJson/BackDesignJson
+    /// (already on this entity) hold the serialized CardDesignSide for each side.</summary>
+    public string? DocumentMetadataJson { get; set; }
+
+    /// <summary>Drives the Home screen's Recent Cards list (Part 37/84) and the
+    /// Designer's own recent-opens -- null means "never opened/created via the designer".</summary>
+    public DateTime? LastOpenedDate { get; set; }
+
+    /// <summary>User-pinned in Recent Cards (Part 37 "Pin").</summary>
+    public bool IsPinnedRecent { get; set; }
 }
