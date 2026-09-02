@@ -128,6 +128,7 @@ public partial class App : Avalonia.Application
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
+        services.AddSingleton<IFilePickerService, FilePickerService>();
 
         // Feature catalog services (sample data today -- see each service for the
         // real-data migration note).
@@ -139,6 +140,11 @@ public partial class App : Avalonia.Application
         // registered here too as later phases add them.
         services.AddSingleton<ICustomCardModelStore, JsonCustomCardModelStore>();
         services.AddSingleton<ICardFormatCatalogService, CardFormatCatalogService>();
+        services.AddSingleton<IDesignClipboard, DesignClipboard>();
+        services.AddSingleton<IDesignAssetService, LocalDesignAssetService>();
+        services.AddSingleton<IDataBindingEvaluator, DataBindingEvaluator>();
+        services.AddSingleton<IPreviewDataProvider, SamplePreviewDataProvider>();
+        services.AddScoped<ICardDesignRepository, CardDesignRepository>();
 
         // Page ViewModels -- transient so every navigation gets a clean instance.
         services.AddTransient<WelcomeViewModel>();

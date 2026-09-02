@@ -21,6 +21,7 @@ public static class DatabaseLocation
     public const string DatabaseFolderName = "Database";
     public const string DatabaseFileName = "InfoID_DB.db";
     public const string LogsFolderName = "Logs";
+    public const string AssetsFolderName = "Assets";
 
     /// <summary>Root %AppData%\InfoID (or OS equivalent) folder. Created if missing.</summary>
     public static string GetApplicationRoot()
@@ -44,6 +45,18 @@ public static class DatabaseLocation
     public static string GetLogsDirectory()
     {
         var directory = Path.Combine(GetApplicationRoot(), LogsFolderName);
+        Directory.CreateDirectory(directory);
+        return directory;
+    }
+
+    /// <summary>Where imported design assets (images, photos, signatures, SVGs) are
+    /// copied to at insertion time -- Card Designer elements store only a relative
+    /// reference under this folder (e.g. "a1b2c3d4.png"), never an absolute path from
+    /// the user's machine, per the "no broken/absolute asset references" requirement.
+    /// Same machine-local, no-central-server model as the database itself.</summary>
+    public static string GetAssetsDirectory()
+    {
+        var directory = Path.Combine(GetApplicationRoot(), AssetsFolderName);
         Directory.CreateDirectory(directory);
         return directory;
     }
