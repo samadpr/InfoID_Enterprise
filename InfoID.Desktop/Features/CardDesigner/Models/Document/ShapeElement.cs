@@ -47,6 +47,15 @@ public sealed partial class ShapeElement : DesignerElement
     [ObservableProperty] private bool _startArrowhead;
     [ObservableProperty] private bool _endArrowhead = true;
 
+    /// <summary>Used by Kind == Line/Arrow only. A bounding box has two diagonals, and
+    /// Width/Height alone can only pick one of them (top-left to bottom-right); this
+    /// flag selects the other (bottom-left to top-right) -- see ShapeRenderer.Draw's
+    /// Line/Arrow cases and DrawArrow. Needed so the Line tool (CardDesignTabViewModel.
+    /// InsertDrawnLine) can faithfully reproduce a line the user actually dragged
+    /// upward-and-rightward (or downward-and-leftward) instead of silently flattening
+    /// every drag direction onto the same diagonal.</summary>
+    [ObservableProperty] private bool _lineFlipped;
+
     /// <summary>Drives the Properties panel's Kind-conditional sections (Views/
     /// CardDesignerView.axaml's ShapeElement DataTemplate) -- there's no per-element
     /// ViewModel in this codebase for a converter to reach through, so these live
