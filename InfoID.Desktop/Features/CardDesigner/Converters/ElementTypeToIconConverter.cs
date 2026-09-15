@@ -35,6 +35,7 @@ public sealed class ElementTypeToIconConverter : IValueConverter
             BarcodeElement => DesignerIcons.Barcode,
             QrCodeElement => DesignerIcons.QrCode,
             DataFieldElement => DesignerIcons.DataField,
+            PenElement => DesignerIcons.Pen,
             DesignerElement el when el.ElementType == ElementType.Group => DesignerIcons.Group,
             _ => DesignerIcons.LayerGeneric,
         };

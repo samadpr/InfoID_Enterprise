@@ -246,13 +246,29 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     [ObservableProperty]
     private bool _panToolActive;
 
-    /// <summary>Inverse of <see cref="PanToolActive"/>, for the top-toolbar "Select"
-    /// tool-mode button's IsChecked (Part 11 -- V/H moved out of the left rail into the
-    /// toolbar as a proper two-button tool-mode group, so exactly one of the two always
-    /// shows as active).</summary>
-    public bool SelectToolActive => !PanToolActive;
+    /// <summary>True while the "Line" tool is active -- a plain left-drag on the canvas
+    /// draws a straight line from press to release instead of marquee-selecting (see
+    /// CardCanvasView.OnPointerPressed/Moved/Released's DragMode.DrawLine branch and
+    /// InsertDrawnLine below). Auto-clears itself after one line is drawn so the user
+    /// isn't stuck in draw mode -- see InsertDrawnLine.</summary>
+    [ObservableProperty]
+    private bool _lineToolActive;
+
+    /// <summary>Same idea as <see cref="LineToolActive"/> but for freehand drawing --
+    /// a left-drag accumulates points into an open stroke instead of one straight
+    /// segment (DragMode.DrawPen / InsertDrawnPen).</summary>
+    [ObservableProperty]
+    private bool _penToolActive;
+
+    /// <summary>True only when none of the other tool modes are -- the top-toolbar
+    /// "Select" button's IsChecked (Part 11 -- V/H moved out of the left rail into the
+    /// toolbar as a proper tool-mode group, so exactly one of these always shows as
+    /// active).</summary>
+    public bool SelectToolActive => !PanToolActive && !LineToolActive && !PenToolActive;
 
     partial void OnPanToolActiveChanged(bool value) => OnPropertyChanged(nameof(SelectToolActive));
+    partial void OnLineToolActiveChanged(bool value) => OnPropertyChanged(nameof(SelectToolActive));
+    partial void OnPenToolActiveChanged(bool value) => OnPropertyChanged(nameof(SelectToolActive));
 
     /// <summary>The TextElement currently being edited inline on the canvas (Part 3),
     /// or null when no inline edit is active. The canvas skips drawing this element's
@@ -1156,6 +1172,74 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         MarkDirty();
     }
 
+    /// <summary>Commits a line actually drawn with the Line tool (CardCanvasView's
+    /// click-drag gesture) as a real ShapeElement -- reuses ShapeKind.Line's existing
+    /// geometry/rendering/persistence untouched (ShapeRenderer), this just computes the
+    /// bounding box from the two drawn points and picks LineFlipped so the line renders
+    /// along whichever diagonal the user actually dragged, not always top-left-to-
+    /// bottom-right. Reverts to the Select tool afterward -- drawing one line and then
+    /// immediately being stuck in "click anywhere draws another line" mode would be a
+    /// worse default than the click-to-insert-then-adjust pattern every other element
+    /// already uses.</summary>
+    public void InsertDrawnLine(double startXMm, double startYMm, double endXMm, double endYMm)
+    {
+        LineToolActive = false;
+
+        var minX = Math.Min(startXMm, endXMm);
+        var minY = Math.Min(startYMm, endYMm);
+        var width = Math.Abs(endXMm - startXMm);
+        var height = Math.Abs(endYMm - startYMm);
+        if (width < 1 && height < 1) return; // accidental click, not a real drag
+
+        var leftIsStart = startXMm <= endXMm;
+        var leftY = leftIsStart ? startYMm : endYMm;
+        var rightY = leftIsStart ? endYMm : startYMm;
+
+        InsertElement(new ShapeElement
+        {
+            Name = "Line", Kind = ShapeKind.Line, FillEnabled = false,
+            StrokeColorHex = "#1F2328", StrokeWidth = 1,
+            X = minX, Y = minY, Width = Math.Max(width, 0.5), Height = Math.Max(height, 0.5),
+            LineFlipped = leftY > rightY,
+        });
+    }
+
+    /// <summary>Commits a freehand stroke drawn with the Pen tool as a real PenElement --
+    /// pointsMm are absolute millimeters (already converted from device pixels by
+    /// CardCanvasView), normalized here into PointsFraction (0..1 of the stroke's own
+    /// bounding box, matching how PenRenderer draws them and how the element's normal
+    /// resize handles will rescale the whole stroke later). Discards a sub-1mm capture
+    /// as an accidental click, the same threshold InsertDrawnLine uses, and reverts to
+    /// the Select tool afterward for the same reason InsertDrawnLine does.</summary>
+    public void InsertDrawnPen(IReadOnlyList<(double X, double Y)> pointsMm)
+    {
+        PenToolActive = false;
+        if (pointsMm.Count < 2) return;
+
+        var minX = pointsMm.Min(p => p.X);
+        var minY = pointsMm.Min(p => p.Y);
+        var maxX = pointsMm.Max(p => p.X);
+        var maxY = pointsMm.Max(p => p.Y);
+        var width = maxX - minX;
+        var height = maxY - minY;
+        if (width < 1 && height < 1) return; // accidental click, not a real stroke
+
+        var boxWidth = Math.Max(width, 0.5);
+        var boxHeight = Math.Max(height, 0.5);
+
+        var element = new PenElement
+        {
+            Name = "Drawing", X = minX, Y = minY, Width = boxWidth, Height = boxHeight,
+            StrokeColorHex = "#1F2328", StrokeWidth = 1.2,
+        };
+        foreach (var p in pointsMm)
+        {
+            element.PointsFraction.Add(new PenPoint((p.X - minX) / boxWidth, (p.Y - minY) / boxHeight));
+        }
+
+        InsertElement(element);
+    }
+
     [RelayCommand]
     private void SelectOnlyLayer(DesignerElement element) => SelectOnly(element);
 
@@ -1408,10 +1492,36 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     // ---------------------------------------------------------------- side/zoom ----
 
     [RelayCommand]
-    private void SelectTool() => PanToolActive = false;
+    private void SelectTool()
+    {
+        PanToolActive = false;
+        LineToolActive = false;
+        PenToolActive = false;
+    }
 
     [RelayCommand]
-    private void PanTool() => PanToolActive = true;
+    private void PanTool()
+    {
+        PanToolActive = true;
+        LineToolActive = false;
+        PenToolActive = false;
+    }
+
+    [RelayCommand]
+    private void LineTool()
+    {
+        PanToolActive = false;
+        PenToolActive = false;
+        LineToolActive = true;
+    }
+
+    [RelayCommand]
+    private void PenTool()
+    {
+        PanToolActive = false;
+        LineToolActive = false;
+        PenToolActive = true;
+    }
 
     [RelayCommand]
     private void SetSideFront()

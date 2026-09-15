@@ -139,7 +139,7 @@ public sealed class CardCanvasView : Control
         (1, 40), (3, 28), (6, 18), (10, 10), (15, 5),
     };
 
-    private enum DragMode { None, Move, ResizeTopLeft, ResizeTopRight, ResizeBottomLeft, ResizeBottomRight, Rotate, MarqueeSelect, Pan }
+    private enum DragMode { None, Move, ResizeTopLeft, ResizeTopRight, ResizeBottomLeft, ResizeBottomRight, Rotate, MarqueeSelect, Pan, DrawLine, DrawPen, LineEndpoint, PenNode }
 
     private DragMode _dragMode = DragMode.None;
     private DesignerElement? _dragElement;
@@ -148,8 +148,36 @@ public sealed class CardCanvasView : Control
     private Point _marqueeStart;
     private Rect? _marqueeRect;
     private bool _spacePressed;
+
+    // Line/Pen tool live preview (Part 96): device-pixel points captured while the drag is
+    // in progress, drawn as a temporary overlay in Render() the same way _marqueeRect
+    // already is, and converted to mm + committed as a real element only on
+    // OnPointerReleased -- never mutated into the document mid-drag.
+    private Point? _lineStartPoint;
+    private Point? _lineEndPoint;
+    private readonly List<Point> _penPoints = new();
+
+    /// <summary>Minimum real-world distance between two captured Pen-tool points -- see
+    /// OnPointerMoved's DragMode.DrawPen branch for why this is mm, not device px. Large
+    /// enough that node-edit handles (12px hit-boxes, HitTestPenNode) stay usefully
+    /// separated at typical editing zoom levels instead of forming one near-continuous
+    /// band that leaves no gap to click the stroke's body (rather than a node) to move
+    /// it as a whole.</summary>
+    private const double MinPenPointSpacingMm = 3.5;
     private double _dragStartRotation;
     private readonly Dictionary<DesignerElement, (double X, double Y, double W, double H)> _dragStartRects = new();
+
+    // Node editing (a selected Line/Arrow or Pen stroke shows its actual endpoints/points
+    // as draggable handles instead of a generic bounding-box frame -- see
+    // DrawSelectionOverlay/HitTestLineNode/HitTestPenNode). _dragStartCenterMm is the
+    // element's own center at the moment the drag started, used as a stable rotation
+    // pivot for the whole drag (matching how ApplyResize's corner-drag math rotates the
+    // pointer delta by the element's OWN Rotation rather than tracking a moving pivot).
+    private int _dragNodeIndex = -1;
+    private bool _dragStartLineFlipped;
+    private List<PenPoint>? _dragStartPenPoints;
+    private Point _dragStartCenterMm;
+    private Point _dragOtherEndpointMm;
 
     // Smart guides (Part 20): lines currently "lit up" because the element being dragged
     // snapped to them this frame -- a ruler guide, the card's own center, or another
@@ -197,12 +225,35 @@ public sealed class CardCanvasView : Control
             newTab.SelectedElements.CollectionChanged += OnSelectionChanged;
         }
 
+        UpdateCursor();
         InvalidateVisual();
     }
 
     private void OnTabChanged(object? sender, EventArgs e) => InvalidateVisual();
-    private void OnTabPropertyChanged(object? sender, PropertyChangedEventArgs e) => InvalidateVisual();
+    private void OnTabPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        InvalidateVisual();
+        UpdateCursor();
+    }
+
     private void OnSelectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => InvalidateVisual();
+
+    /// <summary>Reflects the active tool in the mouse cursor -- Pan shows an open hand,
+    /// Line/Pen show a crosshair (the standard "you're about to draw" affordance in every
+    /// drawing tool), Select falls back to the platform default arrow. Runs on every
+    /// tab PropertyChanged rather than only the three tool-mode properties specifically:
+    /// cheap to recompute, and avoids subscribing/unsubscribing three more explicit event
+    /// handlers for what OnTabPropertyChanged already receives.</summary>
+    private void UpdateCursor()
+    {
+        Cursor = Tab switch
+        {
+            { PanToolActive: true } => new Cursor(StandardCursorType.Hand),
+            { LineToolActive: true } => new Cursor(StandardCursorType.Cross),
+            { PenToolActive: true } => new Cursor(StandardCursorType.Cross),
+            _ => Cursor.Default,
+        };
+    }
 
     /// <summary>Raised when the user double-clicks a TextElement on the canvas (Part 3 /
     /// 80). CardDesignerView owns the actual overlay TextBox (a plain Control like this
@@ -231,6 +282,27 @@ public sealed class CardCanvasView : Control
         if (_marqueeRect is { } marquee)
         {
             context.DrawRectangle(MarqueeFillBrush, new Pen(SelectionBrush, 1), marquee);
+        }
+
+        if (_dragMode == DragMode.DrawLine && _lineStartPoint is { } lineStart && _lineEndPoint is { } lineEnd)
+        {
+            context.DrawLine(new Pen(SelectionBrush, 1.5), lineStart, lineEnd);
+        }
+
+        if (_dragMode == DragMode.DrawPen && _penPoints.Count >= 2)
+        {
+            var previewGeometry = new StreamGeometry();
+            using (var gc = previewGeometry.Open())
+            {
+                gc.BeginFigure(_penPoints[0], isFilled: false);
+                for (var i = 1; i < _penPoints.Count; i++)
+                {
+                    gc.LineTo(_penPoints[i]);
+                }
+                gc.EndFigure(false);
+            }
+
+            context.DrawGeometry(null, new Pen(SelectionBrush, 1.5, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round), previewGeometry);
         }
     }
 
@@ -453,6 +525,9 @@ public sealed class CardCanvasView : Control
                 break;
             case QrCodeElement qr:
                 DrawQrCode(context, elementRect, qr);
+                break;
+            case PenElement pen:
+                PenRenderer.Draw(context, elementRect, pen);
                 break;
             default:
                 DrawPlaceholder(context, elementRect, element);
@@ -868,6 +943,13 @@ public sealed class CardCanvasView : Control
         // rectangle regardless of the element's actual Rotation.
         foreach (var element in tab.SelectedElements)
         {
+            // A Line/Arrow/Pen's own drawn shape is already its selection indicator (see
+            // the node-handle branch below) -- a bounding-box rectangle around a
+            // diagonal line or an arbitrary stroke reads as a confusing, unrelated
+            // "square frame" rather than useful feedback, so those two skip this generic
+            // per-element outline entirely.
+            if (IsNodeEditable(element)) continue;
+
             var elRect = ToDeviceRect(cardRect, scale, element);
             using var rotateScope = context.PushTransform(GetRotationTransform(elRect, element.Rotation));
             context.DrawRectangle(null, new Pen(SelectionBrush, 1.5), elRect);
@@ -880,14 +962,36 @@ public sealed class CardCanvasView : Control
 
             using var rotateScope = context.PushTransform(GetRotationTransform(rect, selected.Rotation));
 
-            foreach (var handle in GetHandleRects(rect))
+            if (selected is ShapeElement { Kind: ShapeKind.Line or ShapeKind.Arrow } lineShape)
             {
-                context.DrawRectangle(Brushes.White, new Pen(SelectionBrush, 1), handle);
+                // Real endpoint handles instead of corner-of-bounding-box handles: a
+                // line only has two meaningful control points, and dragging either one
+                // directly (see HitTestLineNode/OnPointerMoved's DragMode.LineEndpoint)
+                // is how every other vector-editing tool lets you reshape a line --
+                // never "resize the rectangle it happens to sit in".
+                var (start, end) = GetLineEndpointsDevice(rect, lineShape);
+                context.DrawLine(new Pen(SelectionBrush, 2), start, end);
+                DrawNodeHandle(context, start);
+                DrawNodeHandle(context, end);
             }
+            else if (selected is PenElement penEl)
+            {
+                foreach (var p in penEl.PointsFraction)
+                {
+                    DrawNodeHandle(context, FractionToDevicePoint(rect, p));
+                }
+            }
+            else
+            {
+                foreach (var handle in GetHandleRects(rect))
+                {
+                    context.DrawRectangle(Brushes.White, new Pen(SelectionBrush, 1), handle);
+                }
 
-            var rotationHandleCenter = new Point(rect.Center.X, rect.Top - 24);
-            context.DrawLine(new Pen(SelectionBrush, 1), new Point(rect.Center.X, rect.Top), rotationHandleCenter);
-            context.DrawEllipse(SelectionBrush, new Pen(Brushes.White, 1.5), rotationHandleCenter, 7, 7);
+                var rotationHandleCenter = new Point(rect.Center.X, rect.Top - 24);
+                context.DrawLine(new Pen(SelectionBrush, 1), new Point(rect.Center.X, rect.Top), rotationHandleCenter);
+                context.DrawEllipse(SelectionBrush, new Pen(Brushes.White, 1.5), rotationHandleCenter, 7, 7);
+            }
         }
         else if (tab.SelectedElements.Count > 1)
         {
@@ -915,6 +1019,65 @@ public sealed class CardCanvasView : Control
         yield return new Rect(r.TopRight.X - h / 2, r.TopRight.Y - h / 2, h, h);
         yield return new Rect(r.BottomLeft.X - h / 2, r.BottomLeft.Y - h / 2, h, h);
         yield return new Rect(r.BottomRight.X - h / 2, r.BottomRight.Y - h / 2, h, h);
+    }
+
+    /// <summary>Line/Arrow and Pen get real point-based selection/editing (see
+    /// DrawSelectionOverlay/HitTestLineNode/HitTestPenNode) instead of the generic
+    /// bounding-box outline + corner-resize-handle treatment every other element uses.</summary>
+    private static bool IsNodeEditable(DesignerElement element) =>
+        element is PenElement || element is ShapeElement { Kind: ShapeKind.Line or ShapeKind.Arrow };
+
+    private static void DrawNodeHandle(DrawingContext context, Point center) =>
+        context.DrawEllipse(Brushes.White, new Pen(SelectionBrush, 1.5), center, 5, 5);
+
+    private static Point FractionToDevicePoint(Rect rect, PenPoint fraction) =>
+        new(rect.X + fraction.X * rect.Width, rect.Y + fraction.Y * rect.Height);
+
+    /// <summary>The un-rotated device-space endpoints of a Line/Arrow -- rect.TopLeft to
+    /// rect.BottomRight normally, or the other diagonal when LineFlipped (see
+    /// ShapeRenderer.Draw's own Line/Arrow cases, which this mirrors exactly so the
+    /// handles always sit exactly on the drawn line).</summary>
+    private static (Point Start, Point End) GetLineEndpointsDevice(Rect rect, ShapeElement shape)
+    {
+        var start = shape.LineFlipped ? rect.BottomLeft : rect.TopLeft;
+        var end = shape.LineFlipped ? rect.TopRight : rect.BottomRight;
+        return (start, end);
+    }
+
+    /// <summary>Same as GetLineEndpointsDevice but in the element's own millimeter space
+    /// (X/Y/Width/Height as stored on the model) rather than a device-pixel Rect -- used
+    /// to capture the "other" (not being dragged) endpoint's absolute position once at
+    /// the start of a DragMode.LineEndpoint drag.</summary>
+    private static (Point Start, Point End) GetLineEndpointsMm(ShapeElement shape)
+    {
+        var start = shape.LineFlipped ? new Point(shape.X, shape.Y + shape.Height) : new Point(shape.X, shape.Y);
+        var end = shape.LineFlipped ? new Point(shape.X + shape.Width, shape.Y) : new Point(shape.X + shape.Width, shape.Y + shape.Height);
+        return (start, end);
+    }
+
+    private static int HitTestLineNode(Rect elementRect, double rotationDeg, ShapeElement shape, Point point)
+    {
+        const double h = 12;
+        var center = elementRect.Center;
+        var (localStart, localEnd) = GetLineEndpointsDevice(elementRect, shape);
+        var start = RotatePointAround(localStart, center, rotationDeg);
+        var end = RotatePointAround(localEnd, center, rotationDeg);
+        if (new Rect(start.X - h / 2, start.Y - h / 2, h, h).Contains(point)) return 0;
+        if (new Rect(end.X - h / 2, end.Y - h / 2, h, h).Contains(point)) return 1;
+        return -1;
+    }
+
+    private static int HitTestPenNode(Rect elementRect, double rotationDeg, PenElement pen, Point point)
+    {
+        const double h = 12;
+        var center = elementRect.Center;
+        for (var i = 0; i < pen.PointsFraction.Count; i++)
+        {
+            var local = FractionToDevicePoint(elementRect, pen.PointsFraction[i]);
+            var rotated = RotatePointAround(local, center, rotationDeg);
+            if (new Rect(rotated.X - h / 2, rotated.Y - h / 2, h, h).Contains(point)) return i;
+        }
+        return -1;
     }
 
     /// <summary>The exact rotation transform DrawElement applies to an element's own
@@ -1155,6 +1318,31 @@ public sealed class CardCanvasView : Control
             return;
         }
 
+        if (tab.LineToolActive || tab.PenToolActive)
+        {
+            var (toolScale, toolSideRects) = ComputeLayout(tab);
+            var toolHit = toolSideRects.FirstOrDefault(kv => kv.Value.Contains(point));
+            if (toolHit.Value != default)
+            {
+                tab.FocusedSide = toolHit.Key;
+                if (tab.LineToolActive)
+                {
+                    _dragMode = DragMode.DrawLine;
+                    _lineStartPoint = point;
+                    _lineEndPoint = point;
+                }
+                else
+                {
+                    _dragMode = DragMode.DrawPen;
+                    _penPoints.Clear();
+                    _penPoints.Add(point);
+                }
+                e.Pointer.Capture(this);
+                InvalidateVisual();
+            }
+            return;
+        }
+
         var (scale, sideRects) = ComputeLayout(tab);
         var hit = sideRects.FirstOrDefault(kv => kv.Value.Contains(point));
         if (hit.Value == default)
@@ -1172,17 +1360,53 @@ public sealed class CardCanvasView : Control
         {
             var selected = tab.SelectedElements[0];
             var elementRect = ToDeviceRect(cardRect, scale, selected);
-            var handle = HitTestHandle(elementRect, selected.Rotation, point);
-            if (handle != DragMode.None)
+
+            if (selected is ShapeElement { Kind: ShapeKind.Line or ShapeKind.Arrow } lineShape)
             {
-                _dragMode = handle;
-                _dragElement = selected;
-                _dragStartPointerPos = point;
-                _dragStartRotation = selected.Rotation;
-                _dragStartRects.Clear();
-                _dragStartRects[selected] = (selected.X, selected.Y, selected.Width, selected.Height);
-                e.Pointer.Capture(this);
-                return;
+                var nodeIndex = HitTestLineNode(elementRect, selected.Rotation, lineShape, point);
+                if (nodeIndex >= 0)
+                {
+                    var (startMm, endMm) = GetLineEndpointsMm(lineShape);
+                    _dragMode = DragMode.LineEndpoint;
+                    _dragElement = selected;
+                    _dragNodeIndex = nodeIndex;
+                    _dragStartLineFlipped = lineShape.LineFlipped;
+                    _dragStartCenterMm = new Point(selected.X + selected.Width / 2, selected.Y + selected.Height / 2);
+                    _dragOtherEndpointMm = nodeIndex == 0 ? endMm : startMm;
+                    _dragStartRects.Clear();
+                    _dragStartRects[selected] = (selected.X, selected.Y, selected.Width, selected.Height);
+                    e.Pointer.Capture(this);
+                    return;
+                }
+            }
+            else if (selected is PenElement penEl)
+            {
+                var nodeIndex = HitTestPenNode(elementRect, selected.Rotation, penEl, point);
+                if (nodeIndex >= 0)
+                {
+                    _dragMode = DragMode.PenNode;
+                    _dragElement = selected;
+                    _dragNodeIndex = nodeIndex;
+                    _dragStartCenterMm = new Point(selected.X + selected.Width / 2, selected.Y + selected.Height / 2);
+                    _dragStartPenPoints = penEl.PointsFraction.ToList();
+                    e.Pointer.Capture(this);
+                    return;
+                }
+            }
+            else
+            {
+                var handle = HitTestHandle(elementRect, selected.Rotation, point);
+                if (handle != DragMode.None)
+                {
+                    _dragMode = handle;
+                    _dragElement = selected;
+                    _dragStartPointerPos = point;
+                    _dragStartRotation = selected.Rotation;
+                    _dragStartRects.Clear();
+                    _dragStartRects[selected] = (selected.X, selected.Y, selected.Width, selected.Height);
+                    e.Pointer.Capture(this);
+                    return;
+                }
             }
         }
 
@@ -1290,8 +1514,85 @@ public sealed class CardCanvasView : Control
             return;
         }
 
+        if (_dragMode == DragMode.DrawLine)
+        {
+            // Hold Shift to constrain to horizontal/vertical/45-degree, the same
+            // "hold a modifier to constrain" convention Rotate already uses (15-degree
+            // snap) a few blocks down.
+            var start = _lineStartPoint!.Value;
+            if (e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+            {
+                var delta = point - start;
+                var angle = Math.Round(Math.Atan2(delta.Y, delta.X) / (Math.PI / 4)) * (Math.PI / 4);
+                var length = Math.Sqrt(delta.X * delta.X + delta.Y * delta.Y);
+                point = start + new Vector(Math.Cos(angle) * length, Math.Sin(angle) * length);
+            }
+            _lineEndPoint = point;
+            InvalidateVisual();
+            return;
+        }
+
+        if (_dragMode == DragMode.DrawPen)
+        {
+            // Minimum spacing is expressed in mm (converted to device px via the current
+            // zoom), not a flat device-px number -- a flat px threshold captures far more
+            // points at high zoom (more device px per mm of actual mouse movement) than
+            // at low zoom, which is exactly what produced a stroke made of near-
+            // touching/overlapping points at 235% zoom. A real-world spacing keeps point
+            // density (and so node-handle density -- see HitTestPenNode) consistent
+            // regardless of how zoomed in the user happens to be.
+            var minSpacingPx = MinPenPointSpacingMm * PixelsPerMm * tab.Zoom;
+            var last = _penPoints[^1];
+            var moved = point - last;
+            if (Math.Sqrt(moved.X * moved.X + moved.Y * moved.Y) >= minSpacingPx)
+            {
+                _penPoints.Add(point);
+                InvalidateVisual();
+            }
+            return;
+        }
+
         var (scale, sideRects) = ComputeLayout(tab);
         if (!sideRects.TryGetValue(tab.FocusedSide, out var cardRect)) return;
+
+        if (_dragMode == DragMode.LineEndpoint && _dragElement is ShapeElement lineShape)
+        {
+            var mmPoint = ToMm(cardRect, scale, point);
+            var draggedMm = lineShape.Rotation == 0
+                ? mmPoint
+                : RotatePointAround(mmPoint, _dragStartCenterMm, -lineShape.Rotation);
+            var otherMm = _dragOtherEndpointMm;
+
+            var minX = Math.Min(otherMm.X, draggedMm.X);
+            var minY = Math.Min(otherMm.Y, draggedMm.Y);
+            var width = Math.Max(0.5, Math.Abs(draggedMm.X - otherMm.X));
+            var height = Math.Max(0.5, Math.Abs(draggedMm.Y - otherMm.Y));
+
+            var leftPoint = otherMm.X <= draggedMm.X ? otherMm : draggedMm;
+            var rightPoint = otherMm.X <= draggedMm.X ? draggedMm : otherMm;
+
+            lineShape.X = minX;
+            lineShape.Y = minY;
+            lineShape.Width = width;
+            lineShape.Height = height;
+            lineShape.LineFlipped = leftPoint.Y > rightPoint.Y;
+            InvalidateVisual();
+            return;
+        }
+
+        if (_dragMode == DragMode.PenNode && _dragElement is PenElement penEl && _dragNodeIndex >= 0 && _dragNodeIndex < penEl.PointsFraction.Count)
+        {
+            var mmPoint = ToMm(cardRect, scale, point);
+            var localMm = penEl.Rotation == 0
+                ? mmPoint
+                : RotatePointAround(mmPoint, _dragStartCenterMm, -penEl.Rotation);
+
+            var fx = penEl.Width > 0 ? (localMm.X - penEl.X) / penEl.Width : 0;
+            var fy = penEl.Height > 0 ? (localMm.Y - penEl.Y) / penEl.Height : 0;
+            penEl.PointsFraction[_dragNodeIndex] = new PenPoint(fx, fy);
+            InvalidateVisual();
+            return;
+        }
 
         if (_dragMode == DragMode.MarqueeSelect)
         {
@@ -1455,11 +1756,78 @@ public sealed class CardCanvasView : Control
             tab.MarkDirty();
             tab.RefreshHistoryFlags();
         }
+        else if (_dragMode == DragMode.DrawLine && _lineStartPoint is { } lineStart && _lineEndPoint is { } lineEnd)
+        {
+            var (scale, sideRects) = ComputeLayout(tab);
+            if (sideRects.TryGetValue(tab.FocusedSide, out var cardRect))
+            {
+                var startMm = ToMm(cardRect, scale, lineStart);
+                var endMm = ToMm(cardRect, scale, lineEnd);
+                tab.InsertDrawnLine(startMm.X, startMm.Y, endMm.X, endMm.Y);
+            }
+        }
+        else if (_dragMode == DragMode.DrawPen && _penPoints.Count >= 2)
+        {
+            var (scale, sideRects) = ComputeLayout(tab);
+            if (sideRects.TryGetValue(tab.FocusedSide, out var cardRect))
+            {
+                var pointsMm = _penPoints.Select(p =>
+                {
+                    var mm = ToMm(cardRect, scale, p);
+                    return (mm.X, mm.Y);
+                }).ToList();
+                tab.InsertDrawnPen(pointsMm);
+            }
+        }
+        else if (_dragMode == DragMode.LineEndpoint && _dragElement is ShapeElement lineShapeReleased && _dragStartRects.TryGetValue(_dragElement, out var lineStartRect))
+        {
+            var after = (_dragElement.X, _dragElement.Y, _dragElement.Width, _dragElement.Height);
+            var commands = new List<IDesignCommand>();
+            if (lineStartRect.X != after.X || lineStartRect.Y != after.Y || lineStartRect.W != after.Width || lineStartRect.H != after.Height)
+            {
+                commands.Add(new TransformElementCommand(_dragElement, lineStartRect, after));
+            }
+            if (lineShapeReleased.LineFlipped != _dragStartLineFlipped)
+            {
+                commands.Add(new ChangePropertyCommand<ShapeElement, bool>(
+                    lineShapeReleased, static (el, v) => el.LineFlipped = v, _dragStartLineFlipped, lineShapeReleased.LineFlipped, "Adjust line"));
+            }
+
+            if (commands.Count > 0)
+            {
+                var composite = commands.Count == 1 ? commands[0] : new CompositeCommand("Adjust line", commands);
+                tab.History.Record(composite);
+                tab.MarkDirty();
+                tab.RefreshHistoryFlags();
+            }
+        }
+        else if (_dragMode == DragMode.PenNode && _dragElement is PenElement penElReleased && _dragStartPenPoints is { } penStartPoints)
+        {
+            var penAfterPoints = penElReleased.PointsFraction.ToList();
+            if (!penStartPoints.SequenceEqual(penAfterPoints))
+            {
+                tab.History.Record(new ChangePropertyCommand<PenElement, List<PenPoint>>(
+                    penElReleased,
+                    static (el, pts) =>
+                    {
+                        el.PointsFraction.Clear();
+                        foreach (var p in pts) el.PointsFraction.Add(p);
+                    },
+                    penStartPoints, penAfterPoints, "Adjust drawing"));
+                tab.MarkDirty();
+                tab.RefreshHistoryFlags();
+            }
+        }
 
         _dragMode = DragMode.None;
         _dragElement = null;
         _dragStartRects.Clear();
         _activeSnapLines.Clear();
+        _lineStartPoint = null;
+        _lineEndPoint = null;
+        _penPoints.Clear();
+        _dragNodeIndex = -1;
+        _dragStartPenPoints = null;
         InvalidateVisual();
     }
 

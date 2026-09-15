@@ -464,7 +464,29 @@
 			</StackPanel>
 		</DataTemplate>
 
+<<<<<<< HEAD
+        <!-- Pen tool stroke (Part 96): just color/width; an open freehand ink line has
+             no fill, corner radius or arrowheads to configure, unlike ShapeElement. -->
+        <DataTemplate DataType="doc:PenElement">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Drawing" Classes="caption" />
+                <Grid ColumnDefinitions="*,*">
+                    <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                        <TextBlock Text="Stroke color" Classes="caption" />
+                        <controls:ColorPickerField ColorHex="{Binding StrokeColorHex, Mode=TwoWay}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="4" Margin="4,0,0,0">
+                        <TextBlock Text="Stroke width" Classes="caption" />
+                        <NumericUpDown Value="{Binding StrokeWidth, Mode=TwoWay}" Minimum="0.25" Maximum="20" Increment="0.25" />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Image Properties (Part 91): tabbed like the ID-ALL reference screenshots
+=======
 		<!-- Image Properties (Part 91): tabbed like the ID-ALL reference screenshots
+>>>>>>> 42f7c5fa34fff67e27765b0cd486c893969f59d5
              (Clipping / Style / Position / Parameters); InfoID's own implementation
              against InfoID's own architecture and existing commands, not a port. X/Y/
              Width/Height/Rotation/Opacity stay in the shared header above this
@@ -1015,6 +1037,21 @@
              of canvas height. -->
 		<Border DockPanel.Dock="Top" Background="{DynamicResource BrushSurface}"
                 BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,0,0,1" Padding="8,6">
+<<<<<<< HEAD
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="4" Margin="0,0,8,0">
+                    <Button Classes="ghost toolbtn" Command="{Binding GoBackCommand}"
+                            ToolTip.Tip="Return to the format/template selection screen" AutomationProperties.Name="Back">
+                        <PathIcon Data="{x:Static icons:DesignerIcons.Back}" Width="15" Height="15" />
+                    </Button>
+                    <Button Classes="ghost toolbtn" Command="{Binding GoHomeCommand}"
+                            ToolTip.Tip="Go to the InfoID home screen" AutomationProperties.Name="Home">
+                        <PathIcon Data="{x:Static icons:DesignerIcons.Home}" Width="15" Height="15" />
+                    </Button>
+                    <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,2" />
+                </StackPanel>
+                <Button DockPanel.Dock="Right" Classes="ghost" Content="+ New" Command="{Binding NewBlankTabCommand}"
+=======
 			<DockPanel>
 				<StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="4" Margin="0,0,8,0">
 					<Button Classes="ghost" Content="&lt; Back" Command="{Binding GoBackCommand}"
@@ -1024,6 +1061,7 @@
 					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,2" />
 				</StackPanel>
 				<Button DockPanel.Dock="Right" Classes="ghost" Content="+ New" Command="{Binding NewBlankTabCommand}"
+>>>>>>> 42f7c5fa34fff67e27765b0cd486c893969f59d5
                         ToolTip.Tip="New blank design (Ctrl+N)" />
 				<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
 					<ItemsControl ItemsSource="{Binding Tabs}">
@@ -1129,6 +1167,32 @@
                      sets PanToolActive), not by the ToggleButton's own click-toggles-
                      IsChecked behaviour, avoiding two competing write paths, and
                      SelectToolActive has no setter (TwoWay would fail against it). -->
+<<<<<<< HEAD
+                <ToggleButton Classes="toolbtn" ToolTip.Tip="Select tool (V) -- click, drag-select and move elements"
+                              AutomationProperties.Name="Select tool"
+                              IsChecked="{Binding ActiveTab.SelectToolActive, Mode=OneWay}"
+                              Command="{Binding ActiveTab.SelectToolCommand}">
+                    <PathIcon Data="{x:Static icons:DesignerIcons.Select}" Width="15" Height="15" />
+                </ToggleButton>
+                <ToggleButton Classes="toolbtn" ToolTip.Tip="Pan tool (H) -- drag to pan the canvas. Space+drag or middle-mouse also pans anytime."
+                              AutomationProperties.Name="Pan tool"
+                              IsChecked="{Binding ActiveTab.PanToolActive, Mode=OneWay}"
+                              Command="{Binding ActiveTab.PanToolCommand}">
+                    <PathIcon Data="{x:Static icons:DesignerIcons.Pan}" Width="15" Height="15" />
+                </ToggleButton>
+                <ToggleButton Classes="toolbtn" ToolTip.Tip="Line tool -- drag on the card to draw a straight line. Hold Shift to constrain to 45-degree angles."
+                              AutomationProperties.Name="Line tool"
+                              IsChecked="{Binding ActiveTab.LineToolActive, Mode=OneWay}"
+                              Command="{Binding ActiveTab.LineToolCommand}">
+                    <PathIcon Data="{x:Static icons:DesignerIcons.Line}" Width="15" Height="15" />
+                </ToggleButton>
+                <ToggleButton Classes="toolbtn" ToolTip.Tip="Pen tool -- drag on the card to draw a freehand line"
+                              AutomationProperties.Name="Pen tool"
+                              IsChecked="{Binding ActiveTab.PenToolActive, Mode=OneWay}"
+                              Command="{Binding ActiveTab.PenToolCommand}">
+                    <PathIcon Data="{x:Static icons:DesignerIcons.Pen}" Width="15" Height="15" />
+                </ToggleButton>
+=======
 					<ToggleButton Classes="toolbtn" ToolTip.Tip="Select tool (V) -- click, drag-select and move elements"
 								  AutomationProperties.Name="Select tool"
 								  IsChecked="{Binding ActiveTab.SelectToolActive, Mode=OneWay}"
@@ -1141,6 +1205,7 @@
 								  Command="{Binding ActiveTab.PanToolCommand}">
 						<PathIcon Data="{x:Static icons:DesignerIcons.Pan}" Width="15" Height="15" />
 					</ToggleButton>
+>>>>>>> 42f7c5fa34fff67e27765b0cd486c893969f59d5
 
 					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
 
@@ -1327,6 +1392,13 @@
 
 					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
 
+<<<<<<< HEAD
+                <!-- Grid/Snap/Rulers toggles removed from here; they're duplicated
+                     one-for-one in the header's View menu (Show/Hide Grid, Snap to Grid,
+                     Show/Hide Rulers, all bound to these exact same commands), and having
+                     both made this toolbar row noticeably more crowded for no added
+                     capability. -->
+=======
 					<ToggleButton Classes="toolbtn-wide" Content="Grid" ToolTip.Tip="Show/hide the design grid"
 								  IsChecked="{Binding ActiveTab.ShowGrid, Mode=OneWay}"
 								  Command="{Binding ActiveTab.ToggleShowGridCommand}" />
@@ -1338,6 +1410,7 @@
 								  Command="{Binding ActiveTab.ToggleShowRulersCommand}" />
 
 					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+>>>>>>> 42f7c5fa34fff67e27765b0cd486c893969f59d5
 
 					<Button Classes="ghost toolbtn" ToolTip.Tip="Zoom out (Ctrl+-)" AutomationProperties.Name="Zoom out"
 							Command="{Binding ActiveTab.ZoomOutCommand}">
