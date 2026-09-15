@@ -10,3 +10,16 @@ D:\InfoME\INFOID\InfoID\InfoID.Domain\obj\Debug\net10.0\InfoID.Domain.dll
 D:\InfoME\INFOID\InfoID\InfoID.Domain\obj\Debug\net10.0\refint\InfoID.Domain.dll
 D:\InfoME\INFOID\InfoID\InfoID.Domain\obj\Debug\net10.0\InfoID.Domain.pdb
 D:\InfoME\INFOID\InfoID\InfoID.Domain\obj\Debug\net10.0\ref\InfoID.Domain.dll
+D:\infome\InfoID_Enterprise\InfoID.Domain\bin\Debug\net10.0\InfoID.Domain.deps.json
+D:\infome\InfoID_Enterprise\InfoID.Domain\bin\Debug\net10.0\InfoID.Domain.dll
+D:\infome\InfoID_Enterprise\InfoID.Domain\bin\Debug\net10.0\InfoID.Domain.pdb
+D:\infome\InfoID_Enterprise\InfoID.Domain\obj\Debug\net10.0\InfoID.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\infome\InfoID_Enterprise\InfoID.Domain\obj\Debug\net10.0\InfoID.Domain.AssemblyInfoInputs.cache
+D:\infome\InfoID_Enterprise\InfoID.Domain\obj\Debug\net10.0\InfoID.Domain.AssemblyInfo.cs
+D:\infome\InfoID_Enterprise\InfoID.Domain\obj\Debug\net10.0\InfoID.Domain.csproj.CoreCompileInputs.cache
+D:\infome\InfoID_Enterprise\InfoID.Domain\obj\Debug\net10.0\InfoID.Domain.sourcelink.json
+D:\infome\InfoID_Enterprise\InfoID.Domain\obj\Debug\net10.0\InfoID.Domain.dll
+D:\infome\InfoID_Enterprise\InfoID.Domain\obj\Debug\net10.0\refint\InfoID.Domain.dll
+D:\infome\InfoID_Enterprise\InfoID.Domain\obj\Debug\net10.0\InfoID.Domain.pdb
+D:\infome\InfoID_Enterprise\InfoID.Domain\obj\Debug\net10.0\ref\InfoID.Domain.dll
+D:\infome\InfoID_Enterprise\InfoID.Domain\obj\Debug\net10.0\InfoID.D.C9416344.Up2Date

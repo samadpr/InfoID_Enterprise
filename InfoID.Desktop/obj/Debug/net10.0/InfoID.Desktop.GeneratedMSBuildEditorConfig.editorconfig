@@ -1,0 +1,120 @@
+is_global = true
+build_property.AvaloniaNameGeneratorIsEnabled = true
+build_property.AvaloniaNameGeneratorBehavior = InitializeComponent
+build_property.AvaloniaNameGeneratorDefaultFieldModifier = internal
+build_property.AvaloniaNameGeneratorFilterByPath = *
+build_property.AvaloniaNameGeneratorFilterByNamespace = *
+build_property.AvaloniaNameGeneratorViewFileNamingStrategy = NamespaceAndClassName
+build_property.AvaloniaNameGeneratorAttachDevTools = true
+build_property.AvaloniaUseCompiledBindingsByDefault = true
+build_property.AvaloniaMainPackageVersion = 12.1.1
+build_property.AvaloniaPreviewerNetCoreToolPath = C:\Users\USER\.nuget\packages\avalonia\12.1.1\buildTransitive\\..\tools\net8.0\designer\Avalonia.Designer.HostApp.dll
+build_property.AvaloniaResourcePaths = D:\infome\InfoID_Enterprise\InfoID.Desktop\Assets\Images\InfoID.png,D:\infome\InfoID_Enterprise\InfoID.Desktop\Assets\Images\InfoIDLogo.png,D:\infome\InfoID_Enterprise\InfoID.Desktop\Assets\Icons\InfoID.ico,D:\infome\InfoID_Enterprise\InfoID.Desktop\Assets\Icons\InfoID.ico,D:\infome\InfoID_Enterprise\InfoID.Desktop\App.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Core\Dialogs\MessageDialogView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Features\BlankCard\Views\BlankCardView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Features\BlankCard\Views\CustomCardDialogView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Features\CardDesigner\Views\CameraCaptureDialogView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Features\CardDesigner\Views\CardDesignerView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Features\CardDesigner\Views\Controls\ColorPickerField.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Features\CardDesigner\Views\CropEditorView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Features\CardDesigner\Views\ImageEditorDialogView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Features\CardDesigner\Views\PrintPreviewView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Features\CardDesigner\Views\VersionHistoryView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Features\Templates\Views\TemplatesView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Features\Welcome\Views\RecentDesignsView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Features\Welcome\Views\WelcomeView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Resources\Colors\Palette.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Resources\Controls\Buttons.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Resources\Controls\Cards.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Resources\Controls\Chrome.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Resources\Controls\Inputs.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Resources\Styles\Spacing.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Resources\Styles\Typography.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Shell\Components\AppHeaderView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Shell\Components\PageHeaderView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Shell\Components\ThemeToggleView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Shell\Views\AboutView.axaml,D:\infome\InfoID_Enterprise\InfoID.Desktop\Shell\Views\ShellView.axaml
+build_property.TargetFramework = net10.0
+build_property.TargetFramework = net10.0
+build_property.TargetPlatformMinVersion = 
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.MvvmToolkitEnableINotifyPropertyChangingSupport = true
+build_property._MvvmToolkitIsUsingWindowsRuntimePack = false
+build_property.CsWinRTComponent = 
+build_property.CsWinRTAotOptimizerEnabled = 
+build_property.CsWinRTAotWarningLevel = 
+build_property.TargetFrameworkIdentifier = .NETCoreApp
+build_property.TargetFrameworkVersion = v10.0
+build_property.EntryPointFilePath = 
+build_property.RootNamespace = InfoID.Desktop
+build_property.ProjectDir = D:\infome\InfoID_Enterprise\InfoID.Desktop\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.EffectiveAnalysisLevelStyle = 10.0
+build_property.EnableCodeStyleSeverity = 
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/App.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Core/Dialogs/MessageDialogView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Features/BlankCard/Views/BlankCardView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Features/BlankCard/Views/CustomCardDialogView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Features/CardDesigner/Views/CameraCaptureDialogView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Features/CardDesigner/Views/CardDesignerView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Features/CardDesigner/Views/Controls/ColorPickerField.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Features/CardDesigner/Views/CropEditorView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Features/CardDesigner/Views/ImageEditorDialogView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Features/CardDesigner/Views/PrintPreviewView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Features/CardDesigner/Views/VersionHistoryView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Features/Templates/Views/TemplatesView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Features/Welcome/Views/RecentDesignsView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Features/Welcome/Views/WelcomeView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Resources/Colors/Palette.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Resources/Controls/Buttons.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Resources/Controls/Cards.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Resources/Controls/Chrome.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Resources/Controls/Inputs.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Resources/Styles/Spacing.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Resources/Styles/Typography.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Shell/Components/AppHeaderView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Shell/Components/PageHeaderView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Shell/Components/ThemeToggleView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Shell/Views/AboutView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[D:/infome/InfoID_Enterprise/InfoID.Desktop/Shell/Views/ShellView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml

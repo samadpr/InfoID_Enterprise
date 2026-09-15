@@ -25,4 +25,5 @@ public enum ElementType
     Counter,
     Watermark,
     Group,
+    DateTime
 }
