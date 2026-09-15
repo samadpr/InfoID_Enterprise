@@ -1106,6 +1106,34 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     /// designing and only resolves to a real value in Data Preview, so it's visually and
     /// semantically flagged (see the DataFieldElement DataTemplate) as a bound field
     /// rather than editable static text.</summary>
+
+    [RelayCommand]
+    private void AddDateTimeElement(string? displayFormat)
+    {
+        var format = Enum.TryParse<DateTimeDisplayFormat>(displayFormat, out var parsed)
+            ? parsed
+            : DateTimeDisplayFormat.DateTime;
+
+        InsertElement(new DateTimeElement
+        {
+            Name = "Date / Time",
+            X = 10,
+            Y = 10,
+            Width = 65,
+            Height = 10,
+            DisplayFormat = format,
+            DateFormat = "dd-MM-yyyy",
+            TimeFormat = "HH:mm:ss",
+            FontFamily = "Segoe UI",
+            FontSize = 24,
+            Bold = false,
+            Italic = false,
+            Underline = false,
+            ColorHex = "#000000",
+            HorizontalAlignment = TextAlignmentX.Left,
+            VerticalAlignment = TextAlignmentY.Top
+        });
+    }
     [RelayCommand]
     private void AddDataFieldElement() => InsertElement(new DataFieldElement { Name = "Data Field", X = 10, Y = 10, Width = 40, Height = 8 });
 

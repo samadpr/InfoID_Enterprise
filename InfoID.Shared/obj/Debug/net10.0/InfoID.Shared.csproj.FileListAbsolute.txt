@@ -10,3 +10,16 @@ D:\InfoME\INFOID\InfoID\InfoID.Shared\obj\Debug\net10.0\InfoID.Shared.dll
 D:\InfoME\INFOID\InfoID\InfoID.Shared\obj\Debug\net10.0\refint\InfoID.Shared.dll
 D:\InfoME\INFOID\InfoID\InfoID.Shared\obj\Debug\net10.0\InfoID.Shared.pdb
 D:\InfoME\INFOID\InfoID\InfoID.Shared\obj\Debug\net10.0\ref\InfoID.Shared.dll
+D:\infome\InfoID_Enterprise\InfoID.Shared\bin\Debug\net10.0\InfoID.Shared.deps.json
+D:\infome\InfoID_Enterprise\InfoID.Shared\bin\Debug\net10.0\InfoID.Shared.dll
+D:\infome\InfoID_Enterprise\InfoID.Shared\bin\Debug\net10.0\InfoID.Shared.pdb
+D:\infome\InfoID_Enterprise\InfoID.Shared\obj\Debug\net10.0\InfoID.Shared.GeneratedMSBuildEditorConfig.editorconfig
+D:\infome\InfoID_Enterprise\InfoID.Shared\obj\Debug\net10.0\InfoID.Shared.AssemblyInfoInputs.cache
+D:\infome\InfoID_Enterprise\InfoID.Shared\obj\Debug\net10.0\InfoID.Shared.AssemblyInfo.cs
+D:\infome\InfoID_Enterprise\InfoID.Shared\obj\Debug\net10.0\InfoID.Shared.csproj.CoreCompileInputs.cache
+D:\infome\InfoID_Enterprise\InfoID.Shared\obj\Debug\net10.0\InfoID.Shared.sourcelink.json
+D:\infome\InfoID_Enterprise\InfoID.Shared\obj\Debug\net10.0\InfoID.Shared.dll
+D:\infome\InfoID_Enterprise\InfoID.Shared\obj\Debug\net10.0\refint\InfoID.Shared.dll
+D:\infome\InfoID_Enterprise\InfoID.Shared\obj\Debug\net10.0\InfoID.Shared.pdb
+D:\infome\InfoID_Enterprise\InfoID.Shared\obj\Debug\net10.0\ref\InfoID.Shared.dll
+D:\infome\InfoID_Enterprise\InfoID.Shared\obj\Debug\net10.0\InfoID.S.F35AB62F.Up2Date
