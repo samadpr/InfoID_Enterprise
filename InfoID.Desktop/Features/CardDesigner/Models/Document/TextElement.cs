@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using InfoID.Desktop.Features.CardDesigner.Services;
 
 namespace InfoID.Desktop.Features.CardDesigner.Models.Document;
 
@@ -8,6 +9,8 @@ public sealed partial class TextElement : DesignerElement
 
     [ObservableProperty] private string _text = "Text";
     [ObservableProperty] private string _fontFamily = "Segoe UI";
+
+    partial void OnFontFamilyChanged(string value) => RecentFontsTracker.Record(value);
     [ObservableProperty] private double _fontSize = 12;
     [ObservableProperty] private bool _bold;
     [ObservableProperty] private bool _italic;

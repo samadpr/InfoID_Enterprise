@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "+Zm7svY+VJg=",
+  "success": true,
+  "projectFilePath": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Application\\InfoID.Application.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\asama\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.10\\microsoft.extensions.dependencyinjection.abstractions.10.0.10.nupkg.sha512"
+  ],
+  "logs": []
+}

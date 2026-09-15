@@ -37,6 +37,13 @@
       <SolidColorBrush x:Key="BrushInputBackground" Color="#FFFFFF" />
       <SolidColorBrush x:Key="BrushHoverOverlay" Color="#0A1B1D22" />
       <SolidColorBrush x:Key="BrushScrollThumb" Color="#C7CAD1" />
+
+      <!-- Card Designer's ruler strips + the corner square where they meet
+           (CardDesignerView.axaml, RulerView.cs); must match RulerView.cs's own
+           BackgroundBrushLight exactly, since that control paints itself in code and
+           can't use this DynamicResource directly (see RulerView.cs's own comment for
+           why: a plain XAML Border can, which is what this resource is actually for). -->
+      <SolidColorBrush x:Key="BrushRulerBackground" Color="#EDEEF1" />
     </ResourceDictionary>
 
     <!-- ===================== DARK ===================== -->
@@ -56,6 +63,10 @@
       <SolidColorBrush x:Key="BrushInputBackground" Color="#1B1C21" />
       <SolidColorBrush x:Key="BrushHoverOverlay" Color="#14FFFFFF" />
       <SolidColorBrush x:Key="BrushScrollThumb" Color="#44474F" />
+
+      <!-- Must match RulerView.cs's own BackgroundBrushDark; see the Light
+           dictionary's own comment on this same key. -->
+      <SolidColorBrush x:Key="BrushRulerBackground" Color="#252526" />
     </ResourceDictionary>
 
   </ResourceDictionary.ThemeDictionaries>

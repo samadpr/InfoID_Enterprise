@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Shell.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="360"
+             x:Class="InfoID.Desktop.Shell.Views.AboutView"
+             x:DataType="vm:AboutViewModel"
+             Background="{DynamicResource BrushSurface}"
+             Width="360">
+
+    <StackPanel Margin="28" Spacing="16" HorizontalAlignment="Center">
+        <TextBlock Text="{Binding AppName}" Classes="h2" HorizontalAlignment="Center" />
+        <TextBlock Text="{Binding VersionText}" Classes="caption" HorizontalAlignment="Center" />
+        <TextBlock Text="{Binding FrameworkText}" Classes="caption" HorizontalAlignment="Center" Opacity="0.7" />
+
+        <Border Height="1" Background="{DynamicResource BrushBorder}" Margin="0,4" />
+
+        <TextBlock Text="On-premise ID card design, issuance, RFID encoding and batch printing."
+                   Classes="caption" TextWrapping="Wrap" TextAlignment="Center" />
+
+        <Button Classes="primary" Content="Close" Command="{Binding CloseCommand}"
+                HorizontalAlignment="Center" Margin="0,8,0,0" />
+    </StackPanel>
+</UserControl>

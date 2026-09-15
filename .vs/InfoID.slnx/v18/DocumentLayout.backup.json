@@ -3,48 +3,8 @@
   "WorkspaceRootPath": "D:\\InfoME\\INFOID\\InfoID\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\views\\controls\\cardcanvasview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\views\\controls\\cardcanvasview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\app.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\app.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\app.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\app.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\views\\controls\\rulerview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\views\\controls\\rulerview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\blankcard\\viewmodels\\blankcardviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\blankcard\\viewmodels\\blankcardviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\blankcard\\viewmodels\\customcarddialogviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\blankcard\\viewmodels\\customcarddialogviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\views\\carddesignerview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\views\\carddesignerview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\shell\\components\\appheaderview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\shell\\components\\appheaderview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\viewmodels\\carddesignerviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\viewmodels\\carddesignerviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid\\infoid\\infoid.infrastructure\\persistence\\databaseinitializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\persistence\\databaseinitializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\services\\carddesignrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\services\\carddesignrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|d:\\infome\\infoid\\infoid\\infoid.application\\services\\templateservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -55,164 +15,8 @@
       "RelativeMoniker": "D:0:0:{4E93075D-36F1-1619-DF54-4D29BC5DFA40}|InfoID.Domain\\InfoID.Domain.csproj|solutionrelative:infoid.domain\\common\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\welcome\\services\\recentcardservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\welcome\\services\\recentcardservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\recentdesignsummary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\recentdesignsummary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\services\\jsoncustomcardmodelstore.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\services\\jsoncustomcardmodelstore.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\welcome\\models\\recentcarditem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\welcome\\models\\recentcarditem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\welcome\\views\\welcomeview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\welcome\\views\\welcomeview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\welcome\\views\\welcomeview.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\welcome\\views\\welcomeview.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\welcome\\viewmodels\\welcomeviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\welcome\\viewmodels\\welcomeviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\views\\carddesignerview.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\views\\carddesignerview.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\viewmodels\\carddesigntabviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\viewmodels\\carddesigntabviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\services\\icarddesignrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\services\\icarddesignrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\document\\carddesigndocument.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\carddesigndocument.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\templateversionsummary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\templateversionsummary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{4E93075D-36F1-1619-DF54-4D29BC5DFA40}|InfoID.Domain\\InfoID.Domain.csproj|d:\\infome\\infoid\\infoid\\infoid.domain\\entities\\templatemodule\\template.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{4E93075D-36F1-1619-DF54-4D29BC5DFA40}|InfoID.Domain\\InfoID.Domain.csproj|solutionrelative:infoid.domain\\entities\\templatemodule\\template.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\history\\rotateelementcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\history\\rotateelementcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\document\\designerelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\designerelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\history\\reorderelementcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\history\\reorderelementcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\services\\designclipboard.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\services\\designclipboard.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\services\\idesignclipboard.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\services\\idesignclipboard.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\converters\\enumequalsconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\converters\\enumequalsconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\history\\compositecommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\history\\compositecommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\document\\carddesignside.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\carddesignside.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\document\\photoelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\photoelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\document\\qrcodeelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\qrcodeelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\document\\shapeelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\shapeelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\document\\signatureelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\signatureelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\document\\textelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\textelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\document\\backgroundsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\backgroundsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\document\\barcodeelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\barcodeelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\document\\cardside.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\cardside.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\document\\datafieldelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\datafieldelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\document\\elementtype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\elementtype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\document\\imageelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\imageelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\history\\commands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\history\\commands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\history\\designhistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\history\\designhistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\history\\idesigncommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\history\\idesigncommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\services\\cardformatcatalogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\services\\cardformatcatalogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\services\\icardformatcatalogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\services\\icardformatcatalogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\services\\icustomcardmodelstore.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\services\\icustomcardmodelstore.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\customcardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\customcardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\carddesigner\\models\\cardformatdefinition.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\cardformatdefinition.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid\\infoid\\infoid.infrastructure\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -259,10 +63,6 @@
       "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\persistence\\databaseinitializationresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\asama\\AppData\\Local\\Temp\\8110d274-093d-4d76-ab89-cd29bd3425a3_InfoID.Desktop.zip.InfoID.Desktop.zip\\InfoID.Desktop\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -302,46 +102,6 @@
       "RelativeMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|solutionrelative:infoid.application\\services\\branchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\shell\\views\\shellview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\shell\\views\\shellview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\core\\services\\themeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\core\\services\\themeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\core\\dialogs\\dialogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\core\\dialogs\\dialogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\core\\dialogs\\idialogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\core\\dialogs\\idialogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\blankcard\\models\\cardformatoption.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\blankcard\\models\\cardformatoption.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\resources\\colors\\palette.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\resources\\colors\\palette.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\blankcard\\services\\blankcardcatalogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\blankcard\\services\\blankcardcatalogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\features\\blankcard\\services\\iblankcardcatalogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\blankcard\\services\\iblankcardcatalogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\viewlocator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\viewlocator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid\\infoid\\infoid.desktop\\app.manifest||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\app.manifest||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid\\infoid\\infoid.infrastructure\\migrations\\20260828045704_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\migrations\\20260828045704_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
@@ -353,7 +113,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -361,128 +121,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "RulerView.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Views\\Controls\\RulerView.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Views\\Controls\\RulerView.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Views\\Controls\\RulerView.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Views\\Controls\\RulerView.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-01T04:10:35.789Z"
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "CardCanvasView.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Views\\Controls\\CardCanvasView.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Views\\Controls\\CardCanvasView.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Views\\Controls\\CardCanvasView.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Views\\Controls\\CardCanvasView.cs",
-              "ViewState": "AgIAALABAAAAAAAAAAAEwDMEAAA9AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T06:16:19.033Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "CardDesignerView.axaml",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Views\\CardDesignerView.axaml",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Views\\CardDesignerView.axaml",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Views\\CardDesignerView.axaml",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Views\\CardDesignerView.axaml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAlAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-08-20T07:45:19.286Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
               "Title": "DatabaseInitializer.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\DatabaseInitializer.cs",
               "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\DatabaseInitializer.cs",
               "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\DatabaseInitializer.cs",
               "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\DatabaseInitializer.cs",
-              "ViewState": "AgIAACMAAAAAAAAAAAAawCoAAAAQAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAoAAAAOAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T04:53:43.683Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "CardDesignerViewModel.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignerViewModel.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignerViewModel.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignerViewModel.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignerViewModel.cs",
-              "ViewState": "AgIAACcAAAAAAAAAAAAgwBsAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:35:41.037Z"
+              "WhenOpened": "2026-08-21T04:53:43.683Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "App.axaml",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\App.axaml",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\App.axaml",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\App.axaml",
-              "RelativeToolTip": "InfoID.Desktop\\App.axaml",
-              "ViewState": "AgIAABIAAAAAAAAAAAAAAAoAAAAgAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-08-20T11:27:17.603Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "App.axaml.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\App.axaml.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\App.axaml.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\App.axaml.cs",
-              "RelativeToolTip": "InfoID.Desktop\\App.axaml.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAIkAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-20T07:45:44.492Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "BlankCardViewModel.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\BlankCard\\ViewModels\\BlankCardViewModel.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\BlankCard\\ViewModels\\BlankCardViewModel.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\BlankCard\\ViewModels\\BlankCardViewModel.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\BlankCard\\ViewModels\\BlankCardViewModel.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAIBJwCIAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-28T09:16:00.78Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "CustomCardDialogViewModel.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\BlankCard\\ViewModels\\CustomCardDialogViewModel.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\BlankCard\\ViewModels\\CustomCardDialogViewModel.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\BlankCard\\ViewModels\\CustomCardDialogViewModel.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\BlankCard\\ViewModels\\CustomCardDialogViewModel.cs",
-              "ViewState": "AgIAADAAAAAAAAAAAAAIwDkAAAAcAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-28T09:14:07.252Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "AppHeaderView.axaml",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Shell\\Components\\AppHeaderView.axaml",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Shell\\Components\\AppHeaderView.axaml",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Shell\\Components\\AppHeaderView.axaml",
-              "RelativeToolTip": "InfoID.Desktop\\Shell\\Components\\AppHeaderView.axaml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAABFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-08-20T10:24:45.312Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
               "Title": "TemplateService.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Application\\Services\\TemplateService.cs",
               "RelativeDocumentMoniker": "InfoID.Application\\Services\\TemplateService.cs",
@@ -494,7 +146,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 85,
+              "DocumentIndex": 25,
               "Title": "20260828045704_InitialCreate.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Migrations\\20260828045704_InitialCreate.cs",
               "RelativeDocumentMoniker": "InfoID.Infrastructure\\Migrations\\20260828045704_InitialCreate.cs",
@@ -506,31 +158,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "CardDesignRepository.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\CardDesignRepository.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Services\\CardDesignRepository.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\CardDesignRepository.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Services\\CardDesignRepository.cs",
-              "ViewState": "AgIAAEUAAAAAAAAAAAAUwFUAAAAaAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T11:13:47.018Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
-              "Title": "JsonCustomCardModelStore.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\JsonCustomCardModelStore.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Services\\JsonCustomCardModelStore.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\JsonCustomCardModelStore.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Services\\JsonCustomCardModelStore.cs",
-              "ViewState": "AgIAAFQAAAAAAAAAAAAIwF8AAAAWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T06:11:57.054Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 2,
               "Title": "BaseEntity.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Domain\\Common\\BaseEntity.cs",
               "RelativeDocumentMoniker": "InfoID.Domain\\Common\\BaseEntity.cs",
@@ -542,511 +170,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "RecentDesignSummary.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\RecentDesignSummary.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\RecentDesignSummary.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\RecentDesignSummary.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\RecentDesignSummary.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAkAAAAMAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T11:09:11.209Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "RecentCardService.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\Welcome\\Services\\RecentCardService.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Welcome\\Services\\RecentCardService.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\Welcome\\Services\\RecentCardService.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\Welcome\\Services\\RecentCardService.cs",
-              "ViewState": "AgIAABYAAAAAAAAAAAAIwCEAAAAtAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T11:47:39.537Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "RecentCardItem.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\Welcome\\Models\\RecentCardItem.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Welcome\\Models\\RecentCardItem.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\Welcome\\Models\\RecentCardItem.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\Welcome\\Models\\RecentCardItem.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAUAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T11:47:07.847Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "WelcomeView.axaml",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\Welcome\\Views\\WelcomeView.axaml",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Welcome\\Views\\WelcomeView.axaml",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\Welcome\\Views\\WelcomeView.axaml",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\Welcome\\Views\\WelcomeView.axaml",
-              "ViewState": "AgIAAEAAAAAAAAAAAABBwFUAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-08-20T10:38:31.337Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 18,
-              "Title": "WelcomeView.axaml.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\Welcome\\Views\\WelcomeView.axaml.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Welcome\\Views\\WelcomeView.axaml.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\Welcome\\Views\\WelcomeView.axaml.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\Welcome\\Views\\WelcomeView.axaml.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T11:56:47.414Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 19,
-              "Title": "WelcomeViewModel.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\Welcome\\ViewModels\\WelcomeViewModel.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Welcome\\ViewModels\\WelcomeViewModel.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\Welcome\\ViewModels\\WelcomeViewModel.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\Welcome\\ViewModels\\WelcomeViewModel.cs",
-              "ViewState": "AgIAACQAAAAAAAAAAAAswDgAAAA4AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T11:49:15.845Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 20,
-              "Title": "CardDesignerView.axaml.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Views\\CardDesignerView.axaml.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Views\\CardDesignerView.axaml.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Views\\CardDesignerView.axaml.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Views\\CardDesignerView.axaml.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T06:22:21.855Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 21,
-              "Title": "CardDesignTabViewModel.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignTabViewModel.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignTabViewModel.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignTabViewModel.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignTabViewModel.cs",
-              "ViewState": "AgIAAIEBAAAAAAAAAAAuwIIBAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:43:19.993Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 22,
-              "Title": "ICardDesignRepository.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\ICardDesignRepository.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Services\\ICardDesignRepository.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\ICardDesignRepository.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Services\\ICardDesignRepository.cs",
-              "ViewState": "AgIAAAoAAAAAAAAAAAAkwCEAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T11:12:52.471Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 24,
-              "Title": "TemplateVersionSummary.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\TemplateVersionSummary.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\TemplateVersionSummary.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\TemplateVersionSummary.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\TemplateVersionSummary.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAB5AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T11:10:09.541Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 25,
-              "Title": "Template.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Domain\\Entities\\TemplateModule\\Template.cs",
-              "RelativeDocumentMoniker": "InfoID.Domain\\Entities\\TemplateModule\\Template.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Domain\\Entities\\TemplateModule\\Template.cs",
-              "RelativeToolTip": "InfoID.Domain\\Entities\\TemplateModule\\Template.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T11:06:23.36Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 23,
-              "Title": "CardDesignDocument.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignDocument.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignDocument.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignDocument.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignDocument.cs",
-              "ViewState": "AgIAACQAAAAAAAAAAAA+wCwAAAAyAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:30:02.379Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 26,
-              "Title": "RotateElementCommand.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\History\\RotateElementCommand.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\History\\RotateElementCommand.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\History\\RotateElementCommand.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\History\\RotateElementCommand.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAaAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T06:44:51.53Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 27,
-              "Title": "DesignerElement.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\DesignerElement.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\DesignerElement.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\DesignerElement.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\DesignerElement.cs",
-              "ViewState": "AgIAACkAAAAAAAAAAAA6wDcAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:18:22.22Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 28,
-              "Title": "ReorderElementCommand.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\History\\ReorderElementCommand.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\History\\ReorderElementCommand.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\History\\ReorderElementCommand.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\History\\ReorderElementCommand.cs",
-              "ViewState": "AgIAAAgAAAAAAAAAAAA0wBUAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T06:45:14.795Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 29,
-              "Title": "DesignClipboard.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\DesignClipboard.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Services\\DesignClipboard.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\DesignClipboard.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Services\\DesignClipboard.cs",
-              "ViewState": "AgIAABYAAAAAAAAAAAAkwB4AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T06:37:58.297Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 30,
-              "Title": "IDesignClipboard.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\IDesignClipboard.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Services\\IDesignClipboard.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\IDesignClipboard.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Services\\IDesignClipboard.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAIBJwBIAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T06:36:42.03Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 31,
-              "Title": "EnumEqualsConverter.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Converters\\EnumEqualsConverter.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Converters\\EnumEqualsConverter.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Converters\\EnumEqualsConverter.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Converters\\EnumEqualsConverter.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAxwBMAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T06:14:00.773Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 32,
-              "Title": "CompositeCommand.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\History\\CompositeCommand.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\History\\CompositeCommand.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\History\\CompositeCommand.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\History\\CompositeCommand.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAkwBoAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:53:52.703Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 34,
-              "Title": "PhotoElement.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\PhotoElement.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\PhotoElement.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\PhotoElement.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\PhotoElement.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:23:02.994Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 35,
-              "Title": "QrCodeElement.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\QrCodeElement.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\QrCodeElement.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\QrCodeElement.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\QrCodeElement.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:24:55.364Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 33,
-              "Title": "CardDesignSide.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignSide.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignSide.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignSide.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignSide.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:29:25.098Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 36,
-              "Title": "ShapeElement.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ShapeElement.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ShapeElement.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ShapeElement.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ShapeElement.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:21:25.439Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 37,
-              "Title": "SignatureElement.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\SignatureElement.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\SignatureElement.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\SignatureElement.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\SignatureElement.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:23:32.556Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 38,
-              "Title": "TextElement.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\TextElement.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\TextElement.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\TextElement.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\TextElement.cs",
-              "ViewState": "AgIAABMAAAAAAAAAAAA2wBgAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:19:32.213Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 39,
-              "Title": "BackgroundSettings.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\BackgroundSettings.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\BackgroundSettings.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\BackgroundSettings.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\BackgroundSettings.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:28:44.5Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 40,
-              "Title": "BarcodeElement.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\BarcodeElement.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\BarcodeElement.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\BarcodeElement.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\BarcodeElement.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:24:04.682Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 41,
-              "Title": "CardSide.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardSide.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardSide.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardSide.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardSide.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:17:46.395Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 42,
-              "Title": "DataFieldElement.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\DataFieldElement.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\DataFieldElement.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\DataFieldElement.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\DataFieldElement.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:27:11.212Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 43,
-              "Title": "ElementType.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ElementType.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ElementType.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ElementType.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ElementType.cs",
-              "ViewState": "AgIAABUAAAAAAAAAAAAywBsAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:17:05.772Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 44,
-              "Title": "ImageElement.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ImageElement.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ImageElement.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ImageElement.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ImageElement.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:21:55.439Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 45,
-              "Title": "Commands.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\History\\Commands.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\History\\Commands.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\History\\Commands.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\History\\Commands.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAF8AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:34:31.985Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 46,
-              "Title": "DesignHistory.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\History\\DesignHistory.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\History\\DesignHistory.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\History\\DesignHistory.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\History\\DesignHistory.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACsAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:32:20.415Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 47,
-              "Title": "IDesignCommand.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\History\\IDesignCommand.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\History\\IDesignCommand.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\History\\IDesignCommand.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\History\\IDesignCommand.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-27T05:31:56.689Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 51,
-              "Title": "CustomCardModel.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\CustomCardModel.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\CustomCardModel.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\CustomCardModel.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\CustomCardModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T06:10:59.325Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 50,
-              "Title": "ICustomCardModelStore.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\ICustomCardModelStore.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Services\\ICustomCardModelStore.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\ICustomCardModelStore.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Services\\ICustomCardModelStore.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T06:11:42.875Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 49,
-              "Title": "ICardFormatCatalogService.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\ICardFormatCatalogService.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Services\\ICardFormatCatalogService.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\ICardFormatCatalogService.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Services\\ICardFormatCatalogService.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAiwBMAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T06:12:26.891Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 48,
-              "Title": "CardFormatCatalogService.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\CardFormatCatalogService.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Services\\CardFormatCatalogService.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Services\\CardFormatCatalogService.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Services\\CardFormatCatalogService.cs",
-              "ViewState": "AgIAAGsAAAAAAAAAAAA+wHcAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T06:12:49.782Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 52,
-              "Title": "CardFormatDefinition.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\CardFormatDefinition.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\CardFormatDefinition.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\CardDesigner\\Models\\CardFormatDefinition.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\CardFormatDefinition.cs",
-              "ViewState": "AgIAADkAAAAAAAAAAAAmwEUAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T06:09:32.85Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 53,
-              "Title": "DependencyInjection.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\DependencyInjection.cs",
-              "RelativeDocumentMoniker": "InfoID.Infrastructure\\DependencyInjection.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\DependencyInjection.cs",
-              "RelativeToolTip": "InfoID.Infrastructure\\DependencyInjection.cs",
-              "ViewState": "AgIAACIAAAAAAAAAAAAQwCgAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T04:17:47.914Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 54,
-              "Title": "InfoIdDbContextFactory.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\InfoIdDbContextFactory.cs",
-              "RelativeDocumentMoniker": "InfoID.Infrastructure\\InfoIdDbContextFactory.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\InfoIdDbContextFactory.cs",
-              "RelativeToolTip": "InfoID.Infrastructure\\InfoIdDbContextFactory.cs",
-              "ViewState": "AgIAAAgAAAAAAAAAAAAqwBYAAAAuAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T04:17:54.026Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 56,
-              "Title": "DatabaseDiagnosticsService.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\DatabaseDiagnosticsService.cs",
-              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\DatabaseDiagnosticsService.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\DatabaseDiagnosticsService.cs",
-              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\DatabaseDiagnosticsService.cs",
-              "ViewState": "AgIAADEAAAAAAAAAAAAkwEgAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T04:56:34.995Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 57,
+              "DocumentIndex": 8,
               "Title": "IDatabaseDiagnosticsService.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\IDatabaseDiagnosticsService.cs",
               "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\IDatabaseDiagnosticsService.cs",
@@ -1058,43 +182,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 55,
-              "Title": "InfoIdDbContext.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\InfoIdDbContext.cs",
-              "RelativeDocumentMoniker": "InfoID.Infrastructure\\InfoIdDbContext.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\InfoIdDbContext.cs",
-              "RelativeToolTip": "InfoID.Infrastructure\\InfoIdDbContext.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAnwB4AAAA/AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T04:17:49.255Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 58,
-              "Title": "DatabaseHealthReport.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\DatabaseHealthReport.cs",
-              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\DatabaseHealthReport.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\DatabaseHealthReport.cs",
-              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\DatabaseHealthReport.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAaAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T04:55:53.881Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 60,
-              "Title": "IDatabaseInitializer.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\IDatabaseInitializer.cs",
-              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\IDatabaseInitializer.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\IDatabaseInitializer.cs",
-              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\IDatabaseInitializer.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T04:53:24.278Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 63,
+              "DocumentIndex": 14,
               "Title": "DatabaseInitializationResult.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\DatabaseInitializationResult.cs",
               "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\DatabaseInitializationResult.cs",
@@ -1106,7 +194,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 59,
+              "DocumentIndex": 10,
               "Title": "FileStartupLogger.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\FileStartupLogger.cs",
               "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\FileStartupLogger.cs",
@@ -1118,7 +206,92 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 61,
+              "DocumentIndex": 3,
+              "Title": "Template.cs",
+              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Domain\\Entities\\TemplateModule\\Template.cs",
+              "RelativeDocumentMoniker": "InfoID.Domain\\Entities\\TemplateModule\\Template.cs",
+              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Domain\\Entities\\TemplateModule\\Template.cs",
+              "RelativeToolTip": "InfoID.Domain\\Entities\\TemplateModule\\Template.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-27T11:06:23.36Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "DependencyInjection.cs",
+              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\DependencyInjection.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\DependencyInjection.cs",
+              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\DependencyInjection.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\DependencyInjection.cs",
+              "ViewState": "AgIAACIAAAAAAAAAAAAQwCgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:17:47.914Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "InfoIdDbContextFactory.cs",
+              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\InfoIdDbContextFactory.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\InfoIdDbContextFactory.cs",
+              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\InfoIdDbContextFactory.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\InfoIdDbContextFactory.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAqwBYAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:17:54.026Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "DatabaseHealthReport.cs",
+              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\DatabaseHealthReport.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\DatabaseHealthReport.cs",
+              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\DatabaseHealthReport.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\DatabaseHealthReport.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:55:53.881Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "IDatabaseInitializer.cs",
+              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\IDatabaseInitializer.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\IDatabaseInitializer.cs",
+              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\IDatabaseInitializer.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\IDatabaseInitializer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:53:24.278Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "DatabaseDiagnosticsService.cs",
+              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\DatabaseDiagnosticsService.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\DatabaseDiagnosticsService.cs",
+              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\DatabaseDiagnosticsService.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\DatabaseDiagnosticsService.cs",
+              "ViewState": "AgIAADEAAAAAAAAAAAAkwEgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:56:34.995Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "InfoIdDbContext.cs",
+              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\InfoIdDbContext.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\InfoIdDbContext.cs",
+              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\InfoIdDbContext.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\InfoIdDbContext.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAnwB4AAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:17:49.255Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
               "Title": "IStartupLogger.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\IStartupLogger.cs",
               "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\IStartupLogger.cs",
@@ -1130,7 +303,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 62,
+              "DocumentIndex": 13,
               "Title": "DatabaseLocation.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Infrastructure\\Persistence\\DatabaseLocation.cs",
               "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\DatabaseLocation.cs",
@@ -1142,7 +315,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 65,
+              "DocumentIndex": 15,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\asama\\AppData\\Local\\Temp\\8110d274-093d-4d76-ab89-cd29bd3425a3_InfoID.Desktop.zip.InfoID.Desktop.zip\\InfoID.Desktop\\Program.cs",
               "ToolTip": "C:\\Users\\asama\\AppData\\Local\\Temp\\8110d274-093d-4d76-ab89-cd29bd3425a3_InfoID.Desktop.zip.InfoID.Desktop.zip\\InfoID.Desktop\\Program.cs [Read Only]",
@@ -1152,7 +325,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 66,
+              "DocumentIndex": 16,
               "Title": "TemplateDtos.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Application\\Dtos\\TemplateModule\\TemplateDtos.cs",
               "RelativeDocumentMoniker": "InfoID.Application\\Dtos\\TemplateModule\\TemplateDtos.cs",
@@ -1164,7 +337,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 67,
+              "DocumentIndex": 17,
               "Title": "AppUserDtos.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Application\\Dtos\\Organization\\AppUserDtos.cs",
               "RelativeDocumentMoniker": "InfoID.Application\\Dtos\\Organization\\AppUserDtos.cs",
@@ -1176,7 +349,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 68,
+              "DocumentIndex": 18,
               "Title": "IAppUserService.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Application\\Interfaces\\IAppUserService.cs",
               "RelativeDocumentMoniker": "InfoID.Application\\Interfaces\\IAppUserService.cs",
@@ -1188,7 +361,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 70,
+              "DocumentIndex": 20,
               "Title": "IOrganizationService.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Application\\Interfaces\\IOrganizationService.cs",
               "RelativeDocumentMoniker": "InfoID.Application\\Interfaces\\IOrganizationService.cs",
@@ -1200,7 +373,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 71,
+              "DocumentIndex": 21,
               "Title": "ITemplateService.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Application\\Interfaces\\ITemplateService.cs",
               "RelativeDocumentMoniker": "InfoID.Application\\Interfaces\\ITemplateService.cs",
@@ -1212,19 +385,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 64,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Program.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Program.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Program.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAPAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-20T07:29:04.477Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 72,
+              "DocumentIndex": 22,
               "Title": "DependencyInjection.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Application\\DependencyInjection.cs",
               "RelativeDocumentMoniker": "InfoID.Application\\DependencyInjection.cs",
@@ -1236,7 +397,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 73,
+              "DocumentIndex": 23,
               "Title": "LicenseService.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Application\\Services\\LicenseService.cs",
               "RelativeDocumentMoniker": "InfoID.Application\\Services\\LicenseService.cs",
@@ -1248,7 +409,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 69,
+              "DocumentIndex": 19,
               "Title": "IBranchService.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Application\\Interfaces\\IBranchService.cs",
               "RelativeDocumentMoniker": "InfoID.Application\\Interfaces\\IBranchService.cs",
@@ -1260,7 +421,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 74,
+              "DocumentIndex": 24,
               "Title": "BranchService.cs",
               "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Application\\Services\\BranchService.cs",
               "RelativeDocumentMoniker": "InfoID.Application\\Services\\BranchService.cs",
@@ -1269,126 +430,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-08-20T12:03:42.147Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 75,
-              "Title": "ShellView.axaml",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Shell\\Views\\ShellView.axaml",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Shell\\Views\\ShellView.axaml",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Shell\\Views\\ShellView.axaml",
-              "RelativeToolTip": "InfoID.Desktop\\Shell\\Views\\ShellView.axaml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAA4AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-08-20T11:28:46.543Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 76,
-              "Title": "ThemeService.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Core\\Services\\ThemeService.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Core\\Services\\ThemeService.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Core\\Services\\ThemeService.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Core\\Services\\ThemeService.cs",
-              "ViewState": "AgIAACkAAAAAAAAAAAAmwC0AAAAvAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-20T09:04:37.512Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 78,
-              "Title": "IDialogService.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Core\\Dialogs\\IDialogService.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Core\\Dialogs\\IDialogService.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Core\\Dialogs\\IDialogService.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Core\\Dialogs\\IDialogService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-20T09:01:55.783Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 77,
-              "Title": "DialogService.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Core\\Dialogs\\DialogService.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Core\\Dialogs\\DialogService.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Core\\Dialogs\\DialogService.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Core\\Dialogs\\DialogService.cs",
-              "ViewState": "AgIAAB4AAAAAAAAAAAAYwEMAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-20T08:40:01.22Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 79,
-              "Title": "CardFormatOption.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\BlankCard\\Models\\CardFormatOption.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\BlankCard\\Models\\CardFormatOption.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\BlankCard\\Models\\CardFormatOption.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\BlankCard\\Models\\CardFormatOption.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAzwAYAAAAOAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-20T08:34:12.141Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 81,
-              "Title": "BlankCardCatalogService.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\BlankCard\\Services\\BlankCardCatalogService.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\BlankCard\\Services\\BlankCardCatalogService.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\BlankCard\\Services\\BlankCardCatalogService.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\BlankCard\\Services\\BlankCardCatalogService.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAADwvw4AAAA5AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-20T08:33:58.254Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 82,
-              "Title": "IBlankCardCatalogService.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\BlankCard\\Services\\IBlankCardCatalogService.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\BlankCard\\Services\\IBlankCardCatalogService.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Features\\BlankCard\\Services\\IBlankCardCatalogService.cs",
-              "RelativeToolTip": "InfoID.Desktop\\Features\\BlankCard\\Services\\IBlankCardCatalogService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAA4AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-20T08:33:22.915Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 80,
-              "Title": "Palette.axaml",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Resources\\Colors\\Palette.axaml",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\Resources\\Colors\\Palette.axaml",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\Resources\\Colors\\Palette.axaml",
-              "RelativeToolTip": "InfoID.Desktop\\Resources\\Colors\\Palette.axaml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-08-20T07:46:36.964Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 83,
-              "Title": "ViewLocator.cs",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\ViewLocator.cs",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\ViewLocator.cs",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\ViewLocator.cs",
-              "RelativeToolTip": "InfoID.Desktop\\ViewLocator.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAASAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-20T07:29:36.885Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 84,
-              "Title": "app.manifest",
-              "DocumentMoniker": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\app.manifest",
-              "RelativeDocumentMoniker": "InfoID.Desktop\\app.manifest",
-              "ToolTip": "D:\\InfoME\\INFOID\\InfoID\\InfoID.Desktop\\app.manifest",
-              "RelativeToolTip": "InfoID.Desktop\\app.manifest",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAALAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001203|",
-              "WhenOpened": "2026-08-19T10:24:44.092Z"
             }
           ]
         }

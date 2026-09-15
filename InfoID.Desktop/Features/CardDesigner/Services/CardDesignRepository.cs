@@ -141,6 +141,23 @@ public sealed class CardDesignRepository : ICardDesignRepository
             .ToList();
     }
 
+    public async Task<CardDesignDocument?> GetVersionSnapshotAsync(long versionId, CancellationToken ct = default)
+    {
+        var entity = await _unitOfWork.Repository<TemplateVersion>().GetByIdAsync(versionId, ct);
+        if (entity is null || string.IsNullOrEmpty(entity.SnapshotJson)) return null;
+
+        try
+        {
+            return JsonSerializer.Deserialize<CardDesignDocument>(entity.SnapshotJson);
+        }
+        catch
+        {
+            // A corrupt/unreadable snapshot must not crash the Version History dialog --
+            // the caller treats a null result as "this version can't be restored".
+            return null;
+        }
+    }
+
     /// <summary>InfoID is single-user/single-machine (SRS 3.3), but Template.OrganizationId
     /// is a required FK -- so the first save bootstraps one placeholder Organization row.
     /// Real activation/licensing (Part 4.7 of the SRS) will populate this properly; this

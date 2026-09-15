@@ -1,10 +1,12 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Threading;
 using InfoID.Desktop.Features.CardDesigner.Models.Document;
 using InfoID.Desktop.Features.CardDesigner.ViewModels;
 using InfoID.Desktop.Features.CardDesigner.Views.Controls;
+using System.Linq;
 
 namespace InfoID.Desktop.Features.CardDesigner.Views;
 
@@ -110,4 +112,53 @@ public partial class CardDesignerView : UserControl
     }
 
     private void CommitInlineEdit() => ViewModel?.ActiveTab?.CommitInlineEdit();
+
+    // ------------------------------------------------------------------ rename ----
+
+    /// <summary>Double-click on a tab's title enters rename mode (Part 20), matching
+    /// the canvas's own double-click-to-edit-text gesture. The Button and the rename
+    /// TextBox live in the same Panel (see the tab strip DataTemplate) and swap
+    /// visibility via IsRenaming, so once BeginRenameCommand flips that flag the
+    /// TextBox becomes visible and just needs focus.</summary>
+    private void OnTabTitleDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (sender is not Control { DataContext: CardDesignTabViewModel tab } control) return;
+
+        tab.BeginRenameCommand.Execute(null);
+
+        if (control.Parent is not Panel panel) return;
+        var box = panel.Children.OfType<TextBox>().FirstOrDefault();
+        if (box is null) return;
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            box.Focus();
+            box.SelectAll();
+        }, DispatcherPriority.Loaded);
+    }
+
+    private void OnTabRenameKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (sender is not TextBox { DataContext: CardDesignTabViewModel tab }) return;
+
+        switch (e.Key)
+        {
+            case Key.Enter:
+                tab.CommitRenameCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.Escape:
+                tab.CancelRenameCommand.Execute(null);
+                e.Handled = true;
+                break;
+        }
+    }
+
+    /// <summary>Clicking away from the rename box commits rather than silently
+    /// discarding the typed name -- only Escape should discard (Part 20/3).</summary>
+    private void OnTabRenameLostFocus(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not TextBox { DataContext: CardDesignTabViewModel { IsRenaming: true } tab }) return;
+        tab.CommitRenameCommand.Execute(null);
+    }
 }

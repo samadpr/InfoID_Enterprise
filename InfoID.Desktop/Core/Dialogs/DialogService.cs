@@ -26,13 +26,25 @@ public sealed class DialogService : IDialogService
         {
             Content = content,
             //SizingToContent = SizingToContent.WidthAndHeight,
-            CanResize = false,
+            CanResize = viewModel.CanResize,
             ShowInTaskbar = false,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
             //SystemDecorations = SystemDecorations.BorderOnly,
-            Title = "InfoID",
+            Title = viewModel.Title,
         };
         window.Classes.Add("dialogWindow");
+
+        // Bug fix: this Window never had SizingToContent enabled and never had an
+        // explicit size, so it fell back to Avalonia's own small default -- a
+        // content-heavy dialog's own Border.MinWidth/MinHeight can only constrain
+        // layout WITHIN whatever space the Window already has, it cannot make an
+        // undersized Window grow to fit. See DialogViewModelBase.PreferredSize's own
+        // doc comment for the reported symptoms this caused.
+        if (viewModel.PreferredSize is { } size)
+        {
+            window.Width = size.Width;
+            window.Height = size.Height;
+        }
 
         void OnCloseRequested(TResult? result)
         {

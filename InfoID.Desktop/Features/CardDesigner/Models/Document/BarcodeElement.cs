@@ -2,7 +2,9 @@
 
 namespace InfoID.Desktop.Features.CardDesigner.Models.Document;
 
-public enum BarcodeSymbology { Code128, Code39, Ean13, Upc, Itf, DataMatrix, Pdf417 }
+// Appended, not inserted: same plain-integer-ordinal serialization rule noted on
+// ShapeKind/PhotoMaskShape -- new members must always go at the end.
+public enum BarcodeSymbology { Code128, Code39, Ean13, Upc, Itf, DataMatrix, Pdf417, Aztec, Ean8 }
 
 public sealed partial class BarcodeElement : DesignerElement
 {

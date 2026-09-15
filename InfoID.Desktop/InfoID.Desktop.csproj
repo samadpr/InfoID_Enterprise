@@ -13,7 +13,34 @@
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.1" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.1" />
     <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3" />
+    <!-- Camera capture (Priority 12 / "Take Photo" workflow). FlashCap is a real,
+         MIT-licensed, actively-maintained, genuinely cross-platform .NET camera
+         library (native OS camera APIs on Windows/Linux/macOS — DirectShow/MediaFoundation,
+         V4L2, AVFoundation respectively — no heavyweight OpenCV-style native binary),
+         matching this project's stated cross-platform direction (see the SRS's
+         Avalonia UI decision, Section 6.1). IMPORTANT: this version number was written
+         without live access to NuGet at the time — open NuGet Package Manager (or
+         `dotnet list package —outdated` after a restore) and update to whatever the
+         actual current stable release is before relying on this; do not assume 1.4.0
+         is correct. -->
+    <PackageReference Include="FlashCap" Version="1.4.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <!-- Face detection (Image Editor "Detect Face" auto-crop). Runs the bundled
+         UltraFace RFB-320 ONNX model (Assets/Models/version-RFB-320.onnx, MIT-licensed,
+         see FaceDetectionService.cs) fully offline via ONNX Runtime; no photo ever
+         leaves the machine. -->
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.20.1" />
+    <!-- Barcode / QR Code generation (Card Designer's Barcode and QR Code elements).
+         Real encoding (Reed-Solomon error correction for QR, exact symbol-pattern
+         tables for Code128/PDF417/DataMatrix/Aztec/EAN-UPC) is correctness-critical
+         and not safe to hand-roll; a subtly wrong implementation looks like a real
+         barcode but silently fails to scan, which is worse than no barcode at all.
+         ZXing.Net is the MIT-licensed, actively-maintained .NET port of the ZXing
+         barcode library; used here via its cross-platform BarcodeWriterPixelData API
+         (a raw RGBA pixel buffer this app converts into an Avalonia WriteableBitmap
+         itself), so it needs no platform-specific rendering binding (no System.Drawing,
+         no SkiaSharp dependency) beyond the core package. See BarcodeRenderer.cs. -->
+    <PackageReference Include="ZXing.Net" Version="0.16.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.11">
       <PrivateAssets>all</PrivateAssets>
@@ -33,5 +60,14 @@
 	  <AvaloniaResource Include="Assets\Images\InfoID.png" />
 	  <AvaloniaResource Include="Assets\Images\InfoIDLogo.png" />
 	  <AvaloniaResource Include="Assets\Icons\InfoID.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Loose file (not an AvaloniaResource: ONNX Runtime needs a real file path,
+         not an Avalonia asset URI) copied next to the built exe so FaceDetectionService
+         can find it via AppContext.BaseDirectory at runtime. -->
+    <None Include="Assets\Models\version-RFB-320.onnx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

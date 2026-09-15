@@ -40,7 +40,7 @@ public sealed partial class BlankCardViewModel : ViewModelBase
 
     public ObservableCollection<string> OrientationOptions { get; } = new() { "All", "Landscape", "Portrait" };
 
-    public ObservableCollection<string> FormatOptions { get; } = new() { "All", "CR-80" };
+    public ObservableCollection<string> FormatOptions { get; } = new() { "All", "CR-79", "CR-80", "CR-90", "CR-100" };
 
     public ObservableCollection<FilterChipOption> TypeChips { get; } = new();
 

@@ -41,8 +41,20 @@ public sealed class CardDesignDocument
     /// <summary>The Template.Id this document was last saved as, or null if never
     /// saved. Drives Save-vs-Save-As-style insert/update logic in CardDesignRepository.
     /// Not part of the .infoid export envelope -- it's a local persistence detail, not
-    /// portable document content.</summary>
+    /// portable document content. [JsonIgnore] actually enforces that: without it, a
+    /// document round-tripped through Export/Import would carry a stale Template.Id
+    /// into the new file, and Save on the imported copy would silently update the
+    /// original database row instead of creating a new design or a new file.</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
     public long? PersistedTemplateId { get; set; }
+
+    /// <summary>Non-null means this document is backed by a local .infoid file rather
+    /// than a database Template row -- Save writes back to this file instead of the
+    /// database (see CardDesignTabViewModel.Save). Same reasoning as
+    /// PersistedTemplateId above for why this is [JsonIgnore]: exporting a file-backed
+    /// document to a *different* file must not carry over the original file's path.</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? SourceFilePath { get; set; }
 
     public CardDesignSide Front { get; set; } = new() { Side = CardSide.Front };
     public CardDesignSide Back { get; set; } = new() { Side = CardSide.Back };

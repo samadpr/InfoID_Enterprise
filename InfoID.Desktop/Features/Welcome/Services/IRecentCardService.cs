@@ -11,5 +11,13 @@ namespace InfoID.Desktop.Features.Welcome.Services;
 /// </summary>
 public interface IRecentCardService
 {
-    Task<IReadOnlyList<RecentCardItem>> GetRecentCardsAsync();
+    Task<IReadOnlyList<RecentCardItem>> GetRecentCardsAsync(int maxCount = 50);
+
+    /// <summary>"Remove" a recent item: soft-deletes the database Template row for a
+    /// database-backed item, or just forgets the file was ever opened (never deletes
+    /// the actual file) for a file-backed one. Dispatches on RecentCardItem.Id's "file:"
+    /// prefix, same scheme GetRecentCardsAsync itself uses.</summary>
+    Task DeleteAsync(RecentCardItem item);
+
+    Task TogglePinAsync(RecentCardItem item);
 }
