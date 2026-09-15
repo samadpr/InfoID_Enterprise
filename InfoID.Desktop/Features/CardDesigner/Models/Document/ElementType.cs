@@ -25,10 +25,14 @@ public enum ElementType
     Counter,
     Watermark,
     Group,
+<<<<<<< HEAD
 
     /// <summary>Freehand ink stroke drawn with the Pen tool -- see PenElement. Appended
     /// here rather than inserted alongside the other reserved-but-unused members above:
     /// this enum serializes as a plain integer ordinal (no JsonStringEnumConverter
     /// anywhere in this codebase), so a new member must always go at the end.</summary>
     Pen,
+=======
+    DateTime
+>>>>>>> 42f7c5fa34fff67e27765b0cd486c893969f59d5
 }

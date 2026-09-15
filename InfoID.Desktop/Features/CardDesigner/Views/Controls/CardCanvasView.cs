@@ -501,6 +501,9 @@ public sealed class CardCanvasView : Control
             case TextElement text:
                 DrawText(context, elementRect, text, tab);
                 break;
+            case DateTimeElement dateTime:
+                DrawDateTime(context, elementRect, dateTime, tab);
+                break;
             case ShapeElement shape:
                 DrawShape(context, elementRect, shape);
                 break;
@@ -591,6 +594,74 @@ public sealed class CardCanvasView : Control
         context.DrawText(formatted, origin);
     }
 
+    private static void DrawDateTime( DrawingContext context, Rect rect,DateTimeElement element,CardDesignTabViewModel tab)
+    {
+        var brush = ParseBrush(element.ColorHex);
+
+        var weight = element.Bold
+            ? FontWeight.Bold
+            : FontWeight.Normal;
+
+        var style = element.Italic
+            ? FontStyle.Italic
+            : FontStyle.Normal;
+
+        var typeface = new Typeface(
+            element.FontFamily,
+            style,
+            weight);
+
+        // Use the stored value instead of DateTime.Now
+        var value = element.Value;
+
+        var displayText = element.DisplayFormat switch
+        {
+            DateTimeDisplayFormat.DateTime =>
+                $"{value.ToString(element.DateFormat)} {value.ToString(element.TimeFormat)}",
+
+            DateTimeDisplayFormat.Date =>
+                value.ToString(element.DateFormat),
+
+            DateTimeDisplayFormat.Time =>
+                value.ToString(element.TimeFormat),
+
+            _ => ""
+        };
+
+        var formatted = new FormattedText(
+            string.IsNullOrEmpty(displayText) ? " " : displayText,
+            CultureInfo.CurrentCulture,
+            FlowDirection.LeftToRight,
+            typeface,
+            Math.Max(1, element.FontSize * tab.Zoom),
+            brush)
+        {
+            MaxTextWidth = Math.Max(1, rect.Width),
+            MaxTextHeight = Math.Max(1, rect.Height),
+
+            TextAlignment = element.HorizontalAlignment switch
+            {
+                TextAlignmentX.Center => TextAlignment.Center,
+                TextAlignmentX.Right => TextAlignment.Right,
+                _ => TextAlignment.Left,
+            },
+        };
+
+        var origin = rect.TopLeft;
+
+        if (element.VerticalAlignment == TextAlignmentY.Middle)
+        {
+            origin = origin.WithY(
+                rect.Center.Y - formatted.Height / 2);
+        }
+        else if (element.VerticalAlignment == TextAlignmentY.Bottom)
+        {
+            origin = origin.WithY(
+                rect.Bottom - formatted.Height);
+        }
+
+        context.DrawText(formatted, origin);
+    }
     private static void DrawDataField(DrawingContext context, Rect rect, DataFieldElement field, CardDesignTabViewModel tab)
     {
         var brush = ParseBrush(field.ColorHex);
