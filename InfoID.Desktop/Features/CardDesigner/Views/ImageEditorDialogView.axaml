@@ -1,0 +1,324 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="using:InfoID.Desktop.Features.CardDesigner.ViewModels"
+             xmlns:conv="using:InfoID.Desktop.Features.CardDesigner.Converters"
+             xmlns:controls="using:InfoID.Desktop.Features.CardDesigner.Views.Controls"
+             mc:Ignorable="d" d:DesignWidth="980" d:DesignHeight="640"
+             x:Class="InfoID.Desktop.Features.CardDesigner.Views.ImageEditorDialogView"
+             x:DataType="vm:ImageEditorDialogViewModel">
+
+    <!-- Priority 12 (Image Editor), redesign pass. Reference/UX inspiration: the
+         provided ID-ALL screenshots (Custom/Face Detection/Color mode/Remove
+         background TABS) — InfoID's own implementation against InfoID's own
+         architecture, not a port of that one.
+
+         Redesign reasoning (fixes a real reported bug): the previous single-column,
+         all-controls-in-one-scrolling-list layout could push the Cancel/Done footer
+         buttons off the bottom of the window on smaller screens, with no way to reach
+         them. Fixed two ways together: (1) controls are now split across tabs
+         (Adjust / Color Mode / Background / Face Detection), so each tab needs far
+         less vertical space than one long list of everything at once, and (2) the
+         Window this UserControl is hosted in is now resizable/maximizable
+         (ImageEditorDialogViewModel.CanResize => true) as a safety net regardless of
+         screen size. The footer itself is also now a fixed, bordered row that is
+         never inside a ScrollViewer, so it can never be scrolled out of reach even if
+         a tab's own content does need to scroll.
+
+         MinWidth/MinHeight (not fixed Width/Height) are used on the root Border so a
+         resizable window has a sensible floor without preventing the user from
+         growing it larger. -->
+    <Border Background="{DynamicResource BrushSurface}" MinWidth="920" MinHeight="600">
+        <Grid RowDefinitions="Auto,*,Auto" Margin="16">
+
+            <!-- No separate in-content "Image Editor" heading here — the Window's
+                 own title bar already reads "InfoID Image Editor" (see
+                 ImageEditorDialogViewModel.Title), so a second, duplicate label right
+                 underneath it was both redundant and, combined with the Window
+                 sizing bug this revision also fixes, part of why the layout looked
+                 cramped/overlapping. -->
+
+            <!-- Genuine info readout (the real current working image size); no fake
+                 "Zoom: 100%" alongside it, since the preview always fits the panel
+                 (Stretch="Uniform") rather than supporting an actual zoom level. -->
+            <TextBlock Grid.Row="0" Text="{Binding PreviewSizeText}" Classes="caption"
+                       Foreground="{DynamicResource BrushTextSecondary}" Margin="0,0,0,10" />
+
+            <Grid Grid.Row="1" ColumnDefinitions="*,320">
+
+                <!-- Preview + crop overlay. The overlay Canvas is pointer-driven in
+                     code-behind (ImageEditorDialogView.axaml.cs) rather than through
+                     bindings alone, the same reasoning CardCanvasView's own selection/
+                     resize handles already use: a crop rectangle is fundamentally a
+                     drag interaction, not a data-bound value that changes on its own. -->
+                <Border Grid.Column="0" Background="#1A1A1A" CornerRadius="6" ClipToBounds="True" Margin="0,0,16,0">
+                    <Panel Name="PreviewHost">
+                        <Image Name="PreviewImageControl" Source="{Binding PreviewImage}" Stretch="Uniform" />
+                        <Canvas Name="CropCanvas" Background="Transparent"
+                                PointerPressed="OnCropCanvasPointerPressed"
+                                PointerMoved="OnCropCanvasPointerMoved"
+                                PointerReleased="OnCropCanvasPointerReleased">
+                            <!-- Informational only: the raw, tight box the face-detection
+                                 model actually found (ImageEditorDialogViewModel.
+                                 DetectedFaceBoxFraction), distinct from the padded crop
+                                 selection below it. Not hit-test visible; purely visual
+                                 feedback so the user can see what the model saw versus
+                                 what the Margins panel padded it out to. -->
+                            <Rectangle Name="FaceBoxRect" IsVisible="False" IsHitTestVisible="False"
+                                       Stroke="#4CD96D" StrokeThickness="1.5" StrokeDashArray="3,2" />
+                            <Rectangle Name="CropSelectionRect" IsVisible="False" IsHitTestVisible="False"
+                                       Stroke="White" StrokeThickness="1.5" StrokeDashArray="4,3"
+                                       Fill="#20FFFFFF" />
+                        </Canvas>
+                    </Panel>
+                </Border>
+
+                <!-- Tabbed tool panel — see this file's top-of-file doc comment for
+                     why this replaced the old single scrolling column. TabControl/
+                     TabItem already have app-wide styling defined in
+                     Resources/Controls/Chrome.axaml ("Document / workspace tabs"),
+                     confirmed before use rather than assumed. -->
+                <TabControl Grid.Column="1">
+
+                    <TabItem Header="Adjust">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Spacing="14" Margin="4,10,4,4">
+
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Rotate" Classes="caption" />
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Button Classes="secondary" Content="⟲ 90°" ToolTip.Tip="Rotate left (counter-clockwise)"
+                                                Command="{Binding RotateLeftCommand}" />
+                                        <Button Classes="secondary" Content="⟳ 90°" ToolTip.Tip="Rotate right (clockwise)"
+                                                Command="{Binding RotateRightCommand}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Flip" Classes="caption" />
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Button Classes="secondary" Content="Horizontal" ToolTip.Tip="Flip left-right"
+                                                Command="{Binding ToggleFlipHorizontalCommand}" />
+                                        <Button Classes="secondary" Content="Vertical" ToolTip.Tip="Flip top-bottom"
+                                                Command="{Binding ToggleFlipVerticalCommand}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Crop" Classes="caption" />
+                                    <TextBlock Text="Drag on the preview to select a crop area." Classes="caption"
+                                               Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
+                                    <Button Classes="ghost" Content="Clear crop selection" HorizontalAlignment="Left"
+                                            Command="{Binding ResetCropCommand}" />
+                                </StackPanel>
+
+                                <Border Height="1" Background="{DynamicResource BrushBorder}" />
+
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="Brightness" Classes="caption" />
+                                    <Slider Minimum="-100" Maximum="100" Value="{Binding BrightnessPercent, Mode=TwoWay}" />
+                                </StackPanel>
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="Contrast" Classes="caption" />
+                                    <Slider Minimum="-100" Maximum="100" Value="{Binding ContrastPercent, Mode=TwoWay}" />
+                                </StackPanel>
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="Saturation" Classes="caption" />
+                                    <Slider Minimum="-100" Maximum="100" Value="{Binding SaturationPercent, Mode=TwoWay}" />
+                                </StackPanel>
+
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem Header="Color Mode">
+                        <StackPanel Spacing="10" Margin="4,14,4,4">
+                            <TextBlock Text="Apply a preset color treatment to the whole image." Classes="caption"
+                                       Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
+                            <WrapPanel>
+                                <ToggleButton Content="Color" Margin="0,0,8,8"
+                                              IsChecked="{Binding SelectedColorMode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Color}" />
+                                <ToggleButton Content="Grayscale" Margin="0,0,8,8"
+                                              IsChecked="{Binding SelectedColorMode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Grayscale}" />
+                                <ToggleButton Content="Sepia" Margin="0,0,8,8"
+                                              IsChecked="{Binding SelectedColorMode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Sepia}" />
+                                <ToggleButton Content="Negative" Margin="0,0,8,8"
+                                              IsChecked="{Binding SelectedColorMode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Negative}" />
+                            </WrapPanel>
+                        </StackPanel>
+                    </TabItem>
+
+                    <TabItem Header="Background">
+                        <StackPanel Spacing="10" Margin="4,14,4,4">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ToggleButton IsChecked="{Binding IsBackgroundRemovalEnabled, Mode=TwoWay}" />
+                                <TextBlock Text="Remove background color" Classes="body" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="Removes pixels close to the chosen color -- works best on a plain, solid-color backdrop."
+                                       Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
+                            <StackPanel Orientation="Horizontal" Spacing="8" IsEnabled="{Binding IsBackgroundRemovalEnabled}">
+                                <TextBlock Text="Color:" Classes="caption" VerticalAlignment="Center" />
+                                <controls:ColorPickerField ColorHex="{Binding BackgroundColorHex, Mode=TwoWay}" />
+                                <!-- Eyedropper: while checked, the next click on the
+                                     preview (handled in code-behind, see
+                                     OnCropCanvasPointerPressed) samples that pixel's
+                                     color into BackgroundColorHex instead of starting a
+                                     crop drag, so the actual backdrop color can be
+                                     picked straight off the photo. -->
+                                <ToggleButton IsChecked="{Binding IsPickingBackgroundColor, Mode=TwoWay}"
+                                              ToolTip.Tip="Pick color from image: click the toggle, then click the backdrop in the photo.">
+                                    <TextBlock Text="🖊 Pick from image" />
+                                </ToggleButton>
+                            </StackPanel>
+                            <StackPanel Spacing="2" IsEnabled="{Binding IsBackgroundRemovalEnabled}">
+                                <TextBlock Text="Tolerance" Classes="caption" />
+                                <Slider Minimum="0" Maximum="100" Value="{Binding BackgroundTolerancePercent, Mode=TwoWay}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- Detection runs automatically on load (see ImageEditorDialogViewModel's
+                         ctor); "Detect Face" here re-runs it on demand, e.g. after
+                         Rotate/Flip (which clear the detected box) or after "Cut Image"
+                         (to detect again against the now-cropped result). The green
+                         dashed box on the preview is the model's own raw detection;
+                         Margins pads that out into the white selection box without
+                         re-running the model. "Cut Image" bakes that selection into the
+                         working image immediately, separate from the dialog's own
+                         Done/Cancel export. -->
+                    <TabItem Header="Face Detection">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Spacing="16" Margin="4,10,4,4">
+
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Face Detection" Classes="caption" />
+                                    <TextBlock Text="Finds the face and frames a head-and-shoulders crop for an ID photo. Runs fully offline -- the photo never leaves this computer."
+                                               Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
+                                    <Button Classes="secondary" HorizontalAlignment="Left"
+                                            Command="{Binding DetectFaceCommand}"
+                                            IsEnabled="{Binding IsDetectingFace, Converter={x:Static conv:BoolNegationConverter.Instance}}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <TextBlock Text="🙂" />
+                                            <TextBlock Text="Detect Face" />
+                                        </StackPanel>
+                                    </Button>
+                                    <TextBlock Text="{Binding FaceDetectionStatusMessage}" Classes="caption"
+                                               Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <Border Height="1" Background="{DynamicResource BrushBorder}" />
+
+                                <StackPanel Spacing="10" IsEnabled="{Binding HasDetectedFace}">
+                                    <TextBlock Text="Margins" Classes="caption" />
+                                    <TextBlock Text="Extra room to keep around the detected face, on each side."
+                                               Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
+
+                                    <!-- Compass layout: top above, left/right flanking a
+                                         center illustration, bottom below; mirrors how
+                                         the four values actually map onto the photo. -->
+                                    <!-- Sized to fit inside the 320px tool panel column with
+                                         room to spare. The previous version (separate "%"
+                                         label, wider buttons/box) added up to almost exactly
+                                         320px and got the Right stepper clipped by the
+                                         ScrollViewer's disabled horizontal scrolling. -->
+                                    <Grid HorizontalAlignment="Center"
+                                          RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,Auto,Auto"
+                                          RowSpacing="6" ColumnSpacing="6">
+
+                                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="2" HorizontalAlignment="Center">
+                                            <Button Classes="ghost" Content="-" Width="22" Height="24" Padding="0" FontSize="13"
+                                                    Command="{Binding AdjustMarginCommand}" CommandParameter="Top:-10" />
+                                            <Border Width="42" Height="24" CornerRadius="4"
+                                                    BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+                                                <TextBlock Text="{Binding MarginTopPercent, StringFormat={}{0}%}" FontSize="11"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <Button Classes="ghost" Content="+" Width="22" Height="24" Padding="0" FontSize="13"
+                                                    Command="{Binding AdjustMarginCommand}" CommandParameter="Top:10" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                                            <Button Classes="ghost" Content="-" Width="22" Height="24" Padding="0" FontSize="13"
+                                                    Command="{Binding AdjustMarginCommand}" CommandParameter="Left:-10" />
+                                            <Border Width="42" Height="24" CornerRadius="4"
+                                                    BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+                                                <TextBlock Text="{Binding MarginLeftPercent, StringFormat={}{0}%}" FontSize="11"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <Button Classes="ghost" Content="+" Width="22" Height="24" Padding="0" FontSize="13"
+                                                    Command="{Binding AdjustMarginCommand}" CommandParameter="Left:10" />
+                                        </StackPanel>
+
+                                        <Border Grid.Row="1" Grid.Column="1" Width="52" Height="52" CornerRadius="8"
+                                                Background="{DynamicResource BrushSurface}"
+                                                BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1.5">
+                                            <Viewbox Margin="11">
+                                                <Canvas Width="24" Height="24">
+                                                    <Ellipse Canvas.Left="7" Canvas.Top="2" Width="10" Height="10" Fill="{DynamicResource BrushTextSecondary}" />
+                                                    <Path Data="M4,22 C4,16 8,13 12,13 C16,13 20,16 20,22 Z" Fill="{DynamicResource BrushTextSecondary}" />
+                                                </Canvas>
+                                            </Viewbox>
+                                        </Border>
+
+                                        <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                                            <Button Classes="ghost" Content="-" Width="22" Height="24" Padding="0" FontSize="13"
+                                                    Command="{Binding AdjustMarginCommand}" CommandParameter="Right:-10" />
+                                            <Border Width="42" Height="24" CornerRadius="4"
+                                                    BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+                                                <TextBlock Text="{Binding MarginRightPercent, StringFormat={}{0}%}" FontSize="11"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <Button Classes="ghost" Content="+" Width="22" Height="24" Padding="0" FontSize="13"
+                                                    Command="{Binding AdjustMarginCommand}" CommandParameter="Right:10" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="2" HorizontalAlignment="Center">
+                                            <Button Classes="ghost" Content="-" Width="22" Height="24" Padding="0" FontSize="13"
+                                                    Command="{Binding AdjustMarginCommand}" CommandParameter="Bottom:-10" />
+                                            <Border Width="42" Height="24" CornerRadius="4"
+                                                    BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+                                                <TextBlock Text="{Binding MarginBottomPercent, StringFormat={}{0}%}" FontSize="11"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <Button Classes="ghost" Content="+" Width="22" Height="24" Padding="0" FontSize="13"
+                                                    Command="{Binding AdjustMarginCommand}" CommandParameter="Bottom:10" />
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+
+                                <Border Height="1" Background="{DynamicResource BrushBorder}" />
+
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Cut Image" Classes="caption" />
+                                    <TextBlock Text="Applies the selection above right now, so the image becomes the cropped result -- you can keep editing it, or detect a face again against it."
+                                               Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
+                                    <Button Classes="primary" Content="Cut Image" HorizontalAlignment="Left"
+                                            Command="{Binding CutImageCommand}"
+                                            IsEnabled="{Binding HasCropSelection}" />
+                                </StackPanel>
+
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                </TabControl>
+            </Grid>
+
+            <!-- Footer — a fixed row, never inside a ScrollViewer, so Cancel/Done can
+                 never be scrolled out of reach regardless of a tab's own content
+                 height (see this file's top-of-file doc comment for the bug this
+                 fixes). -->
+            <Border Grid.Row="2" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,1,0,0" Padding="0,12,0,0" Margin="0,12,0,0">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <Button Grid.Column="0" Classes="ghost" Content="Reset all edits" Command="{Binding ResetCommand}" />
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                        <Button Classes="secondary" Content="Cancel" Command="{Binding CancelCommand}" />
+                        <Button Classes="primary" Content="Done" Command="{Binding DoneCommand}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+        </Grid>
+    </Border>
+</UserControl>

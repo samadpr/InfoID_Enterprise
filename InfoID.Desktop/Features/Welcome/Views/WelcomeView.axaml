@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:InfoID.Desktop.Features.Welcome.ViewModels"
              xmlns:models="using:InfoID.Desktop.Features.Welcome.Models"
+             xmlns:icons="using:InfoID.Desktop.Features.CardDesigner.Views.Icons"
              mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="820"
              x:Class="InfoID.Desktop.Features.Welcome.Views.WelcomeView"
              x:DataType="vm:WelcomeViewModel"
@@ -74,10 +75,57 @@
 										HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
 										Command="{Binding #Root.((vm:WelcomeViewModel)DataContext).OpenRecentCommand}"
 										CommandParameter="{Binding}">
+									<!-- Right-click actions (Part: "enterprise level" recent-card
+										 management): Open mirrors the button's own click, Pin/Unpin
+										 and Delete both go through RecentCardListViewModelBase so
+										 Home and the full Recent Designs page behave identically. -->
+									<Button.ContextMenu>
+										<ContextMenu>
+											<MenuItem Header="Open"
+													  Command="{Binding #Root.((vm:WelcomeViewModel)DataContext).OpenRecentCommand}"
+													  CommandParameter="{Binding}" />
+											<MenuItem Header="Unpin" IsVisible="{Binding IsPinned}"
+													  Command="{Binding #Root.((vm:WelcomeViewModel)DataContext).TogglePinRecentCommand}"
+													  CommandParameter="{Binding}" />
+											<MenuItem Header="Pin" IsVisible="{Binding !IsPinned}"
+													  Command="{Binding #Root.((vm:WelcomeViewModel)DataContext).TogglePinRecentCommand}"
+													  CommandParameter="{Binding}" />
+											<Separator />
+											<MenuItem Header="Delete"
+													  Command="{Binding #Root.((vm:WelcomeViewModel)DataContext).DeleteRecentCommand}"
+													  CommandParameter="{Binding}" />
+										</ContextMenu>
+									</Button.ContextMenu>
 									<StackPanel Spacing="8">
+										<!-- Real thumbnail when one exists (Part 61); a plain neutral
+											 tile otherwise : never a fake/generic "card" picture, just
+											 an honest empty state until the design has actually been
+											 saved at least once.
+
+											 Priority 1 fix: pinned status used to be a separate "Pinned"
+											 text row below the subtitle, which added height the fixed-
+											 size tile didn't have and clipped the name/metadata. It is
+											 now a small red pin badge overlaid on the top-right corner
+											 of the thumbnail instead, so the tile's text layout never
+											 changes based on pinned state. -->
+										<Panel Height="96">
+											<Border CornerRadius="6" Background="{DynamicResource BrushBackground}"
+													ClipToBounds="True">
+												<Image Source="{Binding ThumbnailImage}" Stretch="Uniform" />
+											</Border>
+											<Border IsVisible="{Binding IsPinned}"
+													Width="22" Height="22" CornerRadius="11"
+													Background="#DA3025"
+													HorizontalAlignment="Right" VerticalAlignment="Top"
+													Margin="0,-6,-6,0"
+													ToolTip.Tip="Pinned"
+													BoxShadow="0 1 3 0 #40000000">
+												<PathIcon Data="{x:Static icons:DesignerIcons.Pin}"
+														  Width="12" Height="12" Foreground="White" />
+											</Border>
+										</Panel>
 										<TextBlock Text="{Binding Name}" Classes="h3" TextTrimming="CharacterEllipsis" />
 										<TextBlock Text="{Binding Subtitle}" Classes="caption" TextTrimming="CharacterEllipsis" />
-										<TextBlock Text="Pinned" Classes="caption" IsVisible="{Binding IsPinned}" />
 									</StackPanel>
 								</Button>
 							</DataTemplate>
@@ -91,6 +139,20 @@
                                        TextWrapping="Wrap" TextAlignment="Center" MaxWidth="160" />
                         </StackPanel>
                     </Border>
+
+                    <!-- "View More" (Part: full Recent Designs page) : only shown once
+                         there are actually more recent items than fit in this preview
+                         row, so it never appears as a dead-looking tile with nothing
+                         more to show. -->
+                    <Button Classes="tile ghost" Width="220" Height="180" Margin="0,0,16,16"
+                            IsVisible="{Binding HasMoreRecentCards}"
+                            Command="{Binding ViewMoreRecentCommand}">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="6">
+                            <TextBlock Text="View More" Classes="h3" HorizontalAlignment="Center" />
+                            <TextBlock Text="See every recent design and file" Classes="caption"
+                                       TextWrapping="Wrap" TextAlignment="Center" MaxWidth="160" />
+                        </StackPanel>
+                    </Button>
 
                 </WrapPanel>
             </StackPanel>

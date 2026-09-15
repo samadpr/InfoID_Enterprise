@@ -31,4 +31,10 @@ public interface ICardDesignRepository
     Task SaveVersionSnapshotAsync(long templateId, CardDesignDocument document, string? changeNote, CancellationToken ct = default);
 
     Task<IReadOnlyList<TemplateVersionSummary>> GetVersionsAsync(long templateId, CancellationToken ct = default);
+
+    /// <summary>Full document content for one version snapshot, for Version History's
+    /// "Restore" action (Part 60). Null if the version row doesn't exist or its JSON is
+    /// somehow unreadable -- never throws for a corrupt/missing snapshot, since that
+    /// would take down the whole Version History dialog over one bad row.</summary>
+    Task<CardDesignDocument?> GetVersionSnapshotAsync(long versionId, CancellationToken ct = default);
 }

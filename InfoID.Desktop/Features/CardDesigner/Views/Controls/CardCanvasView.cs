@@ -9,6 +9,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using InfoID.Desktop.Features.CardDesigner.History;
 using InfoID.Desktop.Features.CardDesigner.Models.Document;
+using InfoID.Desktop.Features.CardDesigner.Services;
 using InfoID.Desktop.Features.CardDesigner.ViewModels;
 
 namespace InfoID.Desktop.Features.CardDesigner.Views.Controls;
@@ -45,7 +46,21 @@ public sealed class CardCanvasView : Control
     /// where the canvas actually draws the card -- both controls compute origin from
     /// their own Bounds.Width/Height plus the same tab.Zoom/PanX/PanY, which works
     /// because the ruler strips are laid out with the same width/height as the canvas
-    /// (see CardDesignerView.axaml's Grid).</summary>
+    /// (see CardDesignerView.axaml's Grid).
+    ///
+    /// This overload always returns the FRONT card's origin (or the single visible
+    /// card's origin in Front-only/Back-only view) -- used for drawing the ruler's own
+    /// continuous tick-mark strip, which intentionally spans the whole visible
+    /// workspace in one coordinate line rather than resetting at each card. For a
+    /// screen position that corresponds to an mm value already expressed relative to a
+    /// SPECIFIC side's own local origin (e.g. ScreenPointToFocusedMm's result, which is
+    /// always relative to tab.FocusedSide -- see that method's own doc comment), use
+    /// the ComputeOriginX(tab, controlWidth, side) overload below instead. Priority 6
+    /// bug: RulerView's cursor-position marker and drag-to-create-guide code used to
+    /// call this side-blind overload even when the focused side was Back, silently
+    /// reusing the Front card's origin for an mm value that was actually relative to
+    /// Back's -- the marker (and any guide dragged out while Back was focused) ended up
+    /// offset by exactly one card-width-plus-gap from where the mouse actually was.</summary>
     internal static double ComputeOriginX(CardDesignTabViewModel tab, double controlWidth)
     {
         var scale = PixelsPerMm * tab.Zoom;
@@ -55,6 +70,28 @@ public sealed class CardCanvasView : Control
         return (controlWidth - totalWidth) / 2 + tab.PanX;
     }
 
+    /// <summary>The X origin of <paramref name="side"/>'s own card specifically --
+    /// identical to the side-blind overload above except in "Both" view when
+    /// <paramref name="side"/> is Back, where it adds the front card's width plus the
+    /// gap between them (the same offset CardCanvasView.ComputeLayout already applies
+    /// when placing Back's Rect). See that overload's doc comment for the bug this
+    /// fixes and why two overloads exist rather than one.</summary>
+    internal static double ComputeOriginX(CardDesignTabViewModel tab, double controlWidth, CardSide side)
+    {
+        var baseOrigin = ComputeOriginX(tab, controlWidth);
+        if (tab.ActiveSideView != DesignerSideView.Both || side != CardSide.Back) return baseOrigin;
+
+        var scale = PixelsPerMm * tab.Zoom;
+        var cardWpx = tab.Document.WidthMm * scale;
+        var gapPx = GapBetweenSidesMm * scale;
+        return baseOrigin + cardWpx + gapPx;
+    }
+
+    /// <summary>Y origin is identical for Front and Back in the current side-by-side
+    /// (never stacked) layout -- see CardCanvasView.ComputeLayout, where both sides'
+    /// Rects share the same originY. Kept as a single side-blind method (no overload
+    /// needed the way ComputeOriginX has one) for that reason; if a stacked-vertically
+    /// layout mode is ever added, this would need the same side-aware treatment.</summary>
     internal static double ComputeOriginY(CardDesignTabViewModel tab, double controlHeight)
     {
         var scale = PixelsPerMm * tab.Zoom;
@@ -62,13 +99,45 @@ public sealed class CardCanvasView : Control
         return (controlHeight - cardHpx) / 2 + tab.PanY;
     }
 
-    private static readonly IBrush WorkspaceBackgroundBrush = new SolidColorBrush(Color.Parse("#1E1E1E"));
+    private static readonly IBrush WorkspaceBackgroundBrushLight = new SolidColorBrush(Color.Parse("#FFFFFF"));
+    private static readonly IBrush WorkspaceBackgroundBrushDark = new SolidColorBrush(Color.Parse("#1E1E1E"));
+
+    /// <summary>The pasteboard area behind the card itself. Previously a hardcoded
+    /// dark color regardless of theme, which read as a rendering bug in light mode (a
+    /// stark black rectangle behind an otherwise all-white/light UI).
+    ///
+    /// Reads Application.Current.ActualThemeVariant directly -- the same value
+    /// ThemeService.ApplyTheme sets via Application.Current.RequestedThemeVariant --
+    /// rather than a "BrushCanvasWorkspace" XAML resource looked up via
+    /// this.TryFindResource(...): that route was tried first and didn't actually
+    /// track the live theme for this control (canvas stayed on its dark fallback
+    /// value in light mode), so this reads the one place the app's theme state is
+    /// unambiguous instead of depending on this custom-drawn Control's resource-host
+    /// chain resolving a themed dictionary entry correctly.</summary>
+    private static IBrush WorkspaceBackgroundBrush =>
+        Avalonia.Application.Current?.ActualThemeVariant == Avalonia.Styling.ThemeVariant.Dark
+            ? WorkspaceBackgroundBrushDark
+            : WorkspaceBackgroundBrushLight;
+
     private static readonly IBrush SelectionBrush = new SolidColorBrush(Color.Parse("#3B82F6"));
     private static readonly IBrush MarqueeFillBrush = new SolidColorBrush(Color.Parse("#333B82F6"));
     private static readonly IBrush GuideBrush = new SolidColorBrush(Color.Parse("#00B4D8"));
     private static readonly IBrush SmartGuideBrush = new SolidColorBrush(Color.Parse("#FF7A00"));
     private static readonly IBrush PlaceholderFillBrush = new SolidColorBrush(Color.Parse("#22FFFFFF"));
     private static readonly IBrush PlaceholderBorderBrush = Brushes.Gray;
+    private static readonly IBrush CardBorderBrush = new SolidColorBrush(Color.Parse("#3A3A3A"));
+    private static readonly IBrush GroupSelectionBrush = new SolidColorBrush(Color.Parse("#8B5CF6"));
+
+    /// <summary>Layered semi-transparent rounded rects standing in for a real blurred
+    /// drop shadow (Part 29's "professional canvas" ask). DrawingContext here has no
+    /// gaussian-blur primitive to reach for, so this is the standard cheap
+    /// approximation: several offset copies of the card's silhouette, each larger and
+    /// fainter than the last, which reads as a soft shadow at normal viewing distance
+    /// without needing a compositing effect this control doesn't have access to.</summary>
+    private static readonly (double SpreadPx, byte Alpha)[] ShadowLayers =
+    {
+        (1, 40), (3, 28), (6, 18), (10, 10), (15, 5),
+    };
 
     private enum DragMode { None, Move, ResizeTopLeft, ResizeTopRight, ResizeBottomLeft, ResizeBottomRight, Rotate, MarqueeSelect, Pan }
 
@@ -100,6 +169,13 @@ public sealed class CardCanvasView : Control
         Focusable = true;
         ClipToBounds = true;
         //Background = Brushes.Transparent; // ensures the whole control area is hit-testable
+
+        // WorkspaceBackgroundBrush reads the live theme fresh on every Render() call,
+        // but Render() only runs when something invalidates this control -- toggling
+        // the app's theme doesn't touch the Document/selection/pan/zoom state this
+        // control already listens to, so without this the canvas would keep showing
+        // its old-theme color until some unrelated redraw happened to occur.
+        ActualThemeVariantChanged += (_, _) => InvalidateVisual();
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -164,10 +240,28 @@ public sealed class CardCanvasView : Control
         var radius = doc.CornerRadiusMm * scale;
         var roundedRect = new RoundedRect(cardRect, radius);
 
-        var sideModel = doc.GetSide(side);
-        var backgroundBrush = ResolveBackgroundBrush(sideModel.Background);
+        DrawCardShadow(context, cardRect, radius);
 
-        context.DrawRectangle(backgroundBrush, new Pen(Brushes.Black, 1), roundedRect);
+        var sideModel = doc.GetSide(side);
+        var background = sideModel.Background;
+
+        if (background.Kind == BackgroundKind.Image && !string.IsNullOrEmpty(background.AssetReference))
+        {
+            // Border/shape stroke first (no fill -- the image itself fills the card),
+            // then the image is drawn clipped to that same rounded shape, cover-fit
+            // (ImageFitMode.Fill: scales to cover the whole card, cropping overflow,
+            // never stretching/distorting -- "canvas size correctly fit it properly")
+            // exactly like an Image element's own Fill fit mode already works.
+            context.DrawRectangle(null, new Pen(CardBorderBrush, 1), roundedRect);
+            using (context.PushClip(roundedRect))
+            {
+                DrawImage(context, cardRect, background.AssetReference, ImageFitMode.Fill, cornerRadius: 0);
+            }
+        }
+        else
+        {
+            context.DrawRectangle(ResolveBackgroundBrush(background), new Pen(CardBorderBrush, 1), roundedRect);
+        }
 
         using (context.PushClip(cardRect))
         {
@@ -218,9 +312,26 @@ public sealed class CardCanvasView : Control
         // whichever side is currently being edited -- guides are a per-editing-context
         // aid, not part of the saved design, so they're drawn but never clipped into
         // the printable card content.
-        if (side == tab.FocusedSide)
+        if (side == tab.FocusedSide && tab.ShowGuides)
         {
             DrawGuides(context, cardRect, scale, tab);
+        }
+    }
+
+    /// <summary>See ShadowLayers' own doc comment for why this is layered flat rects
+    /// rather than a real blur. Drawn before the card fill/border so it sits entirely
+    /// behind the card, offset down-and-right like a light source from the upper left --
+    /// the conventional direction for UI drop shadows.</summary>
+    private static void DrawCardShadow(DrawingContext context, Rect cardRect, double radius)
+    {
+        const double offsetX = 2, offsetY = 4;
+        foreach (var (spread, alpha) in ShadowLayers)
+        {
+            var shadowRect = new Rect(
+                cardRect.X - spread + offsetX, cardRect.Y - spread + offsetY,
+                cardRect.Width + spread * 2, cardRect.Height + spread * 2);
+            var brush = new SolidColorBrush(Color.FromArgb(alpha, 0, 0, 0));
+            context.DrawRectangle(brush, null, new RoundedRect(shadowRect, radius + spread * 0.5));
         }
     }
 
@@ -311,11 +422,7 @@ public sealed class CardCanvasView : Control
 
         using var opacityScope = context.PushOpacity(Math.Clamp(element.Opacity, 0, 1));
 
-        var center = elementRect.Center;
-        var transform = Matrix.CreateTranslation(-center.X, -center.Y)
-                        * Matrix.CreateRotation(element.Rotation * Math.PI / 180.0)
-                        * Matrix.CreateTranslation(center.X, center.Y);
-        using var transformScope = context.PushTransform(transform);
+        using var transformScope = context.PushTransform(GetRotationTransform(elementRect, element.Rotation));
 
         switch (element)
         {
@@ -329,7 +436,8 @@ public sealed class CardCanvasView : Control
                 DrawDataField(context, elementRect, field, tab);
                 break;
             case ImageElement image:
-                DrawImage(context, elementRect, image.AssetReference, image.FitMode, image.CornerRadius);
+                DrawImage(context, elementRect, image.AssetReference, image.FitMode, image.CornerRadius, image.CropX, image.CropY, image.CropZoom,
+                    image.MaskShape, image.FlipHorizontal, image.FlipVertical);
                 break;
             case PhotoElement photo:
                 DrawPhoto(context, elementRect, photo);
@@ -339,6 +447,9 @@ public sealed class CardCanvasView : Control
                 break;
             case BarcodeElement barcode:
                 DrawBarcode(context, elementRect, barcode);
+                break;
+            case QrCodeElement qr:
+                DrawQrCode(context, elementRect, qr);
                 break;
             default:
                 DrawPlaceholder(context, elementRect, element);
@@ -366,7 +477,20 @@ public sealed class CardCanvasView : Control
             CultureInfo.CurrentCulture,
             FlowDirection.LeftToRight,
             typeface,
-            text.FontSize,
+            // Priority 4 fix: text.FontSize was previously passed straight into
+            // FormattedText with no relationship to the current zoom level at all,
+            // while the element's own box (rect, via ToDeviceRect) IS scaled by
+            // tab.Zoom -- position/size scaled with zoom, font size didn't. At low
+            // zoom the box shrinks a lot but the glyphs stayed exactly the same
+            // absolute device-pixel size, so most (eventually all) of each letter's
+            // ink fell outside the card's clip region (see DrawSide's
+            // context.PushClip(cardRect)) and the text effectively vanished; at high
+            // zoom the reverse made text look disproportionately small relative to its
+            // now-much-bigger box. Multiplying by tab.Zoom here makes text scale
+            // together with its box exactly like every other element already does, and
+            // is a no-op at the default Zoom=1.0 (100%), so on-screen appearance at the
+            // zoom level everything was presumably designed/tested at is unchanged.
+            Math.Max(1, text.FontSize * tab.Zoom),
             brush)
         {
             MaxTextWidth = Math.Max(1, rect.Width),
@@ -399,7 +523,11 @@ public sealed class CardCanvasView : Control
         var placeholder = $"{{{{{field.FieldKey}}}}}";
         var displayText = tab.ResolveDisplayText(placeholder, placeholder);
 
-        var formatted = new FormattedText(displayText, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, field.FontSize, brush)
+        var formatted = new FormattedText(displayText, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface,
+            // Priority 4 fix: same reasoning as DrawText above -- field.FontSize must
+            // scale with tab.Zoom or a data-field's text vanishes at low zoom exactly
+            // like a plain TextElement's did.
+            Math.Max(1, field.FontSize * tab.Zoom), brush)
         {
             MaxTextWidth = Math.Max(1, rect.Width),
         };
@@ -429,14 +557,25 @@ public sealed class CardCanvasView : Control
         return bitmap;
     }
 
-    /// <summary>Used by Image elements. Fit/Fill/Stretch match the semantics of CSS
-    /// object-fit: Fit letterboxes to show the whole picture, Fill crops to cover the
-    /// whole box, Stretch ignores aspect ratio entirely.</summary>
-    private void DrawImage(DrawingContext context, Rect rect, string? assetReference, ImageFitMode fitMode, double cornerRadius)
+    /// <summary>Used by Image elements (and the Background image path in DrawSide,
+    /// which uses the defaults: Rectangle mask, no flip). Fit/Fill/Stretch match the
+    /// semantics of CSS object-fit: Fit letterboxes to show the whole picture, Fill
+    /// crops to cover the whole box, Stretch ignores aspect ratio entirely. maskShape
+    /// mirrors DrawPhoto's own clip-geometry switch (same three shapes, same meaning);
+    /// flipHorizontal/flipVertical mirror the source rect around its own center before
+    /// drawing -- a transform, not a pixel operation, so it's free to redraw every
+    /// frame and needs no caching.</summary>
+    private void DrawImage(DrawingContext context, Rect rect, string? assetReference, ImageFitMode fitMode, double cornerRadius,
+        double cropX = 0, double cropY = 0, double cropZoom = 1.0,
+        PhotoMaskShape maskShape = PhotoMaskShape.Rectangle, bool flipHorizontal = false, bool flipVertical = false)
     {
-        using var clip = cornerRadius > 0
-            ? context.PushClip(new RoundedRect(rect, Math.Min(cornerRadius, Math.Min(rect.Width, rect.Height) / 2)))
-            : context.PushClip(rect);
+        using var clip = ShapeRenderer.BuildMaskClipGeometry(rect, maskShape) is { } maskGeometry
+            ? context.PushGeometryClip(maskGeometry)
+            : maskShape == PhotoMaskShape.RoundedRectangle
+                ? context.PushClip(new RoundedRect(rect, Math.Min(cornerRadius, Math.Min(rect.Width, rect.Height) / 2)))
+                : cornerRadius > 0
+                    ? context.PushClip(new RoundedRect(rect, Math.Min(cornerRadius, Math.Min(rect.Width, rect.Height) / 2)))
+                    : context.PushClip(rect);
 
         var bitmap = LoadBitmap(assetReference);
         if (bitmap is null)
@@ -456,10 +595,16 @@ public sealed class CardCanvasView : Control
                 destRect = rect;
                 break;
             case ImageFitMode.Fill:
-                var fillScale = Math.Max(rect.Width / sourceSize.Width, rect.Height / sourceSize.Height);
+                // Same pan+zoom formula as DrawPhoto below -- CropX/Y/Zoom mean the same
+                // thing on both element types, so they render the same way.
+                var fillScale = Math.Max(rect.Width / sourceSize.Width, rect.Height / sourceSize.Height) * Math.Max(cropZoom, 0.1);
                 var visibleW = rect.Width / fillScale;
                 var visibleH = rect.Height / fillScale;
-                sourceRect = new Rect((sourceSize.Width - visibleW) / 2, (sourceSize.Height - visibleH) / 2, visibleW, visibleH);
+                var maxOffsetX = Math.Max(0, sourceSize.Width - visibleW);
+                var maxOffsetY = Math.Max(0, sourceSize.Height - visibleH);
+                var offsetX = Math.Clamp((sourceSize.Width - visibleW) / 2 + cropX, 0, maxOffsetX);
+                var offsetY = Math.Clamp((sourceSize.Height - visibleH) / 2 + cropY, 0, maxOffsetY);
+                sourceRect = new Rect(offsetX, offsetY, Math.Min(visibleW, sourceSize.Width), Math.Min(visibleH, sourceSize.Height));
                 destRect = rect;
                 break;
             default: // Fit
@@ -471,17 +616,28 @@ public sealed class CardCanvasView : Control
                 break;
         }
 
-        context.DrawImage(bitmap, sourceRect, destRect);
+        if (flipHorizontal || flipVertical)
+        {
+            var center = rect.Center;
+            var flipTransform = Matrix.CreateTranslation(-center.X, -center.Y)
+                                 * new Matrix(flipHorizontal ? -1 : 1, 0, 0, flipVertical ? -1 : 1, 0, 0)
+                                 * Matrix.CreateTranslation(center.X, center.Y);
+            using var flipScope = context.PushTransform(flipTransform);
+            context.DrawImage(bitmap, sourceRect, destRect);
+        }
+        else
+        {
+            context.DrawImage(bitmap, sourceRect, destRect);
+        }
     }
 
     private void DrawPhoto(DrawingContext context, Rect rect, PhotoElement photo)
     {
-        using var clip = photo.MaskShape switch
-        {
-            PhotoMaskShape.Circle => context.PushGeometryClip(new EllipseGeometry(rect)),
-            PhotoMaskShape.RoundedRectangle => context.PushClip(new RoundedRect(rect, Math.Min(photo.CornerRadius, Math.Min(rect.Width, rect.Height) / 2))),
-            _ => context.PushClip(rect),
-        };
+        using var clip = ShapeRenderer.BuildMaskClipGeometry(rect, photo.MaskShape) is { } maskGeometry
+            ? context.PushGeometryClip(maskGeometry)
+            : photo.MaskShape == PhotoMaskShape.RoundedRectangle
+                ? context.PushClip(new RoundedRect(rect, Math.Min(photo.CornerRadius, Math.Min(rect.Width, rect.Height) / 2)))
+                : context.PushClip(rect);
 
         context.FillRectangle(ParseBrush(photo.BackgroundColorHex), rect);
 
@@ -529,157 +685,96 @@ public sealed class CardCanvasView : Control
         // changelog rather than silently claimed as full recolor support.
     }
 
-    private static void DrawShape(DrawingContext context, Rect rect, ShapeElement shape)
-    {
-        IBrush? fill = shape.FillEnabled ? ParseBrush(shape.FillColorHex) : null;
-        double[]? dashes = shape.DashStyle switch
-        {
-            LineDashStyle.Dashed => new[] { 4.0, 2.0 },
-            LineDashStyle.Dotted => new[] { 1.0, 2.0 },
-            _ => null,
-        };
-        Pen? pen = shape.StrokeWidth > 0
-            ? new Pen(ParseBrush(shape.StrokeColorHex), shape.StrokeWidth, dashStyle: dashes is null ? null : new DashStyle(dashes, 0))
-            : null;
-
-        switch (shape.Kind)
-        {
-            case ShapeKind.Ellipse:
-                context.DrawEllipse(fill, pen, rect);
-                break;
-
-            case ShapeKind.Line:
-                context.DrawLine(pen ?? new Pen(ParseBrush(shape.StrokeColorHex), 1), rect.TopLeft, new Point(rect.Right, rect.Bottom));
-                break;
-
-            case ShapeKind.Arrow:
-                DrawArrow(context, rect, shape, pen ?? new Pen(ParseBrush(shape.StrokeColorHex), 1));
-                break;
-
-            case ShapeKind.Triangle:
-                context.DrawGeometry(fill, pen, BuildPolygonGeometry(rect, PolygonPoints(3, rect, startAngleDeg: -90)));
-                break;
-
-            case ShapeKind.Polygon:
-                context.DrawGeometry(fill, pen, BuildPolygonGeometry(rect, PolygonPoints(Math.Max(3, shape.PolygonSides), rect, startAngleDeg: -90)));
-                break;
-
-            case ShapeKind.Star:
-                context.DrawGeometry(fill, pen, BuildPolygonGeometry(rect, StarPoints(Math.Max(3, shape.StarPoints), rect, shape.StarInnerRadiusRatio)));
-                break;
-
-            default: // Rectangle
-                if (shape.CornerRadius > 0)
-                {
-                    context.DrawRectangle(fill, pen, new RoundedRect(rect, shape.CornerRadius));
-                }
-                else
-                {
-                    context.DrawRectangle(fill, pen, rect);
-                }
-                break;
-        }
-    }
-
-    private static void DrawArrow(DrawingContext context, Rect rect, ShapeElement shape, Pen pen)
-    {
-        var start = rect.TopLeft;
-        var end = new Point(rect.Right, rect.Bottom);
-        context.DrawLine(pen, start, end);
-
-        var angle = Math.Atan2(end.Y - start.Y, end.X - start.X);
-        var headLen = Math.Max(4, pen.Thickness * 4);
-        const double headAngle = Math.PI / 7;
-
-        if (shape.EndArrowhead) DrawArrowhead(context, pen, end, angle, headLen, headAngle);
-        if (shape.StartArrowhead) DrawArrowhead(context, pen, start, angle + Math.PI, headLen, headAngle);
-    }
-
-    private static void DrawArrowhead(DrawingContext context, Pen pen, Point tip, double angle, double length, double spread)
-    {
-        var p1 = new Point(tip.X - length * Math.Cos(angle - spread), tip.Y - length * Math.Sin(angle - spread));
-        var p2 = new Point(tip.X - length * Math.Cos(angle + spread), tip.Y - length * Math.Sin(angle + spread));
-        var geo = new StreamGeometry();
-        using (var gc = geo.Open())
-        {
-            gc.BeginFigure(p1, isFilled: true);
-            gc.LineTo(tip);
-            gc.LineTo(p2);
-            gc.EndFigure(false);
-        }
-        context.DrawGeometry(pen.Brush, pen, geo);
-    }
-
-    /// <summary>Evenly-spaced points around an ellipse inscribed in rect -- used for
-    /// Triangle (3 points) and Polygon (n points). startAngleDeg=-90 puts the first
-    /// point at the top, matching how a triangle/hexagon/etc. is conventionally drawn
-    /// upright rather than tipped onto a flat edge.</summary>
-    private static Point[] PolygonPoints(int sides, Rect rect, double startAngleDeg)
-    {
-        var cx = rect.X + rect.Width / 2;
-        var cy = rect.Y + rect.Height / 2;
-        var rx = rect.Width / 2;
-        var ry = rect.Height / 2;
-        var points = new Point[sides];
-        for (var i = 0; i < sides; i++)
-        {
-            var angle = (startAngleDeg + 360.0 * i / sides) * Math.PI / 180.0;
-            points[i] = new Point(cx + rx * Math.Cos(angle), cy + ry * Math.Sin(angle));
-        }
-        return points;
-    }
-
-    private static Point[] StarPoints(int points, Rect rect, double innerRadiusRatio)
-    {
-        var cx = rect.X + rect.Width / 2;
-        var cy = rect.Y + rect.Height / 2;
-        var rx = rect.Width / 2;
-        var ry = rect.Height / 2;
-        var inner = Math.Clamp(innerRadiusRatio, 0.05, 0.95);
-        var result = new Point[points * 2];
-        for (var i = 0; i < points * 2; i++)
-        {
-            var angle = (-90 + 180.0 * i / points) * Math.PI / 180.0;
-            var r = i % 2 == 0 ? 1.0 : inner;
-            result[i] = new Point(cx + rx * r * Math.Cos(angle), cy + ry * r * Math.Sin(angle));
-        }
-        return result;
-    }
-
-    private static StreamGeometry BuildPolygonGeometry(Rect rect, Point[] points)
-    {
-        var geo = new StreamGeometry();
-        using var gc = geo.Open();
-        gc.BeginFigure(points[0], isFilled: true);
-        for (var i = 1; i < points.Length; i++) gc.LineTo(points[i]);
-        gc.EndFigure(true);
-        return geo;
-    }
+    /// <summary>Delegates to the shared ShapeRenderer (Services/ShapeRenderer.cs) --
+    /// see its own doc comment for why this used to be a private copy of the same code
+    /// duplicated with ThumbnailRenderer, and the bug that caused.</summary>
+    private static void DrawShape(DrawingContext context, Rect rect, ShapeElement shape) =>
+        ShapeRenderer.Draw(context, rect, shape);
 
     /// <summary>Generic fallback for element types this pass doesn't have a specialized
-    /// renderer for yet (Barcode/QR/Photo/Signature/Svg/...). Only appears if such an
-    /// element already exists in a loaded document -- the toolbar in this phase only
-    /// inserts Text/Rectangle/Ellipse, so no button in this build produces a
-    /// placeholder-only element (Part 88).</summary>
-    /// <summary>Deliberately NOT a real Code128/QR renderer yet. Generating a correct
-    /// barcode requires an exact, correctness-critical symbol-pattern table (Code128) or
-    /// a Reed-Solomon error-correction implementation (QR) -- getting either subtly wrong
-    /// produces something that *looks* like a real barcode but silently fails to scan,
-    /// which is worse than an honest placeholder (Part 81 says no fake barcode; a
-    /// plausible-looking but non-functional one is arguably worse than an admitted
-    /// placeholder). This shows the encoded value as text with a clear label instead of
-    /// drawing fake bars, and is intentionally left for a follow-up once you've decided
-    /// between a hand-rolled implementation (needs real scanner verification before you
-    /// can trust it) or a small, well-maintained NuGet package (needs your confirmation
-    /// per project policy) -- see the phase changelog.</summary>
+    /// renderer for yet (Photo/Signature/Svg/...). Only appears if such an element
+    /// already exists in a loaded document.</summary>
+
+    /// <summary>Real barcode rendering via BarcodeRenderer/ZXing.Net (see that class's
+    /// own doc comment). Draws the generated code scaled to fit the element's box,
+    /// aspect-preserving (never non-uniformly stretched -- that can break scanning for
+    /// a 2D code, and distorts a linear code's module widths). Falls back to the
+    /// original honest text-label placeholder (symbology + value, no fake bars) only
+    /// when encoding genuinely fails -- an invalid value for the chosen symbology (e.g.
+    /// a bad EAN-13 checksum length), not a missing capability.</summary>
     private static void DrawBarcode(DrawingContext context, Rect rect, BarcodeElement barcode)
     {
+        using var clip = context.PushClip(rect);
+
+        var bitmap = BarcodeRenderer.TryGenerate(barcode);
+        if (bitmap is not null)
+        {
+            DrawFit(context, rect, bitmap);
+            return;
+        }
+
+        DrawBarcodePlaceholder(context, rect, $"[{barcode.Symbology}]", barcode.Value, barcode.ForegroundColorHex);
+    }
+
+    /// <summary>Real QR Code rendering via BarcodeRenderer/ZXing.Net. Same fit/fallback
+    /// reasoning as DrawBarcode above.</summary>
+    private static void DrawQrCode(DrawingContext context, Rect rect, QrCodeElement qr)
+    {
+        using var clip = context.PushClip(rect);
+
+        var bitmap = BarcodeRenderer.TryGenerate(qr);
+        if (bitmap is not null)
+        {
+            DrawFit(context, rect, bitmap);
+            return;
+        }
+
+        DrawBarcodePlaceholder(context, rect, "[QR Code]", qr.Value, qr.ForegroundColorHex);
+    }
+
+    /// <summary>Contain-fits a generated barcode/QR bitmap into rect, centered,
+    /// preserving its aspect ratio -- same formula as DrawImage's own Fit case.</summary>
+    private static void DrawFit(DrawingContext context, Rect rect, Avalonia.Media.Imaging.Bitmap bitmap)
+    {
+        var sourceSize = bitmap.PixelSize.ToSizeWithDpi(bitmap.Dpi);
+        var fitScale = Math.Min(rect.Width / sourceSize.Width, rect.Height / sourceSize.Height);
+        var fitW = sourceSize.Width * fitScale;
+        var fitH = sourceSize.Height * fitScale;
+        var destRect = new Rect(rect.X + (rect.Width - fitW) / 2, rect.Y + (rect.Height - fitH) / 2, fitW, fitH);
+        context.DrawImage(bitmap, new Rect(sourceSize), destRect);
+    }
+
+    /// <summary>Honest "couldn't encode this" fallback -- the encoded value as text
+    /// with a clear label instead of drawing fake bars/modules (Part 81: a plausible-
+    /// looking but non-functional barcode is worse than an admitted placeholder). Text
+    /// sizing/position is proportional to the element's own box (clamped to sane min/
+    /// max), not fixed pixel offsets, so it stays legible and clipped at any box
+    /// size/zoom.</summary>
+    private static void DrawBarcodePlaceholder(DrawingContext context, Rect rect, string label, string? value, string foregroundColorHex)
+    {
         context.DrawRectangle(PlaceholderFillBrush, new Pen(PlaceholderBorderBrush, 1, dashStyle: DashStyle.Dash), rect);
+
         var typeface = new Typeface("Segoe UI");
-        var label = new FormattedText($"[{barcode.Symbology}]", CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 9, Brushes.Gray);
-        context.DrawText(label, rect.TopLeft + new Vector(4, 4));
-        var valueText = new FormattedText(barcode.Value, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, 11, ParseBrush(barcode.ForegroundColorHex));
-        context.DrawText(valueText, rect.TopLeft + new Vector(4, rect.Height / 2 - 6));
+        var padding = Math.Max(2, rect.Height * 0.08);
+        var labelSize = Math.Clamp(rect.Height * 0.16, 7, 11);
+        var valueSize = Math.Clamp(rect.Height * 0.24, 8, 14);
+
+        var labelText = new FormattedText(label, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+            typeface, labelSize, Brushes.Gray)
+        {
+            MaxTextWidth = Math.Max(1, rect.Width - padding * 2),
+        };
+        context.DrawText(labelText, rect.TopLeft + new Vector(padding, padding));
+
+        var displayValue = string.IsNullOrEmpty(value) ? "(no value)" : value;
+        var valueText = new FormattedText(displayValue, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+            typeface, valueSize, ParseBrush(foregroundColorHex))
+        {
+            MaxTextWidth = Math.Max(1, rect.Width - padding * 2),
+            TextAlignment = TextAlignment.Center,
+        };
+        var valueY = rect.Top + padding + labelText.Height + Math.Max(2, rect.Height * 0.06);
+        context.DrawText(valueText, new Point(rect.Left + rect.Width / 2 - valueText.Width / 2, Math.Min(valueY, rect.Bottom - valueText.Height - padding)));
     }
 
     private static void DrawPlaceholder(DrawingContext context, Rect rect, DesignerElement element)
@@ -689,17 +784,31 @@ public sealed class CardCanvasView : Control
         context.DrawText(formatted, rect.TopLeft + new Vector(4, 4));
     }
 
+    /// <summary>Individual selection uses a SOLID outline, deliberately distinct from
+    /// the dashed style used for bleed/safe-zone/ruler guides -- those are all
+    /// construction aids, while a selection outline means "this is what you're actively
+    /// editing", and having every dashed line on screen mean something different was a
+    /// real source of visual noise/confusion on a busy card.</summary>
     private void DrawSelectionOverlay(DrawingContext context, Rect cardRect, double scale, CardDesignTabViewModel tab)
     {
+        // Priority 8 fix: each selected element's own outline now rotates with it
+        // (using the identical GetRotationTransform DrawElement applies to the
+        // element's content), instead of always being drawn as a plain axis-aligned
+        // rectangle regardless of the element's actual Rotation.
         foreach (var element in tab.SelectedElements)
         {
-            var rect = ToDeviceRect(cardRect, scale, element);
-            context.DrawRectangle(null, new Pen(SelectionBrush, 1.5, dashStyle: DashStyle.Dash), rect);
+            var elRect = ToDeviceRect(cardRect, scale, element);
+            using var rotateScope = context.PushTransform(GetRotationTransform(elRect, element.Rotation));
+            context.DrawRectangle(null, new Pen(SelectionBrush, 1.5), elRect);
         }
 
         if (tab.SelectedElements.Count == 1)
         {
-            var rect = ToDeviceRect(cardRect, scale, tab.SelectedElements[0]);
+            var selected = tab.SelectedElements[0];
+            var rect = ToDeviceRect(cardRect, scale, selected);
+
+            using var rotateScope = context.PushTransform(GetRotationTransform(rect, selected.Rotation));
+
             foreach (var handle in GetHandleRects(rect))
             {
                 context.DrawRectangle(Brushes.White, new Pen(SelectionBrush, 1), handle);
@@ -708,6 +817,23 @@ public sealed class CardCanvasView : Control
             var rotationHandleCenter = new Point(rect.Center.X, rect.Top - 24);
             context.DrawLine(new Pen(SelectionBrush, 1), new Point(rect.Center.X, rect.Top), rotationHandleCenter);
             context.DrawEllipse(SelectionBrush, new Pen(Brushes.White, 1.5), rotationHandleCenter, 7, 7);
+        }
+        else if (tab.SelectedElements.Count > 1)
+        {
+            // Group bounding box (Part 30: "multi-selection bounding box"), in its own
+            // color so it reads as "the whole selection" rather than another individual
+            // element outline -- union of every selected element's own rotation-aware
+            // visual bounds, in device pixels (same coordinate space the per-element
+            // outlines above are already drawn in). Computed from Left/Top/Right/Bottom
+            // rather than a Rect.Union call, consistent with how bounds math is done
+            // elsewhere in this file.
+            var rects = tab.SelectedElements.Select(el => ToDeviceRect(cardRect, scale, el)).ToList();
+            var groupLeft = rects.Min(r => r.Left);
+            var groupTop = rects.Min(r => r.Top);
+            var groupRight = rects.Max(r => r.Right);
+            var groupBottom = rects.Max(r => r.Bottom);
+            var groupRect = new Rect(groupLeft, groupTop, groupRight - groupLeft, groupBottom - groupTop);
+            context.DrawRectangle(null, new Pen(GroupSelectionBrush, 1.5, dashStyle: DashStyle.Dash), groupRect);
         }
     }
 
@@ -718,6 +844,55 @@ public sealed class CardCanvasView : Control
         yield return new Rect(r.TopRight.X - h / 2, r.TopRight.Y - h / 2, h, h);
         yield return new Rect(r.BottomLeft.X - h / 2, r.BottomLeft.Y - h / 2, h, h);
         yield return new Rect(r.BottomRight.X - h / 2, r.BottomRight.Y - h / 2, h, h);
+    }
+
+    /// <summary>The exact rotation transform DrawElement applies to an element's own
+    /// content: rotate elementRect's own center by rotationDeg. Factored out here
+    /// (Priority 8 fix) so the selection outline/handles/rotation-handle drawn in
+    /// DrawSelectionOverlay can be rotated with the identical transform instead of
+    /// being drawn axis-aligned while the element itself visibly rotates underneath
+    /// them -- which was the root cause of the selection frame looking "stuck".</summary>
+    private static Matrix GetRotationTransform(Rect elementRect, double rotationDeg)
+    {
+        var center = elementRect.Center;
+        return Matrix.CreateTranslation(-center.X, -center.Y)
+               * Matrix.CreateRotation(rotationDeg * Math.PI / 180.0)
+               * Matrix.CreateTranslation(center.X, center.Y);
+    }
+
+    /// <summary>Rotates a point around a pivot by the given angle in degrees, using the
+    /// same direction convention as Avalonia's Matrix.CreateRotation (positive angle
+    /// turns clockwise on screen, since screen Y grows downward) -- i.e. the same
+    /// visual rotation GetRotationTransform/DrawElement already apply. Used for
+    /// hit-testing (Priority 8 fix): rather than inverse-transforming the pointer
+    /// through a Matrix, this rotates each handle's own known un-rotated position
+    /// forward to its true on-screen location, which is then compared directly against
+    /// the raw pointer position -- avoiding any dependency on exactly how Avalonia's
+    /// Matrix invert/point-transform APIs are named, while remaining mathematically
+    /// equivalent.</summary>
+    private static Point RotatePointAround(Point p, Point pivot, double angleDeg)
+    {
+        if (angleDeg == 0) return p;
+        var rad = angleDeg * Math.PI / 180.0;
+        var cos = Math.Cos(rad);
+        var sin = Math.Sin(rad);
+        var dx = p.X - pivot.X;
+        var dy = p.Y - pivot.Y;
+        return new Point(pivot.X + dx * cos - dy * sin, pivot.Y + dx * sin + dy * cos);
+    }
+
+    /// <summary>Rotates a direction vector (not a position) by the given angle in
+    /// degrees, same convention as RotatePointAround. Used to convert a screen-space
+    /// drag delta into an element's own local/unrotated axes (Priority 8 fix for
+    /// resize handles): dragging the visually-bottom-right corner of a rotated element
+    /// should extend it along its own edges, not along the absolute screen X/Y axes.</summary>
+    private static Vector RotateVector(Vector v, double angleDeg)
+    {
+        if (angleDeg == 0) return v;
+        var rad = angleDeg * Math.PI / 180.0;
+        var cos = Math.Cos(rad);
+        var sin = Math.Sin(rad);
+        return new Vector(v.X * cos - v.Y * sin, v.X * sin + v.Y * cos);
     }
 
     // ------------------------------------------------------------------- layout ----
@@ -772,18 +947,25 @@ public sealed class CardCanvasView : Control
         var guides = orientation == GuideOrientation.Vertical ? tab.VerticalGuidesMm : tab.HorizontalGuidesMm;
         var cardCenter = orientation == GuideOrientation.Vertical ? tab.Document.WidthMm / 2 : tab.Document.HeightMm / 2;
 
-        var targets = new List<double>(guides) { cardCenter };
-        foreach (var other in tab.FocusedSideModel.Elements)
+        // Guides only contribute snap targets when SnapToGuides is on (Part 28); the
+        // card-center target below is always active (there's no dedicated toggle for
+        // it, and it's cheap/harmless); the other-object edges/centers loop just below
+        // is separately gated on SnapToObjects.
+        var targets = new List<double>(tab.SnapToGuides ? guides : Enumerable.Empty<double>()) { cardCenter };
+        if (tab.SnapToObjects)
         {
-            if (ReferenceEquals(other, dragging) || _dragStartRects.ContainsKey(other)) continue;
-            var bounds = GetVisualBoundsStatic(other);
-            if (orientation == GuideOrientation.Vertical)
+            foreach (var other in tab.FocusedSideModel.Elements)
             {
-                targets.Add(bounds.Left); targets.Add(bounds.Left + bounds.Width / 2); targets.Add(bounds.Right);
-            }
-            else
-            {
-                targets.Add(bounds.Top); targets.Add(bounds.Top + bounds.Height / 2); targets.Add(bounds.Bottom);
+                if (ReferenceEquals(other, dragging) || _dragStartRects.ContainsKey(other)) continue;
+                var bounds = GetVisualBoundsStatic(other);
+                if (orientation == GuideOrientation.Vertical)
+                {
+                    targets.Add(bounds.Left); targets.Add(bounds.Left + bounds.Width / 2); targets.Add(bounds.Right);
+                }
+                else
+                {
+                    targets.Add(bounds.Top); targets.Add(bounds.Top + bounds.Height / 2); targets.Add(bounds.Bottom);
+                }
             }
         }
 
@@ -919,7 +1101,7 @@ public sealed class CardCanvasView : Control
         {
             var selected = tab.SelectedElements[0];
             var elementRect = ToDeviceRect(cardRect, scale, selected);
-            var handle = HitTestHandle(elementRect, point);
+            var handle = HitTestHandle(elementRect, selected.Rotation, point);
             if (handle != DragMode.None)
             {
                 _dragMode = handle;
@@ -952,10 +1134,24 @@ public sealed class CardCanvasView : Control
         }
 
         var elements = tab.Document.GetSide(side).Elements;
+        // Priority 8 fix (related): a rotated element's clickable area is its own
+        // rotated shape, not its plain axis-aligned X/Y/Width/Height rect. mmPoint is
+        // rotated backward into the element's local frame (around its own center, in
+        // the same mm space el.X/Y/Width/Height are already expressed in) before the
+        // ordinary Contains test, using the same RotatePointAround helper the
+        // handle/selection-outline fixes above use -- negative angle here undoes the
+        // element's own +Rotation, landing mmPoint where it would be if the element
+        // were drawn un-rotated.
         var hitElement = elements
             .Where(el => el.Visible && !el.Locked)
             .OrderByDescending(el => el.ZIndex)
-            .FirstOrDefault(el => new Rect(el.X, el.Y, el.Width, el.Height).Contains(mmPoint));
+            .FirstOrDefault(el =>
+            {
+                var localPoint = el.Rotation == 0
+                    ? mmPoint
+                    : RotatePointAround(mmPoint, new Point(el.X + el.Width / 2, el.Y + el.Height / 2), -el.Rotation);
+                return new Rect(el.X, el.Y, el.Width, el.Height).Contains(localPoint);
+            });
 
         // Double-click a text element -> hand off to the inline editor instead of
         // starting a drag (Part 3 / 80). Single-click still just selects, matching the
@@ -1107,9 +1303,17 @@ public sealed class CardCanvasView : Control
 
         if (IsResizeMode(_dragMode) && _dragElement is not null && _dragStartRects.TryGetValue(_dragElement, out var startRect))
         {
-            var deltaMm = new Vector(
+            var rawDeltaMm = new Vector(
                 (point.X - _dragStartPointerPos!.Value.X) / scale,
                 (point.Y - _dragStartPointerPos.Value.Y) / scale);
+
+            // Priority 8 fix: rotate the screen-space drag delta into the element's own
+            // local (un-rotated) axes before resizing, so dragging a corner of a
+            // rotated element extends it along its own edges rather than along the
+            // absolute screen X/Y axes -- otherwise resizing a rotated element would
+            // "work" (no crash) but feel wrong/unintuitive, moving the wrong direction
+            // relative to what the user is visually dragging.
+            var deltaMm = RotateVector(rawDeltaMm, -_dragElement.Rotation);
 
             ApplyResize(_dragElement, startRect, deltaMm, _dragMode);
             InvalidateVisual();
@@ -1352,16 +1556,30 @@ public sealed class CardCanvasView : Control
     private static bool IsResizeMode(DragMode mode) =>
         mode is DragMode.ResizeTopLeft or DragMode.ResizeTopRight or DragMode.ResizeBottomLeft or DragMode.ResizeBottomRight;
 
-    private static DragMode HitTestHandle(Rect elementRect, Point point)
+    private static DragMode HitTestHandle(Rect elementRect, double rotationDeg, Point point)
     {
         const double h = 9;
-        var rotationHandleCenter = new Point(elementRect.Center.X, elementRect.Top - 24);
+        var center = elementRect.Center;
+
+        // Priority 8 fix: every handle's true on-screen position is now computed by
+        // rotating its known un-rotated position forward by the element's own
+        // Rotation (matching GetRotationTransform/DrawSelectionOverlay exactly),
+        // instead of testing the raw pointer against the plain un-rotated rect. Without
+        // this, fixing the *drawing* to rotate the handles would have made clicking
+        // them impossible whenever Rotation != 0 (the handles would look rotated but
+        // only respond to clicks at their old, un-rotated positions).
+        var rotationHandleCenter = RotatePointAround(new Point(center.X, elementRect.Top - 24), center, rotationDeg);
         if (new Rect(rotationHandleCenter.X - 9, rotationHandleCenter.Y - 9, 18, 18).Contains(point)) return DragMode.Rotate;
 
-        if (new Rect(elementRect.TopLeft.X - h / 2, elementRect.TopLeft.Y - h / 2, h, h).Contains(point)) return DragMode.ResizeTopLeft;
-        if (new Rect(elementRect.TopRight.X - h / 2, elementRect.TopRight.Y - h / 2, h, h).Contains(point)) return DragMode.ResizeTopRight;
-        if (new Rect(elementRect.BottomLeft.X - h / 2, elementRect.BottomLeft.Y - h / 2, h, h).Contains(point)) return DragMode.ResizeBottomLeft;
-        if (new Rect(elementRect.BottomRight.X - h / 2, elementRect.BottomRight.Y - h / 2, h, h).Contains(point)) return DragMode.ResizeBottomRight;
+        var topLeft = RotatePointAround(elementRect.TopLeft, center, rotationDeg);
+        var topRight = RotatePointAround(elementRect.TopRight, center, rotationDeg);
+        var bottomLeft = RotatePointAround(elementRect.BottomLeft, center, rotationDeg);
+        var bottomRight = RotatePointAround(elementRect.BottomRight, center, rotationDeg);
+
+        if (new Rect(topLeft.X - h / 2, topLeft.Y - h / 2, h, h).Contains(point)) return DragMode.ResizeTopLeft;
+        if (new Rect(topRight.X - h / 2, topRight.Y - h / 2, h, h).Contains(point)) return DragMode.ResizeTopRight;
+        if (new Rect(bottomLeft.X - h / 2, bottomLeft.Y - h / 2, h, h).Contains(point)) return DragMode.ResizeBottomLeft;
+        if (new Rect(bottomRight.X - h / 2, bottomRight.Y - h / 2, h, h).Contains(point)) return DragMode.ResizeBottomRight;
         return DragMode.None;
     }
 

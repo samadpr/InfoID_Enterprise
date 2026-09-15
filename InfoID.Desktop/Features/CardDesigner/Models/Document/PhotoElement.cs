@@ -2,7 +2,9 @@
 
 namespace InfoID.Desktop.Features.CardDesigner.Models.Document;
 
-public enum PhotoMaskShape { Rectangle, RoundedRectangle, Circle }
+// Appended, not inserted: same plain-integer-ordinal serialization rule as ShapeKind
+// (see its own comment in ShapeElement.cs) -- new members must always go at the end.
+public enum PhotoMaskShape { Rectangle, RoundedRectangle, Circle, Hexagon, Star }
 
 /// <summary>Cardholder photo slot -- distinct from ImageElement because it carries
 /// crop/mask state and is meant to bind to a cardholder data field (Part 20).</summary>

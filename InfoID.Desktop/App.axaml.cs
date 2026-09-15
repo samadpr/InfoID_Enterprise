@@ -126,6 +126,7 @@ public partial class App : Avalonia.Application
 
         // Desktop shell infrastructure.
         services.AddSingleton<IThemeService, ThemeService>();
+        services.AddSingleton<IUserPreferencesService, JsonUserPreferencesService>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<IFilePickerService, FilePickerService>();
@@ -144,14 +145,28 @@ public partial class App : Avalonia.Application
         services.AddSingleton<IDesignAssetService, LocalDesignAssetService>();
         services.AddSingleton<IDataBindingEvaluator, DataBindingEvaluator>();
         services.AddSingleton<IPreviewDataProvider, SamplePreviewDataProvider>();
+        services.AddSingleton<IDesignChecker, DesignChecker>();
+        services.AddSingleton<IThumbnailService, ThumbnailService>();
+        services.AddSingleton<IInfoIdFileService, InfoIdFileService>();
+        services.AddSingleton<IRecentFilesService, JsonRecentFilesService>();
+        // Priority 12 (Add Image workflow / Image Editor).
+        services.AddSingleton<IImageEditingService, ImageEditingService>();
+        // Priority 12 (Take Photo / camera capture). See FlashCapCameraService.cs's
+        // own header comment for this service's honest confidence level.
+        services.AddSingleton<ICameraService, FlashCapCameraService>();
+        services.AddSingleton<IFaceDetectionService, FaceDetectionService>();
         services.AddScoped<ICardDesignRepository, CardDesignRepository>();
 
         // Page ViewModels -- transient so every navigation gets a clean instance.
         services.AddTransient<WelcomeViewModel>();
+        services.AddTransient<RecentDesignsViewModel>();
         services.AddTransient<BlankCardViewModel>();
         services.AddTransient<CustomCardDialogViewModel>();
         services.AddTransient<TemplatesViewModel>();
-        services.AddTransient<CardDesignerViewModel>();
+        // Singleton (not transient): the designer's open tabs must survive a trip to
+        // Home and back, and the header's "Windows" menu needs one persistent instance
+        // to list open designs from regardless of which page is currently shown.
+        services.AddSingleton<CardDesignerViewModel>();
 
         // Shell.
         services.AddSingleton<ShellViewModel>();

@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using InfoID.Desktop.Features.CardDesigner.Services;
 
 namespace InfoID.Desktop.Features.CardDesigner.Models.Document;
 
@@ -11,6 +12,8 @@ public sealed partial class DataFieldElement : DesignerElement
 
     [ObservableProperty] private string _fieldKey = "FirstName";
     [ObservableProperty] private string _fontFamily = "Segoe UI";
+
+    partial void OnFontFamilyChanged(string value) => RecentFontsTracker.Record(value);
     [ObservableProperty] private double _fontSize = 12;
     [ObservableProperty] private string _colorHex = "#000000";
     [ObservableProperty] private TextAlignmentX _horizontalAlignment = TextAlignmentX.Left;

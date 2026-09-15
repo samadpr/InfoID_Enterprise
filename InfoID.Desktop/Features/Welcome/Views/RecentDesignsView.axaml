@@ -1,0 +1,87 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Features.Welcome.ViewModels"
+             xmlns:models="using:InfoID.Desktop.Features.Welcome.Models"
+             xmlns:conv="using:InfoID.Desktop.Features.CardDesigner.Converters"
+             xmlns:icons="using:InfoID.Desktop.Features.CardDesigner.Views.Icons"
+             mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="820"
+             x:Class="InfoID.Desktop.Features.Welcome.Views.RecentDesignsView"
+             x:DataType="vm:RecentDesignsViewModel"
+             x:Name="Root"
+             Background="{DynamicResource BrushBackground}">
+
+    <DockPanel Margin="40,32,40,48">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="12" Margin="0,0,0,24">
+            <Button Classes="ghost" Content="&lt; Back" Command="{Binding GoBackCommand}" />
+            <TextBlock Text="All Recent Designs" Classes="h2" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <ScrollViewer>
+            <StackPanel MaxWidth="1180" HorizontalAlignment="Stretch">
+
+                <TextBlock Text="Nothing here yet. Designs you create, save or import will show up on this page."
+                           Classes="caption" TextWrapping="Wrap" Opacity="0.6"
+                           IsVisible="{Binding Items.Count, Converter={x:Static conv:CountToBoolConverter.Instance}, ConverterParameter=Zero}" />
+
+                <ItemsControl ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:RecentCardItem">
+                            <Button Classes="tile" Width="220" Height="180" Padding="16" Margin="0,0,16,16"
+                                    HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                                    Command="{Binding #Root.((vm:RecentDesignsViewModel)DataContext).OpenRecentCommand}"
+                                    CommandParameter="{Binding}">
+                                <Button.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Open"
+                                                  Command="{Binding #Root.((vm:RecentDesignsViewModel)DataContext).OpenRecentCommand}"
+                                                  CommandParameter="{Binding}" />
+                                        <MenuItem Header="Unpin" IsVisible="{Binding IsPinned}"
+                                                  Command="{Binding #Root.((vm:RecentDesignsViewModel)DataContext).TogglePinRecentCommand}"
+                                                  CommandParameter="{Binding}" />
+                                        <MenuItem Header="Pin" IsVisible="{Binding !IsPinned}"
+                                                  Command="{Binding #Root.((vm:RecentDesignsViewModel)DataContext).TogglePinRecentCommand}"
+                                                  CommandParameter="{Binding}" />
+                                        <Separator />
+                                        <MenuItem Header="Delete"
+                                                  Command="{Binding #Root.((vm:RecentDesignsViewModel)DataContext).DeleteRecentCommand}"
+                                                  CommandParameter="{Binding}" />
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                                <StackPanel Spacing="8">
+                                    <!-- Priority 1 fix: pin badge overlay instead of a "Pinned" text
+                                         row — see WelcomeView.axaml for the matching fix and rationale. -->
+                                    <Panel Height="96">
+                                        <Border CornerRadius="6" Background="{DynamicResource BrushBackground}"
+                                                ClipToBounds="True">
+                                            <Image Source="{Binding ThumbnailImage}" Stretch="Uniform" />
+                                        </Border>
+                                        <Border IsVisible="{Binding IsPinned}"
+                                                Width="22" Height="22" CornerRadius="11"
+                                                Background="#DA3025"
+                                                HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                Margin="0,-6,-6,0"
+                                                ToolTip.Tip="Pinned"
+                                                BoxShadow="0 1 3 0 #40000000">
+                                            <PathIcon Data="{x:Static icons:DesignerIcons.Pin}"
+                                                      Width="12" Height="12" Foreground="White" />
+                                        </Border>
+                                    </Panel>
+                                    <TextBlock Text="{Binding Name}" Classes="h3" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Subtitle}" Classes="caption" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

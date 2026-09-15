@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Features.CardDesigner.ViewModels"
+             xmlns:controls="using:InfoID.Desktop.Features.CardDesigner.Views.Controls"
+             mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="560"
+             x:Class="InfoID.Desktop.Features.CardDesigner.Views.CropEditorView"
+             x:DataType="vm:CropEditorViewModel"
+             Background="{DynamicResource BrushSurface}"
+             Width="480" Height="560">
+
+    <!-- Real interactive crop editor (Part 38): drag the image to pan, scroll to zoom,
+         or use the slider. Nothing here writes back to the actual element until
+         Apply : see CropEditorViewModel's own doc comment. -->
+    <DockPanel Margin="20">
+        <TextBlock DockPanel.Dock="Top" Text="Crop Image" Classes="h2" Margin="0,0,0,4" />
+        <TextBlock DockPanel.Dock="Top" Text="Drag to reposition, scroll to zoom. The bright box is what will show on the card."
+                   Classes="caption" TextWrapping="Wrap" Opacity="0.7" Margin="0,0,0,14" />
+
+        <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,Auto,Auto" Margin="0,14,0,0">
+            <Button Grid.Column="0" Classes="ghost" Content="Reset" Command="{Binding ResetCropCommand}" HorizontalAlignment="Left" />
+            <Button Grid.Column="1" Content="Cancel" Command="{Binding CancelCommand}" Margin="0,0,8,0" />
+            <Button Grid.Column="2" Classes="primary" Content="Apply" Command="{Binding ApplyCommand}" />
+        </Grid>
+
+        <StackPanel DockPanel.Dock="Bottom" Spacing="4" Margin="0,14,0,0">
+            <TextBlock Text="Zoom" Classes="caption" />
+            <Slider Minimum="0.2" Maximum="5" Value="{Binding CropZoom, Mode=TwoWay}" />
+        </StackPanel>
+
+        <Border BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="6" ClipToBounds="True">
+            <controls:CropEditorSurface x:Name="Surface"
+                                         Source="{Binding SourceBitmap}"
+                                         AspectRatio="{Binding AspectRatio}"
+                                         CropX="{Binding CropX, Mode=TwoWay}"
+                                         CropY="{Binding CropY, Mode=TwoWay}"
+                                         CropZoom="{Binding CropZoom, Mode=TwoWay}" />
+        </Border>
+    </DockPanel>
+</UserControl>

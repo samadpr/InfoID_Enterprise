@@ -2,14 +2,25 @@
 
 namespace InfoID.Desktop.Features.CardDesigner.Models.Document;
 
-public enum ShapeKind { Rectangle, Ellipse, Line, Arrow, Triangle, Polygon, Star }
+// New members must always be appended at the end, never inserted/reordered: ShapeKind
+// serializes as a plain integer ordinal (no [JsonConverter]/string enum anywhere in this
+// codebase), so an already-saved design's shape would silently reinterpret as the wrong
+// kind if an earlier member's ordinal ever shifted.
+public enum ShapeKind { Rectangle, Ellipse, Line, Arrow, Triangle, Polygon, Star, RightTriangle, Parallelogram }
 public enum LineDashStyle { Solid, Dashed, Dotted }
 
 public sealed partial class ShapeElement : DesignerElement
 {
     public override ElementType ElementType => ElementType.Shape;
 
-    [ObservableProperty] private ShapeKind _kind = ShapeKind.Rectangle;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLineOrArrow))]
+    [NotifyPropertyChangedFor(nameof(IsRectangleKind))]
+    [NotifyPropertyChangedFor(nameof(IsPolygonKind))]
+    [NotifyPropertyChangedFor(nameof(IsStarKind))]
+    [NotifyPropertyChangedFor(nameof(IsArrowKind))]
+    private ShapeKind _kind = ShapeKind.Rectangle;
+
     [ObservableProperty] private string _fillColorHex = "#DA3025";
     [ObservableProperty] private bool _fillEnabled = true;
     [ObservableProperty] private string _strokeColorHex = "#000000";
@@ -35,4 +46,15 @@ public sealed partial class ShapeElement : DesignerElement
     /// like a filled box the way Rectangle/Ellipse/Triangle/Polygon/Star do.</summary>
     [ObservableProperty] private bool _startArrowhead;
     [ObservableProperty] private bool _endArrowhead = true;
+
+    /// <summary>Drives the Properties panel's Kind-conditional sections (Views/
+    /// CardDesignerView.axaml's ShapeElement DataTemplate) -- there's no per-element
+    /// ViewModel in this codebase for a converter to reach through, so these live
+    /// directly on the model, same as everywhere else DesignerElement/ShapeElement
+    /// already exposes plain data for direct XAML binding.</summary>
+    public bool IsLineOrArrow => Kind is ShapeKind.Line or ShapeKind.Arrow;
+    public bool IsRectangleKind => Kind == ShapeKind.Rectangle;
+    public bool IsPolygonKind => Kind == ShapeKind.Polygon;
+    public bool IsStarKind => Kind == ShapeKind.Star;
+    public bool IsArrowKind => Kind == ShapeKind.Arrow;
 }

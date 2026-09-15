@@ -38,10 +38,26 @@ public sealed class RulerView : Control
         set => SetValue(OrientationProperty, value);
     }
 
-    private static readonly IBrush BackgroundBrush = new SolidColorBrush(Color.Parse("#252526"));
-    private static readonly IBrush TickBrush = new SolidColorBrush(Color.Parse("#8A8A8A"));
-    private static readonly IBrush TextBrush = new SolidColorBrush(Color.Parse("#B0B0B0"));
+    // Light/dark pairs -- same "read Application.Current.ActualThemeVariant directly"
+    // approach as CardCanvasView.WorkspaceBackgroundBrush, for the same reason: this is
+    // a custom-drawn Control painting itself in one Render() pass, not something a
+    // XAML DynamicResource can reach. Dark values are unchanged from what this ruler
+    // always used; Light values are new (previously hardcoded dark regardless of
+    // theme, same bug class as the canvas's own background).
+    private static readonly IBrush BackgroundBrushLight = new SolidColorBrush(Color.Parse("#EDEEF1"));
+    private static readonly IBrush BackgroundBrushDark = new SolidColorBrush(Color.Parse("#252526"));
+    private static readonly IBrush TickBrushLight = new SolidColorBrush(Color.Parse("#6B7078"));
+    private static readonly IBrush TickBrushDark = new SolidColorBrush(Color.Parse("#8A8A8A"));
+    private static readonly IBrush TextBrushLight = new SolidColorBrush(Color.Parse("#4A4E55"));
+    private static readonly IBrush TextBrushDark = new SolidColorBrush(Color.Parse("#B0B0B0"));
     private static readonly IBrush CursorMarkerBrush = new SolidColorBrush(Color.Parse("#00B4D8"));
+
+    private static bool IsDarkTheme =>
+        Avalonia.Application.Current?.ActualThemeVariant == Avalonia.Styling.ThemeVariant.Dark;
+
+    private static IBrush BackgroundBrush => IsDarkTheme ? BackgroundBrushDark : BackgroundBrushLight;
+    private static IBrush TickBrush => IsDarkTheme ? TickBrushDark : TickBrushLight;
+    private static IBrush TextBrush => IsDarkTheme ? TextBrushDark : TextBrushLight;
 
     private double? _cursorPositionPx;
     private bool _isDraggingGuide;
@@ -61,6 +77,15 @@ public sealed class RulerView : Control
         AffectsRender<RulerView>(TabProperty, OrientationProperty);
     }
 
+    public RulerView()
+    {
+        // Toggling the app's theme doesn't touch Tab/Orientation (the only properties
+        // AffectsRender watches above), so without this the ruler would keep showing
+        // its old-theme colors until some unrelated redraw happened to occur -- same
+        // reasoning as CardCanvasView's own constructor.
+        ActualThemeVariantChanged += (_, _) => InvalidateVisual();
+    }
+
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
@@ -76,7 +101,17 @@ public sealed class RulerView : Control
 
     /// <summary>Called by CardDesignerView.axaml.cs whenever the canvas reports pointer
     /// movement, so the ruler can show a live cursor-position tick even though the
-    /// pointer itself never enters the ruler's own bounds during normal use.</summary>
+    /// pointer itself never enters the ruler's own bounds during normal use.
+    ///
+    /// Priority 6 bug fix: mmAlongAxis comes from CardCanvasView.ScreenPointToFocusedMm,
+    /// which is always relative to tab.FocusedSide's own card origin (that method's
+    /// name says so, and its doc comment confirms it) -- so converting it back to a
+    /// screen position must use that SAME side's origin via the side-aware
+    /// ComputeOriginX/Y(tab, extent, side) overload, not the side-blind one. Using the
+    /// side-blind overload here (as this used to) silently assumed the mm value was
+    /// always relative to the Front card, so the marker landed exactly one
+    /// card-width-plus-gap away from the actual mouse position whenever Back was the
+    /// focused side in "Both" view.</summary>
     public void UpdateCursorPosition(double? mmAlongAxis)
     {
         if (mmAlongAxis is null) { _cursorPositionPx = null; InvalidateVisual(); return; }
@@ -85,7 +120,7 @@ public sealed class RulerView : Control
         if (tab is null) return;
         var scale = CardCanvasView.PixelsPerMm * tab.Zoom;
         var origin = Orientation == RulerOrientation.Horizontal
-            ? CardCanvasView.ComputeOriginX(tab, Bounds.Width)
+            ? CardCanvasView.ComputeOriginX(tab, Bounds.Width, tab.FocusedSide)
             : CardCanvasView.ComputeOriginY(tab, Bounds.Height);
         _cursorPositionPx = origin + mmAlongAxis.Value * scale;
         InvalidateVisual();
@@ -203,6 +238,16 @@ public sealed class RulerView : Control
         GuidePreviewChanged?.Invoke(this, mm);
     }
 
+    /// <summary>Converts a ruler-local point into an mm value relative to the currently
+    /// focused side's own card origin -- matching the same reference frame
+    /// CardCanvasView.ScreenPointToFocusedMm and the guide-drawing code in
+    /// CardCanvasView.DrawSide both already use (guides are stored as a single set of
+    /// "mm relative to a card's own local origin" values, drawn against whichever side
+    /// is focused). Same Priority 6 bug/fix as UpdateCursorPosition above: this used to
+    /// always use the side-blind origin overload, so dragging a new guide out of this
+    /// ruler while Back was the focused side in "Both" view produced a guide positioned
+    /// as if it were relative to Front's origin instead -- landing it visibly wrong
+    /// once drawn against Back's own card rect.</summary>
     private double? PointToMm(Point pointerPosInRuler)
     {
         var tab = Tab;
@@ -216,7 +261,7 @@ public sealed class RulerView : Control
         // not be clamped to the ruler's own small footprint.
         if (Orientation == RulerOrientation.Horizontal)
         {
-            var origin = CardCanvasView.ComputeOriginX(tab, Bounds.Width);
+            var origin = CardCanvasView.ComputeOriginX(tab, Bounds.Width, tab.FocusedSide);
             return (pointerPosInRuler.X - origin) / scale;
         }
         else

@@ -1,0 +1,160 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="220" d:DesignHeight="34"
+             x:Class="InfoID.Desktop.Features.CardDesigner.Views.Controls.ColorPickerField"
+             x:Name="Root">
+
+    <!--
+    Real visual color picker (Part 17): hue/saturation/value/alpha sliders, a live
+    preview swatch, a manual hex field for power users, and a "recently used" row,
+    not a hex-only text box. Built from plain Avalonia primitives (Slider, Border,
+    TextBox) rather than a NuGet color-picker package, per project policy of not adding
+    a dependency without explicit confirmation; every piece used here (Slider,
+    LinearGradientBrush, Flyout) already ships in the base Avalonia/Avalonia.Controls
+    packages this project references.
+
+    ColorHex is the only thing callers bind to (TwoWay), e.g.:
+      <controls:ColorPickerField ColorHex="{Binding FillColorHex, Mode=TwoWay}" />
+    All the HSVA <-> hex bookkeeping is internal (code-behind), matching how
+    CardCanvasView keeps its own rendering-only state out of the ViewModel layer.
+    -->
+
+    <Button Classes="ghost" Padding="0" HorizontalAlignment="Left" x:Name="SwatchButton"
+            ToolTip.Tip="Click to choose a color">
+        <Border Width="26" Height="26" CornerRadius="4"
+                BorderBrush="{DynamicResource BrushBorderStrong}" BorderThickness="1">
+            <!-- Checkerboard-ish transparency cue behind the swatch, then the actual
+                 color on top, so "no color"/low-alpha is visually distinguishable
+                 from a solid color, not just invisible. -->
+            <Panel>
+                <Border Background="#FFFFFF" CornerRadius="3" Margin="1" />
+                <Border x:Name="SwatchPreview" CornerRadius="3" Margin="1" />
+            </Panel>
+        </Border>
+
+        <Button.Flyout>
+            <Flyout Placement="BottomEdgeAlignedLeft">
+                <StackPanel Width="230" Spacing="10">
+
+                    <Grid ColumnDefinitions="Auto,*" VerticalAlignment="Center">
+                        <Border Grid.Column="0" Width="32" Height="32" CornerRadius="4" Margin="0,0,10,0"
+                                BorderBrush="{DynamicResource BrushBorderStrong}" BorderThickness="1">
+                            <Panel>
+                                <Border Background="#FFFFFF" CornerRadius="3" Margin="1" />
+                                <Border x:Name="LargePreview" CornerRadius="3" Margin="1" />
+                            </Panel>
+                        </Border>
+                        <TextBox Grid.Column="1" x:Name="HexBox" Watermark="#RRGGBB or #AARRGGBB" />
+                    </Grid>
+
+                    <!-- Priority 9: 2D saturation/brightness picking area — the single
+                         biggest usability gap the old sliders-only layout had for a
+                         "normal user who doesn't understand HSV": one drag-anywhere
+                         square instead of two separate sliders to land on a color.
+                         SvHueBrush's Color is kept in sync with the Hue slider in
+                         code-behind (pure hue at S=1,V=1); the two Rectangle overlays
+                         are fixed white->transparent (saturation, left to right) and
+                         transparent->black (value, top to bottom) gradients that never
+                         change — exactly the standard SV-box construction. SvThumb
+                         marks the currently selected point and is purely visual
+                         (IsHitTestVisible=False) so it never steals the pointer events
+                         the Border itself needs to handle dragging. -->
+                    <Border x:Name="SvBox" Height="120" CornerRadius="6" ClipToBounds="True"
+                            BorderBrush="{DynamicResource BrushBorderStrong}" BorderThickness="1"
+                            Cursor="Cross"
+                            PointerPressed="OnSvBoxPointerPressed"
+                            PointerMoved="OnSvBoxPointerMoved"
+                            PointerReleased="OnSvBoxPointerReleased">
+                        <Canvas x:Name="SvCanvas" ClipToBounds="True">
+                            <Rectangle Name="SvSatOverlay" Width="300" Height="160" IsHitTestVisible="False">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                                        <GradientStop Color="#FFFFFFFF" Offset="0" />
+                                        <GradientStop Color="#00FFFFFF" Offset="1" />
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Rectangle Name="SvValOverlay" Width="300" Height="160" IsHitTestVisible="False">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                                        <GradientStop Color="#00000000" Offset="0" />
+                                        <GradientStop Color="#FF000000" Offset="1" />
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Ellipse x:Name="SvThumb" Width="14" Height="14" Stroke="White" StrokeThickness="2"
+                                     IsHitTestVisible="False" />
+                        </Canvas>
+                    </Border>
+
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Hue" Classes="caption" />
+                        <Slider x:Name="HueSlider" Minimum="0" Maximum="359" />
+                    </StackPanel>
+
+                    <!-- RGB numeric inputs (Priority 9): kept alongside hex rather than
+                         replacing it — some users think in hex, some in 0-255 RGB
+                         components, so both are offered and kept in sync through the
+                         same SetColorHex/UpdateFromColor pipeline the sliders already
+                         use. -->
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="6">
+                        <StackPanel Grid.Column="0" Spacing="2">
+                            <TextBlock Text="R" Classes="caption" HorizontalAlignment="Center" />
+                            <NumericUpDown x:Name="RedBox" Minimum="0" Maximum="255" Increment="1"
+                                           FormatString="0" ShowButtonSpinner="False" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="2">
+                            <TextBlock Text="G" Classes="caption" HorizontalAlignment="Center" />
+                            <NumericUpDown x:Name="GreenBox" Minimum="0" Maximum="255" Increment="1"
+                                           FormatString="0" ShowButtonSpinner="False" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Spacing="2">
+                            <TextBlock Text="B" Classes="caption" HorizontalAlignment="Center" />
+                            <NumericUpDown x:Name="BlueBox" Minimum="0" Maximum="255" Increment="1"
+                                           FormatString="0" ShowButtonSpinner="False" />
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Opacity" Classes="caption" />
+                        <Slider x:Name="AlphaSlider" Minimum="0" Maximum="100" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Transparent" Classes="caption" />
+                        <Button Classes="ghost" Padding="4,2" HorizontalAlignment="Left" x:Name="TransparentButton"
+                                ToolTip.Tip="No fill/color">
+                            <Border Width="20" Height="20" CornerRadius="4"
+                                    BorderBrush="{DynamicResource BrushBorderStrong}" BorderThickness="1">
+                                <Path Stroke="{DynamicResource BrushTextSecondary}" StrokeThickness="1.4"
+                                      Data="M2,2 L18,18" Stretch="Fill" Margin="1" />
+                            </Border>
+                        </Button>
+                    </StackPanel>
+
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Recently used" Classes="caption" />
+                        <ItemsControl x:Name="RecentColorsList">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="4" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Classes="ghost" Padding="0" Tag="{Binding}" Click="OnRecentColorClicked">
+                                        <Border Width="20" Height="20" CornerRadius="4" Background="{Binding}"
+                                                BorderBrush="{DynamicResource BrushBorderStrong}" BorderThickness="1" />
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                </StackPanel>
+            </Flyout>
+        </Button.Flyout>
+    </Button>
+</UserControl>

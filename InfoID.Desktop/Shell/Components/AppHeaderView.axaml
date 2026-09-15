@@ -4,9 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:InfoID.Desktop.Shell.ViewModels"
              xmlns:components="using:InfoID.Desktop.Shell.Components"
+             xmlns:conv="using:InfoID.Desktop.Features.CardDesigner.Converters"
              mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="44"
              x:Class="InfoID.Desktop.Shell.Components.AppHeaderView"
-             x:DataType="vm:ShellViewModel">
+             x:DataType="vm:ShellViewModel"
+             x:Name="Root">
 
     <Border Background="{DynamicResource BrushHeaderBackground}"
             BorderBrush="{DynamicResource BrushBorder}"
@@ -25,61 +27,113 @@
 
                 <Menu VerticalAlignment="Center">
                     <MenuItem Header="File">
-                        <MenuItem Header="New Card" />
-                        <MenuItem Header="Open" />
-                        <MenuItem Header="Save" />
-                        <MenuItem Header="Save As" />
+                        <MenuItem Header="New Card" Command="{Binding NewCardCommand}" InputGesture="Ctrl+N" />
+                        <MenuItem Header="Open..." Command="{Binding OpenTemplatesCommand}" InputGesture="Ctrl+O"
+                                  ToolTip.Tip="InfoID designs live in the local database, not loose files -- this opens the saved-designs list." />
                         <Separator />
-                        <MenuItem Header="Import" />
-                        <MenuItem Header="Export" />
-                        <MenuItem Header="Print" />
+                        <MenuItem Header="Save" Command="{Binding ActiveDesigner.ActiveTab.SaveCommand}"
+                                  IsVisible="{Binding ActiveDesigner, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                  InputGesture="Ctrl+S" />
+                        <MenuItem Header="Duplicate as New Design"
+                                  Command="{Binding ActiveDesigner.DuplicateActiveTabCommand}"
+                                  IsVisible="{Binding ActiveDesigner, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                  ToolTip.Tip="Opens an editable copy of the current design under a new name -- InfoID's equivalent of Save As, since the original stays untouched under its own saved record." />
+                        <MenuItem Header="Save as New Version"
+                                  Command="{Binding ActiveDesigner.ActiveTab.SaveVersionCommand}"
+                                  IsVisible="{Binding ActiveDesigner, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                  ToolTip.Tip="Saves the current state as a numbered version snapshot you can come back to later, in addition to a normal save." />
+                        <MenuItem Header="Version History..."
+                                  Command="{Binding ActiveDesigner.ShowVersionHistoryCommand}"
+                                  IsVisible="{Binding ActiveDesigner, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        <Separator IsVisible="{Binding ActiveDesigner, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        <MenuItem Header="Import" Command="{Binding ActiveDesigner.ImportDesignCommand}"
+                                  IsVisible="{Binding ActiveDesigner, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                  ToolTip.Tip="Opens a .infoid design file as a new tab." />
+                        <MenuItem Header="Export" Command="{Binding ActiveDesigner.ExportActiveTabCommand}"
+                                  IsVisible="{Binding ActiveDesigner, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                  ToolTip.Tip="Saves the current tab as a portable .infoid design file." />
+                        <MenuItem Header="Print Preview" Command="{Binding ActiveDesigner.ActiveTab.ShowPrintPreviewCommand}"
+                                  IsVisible="{Binding ActiveDesigner, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        <MenuItem Header="Print" IsEnabled="False"
+                                  ToolTip.Tip="Not yet implemented -- no printing engine exists yet." />
                         <Separator />
-                        <MenuItem Header="Recent Files" />
-                        <MenuItem Header="Exit" />
+                        <MenuItem Header="Recent Cards" IsEnabled="False"
+                                  ToolTip.Tip="See the Recent Cards list on the Home screen." />
+                        <MenuItem Header="Close Design" Command="{Binding ActiveDesigner.CloseTabCommand}" CommandParameter="{x:Null}"
+                                  IsVisible="{Binding ActiveDesigner, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                  InputGesture="Ctrl+W" />
+                        <Separator />
+                        <MenuItem Header="Exit" Command="{Binding ExitCommand}" />
                     </MenuItem>
-                    <MenuItem Header="Edit">
-                        <MenuItem Header="Undo" />
-                        <MenuItem Header="Redo" />
+
+                    <!-- Edit/View only make sense while a design is actually open (Part 5:
+                         "Do NOT show designer-specific menus globally on Home"); every
+                         item below maps to a real, already-working command; nothing here
+                         is a placeholder (Part 88). Items with no backing implementation
+                         yet (Cut, Select All, Lock/Unlock, Show Guides, Panels, Full
+                         Screen, ...) are left out entirely rather than wired to nothing. -->
+                    <MenuItem Header="Edit" IsVisible="{Binding ActiveDesigner, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <MenuItem Header="Undo" Command="{Binding ActiveDesigner.ActiveTab.UndoCommand}" InputGesture="Ctrl+Z" />
+                        <MenuItem Header="Redo" Command="{Binding ActiveDesigner.ActiveTab.RedoCommand}" InputGesture="Ctrl+Y" />
                         <Separator />
-                        <MenuItem Header="Cut" />
-                        <MenuItem Header="Copy" />
-                        <MenuItem Header="Paste" />
-                        <MenuItem Header="Duplicate" />
-                        <MenuItem Header="Delete" />
+                        <MenuItem Header="Copy" Command="{Binding ActiveDesigner.ActiveTab.CopyCommand}" InputGesture="Ctrl+C" />
+                        <MenuItem Header="Paste" Command="{Binding ActiveDesigner.ActiveTab.PasteCommand}" InputGesture="Ctrl+V" />
+                        <MenuItem Header="Duplicate" Command="{Binding ActiveDesigner.ActiveTab.DuplicateSelectedCommand}" InputGesture="Ctrl+D" />
+                        <MenuItem Header="Delete" Command="{Binding ActiveDesigner.ActiveTab.DeleteSelectedCommand}" InputGesture="Delete" />
                         <Separator />
-                        <MenuItem Header="Select All" />
+                        <MenuItem Header="Group" Command="{Binding ActiveDesigner.ActiveTab.GroupCommand}" InputGesture="Ctrl+G" />
+                        <MenuItem Header="Ungroup" Command="{Binding ActiveDesigner.ActiveTab.UngroupCommand}" InputGesture="Ctrl+Shift+G" />
                     </MenuItem>
-                    <MenuItem Header="View">
-                        <MenuItem Header="Zoom In" />
-                        <MenuItem Header="Zoom Out" />
-                        <MenuItem Header="Fit to Window" />
+                    <MenuItem Header="View" IsVisible="{Binding ActiveDesigner, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <MenuItem Header="Zoom In" Command="{Binding ActiveDesigner.ActiveTab.ZoomInCommand}" />
+                        <MenuItem Header="Zoom Out" Command="{Binding ActiveDesigner.ActiveTab.ZoomOutCommand}" />
+                        <MenuItem Header="Actual Size (100%)" Command="{Binding ActiveDesigner.ActiveTab.ZoomResetCommand}" InputGesture="Ctrl+1" />
                         <Separator />
-                        <MenuItem Header="Grid" />
-                        <MenuItem Header="Guides" />
-                        <MenuItem Header="Rulers" />
-                        <MenuItem Header="Panels" />
+                        <MenuItem Header="Show/Hide Grid" Command="{Binding ActiveDesigner.ActiveTab.ToggleShowGridCommand}" />
+                        <MenuItem Header="Snap to Grid" Command="{Binding ActiveDesigner.ActiveTab.ToggleSnapToGridCommand}" />
+                        <MenuItem Header="Show/Hide Rulers" Command="{Binding ActiveDesigner.ActiveTab.ToggleShowRulersCommand}" />
                         <Separator />
-                        <MenuItem Header="Full Screen" />
-                    </MenuItem>
-                    <MenuItem Header="Database">
-                        <MenuItem Header="Connections" />
-                        <MenuItem Header="Import Data" />
-                        <MenuItem Header="Field Mapping" />
-                    </MenuItem>
-                    <MenuItem Header="Tools">
-                        <MenuItem Header="Cardholders" />
-                        <MenuItem Header="Templates" />
-                        <MenuItem Header="Barcode" />
-                        <MenuItem Header="QR Code" />
-                        <MenuItem Header="Printing" />
-                        <MenuItem Header="Plugins" />
+                        <MenuItem Header="Show/Hide Guides" Command="{Binding ActiveDesigner.ActiveTab.ToggleShowGuidesCommand}" />
+                        <MenuItem Header="Snap to Guides" Command="{Binding ActiveDesigner.ActiveTab.ToggleSnapToGuidesCommand}" />
+                        <MenuItem Header="Snap to Objects" Command="{Binding ActiveDesigner.ActiveTab.ToggleSnapToObjectsCommand}" />
+                        <MenuItem Header="Clear Guides" Command="{Binding ActiveDesigner.ActiveTab.ClearGuidesCommand}" />
                         <Separator />
-                        <MenuItem Header="Settings" />
+                        <MenuItem Header="Properties Panel" Command="{Binding ActiveDesigner.ToggleShowPropertiesPanelCommand}" />
+                        <MenuItem Header="Layers Panel" Command="{Binding ActiveDesigner.ToggleShowLayersPanelCommand}" />
                     </MenuItem>
-                    <MenuItem Header="Windows" />
+
+                    <!-- Windows (Part 82): lists every open design tab so a user can jump
+                         straight to one from anywhere in the app, including from Home,
+                         not just while the designer itself is the active page. Bound
+                         through ShellViewModel.Designer (the singleton Card Designer
+                         instance, always alive; see App.axaml.cs) rather than
+                         ActiveDesigner (which is null except while that page is
+                         actually shown), and through ActivateDesignTabCommand (which
+                         both selects the tab and navigates there) rather than the
+                         designer's own SelectTabCommand (which only selects; fine
+                         while already on the page, but wouldn't actually switch pages
+                         when starting from Home). -->
+                    <MenuItem Header="Windows">
+                        <MenuItem Header="Full Screen" Command="{Binding ToggleFullScreenCommand}" />
+                        <Separator />
+                        <MenuItem Header="(No designs open)"
+                                  IsVisible="{Binding Designer.Tabs.Count, Converter={x:Static conv:CountToBoolConverter.Instance}, ConverterParameter=Zero}"
+                                  IsEnabled="False" />
+                        <ItemsControl ItemsSource="{Binding Designer.Tabs}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <MenuItem Header="{Binding Title}"
+                                              Command="{Binding #Root.((vm:ShellViewModel)DataContext).ActivateDesignTabCommand}"
+                                              CommandParameter="{Binding}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </MenuItem>
+
                     <MenuItem Header="Help">
-                        <MenuItem Header="Documentation" />
-                        <MenuItem Header="About InfoID" />
+                        <MenuItem Header="Documentation" IsEnabled="False" ToolTip.Tip="Not yet implemented" />
+                        <MenuItem Header="Keyboard Shortcuts" IsEnabled="False" ToolTip.Tip="Not yet implemented" />
+                        <MenuItem Header="About InfoID" Command="{Binding ShowAboutCommand}" />
                     </MenuItem>
                 </Menu>
             </StackPanel>

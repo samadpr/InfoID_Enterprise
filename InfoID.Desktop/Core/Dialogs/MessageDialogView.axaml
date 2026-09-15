@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:dialogs="using:InfoID.Desktop.Core.Dialogs"
+             mc:Ignorable="d" d:DesignWidth="380"
+             x:Class="InfoID.Desktop.Core.Dialogs.MessageDialogView"
+             x:DataType="dialogs:MessageDialogViewModel"
+             Background="{DynamicResource BrushSurface}"
+             Width="380">
+
+    <StackPanel Margin="24" Spacing="14">
+        <TextBlock Text="{Binding Title}" Classes="h2" />
+        <TextBlock Text="{Binding Message}" Classes="body" TextWrapping="Wrap" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,10,0,0">
+            <Button Content="{Binding CancelText}" Command="{Binding CancelCommand}"
+                    IsVisible="{Binding IsConfirmation}" />
+            <Button Classes="primary" Content="{Binding ConfirmText}" Command="{Binding CloseCommand}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

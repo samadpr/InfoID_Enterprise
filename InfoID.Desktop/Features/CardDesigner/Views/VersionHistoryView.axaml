@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Features.CardDesigner.ViewModels"
+             xmlns:models="using:InfoID.Desktop.Features.CardDesigner.Models"
+             mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="480"
+             x:Class="InfoID.Desktop.Features.CardDesigner.Views.VersionHistoryView"
+             x:DataType="vm:VersionHistoryViewModel"
+             x:Name="Root"
+             Background="{DynamicResource BrushSurface}"
+             Width="420" Height="480">
+
+    <DockPanel Margin="24">
+        <TextBlock DockPanel.Dock="Top" Text="Version History" Classes="h2" Margin="0,0,0,4" />
+        <TextBlock DockPanel.Dock="Top" Text="Restoring opens the old version as a new, unsaved tab -- your current tab and every other saved version stay exactly as they are."
+                   Classes="caption" TextWrapping="Wrap" Opacity="0.7" Margin="0,0,0,16" />
+
+        <Button DockPanel.Dock="Bottom" Classes="secondary" Content="Close" Command="{Binding CloseCommand}"
+                HorizontalAlignment="Right" Margin="0,16,0,0" />
+
+        <TextBlock Text="No saved versions yet. Use File &gt; Save as New Version to create one."
+                   Classes="caption" TextWrapping="Wrap" Opacity="0.6" IsVisible="{Binding !HasVersions}" />
+
+        <ScrollViewer IsVisible="{Binding HasVersions}">
+            <ItemsControl ItemsSource="{Binding Versions}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:TemplateVersionSummary">
+                        <Border Classes="tile" Padding="12" Margin="0,0,0,8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <TextBlock Text="{Binding VersionNumber, StringFormat='Version {0}'}" Classes="h3" />
+                                    <TextBlock Text="{Binding CreatedDate, StringFormat='{}{0:MMM d, yyyy h:mm tt}'}" Classes="caption" />
+                                    <TextBlock Text="{Binding ChangeNote}" Classes="caption" TextWrapping="Wrap"
+                                               IsVisible="{Binding ChangeNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                </StackPanel>
+                                <Button Grid.Column="1" Classes="secondary" Content="Restore" VerticalAlignment="Center"
+                                        Command="{Binding #Root.((vm:VersionHistoryViewModel)DataContext).RestoreCommand}"
+                                        CommandParameter="{Binding}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

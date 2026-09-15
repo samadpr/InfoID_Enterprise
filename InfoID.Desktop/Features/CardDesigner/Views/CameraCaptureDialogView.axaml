@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="using:InfoID.Desktop.Features.CardDesigner.ViewModels"
+             xmlns:models="using:InfoID.Desktop.Features.CardDesigner.Models"
+             mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="560"
+             x:Class="InfoID.Desktop.Features.CardDesigner.Views.CameraCaptureDialogView"
+             x:DataType="vm:CameraCaptureDialogViewModel">
+
+    <!-- Priority 12 (Take Photo / Use Camera), SRS FR-PHS-1. No pointer-drag
+         interaction here (unlike ImageEditorDialogView's crop tool), so this View's
+         code-behind is just InitializeComponent() — everything here is plain
+         property/command bindings, the lowest-risk kind of code in this whole
+         feature. See CameraCaptureDialogViewModel and FlashCapCameraService for the
+         honest confidence level on the camera hardware access itself. -->
+    <Border Background="{DynamicResource BrushSurface}" Width="640" Height="560">
+        <Grid RowDefinitions="Auto,*,Auto" Margin="16">
+
+            <TextBlock Grid.Row="0" Text="Take Photo" Classes="h2" Margin="0,0,0,12" />
+
+            <Grid Grid.Row="1">
+
+                <!-- Loading -->
+                <StackPanel IsVisible="{Binding IsLoading}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+                    <TextBlock Text="Looking for a camera..." Classes="body" HorizontalAlignment="Center" />
+                </StackPanel>
+
+                <!-- No camera available -->
+                <StackPanel IsVisible="{Binding HasNoCameraAvailable}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Spacing="12" MaxWidth="380">
+                    <TextBlock Text="No Camera Found" Classes="h3" HorizontalAlignment="Center" />
+                    <TextBlock Text="InfoID couldn't find a connected camera, or camera access isn't available on this machine. You can browse for an image file instead."
+                               Classes="body" TextWrapping="Wrap" TextAlignment="Center"
+                               Foreground="{DynamicResource BrushTextSecondary}" />
+                </StackPanel>
+
+                <!-- Live / countdown / captured -->
+                <Grid RowDefinitions="Auto,*" IsVisible="{Binding ShowCameraUi}">
+
+                    <ComboBox Grid.Row="0" Margin="0,0,0,10" HorizontalAlignment="Stretch"
+                              ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice}"
+                              ToolTip.Tip="Choose a camera if more than one is connected">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="models:CameraDeviceInfo">
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <Border Grid.Row="1" Background="#1A1A1A" CornerRadius="6" ClipToBounds="True">
+                        <Panel>
+                            <Image Source="{Binding PreviewImage}" Stretch="Uniform" />
+
+                            <Border IsVisible="{Binding CountdownText, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                    Background="#66000000">
+                                <TextBlock Text="{Binding CountdownText}" FontSize="96" FontWeight="Bold"
+                                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+
+                            <Border IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                    Background="#AA1A1A1A" VerticalAlignment="Bottom" Padding="12,8">
+                                <TextBlock Text="{Binding ErrorMessage}" Foreground="White" TextWrapping="Wrap" Classes="caption" />
+                            </Border>
+                        </Panel>
+                    </Border>
+                </Grid>
+
+            </Grid>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,16,0,0">
+                <Button Classes="secondary" Content="Cancel" Command="{Binding CancelCommand}" />
+                <Button Classes="secondary" Content="Browse Image Instead" Command="{Binding BrowseInsteadCommand}" />
+                <Button Classes="secondary" Content="Retake" Command="{Binding RetakeCommand}" IsVisible="{Binding IsCaptured}" />
+                <Button Classes="primary" Content="Use This Photo" Command="{Binding DoneCommand}" IsVisible="{Binding IsCaptured}" />
+                <Button Classes="primary" Content="Capture" Command="{Binding CaptureCommand}" IsVisible="{Binding IsLive}" />
+            </StackPanel>
+
+        </Grid>
+    </Border>
+</UserControl>

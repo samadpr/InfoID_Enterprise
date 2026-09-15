@@ -1,0 +1,76 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Features.CardDesigner.ViewModels"
+             xmlns:controls="using:InfoID.Desktop.Features.CardDesigner.Views.Controls"
+             xmlns:icons="using:InfoID.Desktop.Features.CardDesigner.Views.Icons"
+             xmlns:conv="using:InfoID.Desktop.Features.CardDesigner.Converters"
+             mc:Ignorable="d" d:DesignWidth="880" d:DesignHeight="560"
+             x:Class="InfoID.Desktop.Features.CardDesigner.Views.PrintPreviewView"
+             x:DataType="vm:PrintPreviewViewModel"
+             Background="{DynamicResource BrushBackground}"
+             Width="880" Height="560">
+
+    <!--
+    Print Preview (Part 41): front/back at accurate physical proportions, bleed/safe-zone
+    guides, and evaluated sample data : no Print button, no printer selection, no copy
+    count, since there is no printing engine behind this yet (see the ViewModel's own
+    doc comment). This previews appearance only.
+    -->
+
+    <DockPanel Margin="20" LastChildFill="True">
+
+        <!-- Toolbar -->
+        <Border DockPanel.Dock="Top" Padding="0,0,0,16">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0" Text="Print Preview" Classes="h2" VerticalAlignment="Center" />
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="6" VerticalAlignment="Center">
+                    <ToggleButton Classes="toolbtn-wide" Content="Front" ToolTip.Tip="Show front only"
+                                  IsChecked="{Binding ActiveSideView, Mode=OneWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Front}"
+                                  Command="{Binding SetSideFrontCommand}" />
+                    <ToggleButton Classes="toolbtn-wide" Content="Back" ToolTip.Tip="Show back only"
+                                  IsChecked="{Binding ActiveSideView, Mode=OneWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Back}"
+                                  Command="{Binding SetSideBackCommand}" />
+                    <ToggleButton Classes="toolbtn-wide" Content="Both" ToolTip.Tip="Show front and back"
+                                  IsChecked="{Binding ActiveSideView, Mode=OneWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Both}"
+                                  Command="{Binding SetSideBothCommand}" />
+
+                    <Border Width="1" Height="20" Background="{DynamicResource BrushBorder}" Margin="8,0" />
+
+                    <ToggleButton Classes="toolbtn-wide" Content="Bleed / Safe Zone"
+                                  IsChecked="{Binding ShowBleedAndSafeZone, Mode=OneWay}"
+                                  Command="{Binding ToggleBleedAndSafeZoneCommand}" />
+                </StackPanel>
+
+                <Button Grid.Column="2" Classes="secondary" Content="Close" Command="{Binding CloseCommand}" />
+            </Grid>
+        </Border>
+
+        <!-- Sample record picker -->
+        <Border DockPanel.Dock="Bottom" Padding="0,16,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+                <TextBlock Text="Sample data:" Classes="caption" VerticalAlignment="Center" />
+                <Button Classes="ghost toolbtn" ToolTip.Tip="Previous sample record" Command="{Binding PreviousRecordCommand}">
+                    <PathIcon Data="{x:Static icons:DesignerIcons.ChevronLeft}" Width="12" Height="12" />
+                </Button>
+                <TextBlock Text="{Binding SelectedRecord.Label}" Classes="body" VerticalAlignment="Center" MinWidth="160" TextAlignment="Center" />
+                <Button Classes="ghost toolbtn" ToolTip.Tip="Next sample record" Command="{Binding NextRecordCommand}">
+                    <PathIcon Data="{x:Static icons:DesignerIcons.ChevronRight}" Width="12" Height="12" />
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- Front/Back preview surfaces -->
+        <Border Background="{DynamicResource BrushSurface}" CornerRadius="8" Padding="24">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="24">
+                <controls:CardPreviewSurface ViewModel="{Binding}" Side="Front" Width="360" Height="240"
+                                              IsVisible="{Binding ShowFrontPanel}" />
+                <controls:CardPreviewSurface ViewModel="{Binding}" Side="Back" Width="360" Height="240"
+                                              IsVisible="{Binding ShowBackPanel}" />
+            </StackPanel>
+        </Border>
+
+    </DockPanel>
+</UserControl>
