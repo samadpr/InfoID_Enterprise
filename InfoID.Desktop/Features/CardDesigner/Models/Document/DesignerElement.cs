@@ -37,11 +37,8 @@ namespace InfoID.Desktop.Features.CardDesigner.Models.Document;
 [JsonDerivedType(typeof(BarcodeElement), "barcode")]
 [JsonDerivedType(typeof(QrCodeElement), "qrcode")]
 [JsonDerivedType(typeof(DataFieldElement), "datafield")]
-<<<<<<< HEAD
 [JsonDerivedType(typeof(PenElement), "pen")]
-=======
 [JsonDerivedType(typeof(DateTimeElement), "datetime")]
->>>>>>> 42f7c5fa34fff67e27765b0cd486c893969f59d5
 public abstract partial class DesignerElement : ObservableObject
 {
     [ObservableProperty] private string _id = Guid.NewGuid().ToString("N");
