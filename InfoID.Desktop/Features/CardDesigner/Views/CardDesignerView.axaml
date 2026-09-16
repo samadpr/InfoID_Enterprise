@@ -395,6 +395,148 @@
 			</StackPanel>
 		</DataTemplate>
 
+		<DataTemplate DataType="doc:DateTimeElement">
+			<StackPanel Spacing="10">
+
+				<TextBlock Text="Date / Time" Classes="caption" />
+
+				<!-- Format -->
+				<StackPanel Spacing="4">
+					<TextBlock Text="Format" Classes="caption" />
+
+					<StackPanel Orientation="Horizontal" Spacing="4">
+						<ToggleButton Classes="toolbtn-wide" Content="Date + Time"
+									  IsChecked="{Binding DisplayFormat, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=DateTime}" />
+						<ToggleButton Classes="toolbtn-wide" Content="Date"
+									  IsChecked="{Binding DisplayFormat, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Date}" />
+						<ToggleButton Classes="toolbtn-wide" Content="Time"
+									  IsChecked="{Binding DisplayFormat, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Time}" />
+					</StackPanel>
+				</StackPanel>
+
+				<!-- Date format: only shown when DisplayFormat is Date or DateTime -->
+				<StackPanel Spacing="4" IsVisible="{Binding ShowDateFormat}">
+					<TextBlock Text="Date format" Classes="caption" />
+
+					<TextBox
+						Text="{Binding DateFormat, Mode=TwoWay}"
+						Watermark="dd-MM-yyyy" />
+				</StackPanel>
+
+				<!-- Time format: only shown when DisplayFormat is Time or DateTime -->
+				<StackPanel Spacing="4" IsVisible="{Binding ShowTimeFormat}">
+					<TextBlock Text="Time format" Classes="caption" />
+
+					<TextBox
+						Text="{Binding TimeFormat, Mode=TwoWay}"
+						Watermark="HH:mm:ss" />
+				</StackPanel>
+
+				<!-- Font size + Color -->
+				<Grid ColumnDefinitions="*,*">
+
+					<StackPanel
+						Grid.Column="0"
+						Spacing="4"
+						Margin="0,0,4,0">
+
+						<TextBlock Text="Font size" Classes="caption" />
+
+						<NumericUpDown
+							Value="{Binding FontSize, Mode=TwoWay}"
+							Minimum="4"
+							Maximum="200"
+							Increment="1" />
+
+					</StackPanel>
+
+					<StackPanel
+						Grid.Column="1"
+						Spacing="4"
+						Margin="4,0,0,0">
+
+						<TextBlock Text="Color" Classes="caption" />
+
+						<controls:ColorPickerField
+							ColorHex="{Binding ColorHex, Mode=TwoWay}" />
+
+					</StackPanel>
+
+				</Grid>
+
+				<!-- Font style -->
+				<StackPanel
+					Orientation="Horizontal"
+					Spacing="12">
+
+					<CheckBox
+						Content="Bold"
+						IsChecked="{Binding Bold, Mode=TwoWay}" />
+
+					<CheckBox
+						Content="Italic"
+						IsChecked="{Binding Italic, Mode=TwoWay}" />
+
+					<CheckBox
+						Content="Underline"
+						IsChecked="{Binding Underline, Mode=TwoWay}" />
+
+				</StackPanel>
+
+				<!-- Horizontal alignment -->
+				<TextBlock
+					Text="Text alignment"
+					Classes="caption"
+					Margin="0,4,0,0" />
+
+				<StackPanel Orientation="Horizontal" Spacing="4">
+					<ToggleButton Classes="toolbtn" Content="&#8676;" ToolTip.Tip="Text align left"
+								  IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Left}" />
+					<ToggleButton Classes="toolbtn" Content="&#8596;" ToolTip.Tip="Text align center"
+								  IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Center}" />
+					<ToggleButton Classes="toolbtn" Content="&#8677;" ToolTip.Tip="Text align right"
+								  IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Right}" />
+				</StackPanel>
+
+				<!-- Vertical alignment -->
+				<TextBlock
+					Text="Vertical alignment"
+					Classes="caption"
+					Margin="0,4,0,0" />
+
+				<StackPanel
+					Orientation="Horizontal"
+					Spacing="4">
+
+					<ToggleButton
+						Classes="toolbtn"
+						Content="&#8613;"
+						ToolTip.Tip="Vertical align top"
+						IsChecked="{Binding VerticalAlignment, Mode=TwoWay,
+                    Converter={x:Static conv:EnumToBoolConverter.Instance},
+                    ConverterParameter=Top}" />
+
+					<ToggleButton
+						Classes="toolbtn"
+						Content="&#8597;"
+						ToolTip.Tip="Vertical align middle"
+						IsChecked="{Binding VerticalAlignment, Mode=TwoWay,
+                    Converter={x:Static conv:EnumToBoolConverter.Instance},
+                    ConverterParameter=Middle}" />
+
+					<ToggleButton
+						Classes="toolbtn"
+						Content="&#8615;"
+						ToolTip.Tip="Vertical align bottom"
+						IsChecked="{Binding VerticalAlignment, Mode=TwoWay,
+                    Converter={x:Static conv:EnumToBoolConverter.Instance},
+                    ConverterParameter=Bottom}" />
+
+				</StackPanel>
+
+			</StackPanel>
+		</DataTemplate>
+
 		<DataTemplate DataType="doc:ShapeElement">
 			<StackPanel Spacing="10">
 				<TextBlock Text="Shape" Classes="caption" />
@@ -464,7 +606,6 @@
 			</StackPanel>
 		</DataTemplate>
 
-<<<<<<< HEAD
         <!-- Pen tool stroke (Part 96): just color/width; an open freehand ink line has
              no fill, corner radius or arrowheads to configure, unlike ShapeElement. -->
         <DataTemplate DataType="doc:PenElement">
@@ -484,9 +625,6 @@
         </DataTemplate>
 
         <!-- Image Properties (Part 91): tabbed like the ID-ALL reference screenshots
-=======
-		<!-- Image Properties (Part 91): tabbed like the ID-ALL reference screenshots
->>>>>>> 42f7c5fa34fff67e27765b0cd486c893969f59d5
              (Clipping / Style / Position / Parameters); InfoID's own implementation
              against InfoID's own architecture and existing commands, not a port. X/Y/
              Width/Height/Rotation/Opacity stay in the shared header above this
@@ -1037,7 +1175,6 @@
              of canvas height. -->
 		<Border DockPanel.Dock="Top" Background="{DynamicResource BrushSurface}"
                 BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,0,0,1" Padding="8,6">
-<<<<<<< HEAD
             <DockPanel>
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="4" Margin="0,0,8,0">
                     <Button Classes="ghost toolbtn" Command="{Binding GoBackCommand}"
@@ -1050,18 +1187,7 @@
                     </Button>
                     <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,2" />
                 </StackPanel>
-                <Button DockPanel.Dock="Right" Classes="ghost" Content="+ New" Command="{Binding NewBlankTabCommand}"
-=======
-			<DockPanel>
-				<StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="4" Margin="0,0,8,0">
-					<Button Classes="ghost" Content="&lt; Back" Command="{Binding GoBackCommand}"
-                            ToolTip.Tip="Return to the format/template selection screen" />
-					<Button Classes="ghost" Content="Home" Command="{Binding GoHomeCommand}"
-                            ToolTip.Tip="Go to the InfoID home screen" />
-					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,2" />
-				</StackPanel>
 				<Button DockPanel.Dock="Right" Classes="ghost" Content="+ New" Command="{Binding NewBlankTabCommand}"
->>>>>>> 42f7c5fa34fff67e27765b0cd486c893969f59d5
                         ToolTip.Tip="New blank design (Ctrl+N)" />
 				<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
 					<ItemsControl ItemsSource="{Binding Tabs}">
@@ -1167,7 +1293,6 @@
                      sets PanToolActive), not by the ToggleButton's own click-toggles-
                      IsChecked behaviour, avoiding two competing write paths, and
                      SelectToolActive has no setter (TwoWay would fail against it). -->
-<<<<<<< HEAD
                 <ToggleButton Classes="toolbtn" ToolTip.Tip="Select tool (V) -- click, drag-select and move elements"
                               AutomationProperties.Name="Select tool"
                               IsChecked="{Binding ActiveTab.SelectToolActive, Mode=OneWay}"
@@ -1192,20 +1317,6 @@
                               Command="{Binding ActiveTab.PenToolCommand}">
                     <PathIcon Data="{x:Static icons:DesignerIcons.Pen}" Width="15" Height="15" />
                 </ToggleButton>
-=======
-					<ToggleButton Classes="toolbtn" ToolTip.Tip="Select tool (V) -- click, drag-select and move elements"
-								  AutomationProperties.Name="Select tool"
-								  IsChecked="{Binding ActiveTab.SelectToolActive, Mode=OneWay}"
-								  Command="{Binding ActiveTab.SelectToolCommand}">
-						<PathIcon Data="{x:Static icons:DesignerIcons.Select}" Width="15" Height="15" />
-					</ToggleButton>
-					<ToggleButton Classes="toolbtn" ToolTip.Tip="Pan tool (H) -- drag to pan the canvas. Space+drag or middle-mouse also pans anytime."
-								  AutomationProperties.Name="Pan tool"
-								  IsChecked="{Binding ActiveTab.PanToolActive, Mode=OneWay}"
-								  Command="{Binding ActiveTab.PanToolCommand}">
-						<PathIcon Data="{x:Static icons:DesignerIcons.Pan}" Width="15" Height="15" />
-					</ToggleButton>
->>>>>>> 42f7c5fa34fff67e27765b0cd486c893969f59d5
 
 					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
 
@@ -1392,13 +1503,11 @@
 
 					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
 
-<<<<<<< HEAD
                 <!-- Grid/Snap/Rulers toggles removed from here; they're duplicated
                      one-for-one in the header's View menu (Show/Hide Grid, Snap to Grid,
                      Show/Hide Rulers, all bound to these exact same commands), and having
                      both made this toolbar row noticeably more crowded for no added
                      capability. -->
-=======
 					<ToggleButton Classes="toolbtn-wide" Content="Grid" ToolTip.Tip="Show/hide the design grid"
 								  IsChecked="{Binding ActiveTab.ShowGrid, Mode=OneWay}"
 								  Command="{Binding ActiveTab.ToggleShowGridCommand}" />
@@ -1410,7 +1519,6 @@
 								  Command="{Binding ActiveTab.ToggleShowRulersCommand}" />
 
 					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
->>>>>>> 42f7c5fa34fff67e27765b0cd486c893969f59d5
 
 					<Button Classes="ghost toolbtn" ToolTip.Tip="Zoom out (Ctrl+-)" AutomationProperties.Name="Zoom out"
 							Command="{Binding ActiveTab.ZoomOutCommand}">
