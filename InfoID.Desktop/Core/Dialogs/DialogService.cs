@@ -26,6 +26,7 @@ public sealed class DialogService : IDialogService
         {
             Content = content,
             //SizingToContent = SizingToContent.WidthAndHeight,
+            SizeToContent = SizeToContent.WidthAndHeight,
             CanResize = viewModel.CanResize,
             ShowInTaskbar = false,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,

@@ -1581,32 +1581,48 @@
 				<controls:RulerView Name="VerticalRuler" Grid.Row="1" Grid.Column="0" Orientation="Vertical" Tab="{Binding ActiveTab}"
                                      IsVisible="{Binding ActiveTab.ShowRulers}" />
 
-				<Grid Grid.Row="1" Grid.Column="1" Name="CanvasArea">
-					<controls:CardCanvasView Name="CardCanvas" Tab="{Binding ActiveTab}" />
-					<TextBlock Text="Open a card from Home to start designing." Classes="caption"
-                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                               IsVisible="{Binding ActiveTab, Converter={x:Static ObjectConverters.IsNull}}" />
+				<Grid Grid.Row="1" Grid.Column="1" Name="CanvasArea" RowDefinitions="*,Auto">
 
-					<!-- Inline text-edit overlay (Part 3/80). A plain custom-drawn Control has no
-                         caret/selection/IME surface of its own, so double-clicking a TextElement on
-                         the canvas shows a real Avalonia TextBox positioned exactly over that
-                         element instead. Text is bound TwoWay straight to the element's own Text
-                         property, so typing here updates the document (and, via DesignerElement's
-                         PropertyChanged, the Properties panel) immediately — no separate "commit"
-                         copy of the string is kept while editing. Position/size are set from
-                         code-behind (CardDesignerView.axaml.cs) using CardCanvasView.GetElementScreenRect,
-                         which reuses the canvas's own layout math so the box can never drift.
-                         Single-line for this first version (Enter commits, matching Part 3's "Enter
-                         commits the edit"); multi-line text content can still be authored via the
-                         Properties panel's Text box, which does AcceptsReturn. -->
-					<TextBox Name="InlineEditBox"
-                             DataContext="{Binding ActiveTab.InlineEditingElement}"
-                             Text="{Binding Text, Mode=TwoWay}"
-                             IsVisible="{Binding ., Converter={x:Static ObjectConverters.IsNotNull}}"
-                             HorizontalAlignment="Left" VerticalAlignment="Top"
-                             AcceptsReturn="False" TextWrapping="NoWrap"
-                             BorderThickness="1" BorderBrush="#3B82F6" Background="White"
-                             Padding="2" MinHeight="0" MinWidth="0" />
+					<!-- Canvas area -->
+					<Grid Grid.Row="0">
+
+						<controls:CardCanvasView
+							Name="CardCanvas"
+							Tab="{Binding ActiveTab}" />
+
+						<TextBlock Text="Open a card from Home to start designing."
+								   Classes="caption"
+								   HorizontalAlignment="Center"
+								   VerticalAlignment="Center"
+								   IsVisible="{Binding ActiveTab, Converter={x:Static ObjectConverters.IsNull}}" />
+
+						<!-- Inline text-edit overlay -->
+						<TextBox Name="InlineEditBox"
+								 DataContext="{Binding ActiveTab.InlineEditingElement}"
+								 Text="{Binding Text, Mode=TwoWay}"
+								 IsVisible="{Binding ., Converter={x:Static ObjectConverters.IsNotNull}}"
+								 HorizontalAlignment="Left"
+								 VerticalAlignment="Top"
+								 AcceptsReturn="False"
+								 TextWrapping="NoWrap"
+								 BorderThickness="1"
+								 BorderBrush="#3B82F6"
+								 Background="White"
+								 Padding="2"
+								 MinHeight="0"
+								 MinWidth="0" />
+
+					</Grid>
+
+					<!-- Add database -->
+					<Button Grid.Row="1"
+							HorizontalAlignment="Center"
+							Margin="0,10,0,10"
+							Padding="24,10"
+							Classes="ghost"
+							Content="+  Add database" 
+							Command="{Binding ActiveTab.AddDatabaseCommand}"/>
+
 				</Grid>
 			</Grid>
 
