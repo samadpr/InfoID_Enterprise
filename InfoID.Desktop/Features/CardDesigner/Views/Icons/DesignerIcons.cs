@@ -51,6 +51,22 @@ public static class DesignerIcons
         "M6,9 L8,7.5 L8,12.5 L6,13.5 Z " +
         "M6,12 L18,12 L18,19 A3,3 0 0 1 15,22 L10,22 A4,4 0 0 1 6,18 Z");
 
+    /// <summary>Pen tool (freehand drawing) -- a tilted pencil shaft with a pointed tip
+    /// touching down at bottom-left, plus a small cap/ferrule near the top. Distinct
+    /// from the Shapes flyout's Line glyph (a plain diagonal bar) so the two tools read
+    /// differently at a glance despite both being "draw something" actions.</summary>
+    public static readonly Geometry Pen = G(
+        "M3,21 L3,17.5 L15,5.5 L18.5,9 L6.5,21 Z " +
+        "M16.4,4.1 L18,2.5 C18.4,2.1 19,2.1 19.4,2.5 L21.5,4.6 C21.9,5 21.9,5.6 21.5,6 L19.9,7.6 Z");
+
+    /// <summary>Home (tab strip's "go to the InfoID home screen" button) -- a simple
+    /// house silhouette with a doorway notch cut from the bottom edge.</summary>
+    public static readonly Geometry Home = G("M12,3 L21,10 L21,21 L15,21 L15,14 L9,14 L9,21 L3,21 L3,10 Z");
+
+    /// <summary>Back (tab strip's "return to the format/template selection screen"
+    /// button) -- a plain left-pointing chevron/arrow.</summary>
+    public static readonly Geometry Back = G("M14,4 L7,12 L14,20 L16.1,17.9 L11.2,12 L16.1,6.1 Z");
+
     // --- History ------------------------------------------------------------
     public static readonly Geometry Undo = G("M9,5 L9,1 L2,8 L9,15 L9,11 C15,11 19,14.5 18,20 C21,15 19,5 9,5 Z");
     public static readonly Geometry Redo = G("M15,5 L15,1 L22,8 L15,15 L15,11 C9,11 5,14.5 6,20 C3,15 5,5 15,5 Z");

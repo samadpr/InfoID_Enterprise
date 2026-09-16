@@ -248,8 +248,7 @@
               "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-16T04:47:27.06Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-16T04:47:27.06Z"
             },
             {
               "$type": "Document",
@@ -259,7 +258,7 @@
               "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
               "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
               "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAABAAAAApAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-09-16T04:31:31.796Z",
               "EditorCaption": ""
@@ -274,8 +273,7 @@
               "RelativeToolTip": "InfoID.Desktop\\ViewLocator.cs",
               "ViewState": "AgIAAAkAAAAAAAAAAAAowBgAAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-16T04:25:35.413Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-16T04:25:35.413Z"
             },
             {
               "$type": "Document",
@@ -300,8 +298,7 @@
               "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\ViewModels\\ConnectDatabaseDialogViewModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAuwAUAAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-16T04:20:36.055Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-16T04:20:36.055Z"
             },
             {
               "$type": "Document",
@@ -313,8 +310,7 @@
               "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignTabViewModel.cs",
               "ViewState": "AgIAABIGAAAAAAAAAAAowDMGAAA1AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-15T06:39:30.603Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-15T06:39:30.603Z"
             },
             {
               "$type": "Document",
@@ -326,8 +322,7 @@
               "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Views\\CardDesignerView.axaml",
               "ViewState": "AgIAAEQGAAAAAAAAAAAmwFcGAAA3AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-09-15T06:25:14.831Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-15T06:25:14.831Z"
             },
             {
               "$type": "Document",
@@ -339,8 +334,7 @@
               "RelativeToolTip": "InfoID.Desktop\\Core\\Dialogs\\DialogViewModelBase.cs",
               "ViewState": "AgIAACMAAAAAAAAAAAAiwDEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-16T04:21:45.218Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-16T04:21:45.218Z"
             },
             {
               "$type": "Document",
@@ -352,8 +346,7 @@
               "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\Services\\SQLiteConnectionService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-16T04:01:43.969Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-16T04:01:43.969Z"
             },
             {
               "$type": "Document",
@@ -365,8 +358,7 @@
               "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\Models\\DatabaseConnection.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-16T03:58:15.95Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-16T03:58:15.95Z"
             },
             {
               "$type": "Document",
@@ -378,8 +370,7 @@
               "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\Models\\DatabaseType.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-16T03:56:06.798Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-16T03:56:06.798Z"
             },
             {
               "$type": "Document",
@@ -403,8 +394,7 @@
               "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\Services\\IDatabaseConnectionService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-16T04:00:06.896Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-16T04:00:06.896Z"
             },
             {
               "$type": "Document",
@@ -440,8 +430,7 @@
               "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Converters\\ElementTypeToIconConverter.cs",
               "ViewState": "AgIAAC0AAAAAAAAAAAAYwCEAAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-15T11:41:03.313Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-15T11:41:03.313Z"
             },
             {
               "$type": "Document",
@@ -740,8 +729,7 @@
               "RelativeToolTip": "InfoID.Infrastructure\\InfoIdDbContextFactory.cs",
               "ViewState": "AgIAAAgAAAAAAAAAAAAqwBYAAAAuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T04:17:54.026Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-21T04:17:54.026Z"
             },
             {
               "$type": "Document",

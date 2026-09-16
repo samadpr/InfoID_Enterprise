@@ -37,6 +37,7 @@ namespace InfoID.Desktop.Features.CardDesigner.Models.Document;
 [JsonDerivedType(typeof(BarcodeElement), "barcode")]
 [JsonDerivedType(typeof(QrCodeElement), "qrcode")]
 [JsonDerivedType(typeof(DataFieldElement), "datafield")]
+[JsonDerivedType(typeof(PenElement), "pen")]
 [JsonDerivedType(typeof(DateTimeElement), "datetime")]
 public abstract partial class DesignerElement : ObservableObject
 {

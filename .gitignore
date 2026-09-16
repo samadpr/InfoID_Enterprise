@@ -1,0 +1,46 @@
+# -----------------------------------------------------------------------
+# InfoID -- ignored files for all projects (InfoID.Domain, InfoID.Application,
+# InfoID.Infrastructure, InfoID.Shared, InfoID.Desktop). These are all files
+# that dotnet build/Visual Studio regenerates on every build, or local
+# editor/OS state -- none of it should ever be pushed.
+# -----------------------------------------------------------------------
+
+# Build output (every project's bin/obj, at any depth)
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio / Rider workspace state
+.vs/
+.idea/
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Build logs / crash dumps
+*.binlog
+*.log
+*.dmp
+
+# NuGet
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+
+# Publish output
+**/publish/
+*.pubxml
+*.pubxml.user
+
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coveragexml
+
+# OS files
+Thumbs.db
+.DS_Store

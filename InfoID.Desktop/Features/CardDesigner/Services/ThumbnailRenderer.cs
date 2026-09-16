@@ -137,6 +137,9 @@ public static class ThumbnailRenderer
             case QrCodeElement qr:
                 DrawBarcodeOrQr(context, rect, BarcodeRenderer.TryGenerate(qr));
                 break;
+            case PenElement pen:
+                PenRenderer.Draw(context, rect, pen);
+                break;
         }
     }
 

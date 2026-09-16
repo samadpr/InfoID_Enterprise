@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "D:\\infome\\InfoID_Enterprise\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\database\\views\\connectdatabasedialogview.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\database\\views\\connectdatabasedialogview.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\database\\views\\connectdatabasedialogview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
       "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\database\\views\\connectdatabasedialogview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\database\\views\\connectdatabasedialogview.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\database\\views\\connectdatabasedialogview.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\database\\viewmodels\\connectdatabasedialogviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -236,11 +236,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "ConnectDatabaseDialogView.axaml.cs",
               "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml.cs",
               "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml.cs",
@@ -253,13 +253,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "ConnectDatabaseDialogView.axaml",
               "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
               "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
               "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
               "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAApAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABAAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-09-16T04:31:31.796Z",
               "EditorCaption": ""

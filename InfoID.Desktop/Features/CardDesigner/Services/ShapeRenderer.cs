@@ -50,12 +50,14 @@ public static class ShapeRenderer
                 context.DrawEllipse(fill, pen, rect);
                 break;
 
-            case ShapeKind.Line:
-                context.DrawLine(pen ?? new Pen(ParseBrush(shape.StrokeColorHex), 1), rect.TopLeft, new Point(rect.Right, rect.Bottom));
-                break;
-
             case ShapeKind.Arrow:
                 DrawArrow(context, rect, shape, pen ?? new Pen(ParseBrush(shape.StrokeColorHex), 1));
+                break;
+
+            case ShapeKind.Line:
+                var lineStart = shape.LineFlipped ? rect.BottomLeft : rect.TopLeft;
+                var lineEnd = shape.LineFlipped ? rect.TopRight : rect.BottomRight;
+                context.DrawLine(pen ?? new Pen(ParseBrush(shape.StrokeColorHex), 1), lineStart, lineEnd);
                 break;
 
             case ShapeKind.Triangle:
@@ -93,8 +95,8 @@ public static class ShapeRenderer
 
     private static void DrawArrow(DrawingContext context, Rect rect, ShapeElement shape, Pen pen)
     {
-        var start = rect.TopLeft;
-        var end = new Point(rect.Right, rect.Bottom);
+        var start = shape.LineFlipped ? rect.BottomLeft : rect.TopLeft;
+        var end = shape.LineFlipped ? rect.TopRight : rect.BottomRight;
         context.DrawLine(pen, start, end);
 
         var angle = Math.Atan2(end.Y - start.Y, end.X - start.X);
