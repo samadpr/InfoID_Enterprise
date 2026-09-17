@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace InfoID.Desktop.Features.Database.Models;
 
@@ -12,5 +12,10 @@ public sealed class DatabaseConnection
 
     public string ConnectionString { get; set; } = string.Empty;
 
+    public string Username { get; set; } = string.Empty;
+
+    public string Password { get; set; } = string.Empty;
+
+    public bool KeepCredentials { get; set; }
     public bool IsConnected { get; set; }
 }

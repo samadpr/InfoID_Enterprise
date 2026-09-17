@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("InfoID.Desktop")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4bc97349a16acae88fc5631d3f01661c068bcaf1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3f87fa47d163d1a933e5c5cc478ca06f8fa9c9fd")]
 [assembly: System.Reflection.AssemblyProductAttribute("InfoID.Desktop")]
 [assembly: System.Reflection.AssemblyTitleAttribute("InfoID.Desktop")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

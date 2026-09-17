@@ -9,6 +9,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.1.1" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.1.1" />
     <PackageReference Include="Avalonia.Desktop" Version="12.1.1" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.1" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.1" />
@@ -30,6 +31,7 @@
          see FaceDetectionService.cs) fully offline via ONNX Runtime; no photo ever
          leaves the machine. -->
     <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.20.1" />
+    <PackageReference Include="System.Data.Odbc" Version="10.0.12" />
     <!-- Barcode / QR Code generation (Card Designer's Barcode and QR Code elements).
          Real encoding (Reed-Solomon error correction for QR, exact symbol-pattern
          tables for Code128/PDF417/DataMatrix/Aztec/EAN-UPC) is correctness-critical

@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
@@ -7,7 +8,10 @@ using InfoID.Desktop.Features.CardDesigner.Models.Document;
 using InfoID.Desktop.Features.CardDesigner.ViewModels;
 using InfoID.Desktop.Features.CardDesigner.Views.Controls;
 using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using Avalonia.Data;
 
 namespace InfoID.Desktop.Features.CardDesigner.Views;
 
@@ -16,6 +20,7 @@ public partial class CardDesignerView : UserControl
     public CardDesignerView()
     {
         InitializeComponent();
+        DataContextChanged += OnDataContextChanged;
 
         var canvas = this.FindControl<CardCanvasView>("CardCanvas");
         var editBox = this.FindControl<TextBox>("InlineEditBox");
@@ -161,6 +166,93 @@ public partial class CardDesignerView : UserControl
     {
         if (sender is not TextBox { DataContext: CardDesignTabViewModel { IsRenaming: true } tab }) return;
         tab.CommitRenameCommand.Execute(null);
+    }
+    private void OnDataContextChanged(object? sender, EventArgs e)
+    {
+        if (DataContext is CardDesignerViewModel viewModel)
+        {
+            viewModel.PropertyChanged += ViewModel_PropertyChanged;
+
+            if (viewModel.ActiveTab is not null)
+            {
+                viewModel.ActiveTab.PropertyChanged += ActiveTab_PropertyChanged;
+            }
+        }
+    }
+
+    private void ViewModel_PropertyChanged(
+        object? sender,
+        System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(CardDesignerViewModel.ActiveTab))
+        {
+            if (sender is CardDesignerViewModel viewModel &&
+                viewModel.ActiveTab is not null)
+            {
+                viewModel.ActiveTab.PropertyChanged += ActiveTab_PropertyChanged;
+            }
+        }
+    }
+
+    private void ActiveTab_PropertyChanged(
+        object? sender,
+        System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(CardDesignTabViewModel.DatabaseDataView))
+        {
+            BuildDatabaseGrid();
+        }
+    }
+
+    private void BuildDatabaseGrid()
+    {
+        if (DatabaseDataGrid is null)
+            return;
+
+        DatabaseDataGrid.Columns.Clear();
+
+        var tab = ViewModel?.ActiveTab;
+
+        if (tab?.DatabaseDataView is null)
+            return;
+
+        var view = tab.DatabaseDataView;
+
+        if (view.Table is null)
+            return;
+
+        foreach (DataColumn column in view.Table.Columns)
+        {
+            var columnName = column.ColumnName;
+
+            var gridColumn = new DataGridTemplateColumn
+            {
+                Header = columnName,
+
+                CellTemplate = new FuncDataTemplate<object>(
+                    (item, _) =>
+                    {
+                        var value = "";
+
+                        if (item is DataRowView row)
+                        {
+                            value = row[columnName] == DBNull.Value
+                                ? ""
+                                : row[columnName]?.ToString() ?? "";
+                        }
+
+                        return new TextBlock
+                        {
+                            Text = value,
+                            Margin = new Thickness(6, 0),
+                            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+                        };
+                    },
+                    supportsRecycling: true)
+            };
+
+            DatabaseDataGrid.Columns.Add(gridColumn);
+        }
     }
 
     // ------------------------------------------------------------------ layers ----

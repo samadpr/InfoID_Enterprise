@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -16,6 +16,7 @@ public interface IFilePickerService
     /// and returns the picked file's local path, or null if the user cancelled.</summary>
     Task<string?> PickImageFileAsync(string title);
 
+    Task<string?> PickExcelFileAsync(string title);
     /// <summary>Generic "open file" dialog for a specific extension (e.g. .infoid
     /// import). Returns the picked file's local path, or null if cancelled.</summary>
     Task<string?> PickOpenFileAsync(string title, string filterName, IReadOnlyList<string> patterns);
@@ -44,6 +45,36 @@ public sealed class FilePickerService : IFilePickerService
         });
 
         return result.Count > 0 ? result[0].TryGetLocalPath() : null;
+    }
+
+    public async Task<string?> PickExcelFileAsync(string title)
+    {
+        var topLevel = GetOwnerWindow();
+        if (topLevel is null) return null;
+
+        var result = await topLevel.StorageProvider.OpenFilePickerAsync(
+            new FilePickerOpenOptions
+            {
+                Title = title,
+                AllowMultiple = false,
+                FileTypeFilter = new List<FilePickerFileType>
+                {
+                new("Excel Files")
+                {
+                    Patterns = new[]
+                    {
+                        "*.xlsx",
+                        "*.xls",
+                        "*.xlsm",
+                        "*.xlsb"
+                    }
+                }
+                }
+            });
+
+        return result.Count > 0
+            ? result[0].TryGetLocalPath()
+            : null;
     }
 
     public async Task<string?> PickOpenFileAsync(string title, string filterName, IReadOnlyList<string> patterns)
