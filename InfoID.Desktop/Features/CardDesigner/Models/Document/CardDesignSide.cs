@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace InfoID.Desktop.Features.CardDesigner.Models.Document;
 
@@ -12,4 +13,12 @@ public sealed class CardDesignSide
     public BackgroundSettings Background { get; set; } = new();
     public ObservableCollection<DesignerElement> Elements { get; set; } = new();
     public bool BackgroundLocked { get; set; }
+
+    /// <summary>Display name for each layer-group folder, keyed by the same GroupId
+    /// value elements carry on DesignerElement.GroupId. A folder can exist here with no
+    /// elements pointing at it yet -- created empty via the Layers panel's "+" button,
+    /// named, and only then populated by dragging elements in -- matching the reference
+    /// app's "Front / Color-Black / UV" named-folder structure rather than InfoID's
+    /// previous auto-generated "Group (3)" label with no folder-level identity.</summary>
+    public Dictionary<string, string> GroupNames { get; set; } = new();
 }

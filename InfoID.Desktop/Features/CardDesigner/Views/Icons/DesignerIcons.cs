@@ -195,6 +195,9 @@ public static class DesignerIcons
         "M4,7 A5,5 0 0 1 14,7 L14,9 L11.5,9 L11.5,7 A2.5,2.5 0 0 0 6.5,7 L6.5,10 L4,10 Z");
     public static readonly Geometry LayerGeneric = G("F0 M4,4 L20,4 L20,20 L4,20 Z M6.5,6.5 L17.5,6.5 L17.5,17.5 L6.5,17.5 Z");
 
+    /// <summary>Plain "+" -- New group folder button next to the Layers panel header.</summary>
+    public static readonly Geometry Add = G("M11,3 L13,3 L13,11 L21,11 L21,13 L13,13 L13,21 L11,21 L11,13 L3,13 L3,11 L11,11 Z");
+
     // --- Design checker -----------------------------------------------------------
     public static readonly Geometry CheckCircle = G(
         "F0 M12,2 A10,10 0 1 0 12.01,2 Z M12,4.4 A7.6,7.6 0 1 1 11.99,4.4 Z " +

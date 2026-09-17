@@ -1,0 +1,420 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Features.Printing.ViewModels"
+             xmlns:models="using:InfoID.Desktop.Features.Printing.Models"
+             xmlns:printing="using:InfoID.Desktop.Features.Printing.Views"
+             xmlns:printconv="using:InfoID.Desktop.Features.Printing.Converters"
+             mc:Ignorable="d" d:DesignWidth="980" d:DesignHeight="700"
+             x:Class="InfoID.Desktop.Features.Printing.Views.PrintDialogView"
+             x:DataType="vm:PrintDialogViewModel"
+             x:Name="Root"
+             Background="{DynamicResource BrushBackground}">
+
+    <!-- The real printing module (printer selection, bulk printing, rendering options,
+         print-status tracking); separate from Print Preview, which stays appearance-
+         only by its own explicit design. See PrintDialogViewModel's doc comment. -->
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.section">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,0,10" />
+        </Style>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+            <Setter Property="CornerRadius" Value="{StaticResource Radius.MD}" />
+            <Setter Property="Padding" Value="16" />
+        </Style>
+        <Style Selector="Button.stepper">
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+    </UserControl.Styles>
+
+    <DockPanel Margin="20">
+
+        <!-- Header -->
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,16">
+            <TextBlock Grid.Column="0" Text="Print" Classes="h2" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="2" Text="{Binding StatusMessage}" Classes="caption"
+                       Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" MaxWidth="360"
+                       VerticalAlignment="Center" HorizontalAlignment="Right" />
+        </Grid>
+
+        <!-- Footer -->
+        <Border DockPanel.Dock="Bottom" Padding="0,16,0,0">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                <ProgressBar Grid.Column="0" IsIndeterminate="True" IsVisible="{Binding IsPrinting}"
+                             Height="4" VerticalAlignment="Center" Margin="0,0,16,0" />
+                <Button Grid.Column="1" Classes="secondary" Content="Digital Copy" Margin="0,0,8,0"
+                        Command="{Binding SaveDigitalCopyCommand}" ToolTip.Tip="Save a rendered copy of the card(s) as a PDF" />
+                <Button Grid.Column="2" Classes="primary" Content="Print" Margin="0,0,8,0"
+                        Command="{Binding PrintCommand}" IsEnabled="{Binding !IsPrinting}" />
+                <Button Grid.Column="3" Classes="secondary" Content="Close" Command="{Binding CloseCommand}" />
+            </Grid>
+        </Border>
+
+        <TabControl>
+
+            <!-- ============================================================ Print ==== -->
+            <TabItem Header="Print">
+                <ScrollViewer Margin="0,12,0,0">
+                    <StackPanel Spacing="16">
+
+                        <Grid ColumnDefinitions="*,*">
+                            <!-- Destination -->
+                            <Border Classes="card" Grid.Column="0" Margin="0,0,8,0">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="Destination" Classes="section" />
+
+                                    <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                        <ComboBox Grid.Column="0" ItemsSource="{Binding Printers}" SelectedItem="{Binding SelectedPrinter}"
+                                                  HorizontalAlignment="Stretch" IsEnabled="{Binding PrintingSupportedHere}">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate x:DataType="models:PrinterInfo">
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                        <Button Grid.Column="1" Classes="ghost toolbtn" Margin="6,0,0,0" ToolTip.Tip="Refresh printer list"
+                                                AutomationProperties.Name="Refresh printers" Command="{Binding RefreshPrintersCommand}">
+                                            <PathIcon Data="{x:Static printing:PrintingIcons.Refresh}" Width="14" Height="14" />
+                                        </Button>
+                                        <Button Grid.Column="2" Classes="ghost toolbtn" Margin="4,0,0,0" ToolTip.Tip="Add a printer (opens system settings)"
+                                                AutomationProperties.Name="Add printer" Command="{Binding AddPrinterCommand}">
+                                            <PathIcon Data="{x:Static printing:PrintingIcons.Plus}" Width="14" Height="14" />
+                                        </Button>
+                                        <Button Grid.Column="3" Classes="ghost toolbtn" Margin="4,0,0,0" ToolTip.Tip="Preferences (opens the printer's own properties)"
+                                                AutomationProperties.Name="Printer preferences" Command="{Binding OpenPreferencesCommand}"
+                                                IsEnabled="{Binding SelectedPrinter, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                            <PathIcon Data="{x:Static printing:PrintingIcons.Gear}" Width="14" Height="14" />
+                                        </Button>
+                                    </Grid>
+
+                                    <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding SelectedPrinter, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                        <PathIcon Data="{x:Static printing:PrintingIcons.StatusDot}" Width="10" Height="10"
+                                                  Foreground="{Binding IsPrinterOnline, Converter={x:Static printconv:BoolToOnlineBrushConverter.Instance}}" />
+                                        <TextBlock Text="{Binding DriverStatus}" Classes="caption" />
+                                        <TextBlock Text="{Binding DriverIsDefault, StringFormat='(default: {0})'}" Classes="caption"
+                                                   Opacity="0.7" />
+                                    </StackPanel>
+
+                                    <Grid ColumnDefinitions="*,*">
+                                        <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                                            <TextBlock Text="Card Size" Classes="caption" />
+                                            <ComboBox ItemsSource="{Binding CardFormats}" SelectedItem="{Binding SelectedCardFormat}"
+                                                      HorizontalAlignment="Stretch">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Name}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Spacing="4" Margin="4,0,0,0">
+                                            <TextBlock Text="Card Orientation" Classes="caption" />
+                                            <ComboBox ItemsSource="{Binding OrientationOptions}" SelectedItem="{Binding SelectedOrientationOption}"
+                                                      HorizontalAlignment="Stretch" />
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Print Operations -->
+                            <Border Classes="card" Grid.Column="1" Margin="8,0,0,0">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="Print Operations" Classes="section" />
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Grid.Column="0" Text="Print Front" VerticalAlignment="Center" />
+                                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding PrintFront}" OnContent="{x:Null}" OffContent="{x:Null}" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Grid.Column="0" Text="Print Back" VerticalAlignment="Center" />
+                                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding PrintBack}" OnContent="{x:Null}" OffContent="{x:Null}" />
+                                    </Grid>
+
+                                    <Border Height="1" Background="{DynamicResource BrushBorder}" Margin="0,4" />
+
+                                    <TextBlock Text="Driver" Classes="section" Margin="0,0,0,0" />
+                                    <StackPanel Spacing="4">
+                                        <Grid ColumnDefinitions="Auto,*">
+                                            <TextBlock Grid.Column="0" Text="Name:" Classes="caption" Width="60" />
+                                            <TextBlock Grid.Column="1" Text="{Binding DriverName}" Classes="caption" TextWrapping="Wrap" />
+                                        </Grid>
+                                        <Grid ColumnDefinitions="Auto,*">
+                                            <TextBlock Grid.Column="0" Text="Status:" Classes="caption" Width="60" />
+                                            <TextBlock Grid.Column="1" Text="{Binding DriverStatus}" Classes="caption" />
+                                        </Grid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,*">
+                            <!-- Print Range -->
+                            <Border Classes="card" Grid.Column="0" Margin="0,0,8,0">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="Print Range" Classes="section" />
+                                    <TextBlock Text="Number of Cards" Classes="caption" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button Classes="stepper" Content="-" Command="{Binding DecrementCardsCommand}" />
+                                        <TextBlock Text="{Binding NumberOfCards}" VerticalAlignment="Center" Width="30" TextAlignment="Center" />
+                                        <Button Classes="stepper" Content="+" Command="{Binding IncrementCardsCommand}" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding Records.Count, StringFormat='of {0} available sample records'}" Classes="caption" Opacity="0.7" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Print Copies -->
+                            <Border Classes="card" Grid.Column="1" Margin="8,0,0,0">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="Print Copies" Classes="section" />
+                                    <TextBlock Text="Number of Copies" Classes="caption" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button Classes="stepper" Content="-" Command="{Binding DecrementCopiesCommand}" />
+                                        <TextBlock Text="{Binding NumberOfCopies}" VerticalAlignment="Center" Width="30" TextAlignment="Center" />
+                                        <Button Classes="stepper" Content="+" Command="{Binding IncrementCopiesCommand}" />
+                                    </StackPanel>
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                                        <TextBlock Grid.Column="0" Text="Reversed Order" VerticalAlignment="Center" Classes="caption" />
+                                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding ReversedOrder}" OnContent="{x:Null}" OffContent="{x:Null}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                        </Grid>
+
+                        <!-- Print Options -->
+                        <Border Classes="card">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="Print Options" Classes="section" />
+                                <TabControl>
+
+                                    <TabItem Header="Rendering">
+                                        <Grid ColumnDefinitions="*,*" Margin="0,10,0,0">
+                                            <StackPanel Grid.Column="0" Spacing="10" Margin="0,0,8,0">
+                                                <StackPanel Spacing="4">
+                                                    <TextBlock Text="Black" Classes="caption" />
+                                                    <ComboBox ItemsSource="{Binding ColorModeOptions}" SelectedItem="{Binding ColorMode}"
+                                                              HorizontalAlignment="Stretch">
+                                                        <ComboBox.ItemTemplate>
+                                                            <DataTemplate x:DataType="models:PrintColorMode">
+                                                                <TextBlock Text="{Binding Converter={x:Static printconv:PrintColorModeToLabelConverter.Instance}}" />
+                                                            </DataTemplate>
+                                                        </ComboBox.ItemTemplate>
+                                                    </ComboBox>
+                                                </StackPanel>
+                                                <StackPanel Spacing="4">
+                                                    <TextBlock Text="Antialiasing" Classes="caption" />
+                                                    <ComboBox ItemsSource="{Binding AntialiasModeOptions}" SelectedItem="{Binding AntialiasMode}"
+                                                              HorizontalAlignment="Stretch">
+                                                        <ComboBox.ItemTemplate>
+                                                            <DataTemplate x:DataType="models:PrintAntialiasMode">
+                                                                <TextBlock Text="{Binding Converter={x:Static printconv:PrintAntialiasModeToLabelConverter.Instance}}" />
+                                                            </DataTemplate>
+                                                        </ComboBox.ItemTemplate>
+                                                    </ComboBox>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Spacing="4" Margin="8,0,0,0" IsVisible="{Binding IsMonoChrome}">
+                                                <TextBlock Text="{Binding BlackPanelThreshold, StringFormat='Black Panel Threshold: {0:0}'}" Classes="caption" />
+                                                <Slider Minimum="0" Maximum="255" Value="{Binding BlackPanelThreshold}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </TabItem>
+
+                                    <TabItem Header="Advanced">
+                                        <StackPanel Spacing="10" Margin="0,10,0,0">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Grid.Column="0" Text="Rotate 180" VerticalAlignment="Center" />
+                                                <ToggleSwitch Grid.Column="1" IsChecked="{Binding Rotate180}" OnContent="{x:Null}" OffContent="{x:Null}" />
+                                            </Grid>
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Grid.Column="0" Text="Rotate 180 (Landscape)" VerticalAlignment="Center" />
+                                                <ToggleSwitch Grid.Column="1" IsChecked="{Binding Rotate180Landscape}" OnContent="{x:Null}" OffContent="{x:Null}" />
+                                            </Grid>
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Grid.Column="0" Text="Rotate 180 (Portrait)" VerticalAlignment="Center" />
+                                                <ToggleSwitch Grid.Column="1" IsChecked="{Binding Rotate180Portrait}" OnContent="{x:Null}" OffContent="{x:Null}" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </TabItem>
+
+                                    <TabItem Header="Magnetic">
+                                        <StackPanel Spacing="8" Margin="0,10,0,0">
+                                            <TextBlock Text="Magnetic-stripe encoding needs a dedicated ID-card printer's own vendor SDK (e.g. Evolis, Zebra, Fargo) -- not available to this app, so this is shown for reference rather than built as a working control." Classes="caption" TextWrapping="Wrap" Opacity="0.75" />
+                                        </StackPanel>
+                                    </TabItem>
+
+                                    <TabItem Header="Digital Copy">
+                                        <StackPanel Spacing="6" Margin="0,10,0,0">
+                                            <TextBlock Text="Digital Copy Mode" Classes="caption" />
+                                            <ComboBox ItemsSource="{Binding DigitalCopyModeOptions}" SelectedItem="{Binding DigitalCopyMode}" HorizontalAlignment="Stretch">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate x:DataType="models:DigitalCopyMode">
+                                                        <TextBlock Text="{Binding}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                            <TextBlock Text="When not Off, every Print run also auto-saves a copy under InfoID's DigitalCopies folder -- separate from the Digital Copy button below, which always asks where to save one on demand." Classes="caption" TextWrapping="Wrap" Opacity="0.7" />
+                                        </StackPanel>
+                                    </TabItem>
+
+                                </TabControl>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ========================================================== Preview ==== -->
+            <TabItem Header="Preview">
+                <DockPanel Margin="0,12,0,0">
+
+                    <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,16">
+                        <StackPanel Grid.Column="0" Spacing="6">
+                            <TextBlock Text="Filters" Classes="section" />
+                            <Grid ColumnDefinitions="Auto,Auto" >
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" Margin="0,0,16,0">
+                                    <ToggleSwitch IsChecked="{Binding PreviewShowFront}" OnContent="{x:Null}" OffContent="{x:Null}" />
+                                    <TextBlock Text="Front" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                    <ToggleSwitch IsChecked="{Binding PreviewShowBack}" OnContent="{x:Null}" OffContent="{x:Null}" />
+                                    <TextBlock Text="Back" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Spacing="6" HorizontalAlignment="Right">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <ToggleButton Classes="toolbtn-wide" Content="Color" IsChecked="{Binding PreviewShowColor}" />
+                                <ToggleButton Classes="toolbtn-wide" Content="Black" IsChecked="{Binding PreviewShowBlack}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <Button Classes="ghost toolbtn" ToolTip.Tip="Previous sample record" Command="{Binding PreviousPreviewRecordCommand}">
+                                    <PathIcon Data="{x:Static printing:PrintingIcons.ChevronLeft}" Width="12" Height="12" />
+                                </Button>
+                                <TextBlock Text="{Binding PreviewRecord.Label}" Classes="caption" VerticalAlignment="Center" MinWidth="130" TextAlignment="Center" />
+                                <Button Classes="ghost toolbtn" ToolTip.Tip="Next sample record" Command="{Binding NextPreviewRecordCommand}">
+                                    <PathIcon Data="{x:Static printing:PrintingIcons.ChevronRight}" Width="12" Height="12" />
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Background="{DynamicResource BrushSurface}" CornerRadius="8" Padding="24">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="24">
+
+                            <!-- Color (live vector) preview -->
+                            <printing:PrintCardPreviewSurface ViewModel="{Binding}" Side="Front" Width="340" Height="220"
+                                                               IsVisible="{Binding ShowFrontColorPanel}" />
+                            <printing:PrintCardPreviewSurface ViewModel="{Binding}" Side="Back" Width="340" Height="220"
+                                                               IsVisible="{Binding ShowBackColorPanel}" />
+
+                            <!-- Black (real rasterized + thresholded) preview -->
+                            <Image Source="{Binding BlackPreviewFront}" Width="340" Height="220" Stretch="Uniform"
+                                   IsVisible="{Binding ShowFrontBlackPanel}" />
+                            <Image Source="{Binding BlackPreviewBack}" Width="340" Height="220" Stretch="Uniform"
+                                   IsVisible="{Binding ShowBackBlackPanel}" />
+
+                        </StackPanel>
+                    </Border>
+                </DockPanel>
+            </TabItem>
+
+            <!-- ============================================ Advanced Print Operations ==== -->
+            <TabItem Header="Advanced Print Operations">
+                <ScrollViewer Margin="0,12,0,0">
+                    <StackPanel Spacing="16">
+
+                        <Grid ColumnDefinitions="Auto,*">
+                            <ToggleSwitch Grid.Column="0" IsChecked="{Binding UpdatePrintStatusEnabled}" OnContent="{x:Null}" OffContent="{x:Null}" Margin="0,0,10,0" />
+                            <TextBlock Grid.Column="1" Text="Update Print Status" VerticalAlignment="Center" FontWeight="Medium" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,*" IsEnabled="{Binding UpdatePrintStatusEnabled}">
+                            <Border Classes="card" Grid.Column="0" Margin="0,0,8,0">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="Automatic Print Status Update" Classes="section" />
+                                    <TextBlock Text="Please select the column to update after print. Stands in for a real database column mapping until the Cardholder Management module exists." Classes="caption" TextWrapping="Wrap" Opacity="0.75" />
+
+                                    <ItemsControl ItemsSource="{Binding StatusMappings}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:PrintStatusMappingRow">
+                                                <Grid ColumnDefinitions="*,*,Auto" Margin="0,0,0,6">
+                                                    <ComboBox Grid.Column="0" Margin="0,0,4,0" ItemsSource="{Binding #Root.((vm:PrintDialogViewModel)DataContext).AvailableFieldKeys}"
+                                                              SelectedItem="{Binding SourceColumn}" HorizontalAlignment="Stretch" PlaceholderText="No column..." />
+                                                    <ComboBox Grid.Column="1" Margin="4,0,4,0" ItemsSource="{Binding #Root.((vm:PrintDialogViewModel)DataContext).StatusMarkerOptions}"
+                                                              SelectedItem="{Binding Marker}" HorizontalAlignment="Stretch">
+                                                        <ComboBox.ItemTemplate>
+                                                            <DataTemplate x:DataType="models:PrintStatusMarker">
+                                                                <TextBlock Text="{Binding Converter={x:Static printconv:PrintStatusMarkerToLabelConverter.Instance}}" />
+                                                            </DataTemplate>
+                                                        </ComboBox.ItemTemplate>
+                                                    </ComboBox>
+                                                    <Button Grid.Column="2" Classes="ghost toolbtn" ToolTip.Tip="Remove this mapping"
+                                                            Command="{Binding #Root.((vm:PrintDialogViewModel)DataContext).RemoveStatusMappingCommand}"
+                                                            CommandParameter="{Binding}">
+                                                        <PathIcon Data="{x:Static printing:PrintingIcons.Minus}" Width="12" Height="12" />
+                                                    </Button>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <Button Classes="ghost toolbtn-wide" HorizontalAlignment="Left" Command="{Binding AddStatusMappingCommand}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <PathIcon Data="{x:Static printing:PrintingIcons.Plus}" Width="12" Height="12" />
+                                            <TextBlock Text="Add mapping" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Classes="card" Grid.Column="1" Margin="8,0,0,0">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="Manual Print Status Update" Classes="section" />
+                                    <Button Classes="secondary" Content="Set all records as printed" HorizontalAlignment="Stretch"
+                                            Command="{Binding SetAllPrintedCommand}" />
+                                    <Button Classes="secondary" Content="Set all records as not printed" HorizontalAlignment="Stretch"
+                                            Command="{Binding SetAllNotPrintedCommand}" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Border Classes="card">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="Records" Classes="section" />
+                                <ItemsControl ItemsSource="{Binding Records}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:PrintQueueRow">
+                                            <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,0,0,8">
+                                                <TextBlock Grid.Column="0" Text="{Binding Record.Label}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Text="{Binding PrintCount, StringFormat='printed {0}x'}" Classes="caption"
+                                                           Opacity="0.6" VerticalAlignment="Center" Margin="0,0,10,0" IsVisible="{Binding HasPrintCount}" />
+                                                <Border Grid.Column="2" CornerRadius="10" Padding="8,3" Margin="0,0,10,0"
+                                                        Background="{Binding State, Converter={x:Static printconv:PrintStateToBrushConverter.Instance}}">
+                                                    <TextBlock Text="{Binding State}" FontSize="11" Foreground="White" />
+                                                </Border>
+                                                <ToggleSwitch Grid.Column="3" IsChecked="{Binding IsPrinted}" OnContent="{x:Null}" OffContent="{x:Null}"
+                                                              ToolTip.Tip="Mark this record printed / not printed" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+        </TabControl>
+    </DockPanel>
+</UserControl>

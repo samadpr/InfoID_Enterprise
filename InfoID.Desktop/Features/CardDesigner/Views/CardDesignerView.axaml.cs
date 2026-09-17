@@ -254,4 +254,189 @@ public partial class CardDesignerView : UserControl
             DatabaseDataGrid.Columns.Add(gridColumn);
         }
     }
+
+    // ------------------------------------------------------------------ layers ----
+
+    private static readonly DataFormat<LayerNode> LayerDragFormat =
+        DataFormat.CreateInProcessFormat<LayerNode>("InfoID.LayerNode");
+
+    /// <summary>Unified click-or-drag gesture for a layer row -- there's no separate
+    /// drag-handle icon (there used to be one; it was a small, hover-only target that
+    /// made dragging feel fiddly and made it hard to pull an element back out of a
+    /// group). Any part of the row now works for both: press, then either release
+    /// roughly where you pressed (selects) or move a few pixels first (drags). This
+    /// mirrors how most layer panels behave and matches every Button already living
+    /// inside the row (icon expand/collapse, lock/eye/delete) -- those mark their own
+    /// PointerPressed handled via normal ButtonBase press handling, so a press that
+    /// starts on one of them never reaches these three handlers at all.</summary>
+    private LayerNode? _rowPressNode;
+    private Control? _rowPressControl;
+    private PointerPressedEventArgs? _rowPressArgs;
+    private Point _rowPressPoint;
+    private bool _rowDragStarted;
+
+    private void OnLayerRowPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is not Control { DataContext: LayerNode node } control) return;
+        if (!e.GetCurrentPoint(control).Properties.IsLeftButtonPressed) return;
+
+        _rowPressNode = node;
+        _rowPressControl = control;
+        _rowPressArgs = e;
+        _rowPressPoint = e.GetPosition(control);
+        _rowDragStarted = false;
+    }
+
+    /// <summary>IsDragging drives the row's reduced-opacity "lifted" look for the
+    /// duration of the drag (Border.layerRow.dragging in CardDesignerView.axaml) --
+    /// purely visual feedback so a drag actually feels like it's carrying something,
+    /// which is what made the very first version of this feature feel "not smooth."
+    /// Avalonia 12's DragDrop surface (DataTransfer/DataTransferItem/DataFormat)
+    /// replaced the older WPF-style DataObject API; no precedent for it existed
+    /// anywhere else in this codebase before this feature.</summary>
+    private async void OnLayerRowPointerMoved(object? sender, PointerEventArgs e)
+    {
+        if (_rowDragStarted || _rowPressNode is not { } node || _rowPressControl is not { } control || _rowPressArgs is not { } pressArgs) return;
+        if (!ReferenceEquals(sender, control)) return;
+        if (!e.GetCurrentPoint(control).Properties.IsLeftButtonPressed) return;
+
+        var delta = e.GetPosition(control) - _rowPressPoint;
+        if (Math.Abs(delta.X) < 4 && Math.Abs(delta.Y) < 4) return;
+
+        _rowDragStarted = true;
+        _rowPressNode = null;
+        _rowPressControl = null;
+        _rowPressArgs = null;
+
+        var data = new DataTransfer();
+        data.Add(DataTransferItem.Create(LayerDragFormat, node));
+
+        node.IsDragging = true;
+        try
+        {
+            await DragDrop.DoDragDropAsync(pressArgs, data, DragDropEffects.Move);
+        }
+        finally
+        {
+            node.IsDragging = false;
+        }
+    }
+
+    /// <summary>If a drag never started, this was a plain click -- select (or toggle,
+    /// with Ctrl/Shift) whatever the press landed on.</summary>
+    private void OnLayerRowPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        var wasDragging = _rowDragStarted;
+        var node = _rowPressNode;
+        _rowPressNode = null;
+        _rowPressControl = null;
+        _rowPressArgs = null;
+        _rowDragStarted = false;
+
+        if (wasDragging || node is null) return;
+        if (ViewModel?.ActiveTab is not { } tab) return;
+
+        if (e.KeyModifiers.HasFlag(KeyModifiers.Control) || e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+        {
+            tab.ToggleLayerNodeSelectionCommand.Execute(node);
+        }
+        else
+        {
+            tab.SelectLayerNodeCommand.Execute(node);
+        }
+    }
+
+    /// <summary>Toggles the drop-target highlight (Border.layerRow.dragOver) so hovering
+    /// a row while dragging shows exactly where a drop would land, instead of the drag
+    /// giving no feedback until you release.</summary>
+    private void OnLayerRowDragEnter(object? sender, DragEventArgs e)
+    {
+        if (sender is Border { DataContext: LayerNode } border && e.DataTransfer.Contains(LayerDragFormat))
+        {
+            border.Classes.Add("dragOver");
+        }
+    }
+
+    private void OnLayerRowDragLeave(object? sender, DragEventArgs e)
+    {
+        if (sender is Border border) border.Classes.Remove("dragOver");
+    }
+
+    private void OnLayerRowDragOver(object? sender, DragEventArgs e)
+    {
+        e.DragEffects = e.DataTransfer.Contains(LayerDragFormat) ? DragDropEffects.Move : DragDropEffects.None;
+    }
+
+    /// <summary>Hands the actual reorder/regroup decision to CardDesignTabViewModel.
+    /// HandleLayerDrop -- this handler's only job is figuring out which two LayerNodes
+    /// were involved. Marks the event handled so it doesn't also reach
+    /// OnLayersPanelBackgroundDrop on the ScrollViewer this row lives inside.</summary>
+    private void OnLayerRowDrop(object? sender, DragEventArgs e)
+    {
+        if (sender is Border border) border.Classes.Remove("dragOver");
+        if (sender is not Control { DataContext: LayerNode target }) return;
+        if (ViewModel?.ActiveTab is not { } tab) return;
+        if (e.DataTransfer.TryGetValue(LayerDragFormat) is not LayerNode dragged) return;
+
+        e.Handled = true;
+        tab.HandleLayerDrop(dragged, target);
+    }
+
+    /// <summary>Dropping on blank panel area (not on any row) is the explicit "take this
+    /// out of its group" gesture -- only reached when the drop didn't land on a row,
+    /// since OnLayerRowDrop above marks the event handled.</summary>
+    private void OnLayersPanelBackgroundDrop(object? sender, DragEventArgs e)
+    {
+        if (ViewModel?.ActiveTab is not { } tab) return;
+        if (e.DataTransfer.TryGetValue(LayerDragFormat) is not LayerNode dragged) return;
+
+        tab.HandleLayerDropToTopLevel(dragged);
+    }
+
+    // ------------------------------------------------------------ layer groups ----
+
+    /// <summary>Double-click on a group folder's name enters rename mode -- same shape
+    /// as OnTabTitleDoubleTapped above, just scoped to a LayerNode row instead of the
+    /// tab strip.</summary>
+    private void OnLayerGroupNameDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (sender is not Control { DataContext: LayerNode { IsGroup: true } node } control) return;
+        if (ViewModel?.ActiveTab is not { } tab) return;
+
+        tab.BeginRenameGroupCommand.Execute(node);
+
+        if (control.Parent is not Panel panel) return;
+        var box = panel.Children.OfType<TextBox>().FirstOrDefault();
+        if (box is null) return;
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            box.Focus();
+            box.SelectAll();
+        }, DispatcherPriority.Loaded);
+    }
+
+    private void OnLayerGroupRenameKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (sender is not TextBox { DataContext: LayerNode node } || ViewModel?.ActiveTab is not { } tab) return;
+
+        switch (e.Key)
+        {
+            case Key.Enter:
+                tab.CommitRenameGroupCommand.Execute(node);
+                e.Handled = true;
+                break;
+            case Key.Escape:
+                tab.CancelRenameGroupCommand.Execute(node);
+                e.Handled = true;
+                break;
+        }
+    }
+
+    private void OnLayerGroupRenameLostFocus(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not TextBox { DataContext: LayerNode { IsRenaming: true } node }) return;
+        if (ViewModel?.ActiveTab is not { } tab) return;
+        tab.CommitRenameGroupCommand.Execute(node);
+    }
 }

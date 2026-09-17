@@ -12,6 +12,7 @@ using InfoID.Desktop.Features.BlankCard.Services;
 using InfoID.Desktop.Features.BlankCard.ViewModels;
 using InfoID.Desktop.Features.CardDesigner.Services;
 using InfoID.Desktop.Features.CardDesigner.ViewModels;
+using InfoID.Desktop.Features.Printing.Services;
 using InfoID.Desktop.Features.Templates.Services;
 using InfoID.Desktop.Features.Templates.ViewModels;
 using InfoID.Desktop.Features.Welcome.Services;
@@ -156,6 +157,16 @@ public partial class App : Avalonia.Application
         services.AddSingleton<ICameraService, FlashCapCameraService>();
         services.AddSingleton<IFaceDetectionService, FaceDetectionService>();
         services.AddScoped<ICardDesignRepository, CardDesignRepository>();
+
+        // Print module -- one real OS-printing backend per platform (see
+        // IPrinterService's own doc comment for why this is plain shell commands
+        // rather than a System.Drawing.Printing/System.Windows.Forms dependency),
+        // chosen once here rather than at every call site.
+        services.AddSingleton<IPrinterService>(_ =>
+            OperatingSystem.IsWindows() ? new WindowsPrinterService()
+            : OperatingSystem.IsMacOS() || OperatingSystem.IsLinux() ? new CupsPrinterService()
+            : new UnsupportedPrinterService());
+        services.AddSingleton<IPrintStatusStore, JsonPrintStatusStore>();
 
         // Page ViewModels -- transient so every navigation gets a clean instance.
         services.AddTransient<WelcomeViewModel>();

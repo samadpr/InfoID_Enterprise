@@ -6,6 +6,7 @@ using InfoID.Desktop.Core.Services;
 using InfoID.Desktop.Features.BlankCard.Models;
 using InfoID.Desktop.Features.CardDesigner.Models.Document;
 using InfoID.Desktop.Features.CardDesigner.Services;
+using InfoID.Desktop.Features.Printing.Services;
 using InfoID.Desktop.Features.Templates.Models;
 using InfoID.Desktop.Features.Welcome.ViewModels;
 using InfoID.Desktop.ViewModels.Base;
@@ -38,6 +39,9 @@ public sealed partial class CardDesignerViewModel : ViewModelBase
     private readonly IImageEditingService _imageEditingService;
     private readonly ICameraService _cameraService;
     private readonly IFaceDetectionService _faceDetectionService;
+    private readonly IPrinterService _printerService;
+    private readonly IPrintStatusStore _printStatusStore;
+    private readonly ICardFormatCatalogService _cardFormatCatalogService;
     private int _untitledCounter = 1;
 
     /// <summary>Right-panel visibility (Part 24/75). Session-only (not persisted) --
@@ -63,7 +67,8 @@ public sealed partial class CardDesignerViewModel : ViewModelBase
         IDesignChecker designChecker, IThumbnailService thumbnailService, IDialogService dialogService,
         IInfoIdFileService infoIdFileService, IRecentFilesService recentFilesService,
         IImageEditingService imageEditingService, ICameraService cameraService,
-        IFaceDetectionService faceDetectionService)
+        IFaceDetectionService faceDetectionService, IPrinterService printerService,
+        IPrintStatusStore printStatusStore, ICardFormatCatalogService cardFormatCatalogService)
     {
         _navigationService = navigationService;
         _clipboard = clipboard;
@@ -81,6 +86,9 @@ public sealed partial class CardDesignerViewModel : ViewModelBase
         _imageEditingService = imageEditingService;
         _cameraService = cameraService;
         _faceDetectionService = faceDetectionService;
+        _printerService = printerService;
+        _printStatusStore = printStatusStore;
+        _cardFormatCatalogService = cardFormatCatalogService;
     }
 
     public ObservableCollection<CardDesignTabViewModel> Tabs { get; } = new();
@@ -197,7 +205,7 @@ public sealed partial class CardDesignerViewModel : ViewModelBase
     /// explicit value.</summary>
     private void OpenNewTab(CardDesignDocument document, DesignerSideView? initialSideView = null)
     {
-        var tab = new CardDesignTabViewModel(document, _clipboard, _repository, _filePicker, _assetService, _evaluator, _previewData, _preferences, _designChecker, _thumbnailService, _dialogService, _infoIdFileService, _recentFilesService, _imageEditingService, _cameraService, _faceDetectionService);
+        var tab = new CardDesignTabViewModel(document, _clipboard, _repository, _filePicker, _assetService, _evaluator, _previewData, _preferences, _designChecker, _thumbnailService, _dialogService, _infoIdFileService, _recentFilesService, _imageEditingService, _cameraService, _faceDetectionService, _printerService, _printStatusStore, _cardFormatCatalogService);
 
         if (initialSideView is { } sideView)
         {
