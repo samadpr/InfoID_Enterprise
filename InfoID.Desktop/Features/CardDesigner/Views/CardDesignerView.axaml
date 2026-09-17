@@ -8,6 +8,7 @@
              xmlns:conv="using:InfoID.Desktop.Features.CardDesigner.Converters"
              xmlns:icons="using:InfoID.Desktop.Features.CardDesigner.Views.Icons"
              xmlns:services="using:InfoID.Desktop.Features.CardDesigner.Services"
+             xmlns:printing="using:InfoID.Desktop.Features.Printing.Views"
              mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="820"
              x:Class="InfoID.Desktop.Features.CardDesigner.Views.CardDesignerView"
              x:DataType="vm:CardDesignerViewModel"
@@ -81,6 +82,55 @@
 		</Style>
 		<Style Selector="ToggleButton.railbtn:checked PathIcon">
 			<Setter Property="Foreground" Value="{DynamicResource BrushPrimary}" />
+		</Style>
+
+		<!-- Layers panel row (Part 96): the drag handle/lock/visibility/delete action
+             group only appears on hover, same "don't clutter the row until it's
+             relevant" idea the rest of this app already follows; and the whole row
+             tints when its element(s) are part of the current selection, matching the
+             tab strip's own Classes.active pattern (AppHeaderView) rather than a
+             one-off style just for this panel. -->
+		<Style Selector="Border.layerRow">
+			<Setter Property="Background" Value="Transparent" />
+		</Style>
+		<Style Selector="Border.layerRow.selected">
+			<Setter Property="Background" Value="{DynamicResource BrushSelectionBackground}" />
+		</Style>
+		<Style Selector="Border.layerRow StackPanel.layerRowActions">
+			<Setter Property="Opacity" Value="0" />
+		</Style>
+		<Style Selector="Border.layerRow:pointerover StackPanel.layerRowActions">
+			<Setter Property="Opacity" Value="1" />
+		</Style>
+		<!-- Drag feedback (Part 96 follow-up: drag felt "not smooth" with zero visual
+             cue): the row being lifted goes translucent, and whichever row the pointer
+             is currently over while dragging gets an accent outline so a drop target is
+             obvious before you let go, not just after. -->
+		<Style Selector="Border.layerRow.dragging">
+			<Setter Property="Opacity" Value="0.45" />
+		</Style>
+		<Style Selector="Border.layerRow.dragOver">
+			<Setter Property="BorderBrush" Value="{DynamicResource BrushPrimary}" />
+			<Setter Property="BorderThickness" Value="1.5" />
+		</Style>
+		<Style Selector="Border.layerRow">
+			<Setter Property="Cursor" Value="Hand" />
+			<Setter Property="Transitions">
+				<Transitions>
+					<DoubleTransition Property="Opacity" Duration="0:0:0.12" />
+				</Transitions>
+			</Setter>
+		</Style>
+		<Style Selector="PathIcon.layerChevron">
+			<Setter Property="RenderTransform" Value="rotate(0deg)" />
+			<Setter Property="Transitions">
+				<Transitions>
+					<TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1" />
+				</Transitions>
+			</Setter>
+		</Style>
+		<Style Selector="PathIcon.layerChevron.expanded">
+			<Setter Property="RenderTransform" Value="rotate(90deg)" />
 		</Style>
 
 		<!-- Small caret badge on the Shapes rail button, hinting it opens a flyout
@@ -1272,6 +1322,10 @@
                             Command="{Binding ActiveTab.ShowPrintPreviewCommand}">
 						<PathIcon Data="{x:Static icons:DesignerIcons.Print}" Width="16" Height="16" />
 					</Button>
+					<Button Classes="ghost toolbtn" ToolTip.Tip="Print..." AutomationProperties.Name="Print"
+                            Command="{Binding ActiveTab.ShowPrintDialogCommand}">
+						<PathIcon Data="{x:Static printing:PrintingIcons.Printer}" Width="16" Height="16" />
+					</Button>
 					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
 					<Button Classes="ghost toolbtn" ToolTip.Tip="Undo (Ctrl+Z)" AutomationProperties.Name="Undo"
                             Command="{Binding ActiveTab.UndoCommand}" IsEnabled="{Binding ActiveTab.CanUndo}">
@@ -1909,42 +1963,108 @@
                                   ResizeDirection="Rows"
                                   ToolTip.Tip="Drag to resize Properties vs Layers" />
 
-					<ScrollViewer Grid.Row="2" IsVisible="{Binding ShowLayersPanel}">
+					<ScrollViewer Grid.Row="2" IsVisible="{Binding ShowLayersPanel}"
+                                  DragDrop.AllowDrop="True"
+                                  DragDrop.DragOver="OnLayerRowDragOver"
+                                  DragDrop.Drop="OnLayersPanelBackgroundDrop">
 						<StackPanel Margin="16" Spacing="8">
-							<TextBlock Text="Layers" Classes="h3" />
-							<ItemsControl ItemsSource="{Binding ActiveTab.FocusedSideModel.Elements}">
+
+							<Grid ColumnDefinitions="*,Auto">
+								<TextBlock Grid.Column="0" Text="Layers" Classes="h3" VerticalAlignment="Center" />
+								<Button Grid.Column="1" Classes="ghost toolbtn" Padding="4,0" ToolTip.Tip="New layer folder"
+                                        AutomationProperties.Name="New layer folder"
+                                        Command="{Binding ActiveTab.CreateLayerGroupCommand}">
+									<PathIcon Data="{x:Static icons:DesignerIcons.Add}" Width="14" Height="14" />
+								</Button>
+							</Grid>
+
+							<!-- Layers panel: a real hierarchical tree (grouped elements nest under one
+                                 collapsible folder row instead of a flat list), and clicking/dragging is
+                                 unified at the row level: press-and-release-in-place selects, press-and-
+                                 move-past-a-few-pixels drags (OnLayerRowPointerPressed/Moved/Released in
+                                 CardDesignerView.axaml.cs), so there's no separate drag-handle icon to find
+                                 and no dead zone: any part of the row (icon, name, or blank space) both
+                                 selects and drags. Dropping onto another row reorders/regroups via
+                                 HandleLayerDrop; dropping on the panel's blank area below the list pulls a
+                                 grouped element back out to the top level via HandleLayerDropToTopLevel
+                                 (CardDesignTabViewModel), both go through History, so a drag is one
+                                 undoable step like any other layer move. -->
+							<ItemsControl ItemsSource="{Binding ActiveTab.LayerTree}">
+								<ItemsControl.Resources>
+									<DataTemplate x:Key="LayerRowTemplate" x:DataType="vm:LayerNode">
+										<Border Classes="layerRow" Classes.selected="{Binding IsSelected}" Classes.dragging="{Binding IsDragging}"
+                                                CornerRadius="{StaticResource Radius.SM}" Margin="0,1"
+                                                AutomationProperties.Name="{Binding DisplayName, StringFormat='Layer: {0}'}"
+                                                PointerPressed="OnLayerRowPointerPressed"
+                                                PointerMoved="OnLayerRowPointerMoved"
+                                                PointerReleased="OnLayerRowPointerReleased"
+                                                DragDrop.AllowDrop="True"
+                                                DragDrop.DragEnter="OnLayerRowDragEnter"
+                                                DragDrop.DragLeave="OnLayerRowDragLeave"
+                                                DragDrop.DragOver="OnLayerRowDragOver"
+                                                DragDrop.Drop="OnLayerRowDrop">
+											<Grid ColumnDefinitions="16,20,*,Auto" Height="28">
+
+												<Button Grid.Column="0" Classes="ghost" Padding="0" Width="16" Height="16"
+                                                        IsVisible="{Binding IsGroup}"
+                                                        ToolTip.Tip="Expand/collapse group"
+                                                        AutomationProperties.Name="Expand or collapse group"
+                                                        Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.ToggleGroupExpandedCommand}"
+                                                        CommandParameter="{Binding}">
+													<PathIcon Classes="layerChevron" Classes.expanded="{Binding IsExpanded}"
+                                                              Data="{x:Static icons:DesignerIcons.ChevronRight}" Width="9" Height="9" />
+												</Button>
+
+												<PathIcon Grid.Column="1" Width="13" Height="13" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                          Data="{Binding Converter={x:Static conv:LayerNodeToIconConverter.Instance}}" />
+
+												<Panel Grid.Column="2" DoubleTapped="OnLayerGroupNameDoubleTapped">
+													<TextBlock Text="{Binding DisplayName}" Classes="body" TextTrimming="CharacterEllipsis"
+                                                               VerticalAlignment="Center" Margin="4,0" IsVisible="{Binding !IsRenaming}" />
+													<TextBox Text="{Binding RenameText, Mode=TwoWay}"
+                                                             IsVisible="{Binding IsRenaming}" Padding="4,2" FontSize="12"
+                                                             KeyDown="OnLayerGroupRenameKeyDown" LostFocus="OnLayerGroupRenameLostFocus" />
+												</Panel>
+
+												<StackPanel Grid.Column="3" Classes="layerRowActions" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+													<Button Classes="ghost" Padding="3,0"
+                                                            ToolTip.Tip="Lock/unlock" AutomationProperties.Name="Toggle layer lock"
+                                                            Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.ToggleLayerNodeLockedCommand}"
+                                                            CommandParameter="{Binding}">
+														<PathIcon Data="{Binding Locked, Converter={x:Static conv:BoolStateIconConverter.Instance}, ConverterParameter=Lock}" Width="13" Height="13" />
+													</Button>
+													<Button Classes="ghost" Padding="3,0"
+                                                            ToolTip.Tip="Show/hide" AutomationProperties.Name="Toggle layer visibility"
+                                                            Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.ToggleLayerNodeVisibleCommand}"
+                                                            CommandParameter="{Binding}">
+														<PathIcon Data="{Binding Visible, Converter={x:Static conv:BoolStateIconConverter.Instance}, ConverterParameter=Visibility}" Width="13" Height="13" />
+													</Button>
+													<Button Classes="ghost" Padding="3,0"
+                                                            ToolTip.Tip="Delete" AutomationProperties.Name="Delete layer"
+                                                            Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.DeleteLayerNodeCommand}"
+                                                            CommandParameter="{Binding}">
+														<PathIcon Data="{x:Static icons:DesignerIcons.Delete}" Width="13" Height="13" />
+													</Button>
+												</StackPanel>
+											</Grid>
+										</Border>
+									</DataTemplate>
+								</ItemsControl.Resources>
 								<ItemsControl.ItemTemplate>
-									<DataTemplate x:DataType="doc:DesignerElement">
-										<Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,2">
-											<!-- Icon-first layer row (Part 19): element-type glyph, name, then
-                                                 eye/lock toggles that swap their own icon based on state instead
-                                                 of showing the raw True/False bool as button text. -->
-											<Button Grid.Column="0" Classes="ghost" Padding="4,0"
-                                                    ToolTip.Tip="{Binding ElementType}"
-                                                    AutomationProperties.Name="{Binding ElementType, StringFormat='Select layer: {0}'}"
-                                                    Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SelectOnlyLayerCommand}"
-                                                    CommandParameter="{Binding}">
-												<PathIcon Data="{Binding Converter={x:Static conv:ElementTypeToIconConverter.Instance}}" Width="14" Height="14" />
-											</Button>
-											<TextBlock Grid.Column="1" Text="{Binding Name}" Classes="body" VerticalAlignment="Center" Margin="6,0" />
-											<Button Grid.Column="2" Classes="ghost" Padding="4,0"
-                                                    ToolTip.Tip="Show/hide this layer"
-                                                    AutomationProperties.Name="Toggle layer visibility"
-                                                    Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.ToggleLayerVisibleCommand}"
-                                                    CommandParameter="{Binding}">
-												<PathIcon Data="{Binding Visible, Converter={x:Static conv:BoolStateIconConverter.Instance}, ConverterParameter=Visibility}" Width="14" Height="14" />
-											</Button>
-											<Button Grid.Column="3" Classes="ghost" Padding="4,0"
-                                                    ToolTip.Tip="Lock/unlock this layer"
-                                                    AutomationProperties.Name="Toggle layer lock"
-                                                    Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.ToggleLayerLockedCommand}"
-                                                    CommandParameter="{Binding}">
-												<PathIcon Data="{Binding Locked, Converter={x:Static conv:BoolStateIconConverter.Instance}, ConverterParameter=Lock}" Width="14" Height="14" />
-											</Button>
-										</Grid>
+									<DataTemplate x:DataType="vm:LayerNode">
+										<StackPanel>
+											<ContentControl Content="{Binding}" ContentTemplate="{StaticResource LayerRowTemplate}" />
+											<ItemsControl ItemsSource="{Binding Children}" Margin="20,0,0,0"
+                                                          IsVisible="{Binding IsExpanded}"
+                                                          ItemTemplate="{StaticResource LayerRowTemplate}" />
+										</StackPanel>
 									</DataTemplate>
 								</ItemsControl.ItemTemplate>
 							</ItemsControl>
+
+							<TextBlock Text="No elements on this side yet." Classes="caption" Opacity="0.6"
+                                       IsVisible="{Binding ActiveTab.LayerTree.Count, Converter={x:Static conv:CountToBoolConverter.Instance}, ConverterParameter=Zero}" />
+
 						</StackPanel>
 					</ScrollViewer>
 				</Grid>
