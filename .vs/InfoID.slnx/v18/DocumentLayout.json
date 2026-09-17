@@ -1,0 +1,929 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\infome\\InfoID_Enterprise\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\database\\views\\connectdatabasedialogview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\database\\views\\connectdatabasedialogview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\database\\views\\connectdatabasedialogview.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\database\\views\\connectdatabasedialogview.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\database\\viewmodels\\connectdatabasedialogviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\database\\viewmodels\\connectdatabasedialogviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\viewlocator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\viewlocator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\database\\views\\connectdatabasedialogview.axaml||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\database\\views\\connectdatabasedialogview.axaml||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\carddesigner\\views\\carddesignerview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\views\\carddesignerview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\carddesigner\\viewmodels\\carddesigntabviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\viewmodels\\carddesigntabviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\core\\dialogs\\dialogviewmodelbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\core\\dialogs\\dialogviewmodelbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\database\\services\\sqliteconnectionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\database\\services\\sqliteconnectionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\database\\services\\idatabaseconnectionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\database\\services\\idatabaseconnectionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\database\\models\\databasetype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\database\\models\\databasetype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\database\\models\\databaseconnection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\database\\models\\databaseconnection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\carddesigner\\converters\\elementtypetoiconconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\converters\\elementtypetoiconconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\welcome\\viewmodels\\recentcardlistviewmodelbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\welcome\\viewmodels\\recentcardlistviewmodelbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\core\\dialogs\\messagedialogview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\core\\dialogs\\messagedialogview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\blankcard\\views\\customcarddialogview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\blankcard\\views\\customcarddialogview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\core\\dialogs\\dialogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\core\\dialogs\\dialogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\carddesigner\\viewmodels\\carddesignerviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\viewmodels\\carddesignerviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\carddesigner\\models\\document\\carddesignside.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\carddesignside.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\carddesigner\\models\\document\\carddesigndocument.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\carddesigndocument.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\shell\\components\\appheaderview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\shell\\components\\appheaderview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\carddesigner\\views\\cropeditorview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\views\\cropeditorview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\carddesigner\\views\\icons\\designericons.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\views\\icons\\designericons.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\USER\\AppData\\Local\\SourceServer\\45367e8c1a3e01f282e1af1bd046c8ab179e8b273ac4137f624521301a449c53\\InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignTabViewModel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\carddesigner\\views\\controls\\cardcanvasview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\views\\controls\\cardcanvasview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\carddesigner\\models\\document\\designerelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\designerelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\carddesigner\\models\\document\\qrcodeelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\qrcodeelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\carddesigner\\models\\document\\elementtype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\carddesigner\\models\\document\\elementtype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\templates\\models\\templatecatalogitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\templates\\models\\templatecatalogitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\templates\\viewmodels\\templatesviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\templates\\viewmodels\\templatesviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|d:\\infome\\infoid_enterprise\\infoid.desktop\\features\\blankcard\\viewmodels\\blankcardviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7583DD9E-6E0A-D65A-DA2B-FF2DB8CC086E}|InfoID.Desktop\\InfoID.Desktop.csproj|solutionrelative:infoid.desktop\\features\\blankcard\\viewmodels\\blankcardviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid_enterprise\\infoid.infrastructure\\persistence\\databaseinitializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\persistence\\databaseinitializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|d:\\infome\\infoid_enterprise\\infoid.application\\services\\templateservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|solutionrelative:infoid.application\\services\\templateservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4E93075D-36F1-1619-DF54-4D29BC5DFA40}|InfoID.Domain\\InfoID.Domain.csproj|d:\\infome\\infoid_enterprise\\infoid.domain\\common\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E93075D-36F1-1619-DF54-4D29BC5DFA40}|InfoID.Domain\\InfoID.Domain.csproj|solutionrelative:infoid.domain\\common\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4E93075D-36F1-1619-DF54-4D29BC5DFA40}|InfoID.Domain\\InfoID.Domain.csproj|d:\\infome\\infoid_enterprise\\infoid.domain\\entities\\templatemodule\\template.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E93075D-36F1-1619-DF54-4D29BC5DFA40}|InfoID.Domain\\InfoID.Domain.csproj|solutionrelative:infoid.domain\\entities\\templatemodule\\template.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid_enterprise\\infoid.infrastructure\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid_enterprise\\infoid.infrastructure\\infoiddbcontextfactory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\infoiddbcontextfactory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid_enterprise\\infoid.infrastructure\\infoiddbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\infoiddbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid_enterprise\\infoid.infrastructure\\persistence\\databasediagnosticsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\persistence\\databasediagnosticsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid_enterprise\\infoid.infrastructure\\persistence\\idatabasediagnosticsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\persistence\\idatabasediagnosticsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid_enterprise\\infoid.infrastructure\\persistence\\databasehealthreport.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\persistence\\databasehealthreport.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid_enterprise\\infoid.infrastructure\\persistence\\filestartuplogger.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\persistence\\filestartuplogger.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid_enterprise\\infoid.infrastructure\\persistence\\idatabaseinitializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\persistence\\idatabaseinitializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid_enterprise\\infoid.infrastructure\\persistence\\istartuplogger.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\persistence\\istartuplogger.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid_enterprise\\infoid.infrastructure\\persistence\\databaselocation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\persistence\\databaselocation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid_enterprise\\infoid.infrastructure\\persistence\\databaseinitializationresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\persistence\\databaseinitializationresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\asama\\AppData\\Local\\Temp\\8110d274-093d-4d76-ab89-cd29bd3425a3_InfoID.Desktop.zip.InfoID.Desktop.zip\\InfoID.Desktop\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|d:\\infome\\infoid_enterprise\\infoid.application\\dtos\\templatemodule\\templatedtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|solutionrelative:infoid.application\\dtos\\templatemodule\\templatedtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|d:\\infome\\infoid_enterprise\\infoid.application\\dtos\\organization\\appuserdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|solutionrelative:infoid.application\\dtos\\organization\\appuserdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|d:\\infome\\infoid_enterprise\\infoid.application\\interfaces\\iappuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|solutionrelative:infoid.application\\interfaces\\iappuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|d:\\infome\\infoid_enterprise\\infoid.application\\interfaces\\ibranchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|solutionrelative:infoid.application\\interfaces\\ibranchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|d:\\infome\\infoid_enterprise\\infoid.application\\interfaces\\iorganizationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|solutionrelative:infoid.application\\interfaces\\iorganizationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|d:\\infome\\infoid_enterprise\\infoid.application\\interfaces\\itemplateservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|solutionrelative:infoid.application\\interfaces\\itemplateservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|d:\\infome\\infoid_enterprise\\infoid.application\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|solutionrelative:infoid.application\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|d:\\infome\\infoid_enterprise\\infoid.application\\services\\licenseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|solutionrelative:infoid.application\\services\\licenseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|d:\\infome\\infoid_enterprise\\infoid.application\\services\\branchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FA476D66-F29D-44AD-DCB5-764DF3E24383}|InfoID.Application\\InfoID.Application.csproj|solutionrelative:infoid.application\\services\\branchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|d:\\infome\\infoid_enterprise\\infoid.infrastructure\\migrations\\20260828045704_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E6C7C25-5E8E-4E09-E51E-5C5A3A686DAB}|InfoID.Infrastructure\\InfoID.Infrastructure.csproj|solutionrelative:infoid.infrastructure\\migrations\\20260828045704_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ConnectDatabaseDialogView.axaml.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-16T04:47:27.06Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ConnectDatabaseDialogView.axaml",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-09-16T04:31:31.796Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ViewLocator.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\ViewLocator.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\ViewLocator.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\ViewLocator.cs",
+              "RelativeToolTip": "InfoID.Desktop\\ViewLocator.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAowBgAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-16T04:25:35.413Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ConnectDatabaseDialogView.axaml",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\Views\\ConnectDatabaseDialogView.axaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACUAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-09-16T04:24:14.293Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ConnectDatabaseDialogViewModel.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\ViewModels\\ConnectDatabaseDialogViewModel.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Database\\ViewModels\\ConnectDatabaseDialogViewModel.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\ViewModels\\ConnectDatabaseDialogViewModel.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\ViewModels\\ConnectDatabaseDialogViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAUAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-16T04:20:36.055Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CardDesignTabViewModel.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignTabViewModel.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignTabViewModel.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignTabViewModel.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignTabViewModel.cs",
+              "ViewState": "AgIAABIGAAAAAAAAAAAowDMGAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T06:39:30.603Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "CardDesignerView.axaml",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Views\\CardDesignerView.axaml",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Views\\CardDesignerView.axaml",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Views\\CardDesignerView.axaml",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Views\\CardDesignerView.axaml",
+              "ViewState": "AgIAAEQGAAAAAAAAAAAmwFcGAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-09-15T06:25:14.831Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "DialogViewModelBase.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Core\\Dialogs\\DialogViewModelBase.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Core\\Dialogs\\DialogViewModelBase.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Core\\Dialogs\\DialogViewModelBase.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Core\\Dialogs\\DialogViewModelBase.cs",
+              "ViewState": "AgIAACMAAAAAAAAAAAAiwDEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-16T04:21:45.218Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "SQLiteConnectionService.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Services\\SQLiteConnectionService.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Database\\Services\\SQLiteConnectionService.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Services\\SQLiteConnectionService.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\Services\\SQLiteConnectionService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-16T04:01:43.969Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "DatabaseConnection.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Models\\DatabaseConnection.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Database\\Models\\DatabaseConnection.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Models\\DatabaseConnection.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\Models\\DatabaseConnection.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-16T03:58:15.95Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "DatabaseType.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Models\\DatabaseType.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Database\\Models\\DatabaseType.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Models\\DatabaseType.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\Models\\DatabaseType.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-16T03:56:06.798Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "CustomCardDialogView.axaml",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\BlankCard\\Views\\CustomCardDialogView.axaml",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\BlankCard\\Views\\CustomCardDialogView.axaml",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\BlankCard\\Views\\CustomCardDialogView.axaml",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\BlankCard\\Views\\CustomCardDialogView.axaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC4AAABMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-09-15T12:04:32.133Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "IDatabaseConnectionService.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Services\\IDatabaseConnectionService.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Database\\Services\\IDatabaseConnectionService.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Database\\Services\\IDatabaseConnectionService.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\Database\\Services\\IDatabaseConnectionService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-16T04:00:06.896Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "MessageDialogView.axaml",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Core\\Dialogs\\MessageDialogView.axaml",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Core\\Dialogs\\MessageDialogView.axaml",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Core\\Dialogs\\MessageDialogView.axaml",
+              "RelativeToolTip": "InfoID.Desktop\\Core\\Dialogs\\MessageDialogView.axaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-09-15T12:02:08.315Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "RecentCardListViewModelBase.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Welcome\\ViewModels\\RecentCardListViewModelBase.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Welcome\\ViewModels\\RecentCardListViewModelBase.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Welcome\\ViewModels\\RecentCardListViewModelBase.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\Welcome\\ViewModels\\RecentCardListViewModelBase.cs",
+              "ViewState": "AgIAADsAAAAAAAAAAAAmwE8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T11:58:59.904Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "ElementTypeToIconConverter.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Converters\\ElementTypeToIconConverter.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Converters\\ElementTypeToIconConverter.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Converters\\ElementTypeToIconConverter.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Converters\\ElementTypeToIconConverter.cs",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAYwCEAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T11:41:03.313Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "DialogService.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Core\\Dialogs\\DialogService.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Core\\Dialogs\\DialogService.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Core\\Dialogs\\DialogService.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Core\\Dialogs\\DialogService.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAABkAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T12:12:18.301Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "CardDesignerViewModel.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignerViewModel.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignerViewModel.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignerViewModel.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignerViewModel.cs",
+              "ViewState": "AgIAAE0AAAAAAAAAAAAawFkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T11:34:28.674Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "CardDesignDocument.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignDocument.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignDocument.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignDocument.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignDocument.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAADgvwkAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T11:33:59.284Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "AppHeaderView.axaml",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Shell\\Components\\AppHeaderView.axaml",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Shell\\Components\\AppHeaderView.axaml",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Shell\\Components\\AppHeaderView.axaml",
+              "RelativeToolTip": "InfoID.Desktop\\Shell\\Components\\AppHeaderView.axaml",
+              "ViewState": "AgIAAGcAAAAAAAAAAAAAwIcAAABMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-09-15T11:32:36.446Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "CardDesignSide.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignSide.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignSide.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignSide.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\CardDesignSide.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAADgvwYAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T11:32:07.854Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "CropEditorView.axaml",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Views\\CropEditorView.axaml",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Views\\CropEditorView.axaml",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Views\\CropEditorView.axaml",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Views\\CropEditorView.axaml",
+              "ViewState": "AgIAABUAAAAAAAAAAAAQwBwAAABYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-09-15T11:31:28.738Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "QrCodeElement.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\QrCodeElement.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\QrCodeElement.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\QrCodeElement.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\QrCodeElement.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAYwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T06:36:10.309Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "DesignerIcons.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Views\\Icons\\DesignerIcons.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Views\\Icons\\DesignerIcons.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Views\\Icons\\DesignerIcons.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Views\\Icons\\DesignerIcons.cs",
+              "ViewState": "AgIAAMgAAAAAAAAAAAAqwN0AAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T06:54:45.815Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "CardDesignTabViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\AppData\\Local\\SourceServer\\45367e8c1a3e01f282e1af1bd046c8ab179e8b273ac4137f624521301a449c53\\InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignTabViewModel.cs",
+              "ToolTip": "C:\\Users\\USER\\AppData\\Local\\SourceServer\\45367e8c1a3e01f282e1af1bd046c8ab179e8b273ac4137f624521301a449c53\\InfoID.Desktop\\Features\\CardDesigner\\ViewModels\\CardDesignTabViewModel.cs [Read Only]",
+              "ViewState": "AgIAAEUEAAAAAAAAAAAiwAAAAAAAAAAAAQAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T09:42:03.204Z",
+              "EditorCaption": " [Read Only]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "DesignerElement.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\DesignerElement.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\DesignerElement.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\DesignerElement.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\DesignerElement.cs",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAAACcAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T06:47:36.864Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "CardCanvasView.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Views\\Controls\\CardCanvasView.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Views\\Controls\\CardCanvasView.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Views\\Controls\\CardCanvasView.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Views\\Controls\\CardCanvasView.cs",
+              "ViewState": "AgIAAFQGAAAAAAAAAAA7wIcGAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T07:04:41.378Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "ElementType.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ElementType.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ElementType.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ElementType.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\CardDesigner\\Models\\Document\\ElementType.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAA3wBwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T06:48:45.548Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "TemplateCatalogItem.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Templates\\Models\\TemplateCatalogItem.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Templates\\Models\\TemplateCatalogItem.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Templates\\Models\\TemplateCatalogItem.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\Templates\\Models\\TemplateCatalogItem.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T06:20:53.805Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "TemplatesViewModel.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Templates\\ViewModels\\TemplatesViewModel.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\Templates\\ViewModels\\TemplatesViewModel.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\Templates\\ViewModels\\TemplatesViewModel.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\Templates\\ViewModels\\TemplatesViewModel.cs",
+              "ViewState": "AgIAAGUAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T06:20:12.635Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "BlankCardViewModel.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\BlankCard\\ViewModels\\BlankCardViewModel.cs",
+              "RelativeDocumentMoniker": "InfoID.Desktop\\Features\\BlankCard\\ViewModels\\BlankCardViewModel.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Desktop\\Features\\BlankCard\\ViewModels\\BlankCardViewModel.cs",
+              "RelativeToolTip": "InfoID.Desktop\\Features\\BlankCard\\ViewModels\\BlankCardViewModel.cs",
+              "ViewState": "AgIAAEcAAAAAAAAAAAAmwA0AAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-15T06:04:31.515Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "DatabaseInitializer.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\DatabaseInitializer.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\DatabaseInitializer.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\DatabaseInitializer.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\DatabaseInitializer.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAgwAoAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:53:43.683Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "TemplateService.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Services\\TemplateService.cs",
+              "RelativeDocumentMoniker": "InfoID.Application\\Services\\TemplateService.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Services\\TemplateService.cs",
+              "RelativeToolTip": "InfoID.Application\\Services\\TemplateService.cs",
+              "ViewState": "AgIAALkAAAAAAAAAAAAIwMQAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-20T12:03:47.768Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 56,
+              "Title": "20260828045704_InitialCreate.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Migrations\\20260828045704_InitialCreate.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Migrations\\20260828045704_InitialCreate.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Migrations\\20260828045704_InitialCreate.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\Migrations\\20260828045704_InitialCreate.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-28T04:57:05.018Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "BaseEntity.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Domain\\Common\\BaseEntity.cs",
+              "RelativeDocumentMoniker": "InfoID.Domain\\Common\\BaseEntity.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Domain\\Common\\BaseEntity.cs",
+              "RelativeToolTip": "InfoID.Domain\\Common\\BaseEntity.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAgwA8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-28T03:48:49.655Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "IDatabaseDiagnosticsService.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\IDatabaseDiagnosticsService.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\IDatabaseDiagnosticsService.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\IDatabaseDiagnosticsService.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\IDatabaseDiagnosticsService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:56:12.131Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 45,
+              "Title": "DatabaseInitializationResult.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\DatabaseInitializationResult.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\DatabaseInitializationResult.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\DatabaseInitializationResult.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\DatabaseInitializationResult.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:53:04.003Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "FileStartupLogger.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\FileStartupLogger.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\FileStartupLogger.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\FileStartupLogger.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\FileStartupLogger.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:52:40.925Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "Template.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Domain\\Entities\\TemplateModule\\Template.cs",
+              "RelativeDocumentMoniker": "InfoID.Domain\\Entities\\TemplateModule\\Template.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Domain\\Entities\\TemplateModule\\Template.cs",
+              "RelativeToolTip": "InfoID.Domain\\Entities\\TemplateModule\\Template.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-27T11:06:23.36Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "DependencyInjection.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\DependencyInjection.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\DependencyInjection.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\DependencyInjection.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\DependencyInjection.cs",
+              "ViewState": "AgIAACIAAAAAAAAAAAAQwCgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:17:47.914Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "InfoIdDbContextFactory.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\InfoIdDbContextFactory.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\InfoIdDbContextFactory.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\InfoIdDbContextFactory.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\InfoIdDbContextFactory.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAqwBYAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:17:54.026Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "DatabaseHealthReport.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\DatabaseHealthReport.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\DatabaseHealthReport.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\DatabaseHealthReport.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\DatabaseHealthReport.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:55:53.881Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "IDatabaseInitializer.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\IDatabaseInitializer.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\IDatabaseInitializer.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\IDatabaseInitializer.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\IDatabaseInitializer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:53:24.278Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
+              "Title": "DatabaseDiagnosticsService.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\DatabaseDiagnosticsService.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\DatabaseDiagnosticsService.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\DatabaseDiagnosticsService.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\DatabaseDiagnosticsService.cs",
+              "ViewState": "AgIAADEAAAAAAAAAAAAkwEgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:56:34.995Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "InfoIdDbContext.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\InfoIdDbContext.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\InfoIdDbContext.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\InfoIdDbContext.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\InfoIdDbContext.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAnwB4AAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:17:49.255Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "IStartupLogger.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\IStartupLogger.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\IStartupLogger.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\IStartupLogger.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\IStartupLogger.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:51:06.576Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": "DatabaseLocation.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\DatabaseLocation.cs",
+              "RelativeDocumentMoniker": "InfoID.Infrastructure\\Persistence\\DatabaseLocation.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Infrastructure\\Persistence\\DatabaseLocation.cs",
+              "RelativeToolTip": "InfoID.Infrastructure\\Persistence\\DatabaseLocation.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-21T04:50:09.736Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 46,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\asama\\AppData\\Local\\Temp\\8110d274-093d-4d76-ab89-cd29bd3425a3_InfoID.Desktop.zip.InfoID.Desktop.zip\\InfoID.Desktop\\Program.cs",
+              "ToolTip": "C:\\Users\\asama\\AppData\\Local\\Temp\\8110d274-093d-4d76-ab89-cd29bd3425a3_InfoID.Desktop.zip.InfoID.Desktop.zip\\InfoID.Desktop\\Program.cs [Read Only]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-20T12:23:36.284Z",
+              "EditorCaption": " [Read Only]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 47,
+              "Title": "TemplateDtos.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Dtos\\TemplateModule\\TemplateDtos.cs",
+              "RelativeDocumentMoniker": "InfoID.Application\\Dtos\\TemplateModule\\TemplateDtos.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Dtos\\TemplateModule\\TemplateDtos.cs",
+              "RelativeToolTip": "InfoID.Application\\Dtos\\TemplateModule\\TemplateDtos.cs",
+              "ViewState": "AgIAABEAAAAAAAAAAAAxwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-20T12:06:07.78Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 48,
+              "Title": "AppUserDtos.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Dtos\\Organization\\AppUserDtos.cs",
+              "RelativeDocumentMoniker": "InfoID.Application\\Dtos\\Organization\\AppUserDtos.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Dtos\\Organization\\AppUserDtos.cs",
+              "RelativeToolTip": "InfoID.Application\\Dtos\\Organization\\AppUserDtos.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-20T12:06:02.878Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 49,
+              "Title": "IAppUserService.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Interfaces\\IAppUserService.cs",
+              "RelativeDocumentMoniker": "InfoID.Application\\Interfaces\\IAppUserService.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Interfaces\\IAppUserService.cs",
+              "RelativeToolTip": "InfoID.Application\\Interfaces\\IAppUserService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAABMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-20T12:04:43.934Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 51,
+              "Title": "IOrganizationService.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Interfaces\\IOrganizationService.cs",
+              "RelativeDocumentMoniker": "InfoID.Application\\Interfaces\\IOrganizationService.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Interfaces\\IOrganizationService.cs",
+              "RelativeToolTip": "InfoID.Application\\Interfaces\\IOrganizationService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-20T12:04:39.529Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 52,
+              "Title": "ITemplateService.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Interfaces\\ITemplateService.cs",
+              "RelativeDocumentMoniker": "InfoID.Application\\Interfaces\\ITemplateService.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Interfaces\\ITemplateService.cs",
+              "RelativeToolTip": "InfoID.Application\\Interfaces\\ITemplateService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-20T12:04:37.051Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 53,
+              "Title": "DependencyInjection.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\DependencyInjection.cs",
+              "RelativeDocumentMoniker": "InfoID.Application\\DependencyInjection.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\DependencyInjection.cs",
+              "RelativeToolTip": "InfoID.Application\\DependencyInjection.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAIBZwA0AAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-20T12:03:55.873Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 54,
+              "Title": "LicenseService.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Services\\LicenseService.cs",
+              "RelativeDocumentMoniker": "InfoID.Application\\Services\\LicenseService.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Services\\LicenseService.cs",
+              "RelativeToolTip": "InfoID.Application\\Services\\LicenseService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-20T12:03:44.1Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 50,
+              "Title": "IBranchService.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Interfaces\\IBranchService.cs",
+              "RelativeDocumentMoniker": "InfoID.Application\\Interfaces\\IBranchService.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Interfaces\\IBranchService.cs",
+              "RelativeToolTip": "InfoID.Application\\Interfaces\\IBranchService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-20T12:03:35.52Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 55,
+              "Title": "BranchService.cs",
+              "DocumentMoniker": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Services\\BranchService.cs",
+              "RelativeDocumentMoniker": "InfoID.Application\\Services\\BranchService.cs",
+              "ToolTip": "D:\\infome\\InfoID_Enterprise\\InfoID.Application\\Services\\BranchService.cs",
+              "RelativeToolTip": "InfoID.Application\\Services\\BranchService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-20T12:03:42.147Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

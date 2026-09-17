@@ -8,6 +8,7 @@ using InfoID.Desktop.Features.CardDesigner.Models.Document;
 using InfoID.Desktop.Features.CardDesigner.Services;
 using InfoID.Desktop.Features.Printing.Services;
 using InfoID.Desktop.Features.Printing.ViewModels;
+using InfoID.Desktop.Features.Database.ViewModels;
 using InfoID.Desktop.ViewModels.Base;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using InfoID.Desktop.Features.Database.ViewModels;
 
 namespace InfoID.Desktop.Features.CardDesigner.ViewModels;
 
@@ -1637,6 +1639,14 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         NotifySelectionChanged();
         RefreshHistoryFlags();
         MarkDirty();
+    }
+
+    [RelayCommand]
+    private async Task AddDatabase()
+    {
+        var dialog = new ConnectDatabaseDialogViewModel();
+
+        await _dialogService.ShowDialogAsync<ConnectDatabaseDialogViewModel, bool>(dialog);
     }
 
     [RelayCommand]

@@ -29,6 +29,7 @@ public sealed class ElementTypeToIconConverter : IValueConverter
         {
             ShapeElement shape => ShapeIconFor(shape),
             TextElement => DesignerIcons.Text,
+            DateTimeElement dateTime => DateTimeIconFor(dateTime),
             ImageElement => DesignerIcons.Image,
             PhotoElement => DesignerIcons.Photo,
             SignatureElement => DesignerIcons.Signature,
@@ -61,6 +62,13 @@ public sealed class ElementTypeToIconConverter : IValueConverter
         _ => shape.CornerRadius > 0 ? DesignerIcons.RoundedRectangle : DesignerIcons.Rectangle, // Rectangle
     };
 
+    private static Geometry DateTimeIconFor(DateTimeElement dateTime) => dateTime.DisplayFormat switch
+    {
+        DateTimeDisplayFormat.Date => DesignerIcons.Calendar,
+        DateTimeDisplayFormat.Time => DesignerIcons.Clock,
+        DateTimeDisplayFormat.DateTime => DesignerIcons.CalendarClock,
+        _ => DesignerIcons.Calendar,
+    };
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         throw new NotSupportedException();
 }
