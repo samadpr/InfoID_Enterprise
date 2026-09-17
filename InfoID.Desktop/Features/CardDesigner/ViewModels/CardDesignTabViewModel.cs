@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InfoID.Desktop.Core.Dialogs;
 using InfoID.Desktop.Core.Services;
@@ -6,15 +6,21 @@ using InfoID.Desktop.Features.CardDesigner.History;
 using InfoID.Desktop.Features.CardDesigner.Models;
 using InfoID.Desktop.Features.CardDesigner.Models.Document;
 using InfoID.Desktop.Features.CardDesigner.Services;
+using InfoID.Desktop.Features.Database.Models;
+using InfoID.Desktop.Features.Database.Services;
 using InfoID.Desktop.Features.Database.ViewModels;
 using InfoID.Desktop.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using InfoID.Desktop.Features.Database.ViewModels;
+
+
 
 namespace InfoID.Desktop.Features.CardDesigner.ViewModels;
 
@@ -318,6 +324,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     /// designs. Values are mm offsets from the card's top-left corner.</summary>
     public ObservableCollection<double> VerticalGuidesMm { get; } = new();
     public ObservableCollection<double> HorizontalGuidesMm { get; } = new();
+    public ObservableCollection<DatabaseTableDefinition> DatabaseTables { get; } = new();
 
     /// <summary>Live preview while dragging a new guide out of a ruler (Part 21) --
     /// null when no drag is in progress. The canvas reads this each render to draw a
@@ -1309,13 +1316,97 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         MarkDirty();
     }
 
+    //[RelayCommand]
+    //private async Task AddDatabase()
+    //{
+    //    var dialog = new ConnectDatabaseDialogViewModel(_filePicker);
+
+    //    await _dialogService.ShowDialogAsync<ConnectDatabaseDialogViewModel, bool>(dialog);
+    //}
+
+    public DataTable? DatabaseData { get; private set; }
+    public ObservableCollection<string> DatabaseColumns { get; } = new();
+    public DataView? DatabaseDataView => DatabaseData?.DefaultView;
+
+    public ObservableCollection<DatabaseField> DatabaseFields { get; } = new();
+
+    [ObservableProperty]
+    private DataRowView? _selectedDatabaseRow;
+
     [RelayCommand]
     private async Task AddDatabase()
     {
-        var dialog = new ConnectDatabaseDialogViewModel();
+        var selectionDialog = new DatabaseTypeSelectionDialogViewModel();
 
-        await _dialogService.ShowDialogAsync<ConnectDatabaseDialogViewModel, bool>(dialog);
+        var selectedType = await _dialogService.ShowDialogAsync< DatabaseTypeSelectionDialogViewModel,DatabaseType?>(selectionDialog);
+
+        if (selectedType is null)
+            return;
+
+        if (selectedType == DatabaseType.Excel)
+        {
+            var excelDialog = new ConnectDatabaseDialogViewModel(_filePicker);
+
+            await _dialogService.ShowDialogAsync<ConnectDatabaseDialogViewModel,bool>(excelDialog);
+
+            return;
+        }
+        if (selectedType == DatabaseType.ODBC)
+        {
+            var odbcDialog =
+                new OdbcConnectionDialogViewModel();
+
+            var connection =
+                await _dialogService.ShowDialogAsync<
+                    OdbcConnectionDialogViewModel,
+                    DatabaseConnection?>(odbcDialog);
+
+            if (connection is null)
+                return;
+
+            var designDialog = new DatabaseDesignDialogViewModel(connection, _dialogService);
+
+            var tableDefinition = await _dialogService.ShowDialogAsync< DatabaseDesignDialogViewModel,DatabaseTableDefinition?>(designDialog);
+
+            if (tableDefinition is not null)
+            {
+                DatabaseTables.Add(tableDefinition);
+
+                var databaseService =
+                    new OdbcDatabaseService();
+
+                try
+                {
+                    DatabaseData =
+                        databaseService.GetData(
+                            tableDefinition.ConnectionString,
+                            tableDefinition.TableName);
+
+                    OnPropertyChanged(nameof(DatabaseData));
+                    OnPropertyChanged(nameof(DatabaseDataView));
+
+                    DatabaseFields.Clear();
+
+                    foreach (DataColumn column in DatabaseData.Columns)
+                    {
+                        DatabaseFields.Add(new DatabaseField
+                        {
+                            DatabaseName = connection.Name,
+                            TableName = tableDefinition.TableName,
+                            ColumnName = column.ColumnName
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(
+                        $"DATABASE DATA ERROR: {ex}");
+                }
+            }
+            return;
+        }
     }
+    
 
     [RelayCommand]
     private void DuplicateSelected()

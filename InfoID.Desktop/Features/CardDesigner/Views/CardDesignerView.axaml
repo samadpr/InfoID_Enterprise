@@ -1762,7 +1762,7 @@
 				<controls:RulerView Name="VerticalRuler" Grid.Row="1" Grid.Column="0" Orientation="Vertical" Tab="{Binding ActiveTab}"
                                      IsVisible="{Binding ActiveTab.ShowRulers}" />
 
-				<Grid Grid.Row="1" Grid.Column="1" Name="CanvasArea" RowDefinitions="*,Auto">
+				<Grid Grid.Row="1" Grid.Column="1" Name="CanvasArea" RowDefinitions="*,8,80">
 
 					<!-- Canvas area -->
 					<Grid Grid.Row="0">
@@ -1794,16 +1794,55 @@
 								 MinWidth="0" />
 
 					</Grid>
-
+                    <GridSplitter Grid.Row="1"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  ResizeDirection="Rows"
+                                  ResizeBehavior="PreviousAndNext"
+                                  Background="Transparent">
+                        <GridSplitter.Template>
+                            <ControlTemplate>
+                                <Border HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Width="48"
+                                        Height="24"
+                                        Background="White"
+                                        CornerRadius="6"
+                                        BorderBrush="#E0E0E0"
+                                        BorderThickness="1">
+                                    <TextBlock Text="↕"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontSize="18"
+                                               Foreground="#00A878"/>
+                                </Border>
+                            </ControlTemplate>
+                        </GridSplitter.Template>
+                    </GridSplitter>
 					<!-- Add database -->
-					<Button Grid.Row="1"
-							HorizontalAlignment="Center"
-							Margin="0,10,0,10"
-							Padding="24,10"
-							Classes="ghost"
-							Content="+  Add database" 
-							Command="{Binding ActiveTab.AddDatabaseCommand}"/>
+                    <!-- Database data -->
+                    <Grid Grid.Row="2" Margin="20,5">
 
+                        <DataGrid Name="DatabaseDataGrid"
+                                  ItemsSource="{Binding ActiveTab.DatabaseDataView}"
+                                  AutoGenerateColumns="False"
+                                  SelectedItem="{Binding ActiveTab.SelectedDatabaseRow, Mode=TwoWay}"
+                                  IsReadOnly="False"
+                                  GridLinesVisibility="All"
+                                  HeadersVisibility="All"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  Margin="0,0,0,45" />
+
+                        <Button HorizontalAlignment="Center"
+                                VerticalAlignment="Bottom"
+                                Margin="0,0,0,5"
+                                Padding="20,7"
+                                Classes="ghost"
+                                Content="+  Add database"
+                                Command="{Binding ActiveTab.AddDatabaseCommand}" />
+
+                    </Grid>
 				</Grid>
 			</Grid>
 
@@ -1958,7 +1997,7 @@
 												<PathIcon Data="{Binding Locked, Converter={x:Static conv:BoolStateIconConverter.Instance}, ConverterParameter=Lock}" Width="14" Height="14" />
 											</Button>
 										</Grid>
-									</DataTemplate>
+									</DataTemplate> 
 								</ItemsControl.ItemTemplate>
 							</ItemsControl>
 						</StackPanel>

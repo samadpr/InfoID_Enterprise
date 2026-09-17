@@ -1,0 +1,120 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Database.ViewModels"
+             x:Class="InfoID.Desktop.Features.Database.Views.OdbcConnectionDialogView"
+             x:DataType="vm:OdbcConnectionDialogViewModel">
+
+    <Grid Width="1000"
+          Height="650"
+          Margin="40"
+          RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0"
+                   Text="ODBC"
+                   FontSize="20"
+                   FontWeight="Bold"
+                   Margin="0,0,0,40" />
+
+        <!-- Main content -->
+        <StackPanel Grid.Row="1"
+                    Width="650"
+                    HorizontalAlignment="Left"
+                    Spacing="35">
+
+            <!-- Database -->
+            <StackPanel Spacing="10">
+
+                <TextBlock Text="Database"
+                           FontSize="16" />
+
+                <StackPanel Orientation="Horizontal"
+                            Spacing="10">
+
+                    <ComboBox Width="500"
+                              ItemsSource="{Binding DatabaseOptions}"
+                              SelectedItem="{Binding SelectedDatabase}" />
+
+                    <!-- ODBC Administrator button -->
+                    <Button Width="50"
+                            Height="42"
+                            Content="⚙"
+                            Command="{Binding OpenOdbcAdministratorCommand}"
+                            ToolTip.Tip="Open ODBC Data Source Administrator" />
+
+                </StackPanel>
+
+            </StackPanel>
+
+            <!-- Login -->
+            <StackPanel Spacing="12">
+
+                <TextBlock Text="Database Login"
+                           FontSize="16" />
+
+                <Grid ColumnDefinitions="*,*"
+                      ColumnSpacing="10">
+
+                    <StackPanel Grid.Column="0"
+                                Spacing="6">
+
+                        <TextBlock Text="Username" />
+
+                        <TextBox Text="{Binding Username}"
+                                 PlaceholderText="Username" />
+
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1"
+                                Spacing="6">
+
+                        <TextBlock Text="Password" />
+
+                        <TextBox Text="{Binding Password}"
+                                 PasswordChar="*"
+                                 PlaceholderText="Password" />
+
+                    </StackPanel>
+
+                </Grid>
+
+                <CheckBox Content="Keep credentials"
+                          IsChecked="{Binding KeepCredentials}" />
+
+            </StackPanel>
+
+            <!-- Test -->
+            <Button Content="Test Database Connection"
+                    Command="{Binding TestDatabaseConnectionCommand}"
+                    HorizontalAlignment="Right"
+                    Padding="24,12" />
+
+            <!-- Status -->
+            <TextBlock Text="{Binding StatusMessage}"
+                       TextWrapping="Wrap" />
+
+        </StackPanel>
+
+        <!-- Bottom buttons -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="12">
+
+            <Button Content="Previous"
+                    Command="{Binding PreviousCommand}"
+                    Padding="28,12" />
+
+            <Button Content="Next"
+                    Command="{Binding NextCommand}"
+                    Padding="28,12" />
+
+            <Button Content="Cancel"
+                    Command="{Binding CancelCommand}"
+                    Padding="28,12" />
+
+        </StackPanel>
+
+    </Grid>
+
+</UserControl>
