@@ -6,6 +6,8 @@ using InfoID.Desktop.Features.CardDesigner.History;
 using InfoID.Desktop.Features.CardDesigner.Models;
 using InfoID.Desktop.Features.CardDesigner.Models.Document;
 using InfoID.Desktop.Features.CardDesigner.Services;
+using InfoID.Desktop.Features.Printing.Services;
+using InfoID.Desktop.Features.Printing.ViewModels;
 using InfoID.Desktop.Features.Database.ViewModels;
 using InfoID.Desktop.ViewModels.Base;
 using System;
@@ -39,6 +41,9 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     private readonly IImageEditingService _imageEditingService;
     private readonly ICameraService _cameraService;
     private readonly IFaceDetectionService _faceDetectionService;
+    private readonly IPrinterService _printerService;
+    private readonly IPrintStatusStore _printStatusStore;
+    private readonly ICardFormatCatalogService _cardFormatCatalogService;
     private CancellationTokenSource? _autosaveCts;
 
     public CardDesignDocument Document { get; }
@@ -55,7 +60,8 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         IUserPreferencesService preferences, IDesignChecker designChecker, IThumbnailService thumbnailService,
         IDialogService dialogService, IInfoIdFileService infoIdFileService, IRecentFilesService recentFilesService,
         IImageEditingService imageEditingService, ICameraService cameraService,
-        IFaceDetectionService faceDetectionService)
+        IFaceDetectionService faceDetectionService, IPrinterService printerService,
+        IPrintStatusStore printStatusStore, ICardFormatCatalogService cardFormatCatalogService)
     {
         Document = document;
         _clipboard = clipboard;
@@ -73,6 +79,9 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         _imageEditingService = imageEditingService;
         _cameraService = cameraService;
         _faceDetectionService = faceDetectionService;
+        _printerService = printerService;
+        _printStatusStore = printStatusStore;
+        _cardFormatCatalogService = cardFormatCatalogService;
         PreviewRecords = new ObservableCollection<PreviewRecord>(previewDataProvider.GetSampleRecords());
         SelectedPreviewRecord = PreviewRecords.FirstOrDefault();
         Title = document.Name;
@@ -81,6 +90,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         HookSide(Document.Front);
         HookSide(Document.Back);
         RefreshBackgroundPreview();
+        RefreshLayerTree();
     }
 
     // ------------------------------------------------------------------ rename ----
@@ -186,6 +196,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
             {
                 foreach (DesignerElement added in e.NewItems) HookElement(added);
             }
+            RefreshLayerTree();
         };
     }
 
@@ -201,6 +212,15 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         // behaves identically to a drag/resize.
         NotifyDocumentChanged();
         MarkDirty();
+
+        // Rebuilding the whole Layers tree on every property change would mean doing it
+        // on every pixel of a canvas drag (X/Y churn constantly) -- only rebuild for the
+        // properties that can actually change what the panel shows.
+        if (e.PropertyName is nameof(DesignerElement.Name) or nameof(DesignerElement.Visible)
+            or nameof(DesignerElement.Locked) or nameof(DesignerElement.GroupId) or nameof(DesignerElement.ZIndex))
+        {
+            RefreshLayerTree();
+        }
     }
     [ObservableProperty]
     private string _saveStatusText = "Unsaved";
@@ -411,6 +431,19 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         await _dialogService.ShowDialogAsync<PrintPreviewViewModel, bool>(previewViewModel);
     }
 
+    /// <summary>Opens the real Print module (printer selection, bulk printing,
+    /// rendering options, per-record print-status tracking) -- deliberately a separate
+    /// dialog/command from Print Preview above, which stays exactly what its own doc
+    /// comment says it is: appearance-only, no printer/copies/print action.</summary>
+    [RelayCommand]
+    private async Task ShowPrintDialog()
+    {
+        var printViewModel = new PrintDialogViewModel(
+            Document, _printerService, _printStatusStore, _cardFormatCatalogService,
+            _previewDataProvider, _evaluator, _assetService, _filePicker);
+        await _dialogService.ShowDialogAsync<PrintDialogViewModel, bool>(printViewModel);
+    }
+
     // ------------------------------------------------------------------ crop -------
 
     /// <summary>Opens the interactive crop editor for an Image or Photo element (Part
@@ -507,6 +540,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         // operations" strictly true.
         ClearSelection();
         RefreshBackgroundPreview();
+        RefreshLayerTree();
     }
 
     // ------------------------------------------------------------------ background ----
@@ -742,6 +776,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         OnPropertyChanged(nameof(PrimarySelection));
         OnPropertyChanged(nameof(HasSelection));
         OnPropertyChanged(nameof(HasMultiSelection));
+        RefreshLayerSelectionHighlight();
     }
 
     public void NotifyDocumentChanged() => DocumentChanged?.Invoke(this, EventArgs.Empty);
@@ -1242,25 +1277,322 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         InsertElement(element);
     }
 
-    [RelayCommand]
-    private void SelectOnlyLayer(DesignerElement element) => SelectOnly(element);
+    // ------------------------------------------------------------- layers panel ----
+
+    /// <summary>Grouped, ordered view of FocusedSideModel.Elements for the Layers
+    /// panel -- a persistent collection whose CONTENTS get replaced (not the property
+    /// itself) by RefreshLayerTree(), so the panel's ItemsControl reacts via ordinary
+    /// INotifyCollectionChanged without needing a property-changed notification on
+    /// every rebuild.</summary>
+    public ObservableCollection<LayerNode> LayerTree { get; } = new();
+
+    /// <summary>Expand/collapse state survives RefreshLayerTree() rebuilding every
+    /// LayerNode instance from scratch -- keyed by GroupId since that's the one stable
+    /// identity a group has across rebuilds (a fresh LayerNode object is created for it
+    /// every time, so the node itself can't remember its own prior expanded state).</summary>
+    private readonly Dictionary<string, bool> _groupExpansion = new();
+
+    /// <summary>Rebuilds LayerTree from scratch: one top-level LayerNode per ungrouped
+    /// element or per distinct GroupId, ordered front-most (highest ZIndex) first --
+    /// the standard "top of the layers list = what's drawn on top" convention. A
+    /// group's own position in that order is its highest member's ZIndex, so dragging
+    /// any one member of a group to the front visually brings the whole group's row
+    /// up too.</summary>
+    private void RefreshLayerTree()
+    {
+        LayerTree.Clear();
+
+        var elements = FocusedSideModel.Elements;
+        var groupNames = FocusedSideModel.GroupNames;
+        var seenGroups = new HashSet<string>();
+        var topLevel = new List<(int SortKey, LayerNode Node)>();
+
+        foreach (var element in elements)
+        {
+            if (!string.IsNullOrEmpty(element.GroupId))
+            {
+                if (!seenGroups.Add(element.GroupId)) continue;
+
+                var members = elements.Where(e => e.GroupId == element.GroupId)
+                    .OrderByDescending(e => e.ZIndex)
+                    .ToList();
+                var name = groupNames.TryGetValue(element.GroupId, out var named) ? named : $"Group ({members.Count})";
+                var groupNode = new LayerNode(element.GroupId, name, members)
+                {
+                    IsExpanded = !_groupExpansion.TryGetValue(element.GroupId, out var expanded) || expanded,
+                };
+                foreach (var member in members) groupNode.Children.Add(new LayerNode(member));
+                topLevel.Add((members.Max(e => e.ZIndex), groupNode));
+            }
+            else
+            {
+                topLevel.Add((element.ZIndex, new LayerNode(element)));
+            }
+        }
+
+        // Empty folders: named via "+" (CreateLayerGroup) but nothing dragged into them
+        // yet. They have no ZIndex to sort by, so they always sit above every element --
+        // an empty folder waiting to be filled reads better at the top than buried in
+        // the middle of a z-order it isn't actually part of.
+        var emptySortKey = (elements.Count == 0 ? 0 : elements.Max(e => e.ZIndex)) + groupNames.Count;
+        foreach (var (groupId, name) in groupNames)
+        {
+            if (!seenGroups.Add(groupId)) continue;
+
+            var groupNode = new LayerNode(groupId, name, System.Array.Empty<DesignerElement>())
+            {
+                IsExpanded = !_groupExpansion.TryGetValue(groupId, out var expanded) || expanded,
+            };
+            topLevel.Add((emptySortKey--, groupNode));
+        }
+
+        foreach (var (_, node) in topLevel.OrderByDescending(t => t.SortKey))
+        {
+            LayerTree.Add(node);
+        }
+
+        RefreshLayerSelectionHighlight();
+    }
+
+    private void RefreshLayerSelectionHighlight()
+    {
+        foreach (var node in LayerTree)
+        {
+            if (node.IsGroup)
+            {
+                foreach (var child in node.Children) child.IsSelected = SelectedElements.Contains(child.Element!);
+                node.IsSelected = node.Children.Any(c => c.IsSelected);
+            }
+            else
+            {
+                node.IsSelected = SelectedElements.Contains(node.Element!);
+            }
+        }
+    }
 
     [RelayCommand]
-    private void ToggleLayerVisible(DesignerElement element)
+    private void SelectLayerNode(LayerNode node)
     {
-        element.Visible = !element.Visible;
+        if (node.IsGroup)
+        {
+            if (node.Children.Count > 0) SelectOnly(node.Children[0].Element);
+            return;
+        }
+
+        SelectOnly(node.Element);
+    }
+
+    [RelayCommand]
+    private void ToggleLayerNodeSelection(LayerNode node)
+    {
+        if (node.IsGroup)
+        {
+            if (node.Children.Count > 0) ToggleSelection(node.Children[0].Element!);
+            return;
+        }
+
+        ToggleSelection(node.Element!);
+    }
+
+    [RelayCommand]
+    private void ToggleGroupExpanded(LayerNode node)
+    {
+        if (!node.IsGroup) return;
+        node.IsExpanded = !node.IsExpanded;
+        _groupExpansion[node.GroupId!] = node.IsExpanded;
+    }
+
+    /// <summary>"+" button next to the Layers header (Part 96 follow-up): creates an
+    /// empty, named folder up front -- matching the reference app's "Front / Color-Black
+    /// / UV" structure, where a folder is a real, nameable thing you create and then
+    /// populate, not just an incidental side-effect of multi-selecting elements and
+    /// clicking Group(). Default name is "Layer N" rather than "Group N" -- "Group"
+    /// read as confusing next to the individual element rows underneath it.</summary>
+    [RelayCommand]
+    private void CreateLayerGroup()
+    {
+        var groupId = Guid.NewGuid().ToString("N");
+        FocusedSideModel.GroupNames[groupId] = $"Layer {FocusedSideModel.GroupNames.Count + 1}";
+        _groupExpansion[groupId] = true;
+        NotifyDocumentChanged();
+        MarkDirty();
+        RefreshLayerTree();
+    }
+
+    [RelayCommand]
+    private void BeginRenameGroup(LayerNode node)
+    {
+        if (!node.IsGroup) return;
+        node.RenameText = node.DisplayName;
+        node.IsRenaming = true;
+    }
+
+    /// <summary>Commits the folder's new name, or silently cancels if it's empty/
+    /// whitespace-only -- same "never leave it blank" rule CommitRename uses for the tab
+    /// title.</summary>
+    [RelayCommand]
+    private void CommitRenameGroup(LayerNode node)
+    {
+        if (node.IsGroup)
+        {
+            var trimmed = node.RenameText.Trim();
+            if (trimmed.Length > 0 && trimmed != node.DisplayName)
+            {
+                FocusedSideModel.GroupNames[node.GroupId!] = trimmed;
+                NotifyDocumentChanged();
+                MarkDirty();
+            }
+        }
+
+        node.IsRenaming = false;
+        RefreshLayerTree();
+    }
+
+    [RelayCommand]
+    private void CancelRenameGroup(LayerNode node) => node.IsRenaming = false;
+
+    [RelayCommand]
+    private void ToggleLayerNodeVisible(LayerNode node)
+    {
+        var members = node.IsGroup ? node.Children.Select(c => c.Element!).ToList() : new List<DesignerElement> { node.Element! };
+        var newValue = !members.Any(m => m.Visible);
+        foreach (var m in members) m.Visible = newValue;
         NotifyDocumentChanged();
         MarkDirty();
     }
 
     [RelayCommand]
-    private void ToggleLayerLocked(DesignerElement element)
+    private void ToggleLayerNodeLocked(LayerNode node)
     {
-        element.Locked = !element.Locked;
-        if (element.Locked) SelectedElements.Remove(element);
+        var members = node.IsGroup ? node.Children.Select(c => c.Element!).ToList() : new List<DesignerElement> { node.Element! };
+        var newValue = !members.All(m => m.Locked);
+        foreach (var m in members)
+        {
+            m.Locked = newValue;
+            if (newValue) SelectedElements.Remove(m);
+        }
         NotifySelectionChanged();
         NotifyDocumentChanged();
         MarkDirty();
+    }
+
+    /// <summary>Deleting a group folder deletes its contents too (matching most layer
+    /// panels' default "delete group" behavior) and removes the folder name itself --
+    /// otherwise an empty-but-still-named entry in GroupNames would make the folder
+    /// reappear as an empty one on the very next RefreshLayerTree().</summary>
+    [RelayCommand]
+    private void DeleteLayerNode(LayerNode node)
+    {
+        if (node.IsGroup)
+        {
+            var members = node.Children.Select(c => c.Element!).ToList();
+            if (members.Count > 0)
+            {
+                History.Execute(new DeleteElementsCommand(FocusedSideModel, members));
+                foreach (var m in members) SelectedElements.Remove(m);
+                NotifySelectionChanged();
+            }
+
+            FocusedSideModel.GroupNames.Remove(node.GroupId!);
+            _groupExpansion.Remove(node.GroupId!);
+        }
+        else
+        {
+            History.Execute(new DeleteElementsCommand(FocusedSideModel, new[] { node.Element! }));
+            SelectedElements.Remove(node.Element!);
+            NotifySelectionChanged();
+        }
+
+        RefreshHistoryFlags();
+        MarkDirty();
+        RefreshLayerTree();
+    }
+
+    /// <summary>Drives the Layers panel's drag-and-drop: dropping a leaf onto a group
+    /// folder (or onto any member of one) joins that folder; dropping a leaf onto
+    /// another ungrouped leaf reorders it (ungrouping it first, if it was grouped);
+    /// dragging a whole group reorders its members as one block next to the drop
+    /// target, without nesting one group inside another. Both the z-order change and
+    /// the folder-membership change go through History, so a drag -- like every other
+    /// layer move -- is a single undoable step.</summary>
+    public void HandleLayerDrop(LayerNode dragged, LayerNode target)
+    {
+        if (ReferenceEquals(dragged, target)) return;
+
+        if (dragged.IsGroup)
+        {
+            var targetZIndex = target.IsGroup
+                ? (target.Children.Count > 0 ? target.Children.Max(c => c.Element!.ZIndex) : (int?)null)
+                : target.Element!.ZIndex;
+            if (targetZIndex is { } z) ReorderZIndexBlock(dragged.Children.Select(c => c.Element!).ToList(), z);
+        }
+        else
+        {
+            var element = dragged.Element!;
+            string? newGroupId = target.IsGroup ? target.GroupId
+                : !string.IsNullOrEmpty(target.Element!.GroupId) ? target.Element.GroupId
+                : null;
+
+            if (newGroupId != element.GroupId)
+            {
+                History.Execute(new ChangePropertyCommand<DesignerElement, string?>(
+                    element, (el, v) => el.GroupId = v, element.GroupId, newGroupId, "Move layer"));
+                RefreshHistoryFlags();
+            }
+
+            if (newGroupId is null && !target.IsGroup)
+            {
+                ReorderZIndexBlock(new[] { element }, target.Element!.ZIndex);
+            }
+        }
+
+        NotifyDocumentChanged();
+        MarkDirty();
+        RefreshLayerTree();
+    }
+
+    /// <summary>Dropping onto the blank area below the layer list (not onto any row)
+    /// pulls a grouped element back out to the top level -- the explicit "let go of the
+    /// group" gesture the panel was missing, for when dragging directly onto an
+    /// ungrouped sibling row isn't handy/visible on screen.</summary>
+    public void HandleLayerDropToTopLevel(LayerNode dragged)
+    {
+        if (dragged.IsGroup || dragged.Element is not { } element || element.GroupId is null) return;
+
+        History.Execute(new ChangePropertyCommand<DesignerElement, string?>(
+            element, (el, v) => el.GroupId = v, element.GroupId, null, "Move layer out of group"));
+        RefreshHistoryFlags();
+        NotifyDocumentChanged();
+        MarkDirty();
+        RefreshLayerTree();
+    }
+
+    /// <summary>Renumbers every element on the focused side so movingElements sit
+    /// immediately above targetZIndex, preserving everyone else's relative order --
+    /// through History as one CompositeCommand of ReorderElementCommands, so a drag
+    /// reorder undoes/redoes as a single step exactly like Bring Forward/Send Backward
+    /// already do (see Reorder() below). ZIndex is only ever compared relatively
+    /// elsewhere in this codebase (rendering order, front/back commands), so renumbering
+    /// it densely from 0 is safe -- nothing relies on the specific gaps between values.</summary>
+    private void ReorderZIndexBlock(IReadOnlyList<DesignerElement> movingElements, int targetZIndex)
+    {
+        var others = FocusedSideModel.Elements.Where(e => !movingElements.Contains(e)).OrderBy(e => e.ZIndex).ToList();
+        var insertAt = others.FindIndex(e => e.ZIndex == targetZIndex);
+        insertAt = insertAt < 0 ? others.Count : insertAt + 1;
+
+        var ordered = new List<DesignerElement>(others);
+        ordered.InsertRange(insertAt, movingElements);
+
+        var commands = new List<IDesignCommand>();
+        for (var i = 0; i < ordered.Count; i++)
+        {
+            if (ordered[i].ZIndex != i) commands.Add(new ReorderElementCommand(ordered[i], ordered[i].ZIndex, i));
+        }
+
+        if (commands.Count == 0) return;
+
+        History.Execute(commands.Count == 1 ? commands[0] : new CompositeCommand("Reorder layers", commands));
+        RefreshHistoryFlags();
     }
 
     // ---------------------------------------------------------- clipboard/dupe ----
@@ -1333,7 +1665,13 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         if (SelectedElements.Count < 2) return;
 
         var groupId = Guid.NewGuid().ToString("N");
-        foreach (var e in SelectedElements) e.GroupId = groupId;
+        var commands = SelectedElements
+            .Select(e => (IDesignCommand)new ChangePropertyCommand<DesignerElement, string?>(
+                e, (el, v) => el.GroupId = v, e.GroupId, groupId, "Group"))
+            .ToList();
+
+        History.Execute(new CompositeCommand("Group elements", commands));
+        RefreshHistoryFlags();
         NotifyDocumentChanged();
         MarkDirty();
     }
@@ -1341,7 +1679,16 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     [RelayCommand]
     private void Ungroup()
     {
-        foreach (var e in SelectedElements.ToList()) e.GroupId = null;
+        var grouped = SelectedElements.Where(e => e.GroupId is not null).ToList();
+        if (grouped.Count == 0) return;
+
+        var commands = grouped
+            .Select(e => (IDesignCommand)new ChangePropertyCommand<DesignerElement, string?>(
+                e, (el, v) => el.GroupId = v, e.GroupId, null, "Ungroup"))
+            .ToList();
+
+        History.Execute(commands.Count == 1 ? commands[0] : new CompositeCommand("Ungroup elements", commands));
+        RefreshHistoryFlags();
         NotifyDocumentChanged();
         MarkDirty();
     }
