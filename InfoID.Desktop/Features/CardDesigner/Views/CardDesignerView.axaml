@@ -2106,35 +2106,6 @@
 									</DataTemplate>
 								</ItemsControl.Resources>
 								<ItemsControl.ItemTemplate>
-									<DataTemplate x:DataType="doc:DesignerElement">
-										<Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,2">
-											<!-- Icon-first layer row (Part 19): element-type glyph, name, then
-                                                 eye/lock toggles that swap their own icon based on state instead
-                                                 of showing the raw True/False bool as button text. -->
-											<Button Grid.Column="0" Classes="ghost" Padding="4,0"
-                                                    ToolTip.Tip="{Binding ElementType}"
-                                                    AutomationProperties.Name="{Binding ElementType, StringFormat='Select layer: {0}'}"
-                                                    Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SelectOnlyLayerCommand}"
-                                                    CommandParameter="{Binding}">
-												<PathIcon Data="{Binding Converter={x:Static conv:ElementTypeToIconConverter.Instance}}" Width="14" Height="14" />
-											</Button>
-											<TextBlock Grid.Column="1" Text="{Binding Name}" Classes="body" VerticalAlignment="Center" Margin="6,0" />
-											<Button Grid.Column="2" Classes="ghost" Padding="4,0"
-                                                    ToolTip.Tip="Show/hide this layer"
-                                                    AutomationProperties.Name="Toggle layer visibility"
-                                                    Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.ToggleLayerVisibleCommand}"
-                                                    CommandParameter="{Binding}">
-												<PathIcon Data="{Binding Visible, Converter={x:Static conv:BoolStateIconConverter.Instance}, ConverterParameter=Visibility}" Width="14" Height="14" />
-											</Button>
-											<Button Grid.Column="3" Classes="ghost" Padding="4,0"
-                                                    ToolTip.Tip="Lock/unlock this layer"
-                                                    AutomationProperties.Name="Toggle layer lock"
-                                                    Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.ToggleLayerLockedCommand}"
-                                                    CommandParameter="{Binding}">
-												<PathIcon Data="{Binding Locked, Converter={x:Static conv:BoolStateIconConverter.Instance}, ConverterParameter=Lock}" Width="14" Height="14" />
-											</Button>
-										</Grid>
-									</DataTemplate> 
 									<DataTemplate x:DataType="vm:LayerNode">
 										<StackPanel>
 											<ContentControl Content="{Binding}" ContentTemplate="{StaticResource LayerRowTemplate}" />
