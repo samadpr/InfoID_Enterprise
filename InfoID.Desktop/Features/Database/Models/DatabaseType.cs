@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,6 +9,8 @@ namespace InfoID.Desktop.Features.Database.Models
         SQLite,
         MySQL,
         PostgreSQL,
-        SQLServer
+        SQLServer,
+        ODBC,
+        Excel
     }
 }

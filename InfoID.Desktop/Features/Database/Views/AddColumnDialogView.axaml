@@ -1,0 +1,73 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Database.ViewModels"
+             x:Class="InfoID.Desktop.Features.Database.Views.AddColumnDialogView"
+             x:DataType="vm:AddColumnDialogViewModel">
+
+    <Grid Width="500"
+          Margin="35"
+          RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0"
+                   Text="Add Column"
+                   FontSize="22"
+                   FontWeight="Bold"
+                   Margin="0,0,0,30" />
+
+        <!-- Content -->
+        <StackPanel Grid.Row="1"
+                    Spacing="20">
+
+            <!-- Column name -->
+            <StackPanel Spacing="8">
+
+                <TextBlock Text="Column Name"
+                           FontSize="15" />
+
+                <TextBox Text="{Binding ColumnName}"
+                         PlaceholderText="Enter column name" />
+
+            </StackPanel>
+
+            <!-- Data type -->
+            <StackPanel Spacing="8">
+
+                <TextBlock Text="Data Type"
+                           FontSize="15" />
+
+                <ComboBox ItemsSource="{Binding DataTypes}"
+                          SelectedItem="{Binding SelectedDataType}" />
+
+            </StackPanel>
+
+            <!-- Primary key -->
+            <CheckBox Content="Primary Key"
+                      IsChecked="{Binding IsPrimaryKey}" />
+
+            <!-- Status -->
+            <TextBlock Text="{Binding StatusMessage}"
+                       TextWrapping="Wrap" />
+
+        </StackPanel>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="12"
+                    Margin="0,25,0,0">
+
+            <Button Content="Cancel"
+                    Command="{Binding CancelCommand}"
+                    Padding="25,12" />
+
+            <Button Content="Add"
+                    Command="{Binding AddCommand}"
+                    Padding="25,12" />
+
+        </StackPanel>
+
+    </Grid>
+
+</UserControl>

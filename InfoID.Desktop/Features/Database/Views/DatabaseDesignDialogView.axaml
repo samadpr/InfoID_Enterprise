@@ -1,0 +1,146 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Database.ViewModels"
+             x:Class="InfoID.Desktop.Features.Database.Views.DatabaseDesignDialogView"
+             x:DataType="vm:DatabaseDesignDialogViewModel"
+             xmlns:models="using:InfoID.Desktop.Features.Database.Models">
+    
+
+    <Grid Width="1000"
+          Height="650"
+          Margin="40"
+          RowDefinitions="Auto,*,Auto">
+
+        <!-- Database information -->
+        <StackPanel Grid.Row="0"
+                    Spacing="8">
+
+            <TextBlock Text="Database"
+                       FontSize="16"
+                       FontWeight="Bold" />
+
+            <TextBlock Text="{Binding SelectedDatabase}"
+                       FontSize="14"
+                       Opacity="0.8" />
+
+        </StackPanel>
+
+
+        <!-- Main content -->
+        <StackPanel Grid.Row="1"
+                    Margin="75,35,75,20"
+                    Spacing="25">
+
+            <!-- Table -->
+            <StackPanel Spacing="8">
+
+                <TextBlock Text="Database"
+                           FontSize="16"
+                           FontWeight="Bold" />
+
+                <TextBlock Text="Table"
+                           FontSize="14"
+                           Opacity="0.7" />
+
+                <ComboBox ItemsSource="{Binding Tables}"
+                          SelectedItem="{Binding SelectedTable}"
+                          Height="45"
+                          HorizontalAlignment="Stretch" />
+
+            </StackPanel>
+
+
+            <!-- Columns -->
+            <StackPanel Spacing="8">
+
+                <TextBlock Text="Columns"
+                           FontSize="14"
+                           Opacity="0.7" />
+
+                <Border BorderBrush="#D6D6D6" BorderThickness="1" CornerRadius="18" Height="220">
+
+                    <ScrollViewer>
+
+                        <ItemsControl ItemsSource="{Binding Columns}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="*,150,150,70" Margin="12,8">
+
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding Name}"
+                                                   FontSize="14"
+                                                   VerticalAlignment="Center" />
+
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding DataType}"
+                                                   FontSize="14"
+                                                   Opacity="0.7"
+                                                   VerticalAlignment="Center" />
+
+                                        <CheckBox Grid.Column="2"
+                                                  Content="Primary key"
+                                                  IsChecked="{Binding IsPrimaryKey}"
+                                                  VerticalAlignment="Center" />
+
+                                        <Button Grid.Column="3" Content="🗑" Command="{Binding $parent[UserControl].DataContext.DeleteColumnCommand}"
+                                            CommandParameter="{Binding}" Padding="8,5" VerticalAlignment="Center"  ToolTip.Tip="Delete column" />
+
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                </Border>
+
+            </StackPanel>
+
+
+            <!-- Actions -->
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="12">
+
+                <Button Content="+  Add column"
+                        Command="{Binding AddColumnCommand}"
+                        Padding="24,12" />
+
+                <Button Content="⚑  Filter"
+                        Command="{Binding FilterCommand}"
+                        Padding="24,12" />
+
+            </StackPanel>
+
+
+            <!-- Status -->
+            <TextBlock Text="{Binding StatusMessage}"
+                       HorizontalAlignment="Right"
+                       FontSize="13"
+                       Opacity="0.7" />
+
+        </StackPanel>
+
+
+        <!-- Bottom buttons -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="12">
+
+            <Button Content="Previous"
+                    Command="{Binding PreviousCommand}"
+                    Padding="28,12" />
+
+            <Button Content="Finish"
+                    Command="{Binding FinishCommand}"
+                    Padding="28,12" />
+
+            <Button Content="Cancel"
+                    Command="{Binding CancelCommand}"
+                    Padding="28,12" />
+
+        </StackPanel>
+
+    </Grid>
+
+</UserControl>

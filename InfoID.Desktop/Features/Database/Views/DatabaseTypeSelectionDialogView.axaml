@@ -1,0 +1,307 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Database.ViewModels"
+             xmlns:models="using:InfoID.Desktop.Features.Database.Models"
+             x:Class="InfoID.Desktop.Features.Database.Views.DatabaseTypeSelectionDialogView"
+             x:DataType="vm:DatabaseTypeSelectionDialogViewModel">
+
+    <Grid Width="1000"
+          Height="700"
+          Background="#F5F5F5"
+          RowDefinitions="*,Auto">
+
+        <ScrollViewer Grid.Row="0"
+                      VerticalScrollBarVisibility="Auto">
+
+            <UniformGrid Columns="4"
+                         Margin="48"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Top">
+
+                <!-- Sample Database -->
+                <Button Classes="databaseCard"
+                        Command="{Binding SelectDatabaseCommand}"
+                        CommandParameter="{x:Static models:DatabaseType.SQLite}">
+
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+
+                        <TextBlock Text="●"
+                                   FontSize="64"
+                                   HorizontalAlignment="Center" />
+
+                        <TextBlock Text="Sample Database (SQLite)"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center" />
+
+                    </StackPanel>
+
+                </Button>
+
+                <!-- Internal Database -->
+                <Button Classes="databaseCard">
+
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+
+                        <TextBlock Text="◉"
+                                   FontSize="64"
+                                   HorizontalAlignment="Center" />
+
+                        <TextBlock Text="Internal Database (SQLite)"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center" />
+
+                    </StackPanel>
+
+                </Button>
+
+                <!-- Excel -->
+                <Button Classes="databaseCard"
+                        Command="{Binding SelectDatabaseCommand}"
+                        CommandParameter="{x:Static models:DatabaseType.Excel}">
+
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+
+                        <TextBlock Text="X"
+                                   FontSize="64"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center" />
+
+                        <TextBlock Text="Excel"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center" />
+
+                    </StackPanel>
+
+                </Button>
+
+                <!-- CSV/TXT -->
+                <Button Classes="databaseCard">
+
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+
+                        <TextBlock Text="CSV"
+                                   FontSize="40"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center" />
+
+                        <TextBlock Text="CSV/TXT"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center" />
+
+                    </StackPanel>
+
+                </Button>
+
+                <!-- Microsoft Access -->
+                <Button Classes="databaseCard">
+
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+
+                        <TextBlock Text="A"
+                                   FontSize="64"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center" />
+
+                        <TextBlock Text="Microsoft Access"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center" />
+
+                    </StackPanel>
+
+                </Button>
+
+                <!-- SQLite -->
+                <Button Classes="databaseCard"
+                        Command="{Binding SelectDatabaseCommand}"
+                        CommandParameter="{x:Static models:DatabaseType.SQLite}">
+
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+
+                        <TextBlock Text="SQLite"
+                                   FontSize="34"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center" />
+
+                        <TextBlock Text="SQLite"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center" />
+
+                    </StackPanel>
+
+                </Button>
+
+                <!-- MySQL -->
+                <Button Classes="databaseCard"
+                        Command="{Binding SelectDatabaseCommand}"
+                        CommandParameter="{x:Static models:DatabaseType.MySQL}">
+
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+
+                        <TextBlock Text="MySQL"
+                                   FontSize="32"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center" />
+
+                        <TextBlock Text="MySQL"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center" />
+
+                    </StackPanel>
+
+                </Button>
+
+                <!-- PostgreSQL -->
+                <Button Classes="databaseCard"
+                        Command="{Binding SelectDatabaseCommand}"
+                        CommandParameter="{x:Static models:DatabaseType.PostgreSQL}">
+
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+
+                        <TextBlock Text="🐘"
+                                   FontSize="58"
+                                   HorizontalAlignment="Center" />
+
+                        <TextBlock Text="PostgreSQL"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center" />
+
+                    </StackPanel>
+
+                </Button>
+
+                <!-- ODBC -->
+                <Button Classes="databaseCard"
+                        Command="{Binding SelectDatabaseCommand}"
+                        CommandParameter="{x:Static models:DatabaseType.ODBC}">
+
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+
+                        <TextBlock Text="ODBC"
+                                   FontSize="38"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center" />
+
+                        <TextBlock Text="ODBC"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center" />
+
+                    </StackPanel>
+
+                </Button>
+
+                <!-- Active Directory -->
+                <Button Classes="databaseCard">
+
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+
+                        <TextBlock Text="◆"
+                                   FontSize="64"
+                                   HorizontalAlignment="Center" />
+
+                        <TextBlock Text="Active Directory"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center" />
+
+                    </StackPanel>
+
+                </Button>
+
+                <!-- Google Sheets -->
+                <Button Classes="databaseCard">
+
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+
+                        <TextBlock Text="▦"
+                                   FontSize="64"
+                                   HorizontalAlignment="Center" />
+
+                        <TextBlock Text="Google Sheets"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center" />
+
+                    </StackPanel>
+
+                </Button>
+
+            </UniformGrid>
+
+        </ScrollViewer>
+
+        <!-- Cancel -->
+        <Button Grid.Row="1"  Classes="cancelButton" Content="Cancel" Command="{Binding CancelCommand}" HorizontalAlignment="Right"
+                Margin="24" Padding="32,12" />
+
+    </Grid>
+
+    <UserControl.Styles>
+        <Style Selector="Button.cancelButton">
+            <Setter Property="Foreground" Value="#1F2937" />
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#1AA36F" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="20" />
+        </Style>
+
+        <Style Selector="Button.cancelButton:pointerover">
+            <Setter Property="Foreground" Value="#1F2937" />
+            <Setter Property="Background" Value="#F0F8F5" />
+        </Style>
+        <!-- Normal database card -->
+        <Style Selector="Button.databaseCard">
+            <Setter Property="Width" Value="220" />
+            <Setter Property="Height" Value="190" />
+            <Setter Property="Margin" Value="5" />
+
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="Foreground" Value="#1F2937" />
+
+            <Setter Property="BorderBrush" Value="#D6D6D6" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="20" />
+
+            <Setter Property="HorizontalContentAlignment"
+                    Value="Center" />
+
+            <Setter Property="VerticalContentAlignment"
+                    Value="Center" />
+        </Style>
+
+        <!-- Hover -->
+        <Style Selector="Button.databaseCard:pointerover">
+            <Setter Property="Background" Value="#F0F8F5" />
+            <Setter Property="Foreground" Value="#1F2937" />
+            <Setter Property="BorderBrush" Value="#1AA36F" />
+        </Style>
+
+        <!-- Pressed -->
+        <Style Selector="Button.databaseCard:pressed">
+            <Setter Property="Background" Value="#E2F2EB" />
+            <Setter Property="Foreground" Value="#1F2937" />
+            <Setter Property="BorderBrush" Value="#1AA36F" />
+        </Style>
+
+    </UserControl.Styles>
+
+</UserControl>

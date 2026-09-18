@@ -26,5 +26,6 @@
         <StyleInclude Source="avares://InfoID.Desktop/Resources/Controls/Inputs.axaml" />
         <StyleInclude Source="avares://InfoID.Desktop/Resources/Controls/Cards.axaml" />
         <StyleInclude Source="avares://InfoID.Desktop/Resources/Controls/Chrome.axaml" />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
     </Application.Styles>
 </Application>
