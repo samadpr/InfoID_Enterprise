@@ -203,6 +203,49 @@
 			<Setter Property="Background" Value="{DynamicResource BrushHoverOverlay}" />
 		</Style>
 
+        <!-- Database area action buttons (Add database / Apply / Disconnect):
+             clear hover and pressed feedback, with a smooth fade. -->
+        <Style Selector="Button.dbAction">
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.dbAction /template/ ContentPresenter">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.12" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.dbAction:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#3300A878" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushPrimary}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="Button.dbAction:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="#4D00A878" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+
+        <!-- In case the theme underlines the button text itself on hover -->
+        <Style Selector="Button.dbAction TextBlock, Button.dbAction:pointerover TextBlock">
+            <Setter Property="TextDecorations" Value="{x:Null}" />
+        </Style>
+
+        <Style Selector="TabControl.propTabs">
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="TabControl.propTabs TabItem">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        
 	</UserControl.Styles>
 
 	<UserControl.DataTemplates>
@@ -216,13 +259,13 @@
              content's runtime type. That's what makes
              Content="{Binding ActiveTab.PrimarySelection}" automatically show the right
              editor for whatever element type is selected. -->
-		<DataTemplate DataType="doc:TextElement">
+		<!--<DataTemplate DataType="doc:TextElement">
 			<StackPanel Spacing="10">
 				<TextBlock Text="Text content" Classes="caption" />
 				<TextBox Text="{Binding Text, Mode=TwoWay}" AcceptsReturn="True" MinHeight="60"
                          Watermark="Type the text shown on the card..." />
 
-				<!-- Font family (Part 16): real installed-font picker instead of typing
+				--><!-- Font family (Part 16): real installed-font picker instead of typing
                      a name. IsEditable so a font saved from another machine (not
                      installed here) still shows/keeps its name instead of the ComboBox
                      just going blank: "handle unavailable fonts gracefully".
@@ -233,7 +276,7 @@
                      FontFamily type accepts a plain string directly, same as the raw
                      string CardCanvasView already hands to Typeface's own constructor),
                      so a name like "Wingdings 3" actually looks like Wingdings 3 in the
-                     dropdown instead of every entry looking identical in the UI font. -->
+                     dropdown instead of every entry looking identical in the UI font. --><!--
 				<StackPanel Spacing="4">
 					<TextBlock Text="Font family" Classes="caption" />
 					<ComboBox ItemsSource="{x:Static services:SystemFontCatalog.FontFamilyNamesWithRecentFirst}"
@@ -263,10 +306,10 @@
 					<CheckBox Content="Underline" IsChecked="{Binding Underline, Mode=TwoWay}" />
 				</StackPanel>
 
-				<!-- Text alignment (paragraph alignment inside this text box) — deliberately
+				--><!-- Text alignment (paragraph alignment inside this text box) — deliberately
                      a separate control from the "Align" buttons in the main toolbar, which move
                      the OBJECT itself relative to other objects/the card (Part 1). Mixing the
-                     two under one ambiguous "Align" label was the original bug report. -->
+                     two under one ambiguous "Align" label was the original bug report. --><!--
 				<TextBlock Text="Text alignment" Classes="caption" Margin="0,4,0,0" />
 				<StackPanel Orientation="Horizontal" Spacing="4">
 					<ToggleButton Classes="toolbtn" Content="&#8676;" ToolTip.Tip="Text align left"
@@ -287,22 +330,403 @@
 					<ToggleButton Classes="toolbtn" Content="&#8615;" ToolTip.Tip="Vertical align bottom"
                                   IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Bottom}" />
 				</StackPanel>
+                <StackPanel Spacing="6" Margin="0,8,0,0">
+                    <TextBlock Text="Database Fields"
+                               Classes="caption" />
 
-				<!-- Data binding (Part 24/42/43). Leave empty for ordinary static text.
+                    <TextBlock Text="{Binding DatabaseColumn,
+                              StringFormat='Connected field: {0}'}"
+                               FontSize="13"
+                               Opacity="0.7" />
+
+                    <ItemsControl ItemsSource="{Binding $parent[UserControl].DataContext.ActiveTab.DatabaseFields}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding ColumnName}"
+                                        Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AddDatabaseFieldCommand}"
+                                        CommandParameter="{Binding}"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Left"
+                                        Margin="0,2"
+                                        Padding="8,6" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+				--><!-- Data binding (Part 24/42/43). Leave empty for ordinary static text.
                      When set, the "Text content" box above is ignored while designing —
                      the canvas shows this expression itself, and (with Data Preview on)
-                     the evaluated value against the selected sample record. -->
-				<TextBlock Text="Data binding expression" Classes="caption" Margin="0,4,0,0" />
-				<TextBox Text="{Binding DataBindingExpression, Mode=TwoWay}" Watermark="e.g. {{FirstName}} {{LastName}}" />
-
-				<!-- Conditional visibility (Part 25/44). Leave empty to always show.
+                     the evaluated value against the selected sample record. --><!--
+				
+				--><!-- Conditional visibility (Part 25/44). Leave empty to always show.
                      Only evaluated with Data Preview on — otherwise every element stays
-                     visible so a conditional element doesn't just vanish while designing. -->
+                     visible so a conditional element doesn't just vanish while designing. --><!--
 				<TextBlock Text="Visibility condition" Classes="caption" Margin="0,4,0,0" />
 				<TextBox Text="{Binding VisibilityCondition, Mode=TwoWay}" Watermark="e.g. Department == 'Security'" />
 			</StackPanel>
-		</DataTemplate>
+		</DataTemplate>-->
+        <DataTemplate DataType="doc:TextElement">
 
+            <TabControl>
+
+                <!-- ========================================================= -->
+                <!-- STYLE TAB                                                  -->
+                <!-- ========================================================= -->
+
+                <TabItem Header="Style">
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+
+                        <StackPanel Spacing="10"
+                                    Margin="0,0,0,20">
+
+                            <!-- Text content -->
+                            <TextBlock Text="Text content"
+                                       Classes="caption" />
+
+                            <TextBox Text="{Binding Text, Mode=TwoWay}"
+                                     AcceptsReturn="True"
+                                     MinHeight="60"
+                                     Watermark="Type the text shown on the card..." />
+
+
+                            <!-- Font family -->
+                            <StackPanel Spacing="4">
+
+                                <TextBlock Text="Font family"
+                                           Classes="caption" />
+
+                                <ComboBox ItemsSource="{x:Static services:SystemFontCatalog.FontFamilyNamesWithRecentFirst}"
+                                          Text="{Binding FontFamily, Mode=TwoWay}"
+                                          IsEditable="True"
+                                          IsTextSearchEnabled="True"
+                                          HorizontalAlignment="Stretch">
+
+                                    <ComboBox.ItemTemplate>
+
+                                        <DataTemplate>
+
+                                            <TextBlock Text="{Binding}"
+                                                       FontFamily="{Binding Converter={x:Static conv:StringToFontFamilyConverter.Instance}}" />
+
+                                        </DataTemplate>
+
+                                    </ComboBox.ItemTemplate>
+
+                                </ComboBox>
+
+                            </StackPanel>
+
+
+                            <!-- Font size + Color -->
+                            <Grid ColumnDefinitions="*,*">
+
+                                <StackPanel Grid.Column="0"
+                                            Spacing="4"
+                                            Margin="0,0,4,0">
+
+                                    <TextBlock Text="Font size"
+                                               Classes="caption" />
+
+                                    <NumericUpDown Value="{Binding FontSize, Mode=TwoWay}"
+                                                   Minimum="4"
+                                                   Maximum="200"
+                                                   Increment="1" />
+
+                                </StackPanel>
+
+
+                                <StackPanel Grid.Column="1"
+                                            Spacing="4"
+                                            Margin="4,0,0,0">
+
+                                    <TextBlock Text="Color"
+                                               Classes="caption" />
+
+                                    <controls:ColorPickerField
+                                        ColorHex="{Binding ColorHex, Mode=TwoWay}" />
+
+                                </StackPanel>
+
+                            </Grid>
+
+
+                            <!-- Bold / Italic / Underline -->
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="12">
+
+                                <CheckBox Content="Bold"
+                                          IsChecked="{Binding Bold, Mode=TwoWay}" />
+
+                                <CheckBox Content="Italic"
+                                          IsChecked="{Binding Italic, Mode=TwoWay}" />
+
+                                <CheckBox Content="Underline"
+                                          IsChecked="{Binding Underline, Mode=TwoWay}" />
+
+                            </StackPanel>
+
+
+                            <!-- Text alignment -->
+                            <TextBlock Text="Text alignment"
+                                       Classes="caption"
+                                       Margin="0,4,0,0" />
+
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="4">
+
+                                <ToggleButton Classes="toolbtn"
+                                              Content="&#8676;"
+                                              ToolTip.Tip="Text align left"
+                                              IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Left}" />
+
+                                <ToggleButton Classes="toolbtn"
+                                              Content="&#8596;"
+                                              ToolTip.Tip="Text align center"
+                                              IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Center}" />
+
+                                <ToggleButton Classes="toolbtn"
+                                              Content="&#8677;"
+                                              ToolTip.Tip="Text align right"
+                                              IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Right}" />
+
+                                <ToggleButton Classes="toolbtn"
+                                              Content="&#8801;"
+                                              ToolTip.Tip="Text justify"
+                                              IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Justify}" />
+
+                            </StackPanel>
+
+
+                            <!-- Vertical alignment -->
+                            <TextBlock Text="Vertical alignment"
+                                       Classes="caption"
+                                       Margin="0,4,0,0" />
+
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="4">
+
+                                <ToggleButton Classes="toolbtn"
+                                              Content="&#8613;"
+                                              ToolTip.Tip="Vertical align top"
+                                              IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Top}" />
+
+                                <ToggleButton Classes="toolbtn"
+                                              Content="&#8597;"
+                                              ToolTip.Tip="Vertical align middle"
+                                              IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Middle}" />
+
+                                <ToggleButton Classes="toolbtn"
+                                              Content="&#8615;"
+                                              ToolTip.Tip="Vertical align bottom"
+                                              IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Bottom}" />
+
+                            </StackPanel>
+
+
+                            <!-- Format -->
+                            <TextBlock Text="Format"
+                                       Classes="caption"
+                                       Margin="0,4,0,0" />
+
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="8">
+
+                                <Button Content="▧"
+                                        Width="36"
+                                        Height="36" />
+
+                                <Button Content="▣"
+                                        Width="36"
+                                        Height="36" />
+
+                                <Button Content="🖌"
+                                        Width="36"
+                                        Height="36" />
+
+                            </StackPanel>
+
+                        </StackPanel>
+
+                    </ScrollViewer>
+
+                </TabItem>
+
+
+                <!-- ========================================================= -->
+                <!-- PARAMETERS TAB                                             -->
+                <!-- ========================================================= -->
+
+                <TabItem Header="Parameters">
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+
+                        <StackPanel Spacing="14"
+                                    Margin="0,0,0,20">
+
+
+                            <!-- Text source -->
+                            <StackPanel Spacing="6">
+
+                                <TextBlock Text="Text source"
+                                           Classes="caption" />
+
+                                <StackPanel Orientation="Horizontal">
+
+                                    <!-- Fixed -->
+                                    <ToggleButton Content="Fixed"
+                                                  Padding="14,8"
+                                                  IsChecked="{Binding SourceType,
+                                              Mode=TwoWay,
+                                              Converter={x:Static conv:EnumToBoolConverter.Instance},
+                                              ConverterParameter=Fixed}" />
+
+                                    <!-- Link -->
+                                    <ToggleButton Content="Link"
+                                                  Padding="14,8"
+                                                  IsChecked="{Binding SourceType,
+                                              Mode=TwoWay,
+                                              Converter={x:Static conv:EnumToBoolConverter.Instance},
+                                              ConverterParameter=Link}" />
+
+                                    <!-- Database -->
+                                    <ToggleButton Content="Database"
+                                                  Padding="14,8"
+                                                  IsChecked="{Binding SourceType,
+                                              Mode=TwoWay,
+                                              Converter={x:Static conv:EnumToBoolConverter.Instance},
+                                              ConverterParameter=Database}" />
+
+                                </StackPanel>
+
+                            </StackPanel>
+
+
+                            <!-- ================================================= -->
+                            <!-- DATABASE PARAMETERS                                -->
+                            <!-- ================================================= -->
+
+                            <StackPanel Spacing="8"
+                                        IsVisible="{Binding IsDatabaseBound}">
+
+                                <TextBlock Text="Database"
+                                           Classes="caption" />
+
+                                <TextBlock Text="{Binding DatabaseColumn,
+                                                  StringFormat='Connected field: {0}'}"
+                                           FontSize="13"
+                                           Opacity="0.7" />
+
+                                <TextBlock Text="Database Field"
+                                           Classes="caption" />
+
+                                <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.ActiveTab.DatabaseFields}"
+                                          SelectedValue="{Binding DatabaseColumn, Mode=TwoWay}"
+                                          SelectedValueBinding="{Binding ColumnName}"
+                                          HorizontalAlignment="Stretch">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding ColumnName}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+
+
+                            <!-- ================================================= -->
+                            <!-- DATA LENGTH                                        -->
+                            <!-- ================================================= -->
+
+                            <StackPanel Spacing="6">
+
+                                <TextBlock Text="Data Length"
+                                           Classes="caption" />
+
+                                <NumericUpDown Minimum="1"
+                                               Maximum="5000"
+                                               Value="500"
+                                               Increment="1" />
+
+                            </StackPanel>
+
+
+                            <!-- ================================================= -->
+                            <!-- CONCATENATION                                      -->
+                            <!-- ================================================= -->
+
+                            <TextBlock Text="Concatenation"
+                                       Classes="caption"
+                                       Margin="0,8,0,0" />
+
+
+                            <!-- Prefix -->
+                            <Grid ColumnDefinitions="*,Auto"
+                                  ColumnSpacing="8">
+
+                                <StackPanel Grid.Column="0"
+                                            Spacing="4">
+
+                                    <TextBlock Text="Prefix"
+                                               Classes="caption" />
+
+                                    <TextBox />
+
+                                </StackPanel>
+
+                                <ToggleSwitch Grid.Column="1"
+                                              Content="Print"
+                                              IsChecked="True"
+                                              VerticalAlignment="Bottom" />
+
+                            </Grid>
+
+
+                            <!-- Suffix -->
+                            <Grid ColumnDefinitions="*,Auto"
+                                  ColumnSpacing="8">
+
+                                <StackPanel Grid.Column="0"
+                                            Spacing="4">
+
+                                    <TextBlock Text="Suffix"
+                                               Classes="caption" />
+
+                                    <TextBox />
+
+                                </StackPanel>
+
+                                <ToggleSwitch Grid.Column="1"
+                                              Content="Print"
+                                              IsChecked="True"
+                                              VerticalAlignment="Bottom" />
+
+                            </Grid>
+
+
+                            <!-- ================================================= -->
+                            <!-- VISIBILITY CONDITION                               -->
+                            <!-- ================================================= -->
+
+                            <StackPanel Spacing="6"
+                                        Margin="0,8,0,0">
+
+                                <TextBlock Text="Visibility condition"
+                                           Classes="caption" />
+
+                                <TextBox Text="{Binding VisibilityCondition, Mode=TwoWay}"
+                                         Watermark="e.g. Department == 'Security'" />
+
+                            </StackPanel>
+
+                        </StackPanel>
+
+                    </ScrollViewer>
+
+                </TabItem>
+
+            </TabControl>
+
+        </DataTemplate>
 		<DataTemplate DataType="doc:DateTimeElement">
 			<StackPanel Spacing="10">
 
@@ -681,191 +1105,279 @@
              DataTemplate (common to every element type) rather than being duplicated
              into a "Position" tab field-by-field; Position here adds what ISN'T
              already there: alignment, z-order, and flip. -->
-		<DataTemplate DataType="doc:ImageElement">
-			<StackPanel Spacing="10">
-				<TextBlock Text="Image" Classes="caption" />
-				<TextBlock Text="{Binding AssetReference, StringFormat='File: {0}'}" Classes="caption" TextWrapping="Wrap" Opacity="0.7" />
+        <DataTemplate DataType="doc:ImageElement">
+            <TabControl Classes="propTabs">
 
-				<TabControl>
+                <!-- One row of equal-width tabs -->
+                <TabControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="2" />
+                    </ItemsPanelTemplate>
+                </TabControl.ItemsPanel>
 
-					<TabItem Header="Clipping">
-						<StackPanel Spacing="10" Margin="4,10,4,4">
-							<TextBlock Text="Clip the image to a shape -- each tile previews this element's own current picture." Classes="caption"
-                                       Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
+                <!-- CLIPPING -->
+                <TabItem Header="Clipping">
+                    <StackPanel Spacing="10" Margin="0,12,0,4">
+                        <TextBlock Text="Clip the image to a shape. Each tile previews this element's current picture." Classes="caption"
+                                   Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
 
-							<!-- Each tile is 56x56: an AssetReferenceToBitmapConverter-bound
-                                 Image so every option previews the SAME real picture, not a
-                                 generic outline icon (Part 92). Rectangle/RoundedRectangle/
-                                 Circle clip via a plain Border's own CornerRadius (0 / 10 /
-                                 28, half the tile size, which makes a square Border render
-                                 as a perfect circle); Hexagon/Star aren't expressible that
-                                 way, so those two clip the Image directly via a literal
-                                 Geometry path sized to this exact 56x56 tile, computed from
-                                 the identical point math ShapeRenderer.BuildMaskClipGeometry
-                                 uses to draw the real thing (so the preview and the actual
-                                 render are always geometrically the same shape). -->
-							<WrapPanel ItemWidth="64" ItemHeight="64">
+                        <WrapPanel ItemWidth="64" ItemHeight="64">
 
-								<ToggleButton Classes="shapeoption" Width="60" Height="60" ToolTip.Tip="Rectangle (no clipping)"
-                                              IsChecked="{Binding MaskShape, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Rectangle}">
-									<Border Width="56" Height="56" ClipToBounds="True" Background="{DynamicResource BrushSurface}">
-										<Image Source="{Binding AssetReference, Converter={x:Static conv:AssetReferenceToBitmapConverter.Instance}}" Stretch="UniformToFill" />
-									</Border>
-								</ToggleButton>
+                            <ToggleButton Classes="shapeoption" Width="60" Height="60" ToolTip.Tip="Rectangle (no clipping)"
+                                          IsChecked="{Binding MaskShape, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Rectangle}">
+                                <Border Width="56" Height="56" ClipToBounds="True" Background="{DynamicResource BrushSurface}">
+                                    <Image Source="{Binding AssetReference, Converter={x:Static conv:AssetReferenceToBitmapConverter.Instance}}" Stretch="UniformToFill" />
+                                </Border>
+                            </ToggleButton>
 
-								<ToggleButton Classes="shapeoption" Width="60" Height="60" ToolTip.Tip="Rounded rectangle (uses Corner radius, in the Style tab)"
-                                              IsChecked="{Binding MaskShape, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=RoundedRectangle}">
-									<Border Width="56" Height="56" CornerRadius="12" ClipToBounds="True" Background="{DynamicResource BrushSurface}">
-										<Image Source="{Binding AssetReference, Converter={x:Static conv:AssetReferenceToBitmapConverter.Instance}}" Stretch="UniformToFill" />
-									</Border>
-								</ToggleButton>
+                            <ToggleButton Classes="shapeoption" Width="60" Height="60" ToolTip.Tip="Rounded rectangle (uses Corner radius, in the Style tab)"
+                                          IsChecked="{Binding MaskShape, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=RoundedRectangle}">
+                                <Border Width="56" Height="56" CornerRadius="12" ClipToBounds="True" Background="{DynamicResource BrushSurface}">
+                                    <Image Source="{Binding AssetReference, Converter={x:Static conv:AssetReferenceToBitmapConverter.Instance}}" Stretch="UniformToFill" />
+                                </Border>
+                            </ToggleButton>
 
-								<ToggleButton Classes="shapeoption" Width="60" Height="60" ToolTip.Tip="Circle"
-                                              IsChecked="{Binding MaskShape, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Circle}">
-									<Border Width="56" Height="56" CornerRadius="28" ClipToBounds="True" Background="{DynamicResource BrushSurface}">
-										<Image Source="{Binding AssetReference, Converter={x:Static conv:AssetReferenceToBitmapConverter.Instance}}" Stretch="UniformToFill" />
-									</Border>
-								</ToggleButton>
+                            <ToggleButton Classes="shapeoption" Width="60" Height="60" ToolTip.Tip="Circle"
+                                          IsChecked="{Binding MaskShape, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Circle}">
+                                <Border Width="56" Height="56" CornerRadius="28" ClipToBounds="True" Background="{DynamicResource BrushSurface}">
+                                    <Image Source="{Binding AssetReference, Converter={x:Static conv:AssetReferenceToBitmapConverter.Instance}}" Stretch="UniformToFill" />
+                                </Border>
+                            </ToggleButton>
 
-								<ToggleButton Classes="shapeoption" Width="60" Height="60" ToolTip.Tip="Hexagon"
-                                              IsChecked="{Binding MaskShape, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Hexagon}">
-									<Panel Width="56" Height="56">
-										<Border Width="56" Height="56" Background="{DynamicResource BrushSurface}"
-                                                Clip="M28,0 L52.24,14 L52.24,42 L28,56 L3.76,42 L3.76,14 Z" />
-										<Image Source="{Binding AssetReference, Converter={x:Static conv:AssetReferenceToBitmapConverter.Instance}}" Stretch="UniformToFill"
-                                               Clip="M28,0 L52.24,14 L52.24,42 L28,56 L3.76,42 L3.76,14 Z" />
-									</Panel>
-								</ToggleButton>
+                            <ToggleButton Classes="shapeoption" Width="60" Height="60" ToolTip.Tip="Hexagon"
+                                          IsChecked="{Binding MaskShape, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Hexagon}">
+                                <Panel Width="56" Height="56">
+                                    <Border Width="56" Height="56" Background="{DynamicResource BrushSurface}"
+                                            Clip="M28,0 L52.24,14 L52.24,42 L28,56 L3.76,42 L3.76,14 Z" />
+                                    <Image Source="{Binding AssetReference, Converter={x:Static conv:AssetReferenceToBitmapConverter.Instance}}" Stretch="UniformToFill"
+                                           Clip="M28,0 L52.24,14 L52.24,42 L28,56 L3.76,42 L3.76,14 Z" />
+                                </Panel>
+                            </ToggleButton>
 
-								<ToggleButton Classes="shapeoption" Width="60" Height="60" ToolTip.Tip="Star"
-                                              IsChecked="{Binding MaskShape, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Star}">
-									<Panel Width="56" Height="56">
-										<Border Width="56" Height="56" Background="{DynamicResource BrushSurface}"
-                                                Clip="M28,0 L36.2,16.68 L54.6,19.35 L41.3,32.33 L44.4,50.66 L28,42 L11.6,50.66 L14.7,32.33 L1.4,19.35 L19.8,16.68 Z" />
-										<Image Source="{Binding AssetReference, Converter={x:Static conv:AssetReferenceToBitmapConverter.Instance}}" Stretch="UniformToFill"
-                                               Clip="M28,0 L36.2,16.68 L54.6,19.35 L41.3,32.33 L44.4,50.66 L28,42 L11.6,50.66 L14.7,32.33 L1.4,19.35 L19.8,16.68 Z" />
-									</Panel>
-								</ToggleButton>
+                            <ToggleButton Classes="shapeoption" Width="60" Height="60" ToolTip.Tip="Star"
+                                          IsChecked="{Binding MaskShape, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Star}">
+                                <Panel Width="56" Height="56">
+                                    <Border Width="56" Height="56" Background="{DynamicResource BrushSurface}"
+                                            Clip="M28,0 L36.2,16.68 L54.6,19.35 L41.3,32.33 L44.4,50.66 L28,42 L11.6,50.66 L14.7,32.33 L1.4,19.35 L19.8,16.68 Z" />
+                                    <Image Source="{Binding AssetReference, Converter={x:Static conv:AssetReferenceToBitmapConverter.Instance}}" Stretch="UniformToFill"
+                                           Clip="M28,0 L36.2,16.68 L54.6,19.35 L41.3,32.33 L44.4,50.66 L28,42 L11.6,50.66 L14.7,32.33 L1.4,19.35 L19.8,16.68 Z" />
+                                </Panel>
+                            </ToggleButton>
 
-							</WrapPanel>
-						</StackPanel>
-					</TabItem>
+                        </WrapPanel>
+                    </StackPanel>
+                </TabItem>
 
-					<TabItem Header="Style">
-						<StackPanel Spacing="10" Margin="4,10,4,4">
-							<StackPanel Spacing="4">
-								<TextBlock Text="Fit mode" Classes="caption" />
-								<StackPanel Orientation="Horizontal" Spacing="4">
-									<ToggleButton Classes="toolbtn-wide" Content="Fit" ToolTip.Tip="Show the whole picture, letterboxed if needed"
-                                                  IsChecked="{Binding FitMode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Fit}" />
-									<ToggleButton Classes="toolbtn-wide" Content="Fill" ToolTip.Tip="Crop to fill the whole box"
-                                                  IsChecked="{Binding FitMode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Fill}" />
-									<ToggleButton Classes="toolbtn-wide" Content="Stretch" ToolTip.Tip="Stretch to fill, ignoring aspect ratio"
-                                                  IsChecked="{Binding FitMode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Stretch}" />
-								</StackPanel>
-							</StackPanel>
-							<StackPanel Spacing="4">
-								<TextBlock Text="Corner radius (mm)" Classes="caption" />
-								<NumericUpDown Value="{Binding CornerRadius, Mode=TwoWay}" Minimum="0" Maximum="50" Increment="0.5" />
-							</StackPanel>
-							<Button Classes="secondary" Content="Crop / Pan / Zoom..." HorizontalAlignment="Stretch"
-                                    IsEnabled="{Binding FitMode, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Fill}"
-                                    ToolTip.Tip="Only applies in Fill mode -- Fit and Stretch always show the whole image"
-                                    Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.EditCropCommand}"
-                                    CommandParameter="{Binding}" />
-							<!-- Priority 12: re-opens the same Image Editor Browse Image/Take
-                                 Photo already use, pre-loaded with this element's current
-                                 picture. Rotate/brightness/contrast/saturation/color-mode/
-                                 background-removal/face-detection all live there rather than
-                                 as separate live properties here; one editor, not two. -->
-							<Button Classes="secondary" Content="Edit Image..." HorizontalAlignment="Stretch"
-                                    ToolTip.Tip="Crop, rotate, adjust colors and more"
-                                    Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.EditImageCommand}"
-                                    CommandParameter="{Binding}" />
-						</StackPanel>
-					</TabItem>
+                <!-- STYLE -->
+                <TabItem Header="Style">
+                    <StackPanel Spacing="12" Margin="0,12,0,4">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Fit mode" Classes="caption" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <ToggleButton Classes="toolbtn-wide" Content="Fit" ToolTip.Tip="Show the whole picture, letterboxed if needed"
+                                              IsChecked="{Binding FitMode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Fit}" />
+                                <ToggleButton Classes="toolbtn-wide" Content="Fill" ToolTip.Tip="Crop to fill the whole box"
+                                              IsChecked="{Binding FitMode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Fill}" />
+                                <ToggleButton Classes="toolbtn-wide" Content="Stretch" ToolTip.Tip="Stretch to fill, ignoring aspect ratio"
+                                              IsChecked="{Binding FitMode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Stretch}" />
+                            </StackPanel>
+                        </StackPanel>
 
-					<TabItem Header="Position">
-						<StackPanel Spacing="10" Margin="4,10,4,4">
-							<TextBlock Text="Position/size/rotation are above; this adds alignment, layer order, and mirroring."
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Corner radius (mm)" Classes="caption" />
+                            <NumericUpDown Value="{Binding CornerRadius, Mode=TwoWay}" Minimum="0" Maximum="50" Increment="0.5" FormatString="0.##" />
+                        </StackPanel>
+
+                        <Button Classes="secondary" Content="Crop / Pan / Zoom..." HorizontalAlignment="Stretch"
+                                IsEnabled="{Binding FitMode, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Fill}"
+                                ToolTip.Tip="Only applies in Fill mode. Fit and Stretch always show the whole image."
+                                Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.EditCropCommand}"
+                                CommandParameter="{Binding}" />
+
+                        <Button Classes="secondary" Content="Edit Image..." HorizontalAlignment="Stretch"
+                                ToolTip.Tip="Crop, rotate, adjust colors and more"
+                                Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.EditImageCommand}"
+                                CommandParameter="{Binding}" />
+                    </StackPanel>
+                </TabItem>
+
+                <!-- POSITION -->
+                <TabItem Header="Position">
+                    <StackPanel Spacing="14" Margin="0,12,0,4">
+
+                        <!-- Position and size -->
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="10">
+                            <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
+                                <TextBlock Text="X (mm)" Classes="caption" />
+                                <NumericUpDown Value="{Binding X, Mode=TwoWay}" Increment="0.5" FormatString="0.##" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
+                                <TextBlock Text="Y (mm)" Classes="caption" />
+                                <NumericUpDown Value="{Binding Y, Mode=TwoWay}" Increment="0.5" FormatString="0.##" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4">
+                                <TextBlock Text="Width (mm)" Classes="caption" />
+                                <NumericUpDown Value="{Binding Width, Mode=TwoWay}" Increment="0.5" Minimum="1" FormatString="0.##" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4">
+                                <TextBlock Text="Height (mm)" Classes="caption" />
+                                <NumericUpDown Value="{Binding Height, Mode=TwoWay}" Increment="0.5" Minimum="1" FormatString="0.##" />
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Rotation (deg)" Classes="caption" />
+                            <NumericUpDown Value="{Binding Rotation, Mode=TwoWay}" Increment="1" FormatString="0.##"
+                                           ToolTip.Tip="Type a value, or drag the round handle above the element on the canvas" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="Opacity" Classes="caption" />
+                                <TextBlock Grid.Column="1" Classes="caption"
+                                           Text="{Binding Opacity, StringFormat={}{0:P0}}" />
+                            </Grid>
+                            <Slider Minimum="0" Maximum="1" Value="{Binding Opacity, Mode=TwoWay}" />
+                        </StackPanel>
+
+                        <Border Height="1" Background="{DynamicResource BrushBorder}" />
+
+                        <!-- Align to card -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Align to card" Classes="caption" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <Button Classes="ghost toolbtn" ToolTip.Tip="Align left" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignLeftCommand}">
+                                    <PathIcon Data="{x:Static icons:DesignerIcons.AlignLeft}" Width="15" Height="15" />
+                                </Button>
+                                <Button Classes="ghost toolbtn" ToolTip.Tip="Align center (horizontal)" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignCenterHorizontalCommand}">
+                                    <PathIcon Data="{x:Static icons:DesignerIcons.AlignCenterHorizontal}" Width="15" Height="15" />
+                                </Button>
+                                <Button Classes="ghost toolbtn" ToolTip.Tip="Align right" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignRightCommand}">
+                                    <PathIcon Data="{x:Static icons:DesignerIcons.AlignRight}" Width="15" Height="15" />
+                                </Button>
+                                <Button Classes="ghost toolbtn" ToolTip.Tip="Align top" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignTopCommand}">
+                                    <PathIcon Data="{x:Static icons:DesignerIcons.AlignTop}" Width="15" Height="15" />
+                                </Button>
+                                <Button Classes="ghost toolbtn" ToolTip.Tip="Align middle (vertical)" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignMiddleVerticalCommand}">
+                                    <PathIcon Data="{x:Static icons:DesignerIcons.AlignMiddleVertical}" Width="15" Height="15" />
+                                </Button>
+                                <Button Classes="ghost toolbtn" ToolTip.Tip="Align bottom" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignBottomCommand}">
+                                    <PathIcon Data="{x:Static icons:DesignerIcons.AlignBottom}" Width="15" Height="15" />
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Layer order -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Order" Classes="caption" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <Button Classes="ghost" Content="Forward" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BringForwardCommand}" />
+                                <Button Classes="ghost" Content="Backward" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SendBackwardCommand}" />
+                                <Button Classes="ghost toolbtn" ToolTip.Tip="Bring to front" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BringToFrontCommand}">
+                                    <PathIcon Data="{x:Static icons:DesignerIcons.BringToFront}" Width="15" Height="15" />
+                                </Button>
+                                <Button Classes="ghost toolbtn" ToolTip.Tip="Send to back" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SendToBackCommand}">
+                                    <PathIcon Data="{x:Static icons:DesignerIcons.SendToBack}" Width="15" Height="15" />
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Mirror -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Mirror" Classes="caption" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <ToggleButton Classes="toolbtn-wide" Content="Flip H" ToolTip.Tip="Flip horizontally"
+                                              IsChecked="{Binding FlipHorizontal, Mode=TwoWay}" />
+                                <ToggleButton Classes="toolbtn-wide" Content="Flip V" ToolTip.Tip="Flip vertically"
+                                              IsChecked="{Binding FlipVertical, Mode=TwoWay}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </TabItem>
+
+                <!-- PARAMETERS -->
+                <TabItem Header="Parameters">
+                    <StackPanel Spacing="12" Margin="0,12,0,4">
+
+                        <TextBlock Text="{Binding AssetReference, StringFormat='File: {0}'}" Classes="caption"
+                                   TextWrapping="Wrap" Opacity="0.7" />
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Data binding" Classes="caption" />
+                            <TextBlock Text="Leave empty for a fixed image, or enter a merge field (e.g. {{PhotoUrl}}) to link it to imported data."
                                        Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
+                            <TextBox Text="{Binding DataBindingExpression, Mode=TwoWay}" Watermark="Fixed image (no binding)" />
+                        </StackPanel>
 
-							<StackPanel Spacing="4">
-								<TextBlock Text="Align to card" Classes="caption" />
-								<StackPanel Orientation="Horizontal" Spacing="4">
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Align left" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignLeftCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.AlignLeft}" Width="15" Height="15" />
-									</Button>
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Align center (horizontal)" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignCenterHorizontalCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.AlignCenterHorizontal}" Width="15" Height="15" />
-									</Button>
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Align right" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignRightCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.AlignRight}" Width="15" Height="15" />
-									</Button>
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Align top" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignTopCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.AlignTop}" Width="15" Height="15" />
-									</Button>
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Align middle (vertical)" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignMiddleVerticalCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.AlignMiddleVertical}" Width="15" Height="15" />
-									</Button>
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Align bottom" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignBottomCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.AlignBottom}" Width="15" Height="15" />
-									</Button>
-								</StackPanel>
-							</StackPanel>
+                        <Border Height="1" Background="{DynamicResource BrushBorder}" />
 
-							<StackPanel Spacing="4">
-								<TextBlock Text="Order" Classes="caption" />
-								<StackPanel Orientation="Horizontal" Spacing="4">
-									<Button Classes="ghost" Content="Forward" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BringForwardCommand}" />
-									<Button Classes="ghost" Content="Backward" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SendBackwardCommand}" />
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Bring to front" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BringToFrontCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.BringToFront}" Width="15" Height="15" />
-									</Button>
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Send to back" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SendToBackCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.SendToBack}" Width="15" Height="15" />
-									</Button>
-								</StackPanel>
-							</StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Replace image" Classes="caption" />
+                            <Button Classes="secondary" Content="Browse Image..." HorizontalAlignment="Stretch"
+                                    Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.ReplaceImageFromFileCommand}"
+                                    CommandParameter="{Binding}" />
+                            <Button Classes="secondary" Content="Get from Camera..." HorizontalAlignment="Stretch"
+                                    Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.ReplaceImageFromCameraCommand}"
+                                    CommandParameter="{Binding}" />
+                        </StackPanel>
 
-							<StackPanel Spacing="4">
-								<TextBlock Text="Mirror" Classes="caption" />
-								<StackPanel Orientation="Horizontal" Spacing="4">
-									<ToggleButton Classes="toolbtn-wide" Content="Flip H" ToolTip.Tip="Flip horizontally"
-                                                  IsChecked="{Binding FlipHorizontal, Mode=TwoWay}" />
-									<ToggleButton Classes="toolbtn-wide" Content="Flip V" ToolTip.Tip="Flip vertically"
-                                                  IsChecked="{Binding FlipVertical, Mode=TwoWay}" />
-								</StackPanel>
-							</StackPanel>
-						</StackPanel>
-					</TabItem>
+                        <Border Height="1" Background="{DynamicResource BrushBorder}" />
 
-					<TabItem Header="Parameters">
-						<StackPanel Spacing="10" Margin="4,10,4,4">
-							<StackPanel Spacing="4">
-								<TextBlock Text="Data binding" Classes="caption" />
-								<TextBlock Text="Leave empty for a fixed image, or enter a merge field (e.g. {{PhotoUrl}}) to link it to imported data."
-                                           Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
-								<TextBox Text="{Binding DataBindingExpression, Mode=TwoWay}" Watermark="Fixed image (no binding)" />
-							</StackPanel>
+                        <!-- Photo folder -->
+                        <StackPanel Spacing="8">
+                            <CheckBox Content="Use photos from a folder"
+                                      IsChecked="{Binding UsePhotoFolder, Mode=TwoWay}" />
 
-							<Border Height="1" Background="{DynamicResource BrushBorder}" />
+                            <StackPanel Spacing="8" IsVisible="{Binding UsePhotoFolder}">
 
-							<StackPanel Spacing="6">
-								<TextBlock Text="Replace image" Classes="caption" />
-								<Button Classes="secondary" Content="Browse Image..." HorizontalAlignment="Stretch"
-                                        Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.ReplaceImageFromFileCommand}"
-                                        CommandParameter="{Binding}" />
-								<Button Classes="secondary" Content="Get from Camera..." HorizontalAlignment="Stretch"
-                                        Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.ReplaceImageFromCameraCommand}"
-                                        CommandParameter="{Binding}" />
-							</StackPanel>
-						</StackPanel>
-					</TabItem>
+                                <TextBlock Text="Photo folder" Classes="caption" />
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBox Grid.Column="0"
+                                             Text="{Binding PhotoFolderPath, Mode=TwoWay}"
+                                             Watermark="C:\EmployeePhotos" />
+                                    <Button Grid.Column="1" Margin="6,0,0,0"
+                                            Classes="secondary" Content="Browse..."
+                                            Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BrowsePhotoFolderCommand}"
+                                            CommandParameter="{Binding}" />
+                                </Grid>
 
-				</TabControl>
-			</StackPanel>
-		</DataTemplate>
+                                <TextBlock Text="File name pattern" Classes="caption" />
+                                <TextBox Text="{Binding PhotoFileNamePattern, Mode=TwoWay}"
+                                         Watermark="{}{EmployeeID}" />
+                                <TextBlock Classes="caption" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource BrushTextSecondary}"
+                                           Text="{}Column names in braces, e.g. {EmployeeID} matches 1001.jpg. Extensions are found automatically." />
+
+                                <TextBlock Text="If no photo is found" Classes="caption" />
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <ToggleButton Classes="toolbtn-wide" Content="Placeholder"
+                                                  IsChecked="{Binding MissingPhotoBehavior, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Placeholder}" />
+                                    <ToggleButton Classes="toolbtn-wide" Content="Blank"
+                                                  IsChecked="{Binding MissingPhotoBehavior, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Blank}" />
+                                    <ToggleButton Classes="toolbtn-wide" Content="Default image"
+                                                  ToolTip.Tip="Show this element's own image (set with Browse Image above)"
+                                                  IsChecked="{Binding MissingPhotoBehavior, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=DefaultImage}" />
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Button Classes="secondary" Content="Check photos"
+                                            Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.CheckPhotoFolderCommand}"
+                                            CommandParameter="{Binding}" />
+                                    <Button Classes="secondary" Content="Refresh"
+                                            ToolTip.Tip="Rescan the folder for new or renamed photos"
+                                            Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.RefreshPhotoFolderCommand}"
+                                            CommandParameter="{Binding}" />
+                                </StackPanel>
+
+                                <TextBlock Text="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.PhotoCheckSummary}"
+                                           Classes="caption" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </TabItem>
+
+            </TabControl>
+        </DataTemplate>
 
 		<DataTemplate DataType="doc:PhotoElement">
 			<StackPanel Spacing="10">
@@ -1604,7 +2116,7 @@
 				<ColumnDefinition Width="52" />
 				<ColumnDefinition Width="*" MinWidth="320" />
 				<ColumnDefinition Width="4" />
-				<ColumnDefinition Width="280" MinWidth="220" MaxWidth="480" />
+				<ColumnDefinition Width="300" MinWidth="240" MaxWidth="480" />
 			</Grid.ColumnDefinitions>
 
 			<!-- Left icon tool rail (Part 10): every insertable element type, icon-first,
@@ -1879,23 +2391,164 @@
 
                         <DataGrid Name="DatabaseDataGrid"
                                   ItemsSource="{Binding ActiveTab.DatabaseDataView}"
+                                  IsVisible="{Binding ActiveTab.HasDatabaseConnection, FallbackValue=False}"
                                   AutoGenerateColumns="False"
                                   SelectedItem="{Binding ActiveTab.SelectedDatabaseRow, Mode=TwoWay}"
                                   IsReadOnly="False"
                                   GridLinesVisibility="All"
                                   HeadersVisibility="All"
+                                  CanUserSortColumns="False"
                                   HorizontalAlignment="Stretch"
                                   VerticalAlignment="Stretch"
+                                  SelectionMode="Extended"
+                                  ColumnHeaderHeight="40"
+                                  FrozenColumnCount="1"
                                   Margin="0,0,0,45" />
 
-                        <Button HorizontalAlignment="Center"
-                                VerticalAlignment="Bottom"
-                                Margin="0,0,0,5"
-                                Padding="20,7"
-                                Classes="ghost"
-                                Content="+  Add database"
-                                Command="{Binding ActiveTab.AddDatabaseCommand}" />
+                        <Border HorizontalAlignment="Left"
+                                                       VerticalAlignment="Top"
+                                                       Height="40"
+                                                       Padding="13,0,0,0"
+                                                       IsVisible="{Binding ActiveTab.HasDatabaseConnection, FallbackValue=False}">
+                            <CheckBox Name="SelectAllRowsCheckBox"
+                                      VerticalAlignment="Center"
+                                      MinWidth="0"
+                                      MinHeight="0"
+                                      Padding="0"
+                                      ToolTip.Tip="Select all / none" />
+                        </Border>
+                        
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Disabled"
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,5">
 
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+
+                                <!-- Not connected: only Add database -->
+                                
+                                <!-- Connected: full toolbar -->
+                                <StackPanel Orientation="Horizontal"
+                                            Spacing="6"
+                                            IsVisible="{Binding ActiveTab.HasDatabaseConnection, FallbackValue=False}">
+
+                                    <Button Classes="ghost toolbtn"
+                                            ToolTip.Tip="Add row"
+                                            AutomationProperties.Name="Add row"
+                                            Command="{Binding ActiveTab.AddDatabaseRowCommand}">
+                                        <PathIcon Data="{x:Static icons:DesignerIcons.Add}" Width="14" Height="14" />
+                                    </Button>
+
+                                    <Button Classes="ghost toolbtn"
+                                            ToolTip.Tip="Remove selected rows from the grid (Ctrl/Shift+click to select several)"
+                                            AutomationProperties.Name="Delete rows"
+                                            Command="{Binding ActiveTab.DeleteDatabaseRowsCommand}"
+                                            CommandParameter="{Binding #DatabaseDataGrid.SelectedItems}">
+                                        <PathIcon Data="{x:Static icons:DesignerIcons.Delete}" Width="14" Height="14" />
+                                    </Button>
+
+                                    <!--<Button Classes="ghost"
+                                            Padding="12,7"
+                                            Content="Save row"
+                                            Command="{Binding ActiveTab.SaveDatabaseRowCommand}" />-->
+
+                                    <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="2,4" />
+
+                                    <!-- Record navigation -->
+                                    <Button Classes="ghost toolbtn" ToolTip.Tip="First record"
+                                            Command="{Binding ActiveTab.FirstDatabaseRowCommand}">
+                                        <PathIcon Data="M3,2 L5,2 L5,14 L3,14 Z M14,2 L14,14 L7,8 Z" Width="12" Height="12" />
+                                    </Button>
+                                    <Button Classes="ghost toolbtn" ToolTip.Tip="Previous record"
+                                            Command="{Binding ActiveTab.PreviousDatabaseRowCommand}">
+                                        <PathIcon Data="{x:Static icons:DesignerIcons.ChevronLeft}" Width="12" Height="12" />
+                                    </Button>
+                                    <TextBlock Text="{Binding ActiveTab.RecordPositionText}"
+                                               VerticalAlignment="Center"
+                                               MinWidth="64"
+                                               TextAlignment="Center"
+                                               Classes="caption" />
+                                    <Button Classes="ghost toolbtn" ToolTip.Tip="Next record"
+                                            Command="{Binding ActiveTab.NextDatabaseRowCommand}">
+                                        <PathIcon Data="{x:Static icons:DesignerIcons.ChevronRight}" Width="12" Height="12" />
+                                    </Button>
+                                    <Button Classes="ghost toolbtn" ToolTip.Tip="Last record"
+                                            Command="{Binding ActiveTab.LastDatabaseRowCommand}">
+                                        <PathIcon Data="M11,2 L13,2 L13,14 L11,14 Z M2,2 L9,8 L2,14 Z" Width="12" Height="12" />
+                                    </Button>
+
+                                    <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="2,4" />
+
+                                    <!-- Search -->
+                                    <TextBox Width="170"
+                                             Watermark="Search..."
+                                             VerticalAlignment="Center"
+                                             Text="{Binding ActiveTab.DatabaseSearchText, Mode=TwoWay}" />
+                                    <ComboBox Width="150"
+                                              VerticalAlignment="Center"
+                                              ItemsSource="{Binding ActiveTab.SearchColumnOptions}"
+                                              SelectedItem="{Binding ActiveTab.SelectedSearchColumn, Mode=TwoWay}" />
+                                    <Button Classes="ghost dbAction"
+                                            Padding="12,7"
+                                            Command="{Binding ActiveTab.ApplyDatabaseSearchCommand}">
+                                        <TextBlock Text="Apply" />
+                                    </Button>
+                                    <Button Classes="ghost dbAction"
+                                             
+                                        ToolTip.Tip="Clear search"
+                                        Command="{Binding ActiveTab.ClearDatabaseSearchCommand}">
+                                        <TextBlock Text="Clear"/>
+                                    </Button>
+
+                                    <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="2,4" />
+
+                                    <Button Classes="ghost dbAction"
+                                          Padding="12,7"
+                                          Command="{Binding ActiveTab.DisconnectDatabaseCommand}">
+                                        <TextBlock Text="Disconnect" />
+                                    </Button>
+
+                                </StackPanel>
+
+                            </StackPanel>
+
+                        </ScrollViewer>
+
+                        <!-- Not connected: centered Add database button -->
+                        <Button HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                Margin="0,8,0,0"
+                                Padding="28,8"
+                                MinWidth="240"
+                                CornerRadius="14"
+                                Classes="ghost dbAction"
+                                IsVisible="{Binding !ActiveTab.HasDatabaseConnection, FallbackValue=True}"
+                                Command="{Binding ActiveTab.AddDatabaseCommand}">
+
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="8"
+                                        HorizontalAlignment="Center">
+
+                                <TextBlock Text="+"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+
+                                <!-- Database cylinder icon -->
+                                <Path Data="M12,3 C7.6,3 4,4.3 4,6 L4,18 C4,19.7 7.6,21 12,21 C16.4,21 20,19.7 20,18 L20,6 C20,4.3 16.4,3 12,3 Z M4,6 C4,7.7 7.6,9 12,9 C16.4,9 20,7.7 20,6 M4,12 C4,13.7 7.6,15 12,15 C16.4,15 20,13.7 20,12"
+                                      Stroke="{Binding $parent[Button].Foreground}"
+                                      StrokeThickness="1.6"
+                                      Width="18"
+                                      Height="18"
+                                      Stretch="Uniform"
+                                      VerticalAlignment="Center" />
+
+                                <TextBlock Text="Add database"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+
+                            </StackPanel>
+
+                        </Button>
                     </Grid>
 				</Grid>
 			</Grid>
@@ -1927,81 +2580,87 @@
 						<RowDefinition Height="{Binding ShowLayersPanel, Converter={x:Static conv:BoolToStarOrZeroRowConverter.Instance}}" />
 					</Grid.RowDefinitions>
 
-					<ScrollViewer Grid.Row="0" IsVisible="{Binding ShowPropertiesPanel}">
-						<StackPanel Margin="16" Spacing="12">
-							<TextBlock Text="Properties" Classes="h3" />
+                    <ScrollViewer Grid.Row="0" IsVisible="{Binding ShowPropertiesPanel}">
+                        <StackPanel Margin="16" Spacing="12">
+                            <TextBlock Text="Properties" Classes="h3" />
 
-							<StackPanel IsVisible="{Binding ActiveTab.PrimarySelection, Converter={x:Static ObjectConverters.IsNotNull}}"
+                            <StackPanel IsVisible="{Binding ActiveTab.PrimarySelection, Converter={x:Static ObjectConverters.IsNotNull}}"
                                         Spacing="12">
-								<Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
-									<StackPanel Grid.Row="0" Grid.Column="0" Spacing="4" Margin="0,0,4,4">
-										<TextBlock Text="X (mm)" Classes="caption" />
-										<NumericUpDown Value="{Binding ActiveTab.PrimarySelection.X, Mode=TwoWay}" Increment="0.5" />
-									</StackPanel>
-									<StackPanel Grid.Row="0" Grid.Column="1" Spacing="4" Margin="4,0,0,4">
-										<TextBlock Text="Y (mm)" Classes="caption" />
-										<NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Y, Mode=TwoWay}" Increment="0.5" />
-									</StackPanel>
-									<StackPanel Grid.Row="1" Grid.Column="0" Spacing="4" Margin="0,0,4,0">
-										<TextBlock Text="Width (mm)" Classes="caption" />
-										<NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Width, Mode=TwoWay}" Increment="0.5" Minimum="1" />
-									</StackPanel>
-									<StackPanel Grid.Row="1" Grid.Column="1" Spacing="4" Margin="4,0,0,0">
-										<TextBlock Text="Height (mm)" Classes="caption" />
-										<NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Height, Mode=TwoWay}" Increment="0.5" Minimum="1" />
-									</StackPanel>
-								</Grid>
 
-								<StackPanel Spacing="4">
-									<TextBlock Text="Rotation (deg)" Classes="caption" />
-									<NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Rotation, Mode=TwoWay}" Increment="1"
-                                                   ToolTip.Tip="Type a value, or drag the small round handle above the selected element on the canvas" />
-								</StackPanel>
+                                <!-- Shared position fields: hidden for Image, which has its own Position tab -->
+                                <StackPanel Spacing="12" IsVisible="{Binding ActiveTab.ShowCommonTransformFields}">
 
-								<StackPanel Spacing="4">
-									<TextBlock Text="Opacity" Classes="caption" />
-									<Slider Minimum="0" Maximum="1" Value="{Binding ActiveTab.PrimarySelection.Opacity, Mode=TwoWay}" />
-								</StackPanel>
+                                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+                                        <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4" Margin="0,0,4,4">
+                                            <TextBlock Text="X (mm)" Classes="caption" />
+                                            <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.X, Mode=TwoWay}" Increment="0.5" FormatString="0.##" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4" Margin="4,0,0,4">
+                                            <TextBlock Text="Y (mm)" Classes="caption" />
+                                            <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Y, Mode=TwoWay}" Increment="0.5" FormatString="0.##" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                                            <TextBlock Text="Width (mm)" Classes="caption" />
+                                            <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Width, Mode=TwoWay}" Increment="0.5" Minimum="1" FormatString="0.##" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4" Margin="4,0,0,0">
+                                            <TextBlock Text="Height (mm)" Classes="caption" />
+                                            <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Height, Mode=TwoWay}" Increment="0.5" Minimum="1" FormatString="0.##" />
+                                        </StackPanel>
+                                    </Grid>
 
-								<Border Height="1" Background="{DynamicResource BrushBorder}" />
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Rotation (deg)" Classes="caption" />
+                                        <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Rotation, Mode=TwoWay}" Increment="1" FormatString="0.##"
+                                                       ToolTip.Tip="Type a value, or drag the small round handle above the selected element on the canvas" />
+                                    </StackPanel>
 
-								<ContentControl Content="{Binding ActiveTab.PrimarySelection}" />
-							</StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Opacity" Classes="caption" />
+                                        <Slider Minimum="0" Maximum="1" Value="{Binding ActiveTab.PrimarySelection.Opacity, Mode=TwoWay}" />
+                                    </StackPanel>
 
-							<StackPanel Spacing="10"
+                                    <Border Height="1" Background="{DynamicResource BrushBorder}" />
+
+                                </StackPanel>
+
+                                <!-- Element-specific properties (Image shows its tabs here) -->
+                                <ContentControl Content="{Binding ActiveTab.PrimarySelection}" />
+                            </StackPanel>
+
+                            <StackPanel Spacing="10"
                                         IsVisible="{Binding ActiveTab.PrimarySelection, Converter={x:Static ObjectConverters.IsNull}}">
-								<TextBlock Text="Select an element to edit its properties, or set the background below."
+                                <TextBlock Text="Select an element to edit its properties, or set the background below."
                                            Classes="caption" TextWrapping="Wrap" />
 
-								<Border Height="1" Background="{DynamicResource BrushBorder}" Margin="0,4" />
+                                <Border Height="1" Background="{DynamicResource BrushBorder}" Margin="0,4" />
 
-								<TextBlock Text="Background" Classes="caption" />
-								<TextBlock Text="The image behind everything on the currently focused side."
+                                <TextBlock Text="Background" Classes="caption" />
+                                <TextBlock Text="The image behind everything on the currently focused side."
                                            Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
 
-								<Border Width="180" Height="112" CornerRadius="6" ClipToBounds="True"
+                                <Border Width="180" Height="112" CornerRadius="6" ClipToBounds="True"
                                         Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}"
                                         BorderThickness="1" HorizontalAlignment="Left">
-									<Grid>
-										<Image Source="{Binding ActiveTab.BackgroundPreviewImage}" Stretch="UniformToFill"
+                                    <Grid>
+                                        <Image Source="{Binding ActiveTab.BackgroundPreviewImage}" Stretch="UniformToFill"
                                                IsVisible="{Binding ActiveTab.HasBackgroundImage}" />
-										<TextBlock Text="Empty" Classes="caption" Foreground="{DynamicResource BrushTextSecondary}"
+                                        <TextBlock Text="Empty" Classes="caption" Foreground="{DynamicResource BrushTextSecondary}"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                                    IsVisible="{Binding ActiveTab.HasBackgroundImage, Converter={x:Static conv:BoolNegationConverter.Instance}}" />
-									</Grid>
-								</Border>
+                                    </Grid>
+                                </Border>
 
-								<StackPanel Orientation="Horizontal" Spacing="8">
-									<Button Classes="secondary" Content="Browse..." Command="{Binding ActiveTab.BrowseBackgroundImageCommand}" />
-									<Button Classes="secondary" Content="Edit" Command="{Binding ActiveTab.EditBackgroundImageCommand}"
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button Classes="secondary" Content="Browse..." Command="{Binding ActiveTab.BrowseBackgroundImageCommand}" />
+                                    <Button Classes="secondary" Content="Edit" Command="{Binding ActiveTab.EditBackgroundImageCommand}"
                                             IsEnabled="{Binding ActiveTab.HasBackgroundImage}" />
-									<Button Classes="ghost" Content="Remove" Command="{Binding ActiveTab.RemoveBackgroundImageCommand}"
+                                    <Button Classes="ghost" Content="Remove" Command="{Binding ActiveTab.RemoveBackgroundImageCommand}"
                                             IsEnabled="{Binding ActiveTab.HasBackgroundImage}" />
-								</StackPanel>
-							</StackPanel>
-						</StackPanel>
-					</ScrollViewer>
-
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
 					<!-- Priority 7 fix (vertical split): this was a plain 1px static
                          divider Border; it's now a real, draggable GridSplitter so the
                          user can adjust the Properties/Layers height split themselves.

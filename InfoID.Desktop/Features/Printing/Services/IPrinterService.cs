@@ -30,6 +30,23 @@ public interface IPrinterService
     /// failure) if the OS reports the job could not be submitted.</summary>
     Task<bool> PrintPagesAsync(string printerName, IReadOnlyList<string> pageImagePaths, int copies, CancellationToken ct = default);
 
+    /// <summary>True when this platform can show the OS's own print dialog (printer
+    /// choice, Preferences, copies) before printing. Default false, so platforms that
+    /// don't override this keep working exactly as before.</summary>
+    bool SupportsSystemPrintDialog => false;
+
+    /// <summary>Shows the OS's own print dialog, pre-selected to
+    /// <paramref name="printerName"/> and <paramref name="copies"/>, then prints the pages
+    /// to whatever printer and copy count the user confirms there. Returns
+    /// <see cref="PrintJobResult.Cancelled"/> if the user closes the dialog. The default
+    /// implementation (platforms without a system dialog) prints directly.</summary>
+    async Task<PrintJobResult> PrintPagesWithSystemDialogAsync(
+        string printerName, IReadOnlyList<string> pageImagePaths, int copies, CancellationToken ct = default)
+    {
+        var ok = await PrintPagesAsync(printerName, pageImagePaths, copies, ct);
+        return ok ? PrintJobResult.Success(printerName) : PrintJobResult.Failure(null);
+    }
+
     /// <summary>Opens the OS's own real printer-properties/preferences surface for the
     /// named printer -- never a custom-built settings screen standing in for it.</summary>
     Task OpenPrinterPreferencesAsync(string printerName);

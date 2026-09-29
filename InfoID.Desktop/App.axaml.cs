@@ -178,6 +178,7 @@ public partial class App : Avalonia.Application
         // Home and back, and the header's "Windows" menu needs one persistent instance
         // to list open designs from regardless of which page is currently shown.
         services.AddSingleton<CardDesignerViewModel>();
+        services.AddSingleton<IPhotoFolderService, PhotoFolderService>();
 
         // Shell.
         services.AddSingleton<ShellViewModel>();

@@ -50,6 +50,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     private readonly IPrinterService _printerService;
     private readonly IPrintStatusStore _printStatusStore;
     private readonly ICardFormatCatalogService _cardFormatCatalogService;
+    private readonly MySqlSshTunnelService _mySqlSshTunnelService = new();
     private CancellationTokenSource? _autosaveCts;
 
     public CardDesignDocument Document { get; }
@@ -282,6 +283,9 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     [ObservableProperty]
     private bool _lineToolActive;
 
+    private bool _isNewDatabaseRow;
+    private string _activeDatabaseTableName = string.Empty;
+
     /// <summary>Same idea as <see cref="LineToolActive"/> but for freehand drawing --
     /// a left-drag accumulates points into an open stroke instead of one straight
     /// segment (DragMode.DrawPen / InsertDrawnPen).</summary>
@@ -443,12 +447,170 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     /// dialog/command from Print Preview above, which stays exactly what its own doc
     /// comment says it is: appearance-only, no printer/copies/print action.</summary>
     [RelayCommand]
+    //private async Task ShowPrintDialog()
+    //{
+    //    var printViewModel = new PrintDialogViewModel(
+    //        Document, _printerService, _printStatusStore, _cardFormatCatalogService,
+    //        _previewDataProvider, _evaluator, _assetService, _filePicker);
+    //    await _dialogService.ShowDialogAsync<PrintDialogViewModel, bool>(printViewModel);
+    //}
     private async Task ShowPrintDialog()
     {
+        // Scan every photo folder used on the card before rendering starts.
+        foreach (var image in Document.Front.Elements.Concat(Document.Back.Elements).OfType<ImageElement>())
+        {
+            if (image.UsePhotoFolder && !string.IsNullOrWhiteSpace(image.PhotoFolderPath))
+                await PhotoFolderService.Shared.PrepareFolderAsync(image.PhotoFolderPath);
+        }
+
         var printViewModel = new PrintDialogViewModel(
             Document, _printerService, _printStatusStore, _cardFormatCatalogService,
-            _previewDataProvider, _evaluator, _assetService, _filePicker);
+            _previewDataProvider, _evaluator, _assetService, _filePicker,
+            databaseRecords: BuildPrintRecords(),
+            resolveImagePath: ResolvePrintImagePath);
+
         await _dialogService.ShowDialogAsync<PrintDialogViewModel, bool>(printViewModel);
+    }
+
+
+    /// <summary>Grid rows as print records. Each is labelled "Table/ID" (e.g.
+    /// "Employees/1001") so print status is remembered per employee.</summary>
+    private IReadOnlyList<PreviewRecord>? BuildPrintRecords()
+    {
+        if (DatabaseData is null)
+            return null;
+
+        var visibleRows = GetVisibleDatabaseRows().Select(v => v.Row).ToList();
+        var tickedRows = visibleRows.Where(_checkedDatabaseRows.Contains).ToList();
+        var rows = tickedRows.Count > 0 ? tickedRows : visibleRows;
+
+        var columnNames = DatabaseData.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList();
+        var primaryKey = DatabaseTables.LastOrDefault()?.PrimaryKey;
+        var keyColumn = !string.IsNullOrWhiteSpace(primaryKey) && DatabaseData.Columns.Contains(primaryKey)
+            ? primaryKey
+            : PhotoFolderService.Shared.SuggestKeyColumn(columnNames);
+
+        var tableName = string.IsNullOrWhiteSpace(_activeDatabaseTableName) ? "Data" : _activeDatabaseTableName;
+
+        var records = new List<PreviewRecord>();
+
+        // BLOB photo columns: RowToRecord turns bytes into the useless text
+        // "System.Byte[]", so for printing each BLOB cell is swapped for a cached image
+        // file path that the print renderer can load like any other photo.
+        var blobColumns = DatabaseData.Columns.Cast<DataColumn>()
+            .Where(c => c.DataType == typeof(byte[]))
+            .ToList();
+
+        foreach (var row in rows)
+        {
+            var fields = RowToRecord(row);
+
+            foreach (var blobColumn in blobColumns)
+            {
+                fields[blobColumn.ColumnName] = ResolveDatabaseImageValue(row[blobColumn]) ?? string.Empty;
+            }
+
+            var key = keyColumn is not null &&
+                      fields.TryGetValue(keyColumn, out var value) &&
+                      !string.IsNullOrWhiteSpace(value)
+                ? value
+                : $"Row {DatabaseData.Rows.IndexOf(row) + 1}";
+
+            records.Add(new PreviewRecord($"{tableName}/{key}", fields));
+        }
+
+        return records;
+    }
+
+    /// <summary>Photo for one printed card. null = the element's normal image,
+    /// "" = print nothing (a placeholder box must never appear on a real card).
+    /// Two per-record sources are supported, in this order: a photo folder
+    /// ("Use photos from a folder"), then a database image column (the image element
+    /// bound to a grid column such as "Photo"). Previously only the photo folder was
+    /// handled, so an image bound to a database column printed the same design-time
+    /// picture on every card.</summary>
+    private string? ResolvePrintImagePath(ImageElement image, IReadOnlyDictionary<string, string> fields)
+    {
+        string? path;
+
+        if (image.UsePhotoFolder && !string.IsNullOrWhiteSpace(image.PhotoFolderPath))
+        {
+            var service = PhotoFolderService.Shared;
+            var key = service.BuildKey(image.PhotoFileNamePattern, fields);
+            path = key is null ? null : service.FindPhoto(image.PhotoFolderPath, key);
+        }
+        else if (image.IsDatabaseBound && !string.IsNullOrWhiteSpace(image.DatabaseColumn))
+        {
+            fields.TryGetValue(image.DatabaseColumn, out var cellValue);
+            path = ResolveDatabaseImageValue(cellValue);
+        }
+        else
+        {
+            return null;
+        }
+
+        if (path is not null)
+            return path;
+
+        return image.MissingPhotoBehavior == MissingPhotoBehavior.DefaultImage
+            ? _assetService.ResolveToFullPath(image.AssetReference) ?? string.Empty
+            : string.Empty;
+    }
+
+    private static readonly string DatabaseImageCacheDirectory =
+        Path.Combine(Path.GetTempPath(), "InfoID", "DatabaseImageCache");
+
+    /// <summary>BLOB bytes already written to the cache, keyed by the byte[] instance
+    /// so canvas redraws don't re-hash the same photo every frame.</summary>
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<byte[], string> BlobPathCache = new();
+
+    /// <summary>Turns one database image cell into a loadable file path, or null if
+    /// the cell has no usable image. Accepts the same three forms the grid's photo
+    /// cells already accept (see GetDatabaseImage): BLOB bytes, an InfoID asset
+    /// reference, or a plain file path.</summary>
+    private string? ResolveDatabaseImageValue(object? value)
+    {
+        try
+        {
+            switch (value)
+            {
+                case byte[] bytes when bytes.Length > 0:
+                    return CacheBlobImage(bytes);
+
+                case string text when !string.IsNullOrWhiteSpace(text):
+                    var trimmed = text.Trim();
+                    var assetPath = _assetService.ResolveToFullPath(trimmed);
+                    if (assetPath is not null && File.Exists(assetPath))
+                        return assetPath;
+                    return File.Exists(trimmed) ? Path.GetFullPath(trimmed) : null;
+
+                default:
+                    return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"DATABASE IMAGE RESOLVE ERROR: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>Writes BLOB image bytes to a content-addressed temp file (same bytes,
+    /// same file) so both the canvas and the print renderer can load them by path.</summary>
+    private static string? CacheBlobImage(byte[] bytes)
+    {
+        if (BlobPathCache.TryGetValue(bytes, out var cached) && File.Exists(cached))
+            return cached;
+
+        Directory.CreateDirectory(DatabaseImageCacheDirectory);
+        var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes));
+        var path = Path.Combine(DatabaseImageCacheDirectory, hash + ".img");
+
+        if (!File.Exists(path))
+            File.WriteAllBytes(path, bytes);
+
+        BlobPathCache.AddOrUpdate(bytes, path);
+        return path;
     }
 
     // ------------------------------------------------------------------ crop -------
@@ -704,13 +866,57 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     /// preview mode -> the raw placeholder text, so the design surface stays honest
     /// about what's static vs. bound while you're working. In preview mode -> the
     /// evaluated value against whichever sample record is selected.</summary>
-    public string ResolveDisplayText(string rawPlaceholderText, string bindingExpression)
-    {
-        if (!PreviewModeEnabled) return rawPlaceholderText;
-        var record = SelectedPreviewRecord?.Fields ?? EmptyRecord;
-        return _evaluator.Evaluate(bindingExpression, record);
-    }
+    //public string ResolveDisplayText(string rawPlaceholderText, string bindingExpression)
+    //{
+    //    if (!PreviewModeEnabled) return rawPlaceholderText;
+    //    var record = SelectedPreviewRecord?.Fields ?? EmptyRecord;
+    //    return _evaluator.Evaluate(bindingExpression, record);
+    //}
 
+    public string ResolveDisplayText(
+      string rawPlaceholderText,
+      string bindingExpression)
+    {
+        if (!PreviewModeEnabled)
+            return rawPlaceholderText;
+
+        // Database preview takes priority when a database row is selected.
+        if (SelectedDatabaseRow is not null)
+        {
+            var databaseValues =
+                new Dictionary<string, string>();
+
+            foreach (DataColumn column in SelectedDatabaseRow.Row.Table.Columns)
+            {
+                databaseValues[column.ColumnName] =
+                    SelectedDatabaseRow.Row[column] == DBNull.Value
+                        ? string.Empty
+                        : SelectedDatabaseRow.Row[column]?.ToString()
+                          ?? string.Empty;
+            }
+
+            // Direct database field binding.
+            if (databaseValues.TryGetValue(
+                    bindingExpression,
+                    out var directValue))
+            {
+                return directValue;
+            }
+
+            // Existing expression-based database binding.
+            return _evaluator.Evaluate(
+                bindingExpression,
+                databaseValues);
+        }
+
+        // Existing normal preview behavior.
+        var record =
+            SelectedPreviewRecord?.Fields ?? EmptyRecord;
+
+        return _evaluator.Evaluate(
+            bindingExpression,
+            record);
+    }
     /// <summary>Whether an element should be drawn at all right now, given its
     /// VisibilityCondition. Always true outside preview mode (see PreviewModeEnabled's
     /// doc comment) so conditional elements never simply vanish while designing.</summary>
@@ -724,6 +930,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     public ObservableCollection<DesignerElement> SelectedElements { get; } = new();
 
     public DesignerElement? PrimarySelection => SelectedElements.Count == 1 ? SelectedElements[0] : null;
+    public bool ShowCommonTransformFields => PrimarySelection is not ImageElement;
 
     public bool CanUndo => History.CanUndo;
     public bool CanRedo => History.CanRedo;
@@ -783,6 +990,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         OnPropertyChanged(nameof(PrimarySelection));
         OnPropertyChanged(nameof(HasSelection));
         OnPropertyChanged(nameof(HasMultiSelection));
+        OnPropertyChanged(nameof(ShowCommonTransformFields));
         RefreshLayerSelectionHighlight();
     }
 
@@ -916,8 +1124,12 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         if (picked is not { } result) return;
         InsertElement(new ImageElement
         {
-            Name = "Image", AssetReference = result.AssetReference,
-            X = 10, Y = 10, Width = result.WidthMm, Height = result.HeightMm,
+            Name = "Image",
+            AssetReference = result.AssetReference,
+            X = 10,
+            Y = 10,
+            Width = result.WidthMm,
+            Height = result.HeightMm,
         });
     }
 
@@ -928,8 +1140,12 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         if (picked is not { } result) return;
         InsertElement(new PhotoElement
         {
-            Name = "Photo", AssetReference = result.AssetReference,
-            X = 10, Y = 10, Width = result.WidthMm, Height = result.HeightMm,
+            Name = "Photo",
+            AssetReference = result.AssetReference,
+            X = 10,
+            Y = 10,
+            Width = result.WidthMm,
+            Height = result.HeightMm,
         });
     }
 
@@ -1003,8 +1219,12 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 
         InsertElement(new ImageElement
         {
-            Name = "Image", AssetReference = assetReference,
-            X = 10, Y = 10, Width = widthMm, Height = heightMm,
+            Name = "Image",
+            AssetReference = assetReference,
+            X = 10,
+            Y = 10,
+            Width = widthMm,
+            Height = heightMm,
         });
     }
 
@@ -1144,8 +1364,12 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         if (picked is not { } result) return;
         InsertElement(new SignatureElement
         {
-            Name = "Signature", AssetReference = result.AssetReference,
-            X = 10, Y = 10, Width = result.WidthMm, Height = result.HeightMm,
+            Name = "Signature",
+            AssetReference = result.AssetReference,
+            X = 10,
+            Y = 10,
+            Width = result.WidthMm,
+            Height = result.HeightMm,
         });
     }
 
@@ -1241,9 +1465,15 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 
         InsertElement(new ShapeElement
         {
-            Name = "Line", Kind = ShapeKind.Line, FillEnabled = false,
-            StrokeColorHex = "#1F2328", StrokeWidth = 1,
-            X = minX, Y = minY, Width = Math.Max(width, 0.5), Height = Math.Max(height, 0.5),
+            Name = "Line",
+            Kind = ShapeKind.Line,
+            FillEnabled = false,
+            StrokeColorHex = "#1F2328",
+            StrokeWidth = 1,
+            X = minX,
+            Y = minY,
+            Width = Math.Max(width, 0.5),
+            Height = Math.Max(height, 0.5),
             LineFlipped = leftY > rightY,
         });
     }
@@ -1273,8 +1503,13 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 
         var element = new PenElement
         {
-            Name = "Drawing", X = minX, Y = minY, Width = boxWidth, Height = boxHeight,
-            StrokeColorHex = "#1F2328", StrokeWidth = 1.2,
+            Name = "Drawing",
+            X = minX,
+            Y = minY,
+            Width = boxWidth,
+            Height = boxHeight,
+            StrokeColorHex = "#1F2328",
+            StrokeWidth = 1.2,
         };
         foreach (var p in pointsMm)
         {
@@ -1660,26 +1895,247 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     public ObservableCollection<string> DatabaseColumns { get; } = new();
     public DataView? DatabaseDataView => DatabaseData?.DefaultView;
 
+
+    public bool HasDatabaseConnection => DatabaseData is not null;
+
+    /// <summary>Every AddDatabase branch already raises PropertyChanged for
+    /// DatabaseData after loading, so HasDatabaseConnection is refreshed here instead
+    /// of editing each branch.</summary>
+    //protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+    //{
+    //    base.OnPropertyChanged(e);
+
+    //    if (e.PropertyName == nameof(DatabaseData))
+    //        base.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(HasDatabaseConnection)));
+    //}
+    protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+
+        if (e.PropertyName == nameof(DatabaseData))
+        {
+            base.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(HasDatabaseConnection)));
+
+            // Search: rebuild the column dropdown when the columns change
+            RefreshSearchColumns();
+
+            // Checkboxes: forget ticks that belong to a previous table (new connection / disconnect)
+            _checkedDatabaseRows.RemoveWhere(r => r.Table != DatabaseData);
+            DatabaseRowChecksChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        // Navigation: keep the "5 of 12" text up to date
+        if (e.PropertyName is nameof(DatabaseData) or nameof(DatabaseDataView) or nameof(SelectedDatabaseRow))
+            base.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(RecordPositionText)));
+    }
+
+    /// <summary>Rows ticked with the grid's checkbox column. Separate from
+    /// SelectedDatabaseRow, which is the "current" row driving the card preview.</summary>
+    private readonly HashSet<DataRow> _checkedDatabaseRows = new();
+
+    /// <summary>Raised whenever ticks change, so the grid can refresh visible checkboxes.</summary>
+    public event EventHandler? DatabaseRowChecksChanged;
+
+    public bool IsDatabaseRowChecked(DataRow row) => _checkedDatabaseRows.Contains(row);
+
+    public bool AreAllVisibleDatabaseRowsChecked
+    {
+        get
+        {
+            var rows = GetVisibleDatabaseRows();
+            return rows.Count > 0 && rows.All(r => _checkedDatabaseRows.Contains(r.Row));
+        }
+    }
+
+    public void SetDatabaseRowChecked(DataRow row, bool isChecked)
+    {
+        if (isChecked) _checkedDatabaseRows.Add(row);
+        else _checkedDatabaseRows.Remove(row);
+
+        DatabaseRowChecksChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Header checkbox: ticks or unticks every row currently visible
+    /// (respects an active search).</summary>
+    public void SetAllDatabaseRowsChecked(bool isChecked)
+    {
+        foreach (var rowView in GetVisibleDatabaseRows())
+        {
+            if (isChecked) _checkedDatabaseRows.Add(rowView.Row);
+            else _checkedDatabaseRows.Remove(rowView.Row);
+        }
+
+        DatabaseRowChecksChanged?.Invoke(this, EventArgs.Empty);
+    }
     public ObservableCollection<DatabaseField> DatabaseFields { get; } = new();
 
     [ObservableProperty]
     private DataRowView? _selectedDatabaseRow;
+
+    //partial void OnSelectedDatabaseRowChanged(DataRowView? value)
+    //{
+    //    NotifyDocumentChanged();
+    //}
+
+    //[RelayCommand]
+    //private void AddDatabaseField(DatabaseField? field)
+    //{
+    //    if (field is null)
+    //        return;
+
+    //    if (PrimarySelection is not TextElement textElement)
+    //        return;
+
+    //    textElement.DatabaseColumn = field.ColumnName;
+    //    textElement.IsDatabaseBound = true;
+
+    //    NotifyDocumentChanged();
+    //    MarkDirty();
+    //}
+
+    [RelayCommand]
+    private void AddDatabaseField(DatabaseField? field)
+    {
+        if (field is null)
+            return;
+
+        if (PrimarySelection is TextElement textElement)
+        {
+            textElement.DatabaseColumn =
+                field.ColumnName;
+
+            textElement.IsDatabaseBound = true;
+        }
+        else if (PrimarySelection is ImageElement imageElement)
+        {
+            imageElement.DatabaseColumn =
+                field.ColumnName;
+
+            imageElement.IsDatabaseBound = true;
+        }
+        else
+        {
+            return;
+        }
+
+        NotifyDocumentChanged();
+        MarkDirty();
+    }
+    public ObservableCollection<DatabaseRowValue> SelectedDatabaseValues { get; } = new();
+
+    partial void OnSelectedDatabaseRowChanged(DataRowView? value)
+    {
+        SelectedDatabaseValues.Clear();
+
+        if (value is null)
+        {
+            NotifySelectionChanged();
+            return;
+        }
+
+        foreach (DataColumn column in value.Row.Table.Columns)
+        {
+            SelectedDatabaseValues.Add(new DatabaseRowValue
+            {
+                ColumnName = column.ColumnName,
+                Value = value.Row[column]?.ToString() ?? string.Empty
+            });
+        }
+
+        // A database row selection is separate from canvas-element selection.
+        //SelectedElements.Clear();
+
+        //NotifySelectionChanged();
+        NotifyDocumentChanged();
+    }
 
     [RelayCommand]
     private async Task AddDatabase()
     {
         var selectionDialog = new DatabaseTypeSelectionDialogViewModel();
 
-        var selectedType = await _dialogService.ShowDialogAsync< DatabaseTypeSelectionDialogViewModel,DatabaseType?>(selectionDialog);
+        var selectedType = await _dialogService.ShowDialogAsync<DatabaseTypeSelectionDialogViewModel, DatabaseType?>(selectionDialog);
 
         if (selectedType is null)
             return;
 
         if (selectedType == DatabaseType.Excel)
         {
-            var excelDialog = new ConnectDatabaseDialogViewModel(_filePicker);
+            var excelDialog =
+                new ExcelConnectionDialogViewModel(_filePicker, _dialogService);
 
-            await _dialogService.ShowDialogAsync<ConnectDatabaseDialogViewModel,bool>(excelDialog);
+            var connection =
+                await _dialogService.ShowDialogAsync<
+                    ExcelConnectionDialogViewModel,
+                    DatabaseConnection?>(excelDialog);
+
+            if (connection is null)
+                return;
+
+            var designDialog =
+                new DatabaseDesignDialogViewModel(
+                    connection,
+                    _dialogService);
+
+            var tableDefinition =
+                await _dialogService.ShowDialogAsync<
+                    DatabaseDesignDialogViewModel,
+                    DatabaseTableDefinition?>(
+                        designDialog);
+
+            if (tableDefinition is null)
+                return;
+
+            try
+            {
+                var excelService = new ExcelOdbcService();
+
+                DatabaseData =
+                    excelService.ReadSheet(
+                        tableDefinition.ConnectionString,
+                        tableDefinition.TableName);
+
+                DatabaseTables.Add(tableDefinition);
+
+                _activeDatabaseTableName =
+                    tableDefinition.TableName;
+
+                if (!string.IsNullOrWhiteSpace(
+                        tableDefinition.PrimaryKey))
+                {
+                    DatabaseData.DefaultView.Sort =
+                        $"[{tableDefinition.PrimaryKey}] ASC";
+                }
+
+                OnPropertyChanged(nameof(DatabaseData));
+                OnPropertyChanged(nameof(DatabaseDataView));
+
+                DatabaseFields.Clear();
+
+                foreach (var column in tableDefinition.Columns)
+                {
+                    if (!DatabaseData.Columns.Contains(column.Name))
+                        continue;
+
+                    DatabaseFields.Add(
+                        new DatabaseField
+                        {
+                            DatabaseName =
+                                connection.Name,
+
+                            TableName =
+                                tableDefinition.TableName,
+
+                            ColumnName =
+                                column.Name
+                        });
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(
+                    $"EXCEL DATA ERROR: {ex}");
+            }
 
             return;
         }
@@ -1698,7 +2154,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 
             var designDialog = new DatabaseDesignDialogViewModel(connection, _dialogService);
 
-            var tableDefinition = await _dialogService.ShowDialogAsync< DatabaseDesignDialogViewModel,DatabaseTableDefinition?>(designDialog);
+            var tableDefinition = await _dialogService.ShowDialogAsync<DatabaseDesignDialogViewModel, DatabaseTableDefinition?>(designDialog);
 
             if (tableDefinition is not null)
             {
@@ -1709,10 +2165,45 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 
                 try
                 {
+                    //DatabaseData =
+                    //    databaseService.GetData(
+                    //        tableDefinition.ConnectionString,
+                    //        tableDefinition.TableName);
+
+                    //OnPropertyChanged(nameof(DatabaseData));
+                    //OnPropertyChanged(nameof(DatabaseDataView));
+
+                    //DatabaseFields.Clear();
+
+                    //foreach (DataColumn column in DatabaseData.Columns)
+                    //{
+                    //    DatabaseFields.Add(new DatabaseField
+                    //    {
+                    //        DatabaseName = connection.Name,
+                    //        TableName = tableDefinition.TableName,
+                    //        ColumnName = column.ColumnName
+                    //    });
+                    //}
                     DatabaseData =
-                        databaseService.GetData(
-                            tableDefinition.ConnectionString,
-                            tableDefinition.TableName);
+    databaseService.GetData(
+        tableDefinition.ConnectionString,
+        tableDefinition.TableName);
+                    if (!string.IsNullOrWhiteSpace(tableDefinition.PrimaryKey))
+                    {
+                        DatabaseData.DefaultView.Sort =
+                            $"[{tableDefinition.PrimaryKey}] ASC";
+                    }
+                    // Add design-time columns that don't physically exist
+                    // in the original database yet.
+                    foreach (var definedColumn in tableDefinition.Columns)
+                    {
+                        if (!DatabaseData.Columns.Contains(definedColumn.Name))
+                        {
+                            DatabaseData.Columns.Add(
+                                definedColumn.Name,
+                                typeof(string));
+                        }
+                    }
 
                     OnPropertyChanged(nameof(DatabaseData));
                     OnPropertyChanged(nameof(DatabaseDataView));
@@ -1737,8 +2228,1667 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
             }
             return;
         }
+        if (selectedType == DatabaseType.SQLite)
+        {
+            var sqliteDialog =
+                new SqliteConnectionDialogViewModel(_filePicker);
+
+            var connection =
+                await _dialogService.ShowDialogAsync<
+                    SqliteConnectionDialogViewModel,
+                    DatabaseConnection?>(sqliteDialog);
+
+            if (connection is null)
+                return;
+
+            var designDialog =
+                new DatabaseDesignDialogViewModel(
+                    connection,
+                    _dialogService);
+
+            var tableDefinition =
+                await _dialogService.ShowDialogAsync<
+                    DatabaseDesignDialogViewModel,
+                    DatabaseTableDefinition?>(designDialog);
+
+            if (tableDefinition is null)
+                return;
+
+            DatabaseTables.Add(tableDefinition);
+
+            _activeDatabaseTableName =
+                tableDefinition.TableName;
+
+            var sqliteService =
+                new SqliteDatabaseService();
+
+            try
+            {
+                DatabaseData =
+                    sqliteService.GetData(
+                        tableDefinition.ConnectionString,
+                        tableDefinition.TableName);
+
+                if (!string.IsNullOrWhiteSpace(
+                        tableDefinition.PrimaryKey))
+                {
+                    DatabaseData.DefaultView.Sort =
+                        $"[{tableDefinition.PrimaryKey}] ASC";
+                }
+
+                OnPropertyChanged(
+                    nameof(DatabaseData));
+
+                OnPropertyChanged(
+                    nameof(DatabaseDataView));
+
+                DatabaseFields.Clear();
+
+                foreach (var column in tableDefinition.Columns)
+                {
+                    if (!DatabaseData.Columns.Contains(
+                            column.Name))
+                    {
+                        continue;
+                    }
+
+                    DatabaseFields.Add(
+                        new DatabaseField
+                        {
+                            DatabaseName =
+                                connection.Name,
+
+                            TableName =
+                                tableDefinition.TableName,
+
+                            ColumnName =
+                                column.Name
+                        });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    $"SQLITE DATA ERROR: {ex}");
+            }
+
+            return;
+        }
+        if (selectedType == DatabaseType.SQLServer)
+        {
+            var sqlServerDialog =
+                new SqlServerConnectionDialogViewModel();
+
+            var connection =
+                await _dialogService.ShowDialogAsync<
+                    SqlServerConnectionDialogViewModel,
+                    DatabaseConnection?>(sqlServerDialog);
+
+            if (connection is null)
+                return;
+
+            var designDialog =
+                new DatabaseDesignDialogViewModel(
+                    connection,
+                    _dialogService);
+
+            var tableDefinition =
+                await _dialogService.ShowDialogAsync<
+                    DatabaseDesignDialogViewModel,
+                    DatabaseTableDefinition?>(designDialog);
+
+            if (tableDefinition is not null)
+            {
+                DatabaseTables.Add(tableDefinition);
+
+                var databaseService =
+                    new OdbcDatabaseService();
+
+                try
+                {
+                    DatabaseData =
+                        databaseService.GetData(
+                            tableDefinition.ConnectionString,
+                            tableDefinition.TableName);
+
+                    foreach (var definedColumn in tableDefinition.Columns)
+                    {
+                        if (!DatabaseData.Columns.Contains(
+                                definedColumn.Name))
+                        {
+                            DatabaseData.Columns.Add(
+                                definedColumn.Name,
+                                typeof(string));
+                        }
+                    }
+
+                    OnPropertyChanged(nameof(DatabaseData));
+                    OnPropertyChanged(nameof(DatabaseDataView));
+
+                    DatabaseFields.Clear();
+
+                    foreach (DataColumn column in DatabaseData.Columns)
+                    {
+                        DatabaseFields.Add(new DatabaseField
+                        {
+                            DatabaseName = connection.Name,
+                            TableName = tableDefinition.TableName,
+                            ColumnName = column.ColumnName
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(
+                        $"SQL SERVER DATA ERROR: {ex}");
+                }
+            }
+
+            return;
+        }
+
+        if (selectedType == DatabaseType.MySQL)
+        {
+            var mySqlDialog =
+                new MySqlConnectionDialogViewModel(_filePicker, _mySqlSshTunnelService);
+
+            var connection =
+                await _dialogService.ShowDialogAsync<
+                    MySqlConnectionDialogViewModel,
+                    DatabaseConnection?>(mySqlDialog);
+
+            if (connection is null)
+                return;
+
+            var designDialog =
+                new DatabaseDesignDialogViewModel(
+                    connection,
+                    _dialogService);
+
+            var tableDefinition =
+                await _dialogService.ShowDialogAsync<
+                    DatabaseDesignDialogViewModel,
+                    DatabaseTableDefinition?>(designDialog);
+
+            if (tableDefinition is not null)
+            {
+                DatabaseTables.Add(tableDefinition);
+
+                var databaseService =
+                    new MySqlDatabaseService();
+
+                try
+                {
+                    DatabaseData =
+                        databaseService.GetData(
+                            tableDefinition.ConnectionString,
+                            tableDefinition.TableName);
+
+                    if (!string.IsNullOrWhiteSpace(
+                            tableDefinition.PrimaryKey))
+                    {
+                        DatabaseData.DefaultView.Sort =
+                            $"[{tableDefinition.PrimaryKey}] ASC";
+                    }
+
+                    OnPropertyChanged(
+                        nameof(DatabaseData));
+
+                    OnPropertyChanged(
+                        nameof(DatabaseDataView));
+
+                    DatabaseFields.Clear();
+
+                    foreach (var column in tableDefinition.Columns)
+                    {
+                        if (!DatabaseData.Columns.Contains(
+                                column.Name))
+                        {
+                            continue;
+                        }
+
+                        DatabaseFields.Add(
+                            new DatabaseField
+                            {
+                                DatabaseName =
+                                    connection.Name,
+
+                                TableName =
+                                    tableDefinition.TableName,
+
+                                ColumnName =
+                                    column.Name
+                            });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(
+                        $"MYSQL DATA ERROR: {ex}");
+                }
+            }
+
+            return;
+        }
+
+        if (selectedType == DatabaseType.Access)
+        {
+            var accessDialog =
+                new AccessConnectionDialogViewModel(
+                    _filePicker);
+
+            var connection =
+                await _dialogService.ShowDialogAsync<
+                    AccessConnectionDialogViewModel,
+                    DatabaseConnection?>(accessDialog);
+
+            if (connection is null)
+                return;
+
+            try
+            {
+                var odbcService =
+                    new OdbcDatabaseService();
+
+                var tables =
+                    odbcService.GetTables(
+                        connection.ConnectionString);
+
+                if (tables.Count == 0)
+                {
+                    Debug.WriteLine(
+                        "ACCESS: No tables found.");
+
+                    return;
+                }
+
+                var tableName =
+                    connection.SelectedTable;
+
+                if (string.IsNullOrWhiteSpace(tableName))
+                    return;
+
+                var columns =
+                    odbcService.GetColumnDefinitions(
+                        connection.ConnectionString,
+                        tableName);
+
+                var data =
+                    odbcService.GetData(
+                        connection.ConnectionString,
+                        tableName);
+
+                DatabaseData = data;
+
+                var tableDefinition =
+                    new DatabaseTableDefinition
+                    {
+                        DatabaseName =
+                            connection.Name,
+
+                        TableName =
+                            tableName,
+
+                        ConnectionString =
+                            connection.ConnectionString,
+
+                        Columns =
+                            columns.ToList()
+                    };
+
+                DatabaseTables.Add(tableDefinition);
+
+                _activeDatabaseTableName =
+                    tableName;
+
+                OnPropertyChanged(
+                    nameof(DatabaseData));
+
+                OnPropertyChanged(
+                    nameof(DatabaseDataView));
+
+                DatabaseFields.Clear();
+
+                foreach (var field in connection.SelectedColumns)
+                {
+                    DatabaseFields.Add(
+                        new DatabaseField
+                        {
+                            DatabaseName =
+                                connection.Name,
+
+                            TableName =
+                                tableName,
+
+                            ColumnName =
+                                field.Name
+                        });
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(
+                    $"ACCESS DATA ERROR: {ex}");
+            }
+
+            return;
+        }
+        if (selectedType == DatabaseType.PostgreSQL)
+        {
+            var postgreSqlDialog =
+                new PostgreSqlConnectionDialogViewModel();
+
+            var connection =
+                await _dialogService.ShowDialogAsync<
+                    PostgreSqlConnectionDialogViewModel,
+                    DatabaseConnection?>(
+                        postgreSqlDialog);
+
+            if (connection is null)
+                return;
+
+            var designDialog =
+                new DatabaseDesignDialogViewModel(
+                    connection,
+                    _dialogService);
+
+            var tableDefinition =
+                await _dialogService.ShowDialogAsync<
+                    DatabaseDesignDialogViewModel,
+                    DatabaseTableDefinition?>(
+                        designDialog);
+
+            if (tableDefinition is not null)
+            {
+                DatabaseTables.Add(tableDefinition);
+
+                _activeDatabaseTableName =
+                    tableDefinition.TableName;
+
+                var databaseService =
+                    new PostgreSqlDatabaseService();
+
+                try
+                {
+                    DatabaseData =
+                        databaseService.GetData(
+                            tableDefinition.ConnectionString,
+                            tableDefinition.TableName);
+
+                    if (!string.IsNullOrWhiteSpace(
+                            tableDefinition.PrimaryKey))
+                    {
+                        DatabaseData.DefaultView.Sort =
+                            $"[{tableDefinition.PrimaryKey}] ASC";
+                    }
+
+                    OnPropertyChanged(nameof(DatabaseData));
+                    OnPropertyChanged(nameof(DatabaseDataView));
+
+                    DatabaseFields.Clear();
+
+                    foreach (var column in tableDefinition.Columns)
+                    {
+                        if (!DatabaseData.Columns.Contains(
+                                column.Name))
+                            continue;
+
+                        DatabaseFields.Add(
+                            new DatabaseField
+                            {
+                                DatabaseName =
+                                    connection.Name,
+
+                                TableName =
+                                    tableDefinition.TableName,
+
+                                ColumnName =
+                                    column.Name
+                            });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(
+                        $"POSTGRESQL DATA ERROR: {ex}");
+                }
+            }
+
+            return;
+        }
+
+        if (selectedType == DatabaseType.CSV ||
+    selectedType == DatabaseType.TXT)
+        {
+            var csvDialog =
+                new CsvTextConnectionDialogViewModel(
+                    _filePicker);
+
+            var connection =
+                await _dialogService.ShowDialogAsync<
+                    CsvTextConnectionDialogViewModel,
+                    DatabaseConnection?>(csvDialog);
+
+            if (connection is null)
+                return;
+
+            try
+            {
+                var csvService =
+                    new CsvTextDatabaseService();
+
+                DatabaseData =
+                    csvService.LoadFile(
+                        connection.ConnectionString);
+
+                if (DatabaseData.Columns.Count == 0)
+                {
+                    Debug.WriteLine(
+                        "CSV/TXT file contains no columns.");
+
+                    return;
+                }
+
+                var tableName =
+                    System.IO.Path.GetFileNameWithoutExtension(
+                        connection.ConnectionString);
+
+                var primaryKey = DatabaseData.Columns
+                    .Cast<DataColumn>()
+                    .FirstOrDefault(column =>
+                        column.ColumnName.Equals(
+                            "ID",
+                            StringComparison.OrdinalIgnoreCase));
+
+                var tableDefinition =
+                    new DatabaseTableDefinition
+                    {
+                        DatabaseName = connection.Name,
+                        TableName = tableName,
+                        ConnectionString =
+                            connection.ConnectionString,
+                        PrimaryKey =
+                            primaryKey?.ColumnName ?? string.Empty,
+                        Columns = DatabaseData.Columns
+                            .Cast<DataColumn>()
+                            .Select(column =>
+                                new DatabaseColumn
+                                {
+                                    Name = column.ColumnName,
+                                    DataType =
+                                        column.DataType.Name,
+                                    IsPrimaryKey =
+                                        primaryKey?.ColumnName ==
+                                        column.ColumnName,
+                                    IsSelected = true
+                                })
+                            .ToList()
+                    };
+
+                DatabaseTables.Add(tableDefinition);
+
+                if (!string.IsNullOrWhiteSpace(
+                        tableDefinition.PrimaryKey))
+                {
+                    DatabaseData.DefaultView.Sort =
+                        $"[{tableDefinition.PrimaryKey}] ASC";
+                }
+
+                OnPropertyChanged(
+                    nameof(DatabaseData));
+
+                OnPropertyChanged(
+                    nameof(DatabaseDataView));
+
+                DatabaseFields.Clear();
+
+                foreach (DataColumn column in DatabaseData.Columns)
+                {
+                    DatabaseFields.Add(
+                        new DatabaseField
+                        {
+                            DatabaseName =
+                                connection.Name,
+                            TableName =
+                                tableName,
+                            ColumnName =
+                                column.ColumnName
+                        });
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"CSV/TXT DATA ERROR: {ex}");
+
+                Debug.WriteLine($"Could not load CSV/TXT file: {ex.Message}");
+            }
+
+            return;
+        }
+
+        if (selectedType == DatabaseType.InternalDatabase)
+        {
+            var sqliteService =
+      new InternalSqliteDatabaseService();
+
+            sqliteService.Initialize();
+
+            var connection = new DatabaseConnection
+            {
+                Name = "InfoID Internal Database",
+                Type = DatabaseType.InternalDatabase,
+                ConnectionString = sqliteService.ConnectionString,
+                IsConnected = true
+            };
+
+            var designDialog =
+                new DatabaseDesignDialogViewModel(
+                    connection,
+                    _dialogService);
+
+            var tableDefinition =
+                await _dialogService.ShowDialogAsync<
+                    DatabaseDesignDialogViewModel,
+                    DatabaseTableDefinition?>(designDialog);
+
+            if (tableDefinition is not null)
+            {
+                DatabaseTables.Add(tableDefinition);
+                _activeDatabaseTableName = tableDefinition.TableName;
+                try
+                {
+                    DatabaseData =
+                        sqliteService.GetData(
+                            tableDefinition.TableName);
+
+                    if (!string.IsNullOrWhiteSpace(
+                            tableDefinition.PrimaryKey))
+                    {
+                        DatabaseData.DefaultView.Sort =
+                            $"[{tableDefinition.PrimaryKey}] ASC";
+                    }
+
+                    OnPropertyChanged(nameof(DatabaseData));
+                    OnPropertyChanged(nameof(DatabaseDataView));
+
+                    DatabaseFields.Clear();
+
+                    foreach (DataColumn column in DatabaseData.Columns)
+                    {
+                        DatabaseFields.Add(new DatabaseField
+                        {
+                            DatabaseName = connection.Name,
+                            TableName = tableDefinition.TableName,
+                            ColumnName = column.ColumnName
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(
+                        $"INTERNAL SQLITE DATA ERROR: {ex}");
+                }
+            }
+
+            return;
+        }
+
+        if (selectedType == DatabaseType.SampleDatabase)
+        {
+            var sqliteService = new InternalSqliteDatabaseService("SampleDatabase.db");
+
+            sqliteService.InitializeSampleDatabase();
+
+            var connection =
+                new DatabaseConnection
+                {
+                    Name = "Sample Database",
+                    Type = DatabaseType.SampleDatabase,
+                    ConnectionString = sqliteService.ConnectionString,
+                    IsConnected = true
+                };
+
+            var designDialog =
+                new DatabaseDesignDialogViewModel(
+                    connection,
+                    _dialogService);
+
+            var tableDefinition =
+                await _dialogService.ShowDialogAsync<
+                    DatabaseDesignDialogViewModel,
+                    DatabaseTableDefinition?>(designDialog);
+
+            if (tableDefinition is not null)
+            {
+                DatabaseTables.Add(tableDefinition);
+
+                _activeDatabaseTableName =
+                    tableDefinition.TableName;
+
+                try
+                {
+                    DatabaseData =
+                        sqliteService.GetData(
+                            tableDefinition.TableName);
+
+                    if (!string.IsNullOrWhiteSpace(
+                            tableDefinition.PrimaryKey))
+                    {
+                        DatabaseData.DefaultView.Sort =
+                            $"[{tableDefinition.PrimaryKey}] ASC";
+                    }
+
+                    OnPropertyChanged(
+                        nameof(DatabaseData));
+
+                    OnPropertyChanged(
+                        nameof(DatabaseDataView));
+
+                    DatabaseFields.Clear();
+
+                    foreach (var column in tableDefinition.Columns)
+                    {
+                        if (!DatabaseData.Columns.Contains(
+                                column.Name))
+                        {
+                            continue;
+                        }
+
+                        DatabaseFields.Add(
+                            new DatabaseField
+                            {
+                                DatabaseName =
+                                    connection.Name,
+
+                                TableName =
+                                    tableDefinition.TableName,
+
+                                ColumnName =
+                                    column.Name
+                            });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(
+                        $"SAMPLE DATABASE DATA ERROR: {ex}");
+                }
+            }
+
+            return;
+        }
+
+        if (selectedType == DatabaseType.API)
+        {
+            var apiDialog = new ApiConnectionDialogViewModel();
+
+            var connection = await _dialogService.ShowDialogAsync<ApiConnectionDialogViewModel, DatabaseConnection?>(apiDialog);
+
+            if (connection is null)
+                return;
+
+            try
+            {
+                var apiService = new ApiDatabaseService();
+
+                // Use the same authentication the user tested with
+                var json = await apiService.GetAsync(
+                    connection.ConnectionString,
+                    string.IsNullOrWhiteSpace(connection.AuthenticationType)
+                        ? "None"
+                        : connection.AuthenticationType,
+                    connection.ApiKey ?? string.Empty,
+                    connection.BearerToken ?? string.Empty,
+                    connection.Username,
+                    connection.Password);
+
+                var data = apiService.ConvertJsonToDataTable(json);
+
+                if (data.Columns.Count == 0)
+                {
+                    Debug.WriteLine("API returned no columns.");
+                    return;
+                }
+
+                // Give the API source a real table name instead of "API"
+                var tableName = GetApiTableName(connection.ConnectionString);
+
+                var primaryKey = data.Columns
+                    .Cast<DataColumn>()
+                    .FirstOrDefault(c =>
+                        c.ColumnName.Equals("ID", StringComparison.OrdinalIgnoreCase));
+
+                var tableDefinition = new DatabaseTableDefinition
+                {
+                    DatabaseName = connection.Name,
+                    TableName = tableName,
+                    ConnectionString = connection.ConnectionString,
+                    PrimaryKey = primaryKey?.ColumnName ?? string.Empty,
+                    Columns = data.Columns
+                        .Cast<DataColumn>()
+                        .Select(c => new DatabaseColumn
+                        {
+                            Name = c.ColumnName,
+                            DataType = c.DataType.Name,
+                            IsPrimaryKey = primaryKey?.ColumnName == c.ColumnName,
+                            IsSelected = true
+                        })
+                        .ToList()
+                };
+
+                DatabaseTables.Add(tableDefinition);
+
+                // Set this BEFORE raising DatabaseData changes so the designer
+                // resolves fields against the correct table
+                _activeDatabaseTableName = tableName;
+
+                if (!string.IsNullOrWhiteSpace(tableDefinition.PrimaryKey))
+                {
+                    data.DefaultView.Sort = $"[{tableDefinition.PrimaryKey}] ASC";
+                }
+
+                DatabaseData = data;
+
+                OnPropertyChanged(nameof(DatabaseData));
+                OnPropertyChanged(nameof(DatabaseDataView));
+
+                DatabaseFields.Clear();
+
+                foreach (DataColumn column in DatabaseData.Columns)
+                {
+                    DatabaseFields.Add(new DatabaseField
+                    {
+                        DatabaseName = connection.Name,
+                        TableName = tableName,
+                        ColumnName = column.ColumnName
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"API DATA ERROR: {ex}");
+            }
+
+            return;
+        }
+
+        if (selectedType == DatabaseType.GoogleSheets)
+        {
+            var sheetsDialog = new GoogleSheetsConnectionDialogViewModel();
+
+            var connection =
+                await _dialogService.ShowDialogAsync<GoogleSheetsConnectionDialogViewModel, DatabaseConnection?>(sheetsDialog);
+
+            if (connection is null)
+                return;
+
+            try
+            {
+                var sheetsService = new GoogleSheetsDatabaseService();
+
+                // Public links load directly; signed-in sheets reuse the dialog's sign-in.
+                var data = await sheetsService.LoadAsync(connection, CancellationToken.None);
+
+                if (data.Columns.Count == 0)
+                {
+                    Debug.WriteLine("GOOGLE SHEETS: sheet has no columns.");
+                    return;
+                }
+
+                var tableName = string.IsNullOrWhiteSpace(connection.SelectedTable)
+                    ? "Sheet1"
+                    : connection.SelectedTable;
+
+                LoadExternalTable(connection, tableName, data);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"GOOGLE SHEETS DATA ERROR: {ex}");
+            }
+
+            return;
+        }
+
+
     }
-    
+
+    private void LoadExternalTable(
+     DatabaseConnection connection,
+     string tableName,
+     DataTable data)
+    {
+        var primaryKey = data.Columns
+            .Cast<DataColumn>()
+            .FirstOrDefault(c =>
+                c.ColumnName.Equals("ID", StringComparison.OrdinalIgnoreCase));
+
+        var tableDefinition = new DatabaseTableDefinition
+        {
+            DatabaseName = connection.Name,
+            TableName = tableName,
+            ConnectionString = connection.ConnectionString,
+            PrimaryKey = primaryKey?.ColumnName ?? string.Empty,
+            Columns = data.Columns
+                .Cast<DataColumn>()
+                .Select(c => new DatabaseColumn
+                {
+                    Name = c.ColumnName,
+                    DataType = c.DataType.Name,
+                    IsPrimaryKey = primaryKey?.ColumnName == c.ColumnName,
+                    IsSelected = true
+                })
+                .ToList()
+        };
+
+        DatabaseTables.Add(tableDefinition);
+
+        _activeDatabaseTableName = tableName;
+
+        if (!string.IsNullOrWhiteSpace(tableDefinition.PrimaryKey))
+        {
+            data.DefaultView.Sort = $"[{tableDefinition.PrimaryKey}] ASC";
+        }
+
+        DatabaseData = data;
+
+        OnPropertyChanged(nameof(DatabaseData));
+        OnPropertyChanged(nameof(DatabaseDataView));
+
+        DatabaseFields.Clear();
+
+        foreach (DataColumn column in DatabaseData.Columns)
+        {
+            DatabaseFields.Add(new DatabaseField
+            {
+                DatabaseName = connection.Name,
+                TableName = tableName,
+                ColumnName = column.ColumnName
+            });
+        }
+    }
+
+    /// <summary>Clears all database state and returns the UI to "Add Database" only.
+    /// Element bindings on the card (DatabaseColumn etc.) are design data and are kept.</summary>
+    [RelayCommand]
+    private void DisconnectDatabase()
+    {
+        // Clear the row selection first, while the old DataView is still bound.
+        // OnSelectedDatabaseRowChanged clears SelectedDatabaseValues as well.
+        SelectedDatabaseRow = null;
+
+        DatabaseData = null;
+        DatabaseTables.Clear();
+        DatabaseFields.Clear();
+        DatabaseColumns.Clear();
+        SelectedDatabaseValues.Clear();
+
+        _activeDatabaseTableName = string.Empty;
+        _isNewDatabaseRow = false;
+
+        OnPropertyChanged(nameof(DatabaseData));
+        OnPropertyChanged(nameof(DatabaseDataView));
+
+        // Redraw so previewed database values disappear from the canvas.
+        NotifyDocumentChanged();
+    }
+
+
+    // ------------------------------------------------ database grid toolbar ----
+    private static readonly string[] ImageColumnKeywords =
+        { "photo", "image", "picture", "avatar", "logo", "signature" };
+
+    /// <summary>Columns shown as a clickable thumbnail in the grid instead of text.</summary>
+    public bool IsDatabaseImageColumn(DataColumn column) =>
+        column.DataType == typeof(byte[]) ||
+        ImageColumnKeywords.Any(k => column.ColumnName.Contains(k, StringComparison.OrdinalIgnoreCase));
+
+    private readonly Dictionary<string, Avalonia.Media.Imaging.Bitmap?> _databaseImageCache = new();
+
+    /// <summary>Loads a small thumbnail for a grid cell. Accepts image bytes (BLOB),
+    /// an InfoID asset reference, or a plain file path. Returns null if the value
+    /// isn't a loadable image.</summary>
+    public Avalonia.Media.Imaging.Bitmap? GetDatabaseImage(object? value)
+    {
+        try
+        {
+            if (value is byte[] bytes && bytes.Length > 0)
+            {
+                using var stream = new MemoryStream(bytes);
+                return Avalonia.Media.Imaging.Bitmap.DecodeToWidth(stream, 96);
+            }
+
+            if (value is not string text || string.IsNullOrWhiteSpace(text))
+                return null;
+
+            if (_databaseImageCache.TryGetValue(text, out var cached))
+                return cached;
+
+            var path = _assetService.ResolveToFullPath(text);
+            if (path is null || !File.Exists(path))
+                path = File.Exists(text) ? text : null;
+
+            Avalonia.Media.Imaging.Bitmap? bitmap = null;
+            if (path is not null)
+            {
+                using var stream = File.OpenRead(path);
+                bitmap = Avalonia.Media.Imaging.Bitmap.DecodeToWidth(stream, 96);
+            }
+
+            _databaseImageCache[text] = bitmap;
+            return bitmap;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"DATABASE IMAGE LOAD ERROR: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>Grid Photo cell click: pick an image file and put it in that row's
+    /// column. Text columns get an InfoID asset reference (the file is copied into
+    /// the assets folder, same as images placed on the card); BLOB columns get the
+    /// image bytes.</summary>
+    public async Task PickDatabaseImageAsync(DataRowView rowView, string columnName)
+    {
+        if (DatabaseData is null) return;
+
+        var row = rowView.Row;
+        if (row.Table != DatabaseData ||
+            row.RowState == DataRowState.Detached ||
+            !DatabaseData.Columns.Contains(columnName))
+            return;
+
+        var path = await _filePicker.PickImageFileAsync("Choose Image");
+        if (path is null) return;
+
+        var column = DatabaseData.Columns[columnName]!;
+
+        try
+        {
+            column.ReadOnly = false;
+
+            if (column.DataType == typeof(byte[]))
+                row[column] = await File.ReadAllBytesAsync(path);
+            else
+                row[column] = await _assetService.ImportAsync(path);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"DATABASE IMAGE PICK ERROR: {ex}");
+            return;
+        }
+
+        // Rebuild the grid so the new thumbnail shows, keeping this row selected.
+        var rowIndex = DatabaseData.Rows.IndexOf(row);
+
+        ReplaceDatabaseTable(DatabaseData, DatabaseData.DefaultView.RowFilter);
+
+        if (rowIndex >= 0 && rowIndex < DatabaseData.Rows.Count)
+        {
+            var updatedRow = DatabaseData.Rows[rowIndex];
+            SelectedDatabaseRow = DatabaseData.DefaultView
+                .Cast<DataRowView>()
+                .FirstOrDefault(v => v.Row == updatedRow);
+        }
+
+        NotifyDocumentChanged();
+    }
+
+
+    // ------------------------------------------------------------ photo folder ----
+
+    private readonly HashSet<string> _preparedPhotoFolders = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Result of the last "Check photos", shown in the Image Parameters tab.</summary>
+    [ObservableProperty]
+    private string _photoCheckSummary = string.Empty;
+
+    private static Dictionary<string, string> RowToRecord(DataRow row)
+    {
+        var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (DataColumn column in row.Table.Columns)
+        {
+            var value = row[column];
+            values[column.ColumnName] = value == DBNull.Value ? string.Empty : value?.ToString() ?? string.Empty;
+        }
+
+        return values;
+    }
+
+    /// <summary>What the canvas should draw for an Image element. With a grid row
+    /// selected and either "Use photos from a folder" on or the image bound to a
+    /// database image column, that's the selected record's photo; otherwise the
+    /// element's own fixed image, exactly as before.</summary>
+    public (Avalonia.Media.Imaging.Bitmap? Bitmap, string? AssetReference, bool ShowPlaceholder)
+        ResolveImageSource(ImageElement image, double drawWidthPx)
+    {
+        if (SelectedDatabaseRow is not { } rowView ||
+            rowView.Row.RowState == DataRowState.Detached)
+        {
+            return (null, image.AssetReference, true);
+        }
+
+        string? path;
+        var service = PhotoFolderService.Shared;
+
+        if (image.UsePhotoFolder && !string.IsNullOrWhiteSpace(image.PhotoFolderPath))
+        {
+            var folder = image.PhotoFolderPath;
+            EnsurePhotoFolderPrepared(folder);
+
+            var key = service.BuildKey(image.PhotoFileNamePattern, RowToRecord(rowView.Row));
+            path = key is null ? null : service.FindPhoto(folder, key);
+        }
+        else if (image.IsDatabaseBound &&
+                 !string.IsNullOrWhiteSpace(image.DatabaseColumn) &&
+                 rowView.Row.Table.Columns.Contains(image.DatabaseColumn))
+        {
+            // Image bound to a database column: the selected row's own photo, same
+            // resolution the Print dialog uses, so canvas and printed card match.
+            path = ResolveDatabaseImageValue(rowView.Row[image.DatabaseColumn]);
+        }
+        else
+        {
+            return (null, image.AssetReference, true);
+        }
+
+        // Rounded up to 64px steps so zooming doesn't reload the photo at every tiny size change.
+        var decodeWidth = Math.Max(64, ((int)Math.Ceiling(drawWidthPx) + 63) / 64 * 64);
+        var bitmap = path is null ? null : service.LoadPhoto(path, decodeWidth);
+
+        if (bitmap is not null)
+            return (bitmap, null, false);
+
+        return image.MissingPhotoBehavior switch
+        {
+            MissingPhotoBehavior.Blank => (null, null, false),
+            MissingPhotoBehavior.DefaultImage => (null, image.AssetReference, true),
+            _ => (null, null, true),
+        };
+    }
+
+    /// <summary>Scans a folder in the background the first time it's needed, then
+    /// redraws so photos appear as soon as the scan finishes.</summary>
+    private void EnsurePhotoFolderPrepared(string folderPath)
+    {
+        if (!_preparedPhotoFolders.Add(folderPath))
+            return;
+
+        _ = PreparePhotoFolderAsync(folderPath);
+    }
+
+    private async Task PreparePhotoFolderAsync(string folderPath)
+    {
+        try
+        {
+            await PhotoFolderService.Shared.PrepareFolderAsync(folderPath);
+            NotifyDocumentChanged();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"PHOTO FOLDER PREPARE ERROR: {ex.Message}");
+            _preparedPhotoFolders.Remove(folderPath);
+        }
+    }
+
+    /// <summary>Parameters tab "Browse...": choose the photos folder, pick a sensible
+    /// file name pattern from the connected data, and check which records match.</summary>
+    [RelayCommand]
+    private async Task BrowsePhotoFolder(ImageElement? image)
+    {
+        if (image is null) return;
+
+        var folder = await _filePicker.PickFolderAsync("Choose Photo Folder");
+        if (folder is null) return;
+
+        image.PhotoFolderPath = folder;
+        image.UsePhotoFolder = true;
+
+        // Default pattern: use the data's ID column if it isn't literally "EmployeeID".
+        if (DatabaseData is not null && image.PhotoFileNamePattern == "{EmployeeID}")
+        {
+            var columns = DatabaseData.Columns.Cast<DataColumn>().Select(c => c.ColumnName);
+            if (PhotoFolderService.Shared.SuggestKeyColumn(columns) is { } keyColumn)
+                image.PhotoFileNamePattern = "{" + keyColumn + "}";
+        }
+
+        await RefreshPhotoFolder(image);
+    }
+
+    /// <summary>Parameters tab "Refresh": rescan the folder (new or renamed photos)
+    /// and re-run the check.</summary>
+    [RelayCommand]
+    private async Task RefreshPhotoFolder(ImageElement? image)
+    {
+        if (image?.PhotoFolderPath is not { Length: > 0 } folder) return;
+
+        _preparedPhotoFolders.Remove(folder);
+        await PhotoFolderService.Shared.RefreshFolderAsync(folder);
+        _preparedPhotoFolders.Add(folder);
+
+        await CheckPhotoFolder(image);
+        NotifyDocumentChanged();
+    }
+
+    /// <summary>Parameters tab "Check photos": how many records have a matching photo,
+    /// and which IDs are missing, before printing.</summary>
+    [RelayCommand]
+    private async Task CheckPhotoFolder(ImageElement? image)
+    {
+        if (image is null || string.IsNullOrWhiteSpace(image.PhotoFolderPath))
+        {
+            PhotoCheckSummary = "Choose a photo folder first.";
+            return;
+        }
+
+        if (!Directory.Exists(image.PhotoFolderPath))
+        {
+            PhotoCheckSummary = "Folder not found on this PC. Click Browse to choose it.";
+            return;
+        }
+
+        if (DatabaseData is null)
+        {
+            PhotoCheckSummary = "Connect a database to check which records have a photo.";
+            return;
+        }
+
+        await PhotoFolderService.Shared.PrepareFolderAsync(image.PhotoFolderPath);
+
+        var records = DatabaseData.Rows.Cast<DataRow>().Select(RowToRecord);
+        var report = PhotoFolderService.Shared.CheckRecords(
+            image.PhotoFolderPath, image.PhotoFileNamePattern, records);
+
+        if (report.MissingRecords == 0)
+        {
+            PhotoCheckSummary = $"All {report.TotalRecords} records have a photo.";
+            return;
+        }
+
+        var shown = string.Join(", ", report.MissingKeys.Take(10));
+        var more = report.MissingKeys.Count > 10 ? $" and {report.MissingKeys.Count - 10} more" : string.Empty;
+
+        PhotoCheckSummary =
+            $"{report.MatchedRecords} of {report.TotalRecords} records have a photo. Missing: {shown}{more}";
+    }
+
+
+    private const string AllColumnsOption = "All";
+
+    /// <summary>"All" plus every column name, for the search column dropdown.</summary>
+    public ObservableCollection<string> SearchColumnOptions { get; } = new() { AllColumnsOption };
+
+    [ObservableProperty]
+    private string _databaseSearchText = string.Empty;
+
+    [ObservableProperty]
+    private string? _selectedSearchColumn = AllColumnsOption;
+
+    /// <summary>"5 of 12" -- position of the current row among the visible rows.</summary>
+    public string RecordPositionText
+    {
+        get
+        {
+            var rows = GetVisibleDatabaseRows();
+            if (rows.Count == 0) return "0 of 0";
+            var index = GetCurrentRowIndex(rows);
+            return index < 0 ? $"- of {rows.Count}" : $"{index + 1} of {rows.Count}";
+        }
+    }
+
+    private List<DataRowView> GetVisibleDatabaseRows() =>
+        DatabaseDataView?.Cast<DataRowView>().ToList() ?? new List<DataRowView>();
+
+    private int GetCurrentRowIndex(List<DataRowView> rows) =>
+        SelectedDatabaseRow is null ? -1 : rows.FindIndex(r => r.Row == SelectedDatabaseRow.Row);
+
+    private void MoveToDatabaseRow(Func<int, int, int> pickIndex)
+    {
+        var rows = GetVisibleDatabaseRows();
+        if (rows.Count == 0) return;
+
+        var target = Math.Clamp(pickIndex(GetCurrentRowIndex(rows), rows.Count), 0, rows.Count - 1);
+        SelectedDatabaseRow = rows[target];
+    }
+
+    [RelayCommand]
+    private void FirstDatabaseRow() => MoveToDatabaseRow((_, _) => 0);
+
+    [RelayCommand]
+    private void PreviousDatabaseRow() => MoveToDatabaseRow((i, _) => i < 0 ? 0 : i - 1);
+
+    [RelayCommand]
+    private void NextDatabaseRow() => MoveToDatabaseRow((i, _) => i + 1);
+
+    [RelayCommand]
+    private void LastDatabaseRow() => MoveToDatabaseRow((_, count) => count - 1);
+
+    /// <summary>Removes the selected rows from the grid only -- the source database is
+    /// never touched. Reconnecting brings them back. Falls back to the current row if
+    /// nothing is multi-selected.</summary>
+    /// <summary>Removes rows from the grid only -- the source database is never
+    /// touched. Priority: ticked rows, then Ctrl/Shift-selected rows, then the
+    /// current row.</summary>
+    [RelayCommand]
+    private void DeleteDatabaseRows(System.Collections.IList? selectedItems)
+    {
+        if (DatabaseData is null) return;
+
+        var rowsToDelete = _checkedDatabaseRows.Where(r => r.Table == DatabaseData).ToList();
+
+        if (rowsToDelete.Count == 0)
+            rowsToDelete = selectedItems?.OfType<DataRowView>().Select(v => v.Row).ToList()
+                           ?? new List<DataRow>();
+
+        if (rowsToDelete.Count == 0 && SelectedDatabaseRow is not null)
+            rowsToDelete.Add(SelectedDatabaseRow.Row);
+
+        if (rowsToDelete.Count == 0) return;
+
+        var firstIndex = GetVisibleDatabaseRows().FindIndex(r => rowsToDelete.Contains(r.Row));
+
+        // Clear selection first: the selection handler reads the row's values,
+        // which fails once the row has been removed.
+        SelectedDatabaseRow = null;
+
+        foreach (var row in rowsToDelete)
+        {
+            if (row.RowState == DataRowState.Added) _isNewDatabaseRow = false;
+            _checkedDatabaseRows.Remove(row);
+            if (row.Table == DatabaseData) DatabaseData.Rows.Remove(row);
+        }
+
+        ReplaceDatabaseTable(DatabaseData, DatabaseData.DefaultView.RowFilter);
+
+        var remaining = GetVisibleDatabaseRows();
+        if (remaining.Count > 0)
+            SelectedDatabaseRow = remaining[Math.Clamp(firstIndex, 0, remaining.Count - 1)];
+
+        NotifyDocumentChanged();
+    }
+    [RelayCommand]
+    private void ApplyDatabaseSearch()
+    {
+        if (DatabaseData is null) return;
+
+        SelectedDatabaseRow = null;
+
+        try
+        {
+            ReplaceDatabaseTable(DatabaseData, BuildDatabaseRowFilter());
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"DATABASE SEARCH ERROR: {ex}");
+            ReplaceDatabaseTable(DatabaseData, string.Empty);
+        }
+
+        SelectedDatabaseRow = GetVisibleDatabaseRows().FirstOrDefault();
+        NotifyDocumentChanged();
+    }
+
+    [RelayCommand]
+    private void ClearDatabaseSearch()
+    {
+        DatabaseSearchText = string.Empty;
+        SelectedSearchColumn = AllColumnsOption;
+
+        if (DatabaseData is null) return;
+
+        SelectedDatabaseRow = null;
+        ReplaceDatabaseTable(DatabaseData, string.Empty);
+        NotifyDocumentChanged();
+    }
+
+    /// <summary>The grid only refreshes when it receives a new DataView, so filtering
+    /// and deleting swap in a copy of the table (same pattern AddDatabaseRow uses),
+    /// keeping the existing sort.</summary>
+    private void ReplaceDatabaseTable(DataTable source, string rowFilter)
+    {
+        var sort = source.DefaultView.Sort;
+        var copy = source.Copy();
+
+        // DataTable.Copy keeps row order, so ticks map across by index.
+        var remapped = new List<DataRow>();
+        for (var i = 0; i < source.Rows.Count; i++)
+        {
+            if (_checkedDatabaseRows.Contains(source.Rows[i]))
+                remapped.Add(copy.Rows[i]);
+        }
+
+        _checkedDatabaseRows.Clear();
+        foreach (var row in remapped)
+            _checkedDatabaseRows.Add(row);
+
+        copy.DefaultView.Sort = sort;
+        copy.DefaultView.RowFilter = rowFilter;
+
+        DatabaseData = copy;
+
+        OnPropertyChanged(nameof(DatabaseData));
+        OnPropertyChanged(nameof(DatabaseDataView));
+    }
+
+    private string BuildDatabaseRowFilter()
+    {
+        if (DatabaseData is null || string.IsNullOrWhiteSpace(DatabaseSearchText))
+            return string.Empty;
+
+        var pattern = EscapeLikeValue(DatabaseSearchText.Trim());
+
+        var columns = string.IsNullOrEmpty(SelectedSearchColumn) || SelectedSearchColumn == AllColumnsOption
+            ? DatabaseData.Columns.Cast<DataColumn>().Select(c => c.ColumnName)
+            : new[] { SelectedSearchColumn };
+
+        return string.Join(" OR ", columns.Select(c =>
+            $"CONVERT([{c.Replace("\\", "\\\\").Replace("]", "\\]")}], 'System.String') LIKE '%{pattern}%'"));
+    }
+
+    // Makes typed text literal inside a DataView LIKE pattern.
+    private static string EscapeLikeValue(string value)
+    {
+        var sb = new System.Text.StringBuilder();
+
+        foreach (var ch in value)
+        {
+            switch (ch)
+            {
+                case '[': sb.Append("[[]"); break;
+                case ']': sb.Append("[]]"); break;
+                case '*': sb.Append("[*]"); break;
+                case '%': sb.Append("[%]"); break;
+                case '\'': sb.Append("''"); break;
+                default: sb.Append(ch); break;
+            }
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>Rebuilds the column dropdown only when the columns actually change
+    /// (new connection or disconnect), so a chosen column survives Apply.</summary>
+    private void RefreshSearchColumns()
+    {
+        if (DatabaseData is null)
+            DatabaseSearchText = string.Empty;
+
+        var names = DatabaseData?.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList()
+                    ?? new List<string>();
+
+        if (SearchColumnOptions.Skip(1).SequenceEqual(names))
+            return;
+
+        SearchColumnOptions.Clear();
+        SearchColumnOptions.Add(AllColumnsOption);
+        foreach (var name in names)
+            SearchColumnOptions.Add(name);
+
+        SelectedSearchColumn = AllColumnsOption;
+    }
+
+    private static string GetApiTableName(string url)
+    {
+        if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            var lastSegment = uri.Segments
+                .LastOrDefault()?
+                .Trim('/');
+
+            if (!string.IsNullOrWhiteSpace(lastSegment))
+                return lastSegment;
+        }
+
+        return "API";
+    }
+    [RelayCommand]
+
+    private async Task AddDatabaseRow()
+    {
+        if (DatabaseData is null)
+            return;
+
+        if (DatabaseData.Columns.Count == 0)
+            return;
+
+        if (string.IsNullOrWhiteSpace(_activeDatabaseTableName))
+            return;
+
+        // CRITICAL: Wait a moment for the DataGrid's TextBox.LostFocus event to complete.
+        // When the user types in a cell and immediately clicks "+ Add row", the button
+        // click triggers LostFocus on the TextBox, but the LostFocus handler (which copies
+        // the TextBox value into the DataRow) might not finish before this command executes.
+        // A 50ms delay lets the event queue drain and ensures the DataRow has the typed values.
+        await Task.Delay(50);
+
+        // BEFORE creating a new row, save the previous pending row if it has data.
+        if (_isNewDatabaseRow && SelectedDatabaseRow is not null)
+        {
+            // CRITICAL: Accept any pending cell edits from the DataGrid BEFORE checking row data.
+            // The user might have just typed into a cell and clicked "+ Add row" immediately.
+            // Without this, the typed values are still in the TextBox and not yet in the DataRow.
+            if (SelectedDatabaseRow.Row.RowState == DataRowState.Detached)
+            {
+                // Row was never properly added to the table - this shouldn't happen,
+                // but if it does, we can't save it.
+                Debug.WriteLine("ADD DATABASE ROW: Skipping detached row.");
+            }
+            else if (RowHasData(SelectedDatabaseRow.Row))
+            {
+                // Row has data - save it to SQLite and reload the table to get the generated ID.
+                if (!SavePendingRowAndReload())
+                {
+                    // Save failed - don't create a new row.
+                    return;
+                }
+                // At this point, DatabaseData has been reloaded from SQLite with the saved row.
+            }
+            else
+            {
+                // Row is empty - don't save it, just discard it by proceeding to create a new one.
+                Debug.WriteLine("ADD DATABASE ROW: Discarding empty pending row.");
+            }
+        }
+
+        // Create a new DataTable so the DataGrid gets a new DataView.
+        var newTable = DatabaseData.Clone();
+
+        // Copy existing rows (these are now the freshly reloaded rows from SQLite if we saved).
+        foreach (DataRow existingRow in DatabaseData.Rows)
+        {
+            newTable.ImportRow(existingRow);
+        }
+
+        // Create the new empty row.
+        var newRow = newTable.NewRow();
+
+        foreach (DataColumn column in newTable.Columns)
+        {
+            if (column.AutoIncrement)
+                continue;
+
+            newRow[column] = DBNull.Value;
+        }
+
+        newTable.Rows.Add(newRow);
+
+        // Replace the DataTable instance.
+        DatabaseData = newTable;
+
+        // Tell the DataGrid that its ItemsSource has changed.
+        OnPropertyChanged(nameof(DatabaseData));
+        OnPropertyChanged(nameof(DatabaseDataView));
+
+        // Select the new row.
+        SelectedDatabaseRow = DatabaseData.DefaultView
+            .Cast<DataRowView>()
+            .FirstOrDefault(x => x.Row == newRow);
+
+        _isNewDatabaseRow = true;
+
+        NotifyDocumentChanged();
+    }
+
+
+    [RelayCommand]
+    private void SaveDatabaseRow()
+    {
+        if (DatabaseData is null)
+            return;
+
+        if (SelectedDatabaseRow is null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(_activeDatabaseTableName))
+            return;
+
+        // Do not save rows that have no actual data.
+        if (!RowHasData(SelectedDatabaseRow.Row))
+        {
+            Debug.WriteLine("SAVE DATABASE ROW: Skipping empty row.");
+            return;
+        }
+
+        try
+        {
+            var sqliteService =
+                new InternalSqliteDatabaseService();
+
+            sqliteService.InsertRow(
+                _activeDatabaseTableName,
+                SelectedDatabaseRow.Row);
+
+            _isNewDatabaseRow = false;
+
+            DatabaseData =
+                sqliteService.GetData(
+                    _activeDatabaseTableName);
+            var tableDefinition = DatabaseTables
+    .FirstOrDefault(x =>
+        x.TableName.Equals(
+            _activeDatabaseTableName,
+            StringComparison.OrdinalIgnoreCase));
+
+            if (tableDefinition is not null &&
+                !string.IsNullOrWhiteSpace(tableDefinition.PrimaryKey))
+            {
+                DatabaseData.DefaultView.Sort =
+                    $"[{tableDefinition.PrimaryKey}] ASC";
+            }
+
+
+            OnPropertyChanged(nameof(DatabaseData));
+            OnPropertyChanged(nameof(DatabaseDataView));
+
+            NotifyDocumentChanged();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(
+                $"SAVE DATABASE ROW ERROR: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// Checks if a DataRow contains any actual data (non-null, non-empty values)
+    /// in columns other than auto-increment primary keys.
+    /// </summary>
+    private bool RowHasData(DataRow row)
+    {
+        foreach (DataColumn column in row.Table.Columns)
+        {
+            // Skip auto-increment columns (they're generated by the database).
+            if (column.AutoIncrement)
+                continue;
+
+            var value = row[column];
+
+            // If the value is not DBNull and not an empty string, the row has data.
+            if (value != DBNull.Value &&
+                !(value is string str && string.IsNullOrWhiteSpace(str)))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Saves a pending row to the database and reloads DatabaseData from SQLite.
+    /// This ensures the saved row (with its generated ID) appears in the grid.
+    /// </summary>
+    /// <returns>True if save succeeded, false otherwise.</returns>
+    private bool SavePendingRowAndReload()
+    {
+        if (string.IsNullOrWhiteSpace(_activeDatabaseTableName))
+            return false;
+
+        if (SelectedDatabaseRow is null)
+            return false;
+
+        try
+        {
+            var sqliteService = new InternalSqliteDatabaseService();
+
+            // Insert the row into SQLite.
+            sqliteService.InsertRow(_activeDatabaseTableName, SelectedDatabaseRow.Row);
+
+            // CRITICAL: Reload DatabaseData from SQLite to get the saved row with its generated ID.
+            // Without this reload, the old temporary row disappears and the saved row never appears.
+            DatabaseData = sqliteService.GetData(_activeDatabaseTableName);
+
+            // Reapply primary key sorting to maintain ascending ID order after reload.
+            var tableDefinition = DatabaseTables.FirstOrDefault(t =>
+                t.TableName.Equals(_activeDatabaseTableName, StringComparison.OrdinalIgnoreCase));
+
+            if (tableDefinition is not null && !string.IsNullOrWhiteSpace(tableDefinition.PrimaryKey))
+            {
+                DatabaseData.DefaultView.Sort = $"[{tableDefinition.PrimaryKey}] ASC";
+            }
+
+            _isNewDatabaseRow = false;
+
+            OnPropertyChanged(nameof(DatabaseData));
+            OnPropertyChanged(nameof(DatabaseDataView));
+
+            Debug.WriteLine($"SAVE PENDING ROW: Successfully saved and reloaded data from {_activeDatabaseTableName}");
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"SAVE PENDING ROW ERROR: {ex}");
+            return false;
+        }
+    }
+
+    [RelayCommand]
+    private void InsertDatabaseField(DatabaseField? field)
+    {
+        if (field is null)
+            return;
+
+        var textElement = SelectedElements
+            .OfType<TextElement>()
+            .FirstOrDefault();
+
+        if (textElement is null)
+            return;
+
+        var binding = $"{{{{{field.ColumnName}}}}}";
+
+        if (string.IsNullOrWhiteSpace(textElement.DataBindingExpression))
+        {
+            textElement.DataBindingExpression = binding;
+        }
+        else
+        {
+            textElement.DataBindingExpression += " " + binding;
+        }
+    }
+
 
     [RelayCommand]
     private void DuplicateSelected()

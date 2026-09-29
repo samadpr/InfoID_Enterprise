@@ -8,9 +8,16 @@ namespace InfoID.Desktop.Features.Database.Models
     {
         SQLite,
         MySQL,
+        SampleDatabase,
         PostgreSQL,
         SQLServer,
         ODBC,
-        Excel
+        Excel,
+        InternalDatabase,
+        CSV,
+        TXT,
+        Access,
+        API,
+        GoogleSheets
     }
 }

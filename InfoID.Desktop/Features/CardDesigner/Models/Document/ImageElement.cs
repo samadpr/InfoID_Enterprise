@@ -1,8 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace InfoID.Desktop.Features.CardDesigner.Models.Document;
 
 public enum ImageFitMode { Fit, Fill, Stretch }
+
+public enum MissingPhotoBehavior { Placeholder, Blank, DefaultImage }
 
 public sealed partial class ImageElement : DesignerElement
 {
@@ -11,6 +13,9 @@ public sealed partial class ImageElement : DesignerElement
     /// <summary>App-relative asset reference (never an absolute local path -- Part 51),
     /// resolved through the future IDesignAssetService.</summary>
     [ObservableProperty] private string? _assetReference;
+    [ObservableProperty] private string? _databaseColumn;
+
+    [ObservableProperty] private bool _isDatabaseBound;
     [ObservableProperty] private ImageFitMode _fitMode = ImageFitMode.Fit;
     [ObservableProperty] private double _cornerRadius;
     [ObservableProperty] private double _brightness;
@@ -40,4 +45,9 @@ public sealed partial class ImageElement : DesignerElement
     /// caching.</summary>
     [ObservableProperty] private bool _flipHorizontal;
     [ObservableProperty] private bool _flipVertical;
+
+    [ObservableProperty] private bool _usePhotoFolder;
+    [ObservableProperty] private string? _photoFolderPath;
+    [ObservableProperty] private string _photoFileNamePattern = "{EmployeeID}";
+    [ObservableProperty] private MissingPhotoBehavior _missingPhotoBehavior = MissingPhotoBehavior.Placeholder;
 }

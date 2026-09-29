@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -511,9 +511,20 @@ public sealed class CardCanvasView : Control
                 DrawDataField(context, elementRect, field, tab);
                 break;
             case ImageElement image:
-                DrawImage(context, elementRect, image.AssetReference, image.FitMode, image.CornerRadius, image.CropX, image.CropY, image.CropZoom,
-                    image.MaskShape, image.FlipHorizontal, image.FlipVertical);
-                break;
+                {
+                    // Photo folder: the selected record's photo; otherwise the element's own image.
+                    (Avalonia.Media.Imaging.Bitmap? Bitmap, string? AssetReference, bool ShowPlaceholder) source =
+                        Tab is { } activeTab
+                            ? activeTab.ResolveImageSource(image, elementRect.Width)
+                            : (null, image.AssetReference, true);
+
+                    DrawImage(context, elementRect, source.AssetReference, image.FitMode, image.CornerRadius,
+                        image.CropX, image.CropY, image.CropZoom,
+                        image.MaskShape, image.FlipHorizontal, image.FlipVertical,
+                        bitmapOverride: source.Bitmap,
+                        drawPlaceholderWhenMissing: source.ShowPlaceholder);
+                    break;
+                }
             case PhotoElement photo:
                 DrawPhoto(context, elementRect, photo);
                 break;
@@ -535,39 +546,104 @@ public sealed class CardCanvasView : Control
         }
     }
 
-    private static void DrawText(DrawingContext context, Rect rect, TextElement text, CardDesignTabViewModel tab)
+    //private static void DrawText(DrawingContext context, Rect rect, TextElement text, CardDesignTabViewModel tab)
+    //{
+    //    var brush = ParseBrush(text.ColorHex);
+    //    var weight = text.Bold ? FontWeight.Bold : FontWeight.Normal;
+    //    var style = text.Italic ? FontStyle.Italic : FontStyle.Normal;
+    //    var typeface = new Typeface(text.FontFamily, style, weight);
+
+    //    // Data-bound text (Part 24): when a binding expression is set, the raw/design-
+    //    // time content IS the expression itself (e.g. "{{FirstName}} {{LastName}}"),
+    //    // kept visually distinguishable from ordinary static text; ResolveDisplayText
+    //    // swaps in the evaluated value only while Data Preview is on.
+    //    //var displayText = string.IsNullOrEmpty(text.DataBindingExpression)
+    //    //    ? text.Text
+    //    //    : tab.ResolveDisplayText(text.DataBindingExpression, text.DataBindingExpression);
+
+    //    var displayText = text.IsDatabaseBound &&
+    //              !string.IsNullOrWhiteSpace(text.DatabaseColumn)
+    //? tab.ResolveDisplayText(
+    //    text.Text,
+    //    text.DatabaseColumn)
+    //: string.IsNullOrEmpty(text.DataBindingExpression)
+    //    ? text.Text
+    //    : tab.ResolveDisplayText(
+    //        text.DataBindingExpression,
+    //        text.DataBindingExpression);
+
+    //    var formatted = new FormattedText(
+    //        string.IsNullOrEmpty(displayText) ? " " : displayText,
+    //        CultureInfo.CurrentCulture,
+    //        FlowDirection.LeftToRight,
+    //        typeface,
+    //        // Priority 4 fix: text.FontSize was previously passed straight into
+    //        // FormattedText with no relationship to the current zoom level at all,
+    //        // while the element's own box (rect, via ToDeviceRect) IS scaled by
+    //        // tab.Zoom -- position/size scaled with zoom, font size didn't. At low
+    //        // zoom the box shrinks a lot but the glyphs stayed exactly the same
+    //        // absolute device-pixel size, so most (eventually all) of each letter's
+    //        // ink fell outside the card's clip region (see DrawSide's
+    //        // context.PushClip(cardRect)) and the text effectively vanished; at high
+    //        // zoom the reverse made text look disproportionately small relative to its
+    //        // now-much-bigger box. Multiplying by tab.Zoom here makes text scale
+    //        // together with its box exactly like every other element already does, and
+    //        // is a no-op at the default Zoom=1.0 (100%), so on-screen appearance at the
+    //        // zoom level everything was presumably designed/tested at is unchanged.
+    //        Math.Max(1, text.FontSize * tab.Zoom),
+    //        brush)
+    //    {
+    //        MaxTextWidth = Math.Max(1, rect.Width),
+    //        MaxTextHeight = Math.Max(1, rect.Height),
+    //        TextAlignment = text.HorizontalAlignment switch
+    //        {
+    //            TextAlignmentX.Center => TextAlignment.Center,
+    //            TextAlignmentX.Right => TextAlignment.Right,
+    //            _ => TextAlignment.Left,
+    //        },
+    //    };
+
+    //    var origin = rect.TopLeft;
+    //    if (text.VerticalAlignment == TextAlignmentY.Middle)
+    //    {
+    //        origin = origin.WithY(rect.Center.Y - formatted.Height / 2);
+    //    }
+    //    else if (text.VerticalAlignment == TextAlignmentY.Bottom)
+    //    {
+    //        origin = origin.WithY(rect.Bottom - formatted.Height);
+    //    }
+
+    //    context.DrawText(formatted, origin);
+    //}
+
+
+    private static void DrawText(
+    DrawingContext context,
+    Rect rect,
+    TextElement text,
+    CardDesignTabViewModel tab)
     {
         var brush = ParseBrush(text.ColorHex);
         var weight = text.Bold ? FontWeight.Bold : FontWeight.Normal;
         var style = text.Italic ? FontStyle.Italic : FontStyle.Normal;
         var typeface = new Typeface(text.FontFamily, style, weight);
 
-        // Data-bound text (Part 24): when a binding expression is set, the raw/design-
-        // time content IS the expression itself (e.g. "{{FirstName}} {{LastName}}"),
-        // kept visually distinguishable from ordinary static text; ResolveDisplayText
-        // swaps in the evaluated value only while Data Preview is on.
-        var displayText = string.IsNullOrEmpty(text.DataBindingExpression)
-            ? text.Text
-            : tab.ResolveDisplayText(text.DataBindingExpression, text.DataBindingExpression);
+        var displayText = text.IsDatabaseBound &&
+                          !string.IsNullOrWhiteSpace(text.DatabaseColumn)
+            ? tab.ResolveDisplayText(
+                text.Text,
+                text.DatabaseColumn)
+            : string.IsNullOrEmpty(text.DataBindingExpression)
+                ? text.Text
+                : tab.ResolveDisplayText(
+                    text.DataBindingExpression,
+                    text.DataBindingExpression);
 
         var formatted = new FormattedText(
             string.IsNullOrEmpty(displayText) ? " " : displayText,
             CultureInfo.CurrentCulture,
             FlowDirection.LeftToRight,
             typeface,
-            // Priority 4 fix: text.FontSize was previously passed straight into
-            // FormattedText with no relationship to the current zoom level at all,
-            // while the element's own box (rect, via ToDeviceRect) IS scaled by
-            // tab.Zoom -- position/size scaled with zoom, font size didn't. At low
-            // zoom the box shrinks a lot but the glyphs stayed exactly the same
-            // absolute device-pixel size, so most (eventually all) of each letter's
-            // ink fell outside the card's clip region (see DrawSide's
-            // context.PushClip(cardRect)) and the text effectively vanished; at high
-            // zoom the reverse made text look disproportionately small relative to its
-            // now-much-bigger box. Multiplying by tab.Zoom here makes text scale
-            // together with its box exactly like every other element already does, and
-            // is a no-op at the default Zoom=1.0 (100%), so on-screen appearance at the
-            // zoom level everything was presumably designed/tested at is unchanged.
             Math.Max(1, text.FontSize * tab.Zoom),
             brush)
         {
@@ -582,6 +658,7 @@ public sealed class CardCanvasView : Control
         };
 
         var origin = rect.TopLeft;
+
         if (text.VerticalAlignment == TextAlignmentY.Middle)
         {
             origin = origin.WithY(rect.Center.Y - formatted.Height / 2);
@@ -593,7 +670,6 @@ public sealed class CardCanvasView : Control
 
         context.DrawText(formatted, origin);
     }
-
     private static void DrawDateTime( DrawingContext context, Rect rect,DateTimeElement element,CardDesignTabViewModel tab)
     {
         var brush = ParseBrush(element.ColorHex);
@@ -713,7 +789,8 @@ public sealed class CardCanvasView : Control
     /// frame and needs no caching.</summary>
     private void DrawImage(DrawingContext context, Rect rect, string? assetReference, ImageFitMode fitMode, double cornerRadius,
         double cropX = 0, double cropY = 0, double cropZoom = 1.0,
-        PhotoMaskShape maskShape = PhotoMaskShape.Rectangle, bool flipHorizontal = false, bool flipVertical = false)
+        PhotoMaskShape maskShape = PhotoMaskShape.Rectangle, bool flipHorizontal = false, bool flipVertical = false,
+         Avalonia.Media.Imaging.Bitmap? bitmapOverride = null, bool drawPlaceholderWhenMissing = true)
     {
         using var clip = ShapeRenderer.BuildMaskClipGeometry(rect, maskShape) is { } maskGeometry
             ? context.PushGeometryClip(maskGeometry)
@@ -723,10 +800,17 @@ public sealed class CardCanvasView : Control
                     ? context.PushClip(new RoundedRect(rect, Math.Min(cornerRadius, Math.Min(rect.Width, rect.Height) / 2)))
                     : context.PushClip(rect);
 
-        var bitmap = LoadBitmap(assetReference);
+        //var bitmap = LoadBitmap(assetReference);
+        //if (bitmap is null)
+        //{
+        //    context.DrawRectangle(PlaceholderFillBrush, new Pen(PlaceholderBorderBrush, 1, dashStyle: DashStyle.Dash), rect);
+        //    return;
+        //}
+        var bitmap = bitmapOverride ?? LoadBitmap(assetReference);
         if (bitmap is null)
         {
-            context.DrawRectangle(PlaceholderFillBrush, new Pen(PlaceholderBorderBrush, 1, dashStyle: DashStyle.Dash), rect);
+            if (drawPlaceholderWhenMissing)
+                context.DrawRectangle(PlaceholderFillBrush, new Pen(PlaceholderBorderBrush, 1, dashStyle: DashStyle.Dash), rect);
             return;
         }
 
@@ -775,6 +859,8 @@ public sealed class CardCanvasView : Control
         {
             context.DrawImage(bitmap, sourceRect, destRect);
         }
+
+       
     }
 
     private void DrawPhoto(DrawingContext context, Rect rect, PhotoElement photo)

@@ -1,0 +1,35 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.AdminLicenseManager.ViewModels"
+             x:Class="InfoID.AdminLicenseManager.Views.ShellView"
+             x:DataType="vm:ShellViewModel">
+    <Grid ColumnDefinitions="230,*">
+        <Border Grid.Column="0" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" Padding="12">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="4,4,4,16">
+                    <TextBlock Text="InfoID" Classes="h1" />
+                    <TextBlock Text="License Manager" Classes="caption" />
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Bottom" Spacing="4" Margin="4,12,4,0">
+                    <TextBlock Text="{Binding AdminName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding AdminRole}" Classes="caption" />
+                    <Button Content="Sign out" Command="{Binding SignOutCommand}" Margin="0,6,0,0" />
+                </StackPanel>
+
+                <ListBox ItemsSource="{Binding NavItems}" SelectedItem="{Binding SelectedNav}" Background="Transparent">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:NavItem">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="{Binding Glyph}" Width="18" TextAlignment="Center" />
+                                <TextBlock Text="{Binding Title}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <ContentControl Grid.Column="1" Margin="24" Content="{Binding CurrentSection}" />
+    </Grid>
+</UserControl>

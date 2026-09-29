@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.AdminLicenseManager.ViewModels"
+             x:Class="InfoID.AdminLicenseManager.Views.LoginView"
+             x:DataType="vm:LoginViewModel">
+    <Border Classes="card" Width="420" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Spacing="12">
+            <TextBlock Text="InfoID License Manager" Classes="h1" />
+            <TextBlock Text="Vendor staff only. Every action is recorded in the audit log." Classes="caption" TextWrapping="Wrap" />
+
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+
+            <TextBlock Text="{Binding Error}" Classes="error" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            <Button Content="Retry" Command="{Binding RetryCommand}"
+                    IsVisible="{Binding !IsReady}" IsEnabled="{Binding !IsBusy}" />
+
+            <StackPanel Spacing="12" IsVisible="{Binding IsReady}">
+                <TextBlock Text="{Binding Warning}" Foreground="#9D5D00" TextWrapping="Wrap"
+                           IsVisible="{Binding Warning, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                <!-- First run: create the initial Super Admin -->
+                <StackPanel Spacing="8" IsVisible="{Binding IsFirstRun}">
+                    <TextBlock Text="First-time setup: create the Super Admin account" Classes="section" TextWrapping="Wrap" />
+                    <TextBox Watermark="Full name" Text="{Binding FullName}" />
+                    <TextBox Watermark="Email" Text="{Binding Email}" />
+                    <TextBox Watermark="Password (10+ chars, upper, lower, digit)" PasswordChar="●" Text="{Binding Password}" />
+                    <TextBox Watermark="Confirm password" PasswordChar="●" Text="{Binding ConfirmPassword}" />
+                    <Button Content="Create account and sign in" IsDefault="True" HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center" Classes="accent"
+                            Command="{Binding CreateAdminCommand}" IsEnabled="{Binding !IsBusy}" />
+                </StackPanel>
+
+                <!-- Normal sign-in -->
+                <StackPanel Spacing="8" IsVisible="{Binding !IsFirstRun}">
+                    <TextBox Watermark="Email" Text="{Binding Email}" />
+                    <TextBox Watermark="Password" PasswordChar="●" Text="{Binding Password}" />
+                    <Button Content="Sign in" IsDefault="True" HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center" Classes="accent"
+                            Command="{Binding SignInCommand}" IsEnabled="{Binding !IsBusy}" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

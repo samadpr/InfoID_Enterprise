@@ -1,0 +1,78 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:InfoID.Desktop.Features.Database.ViewModels"
+    x:Class="InfoID.Desktop.Features.Database.Views.SqliteConnectionDialogView"
+    x:DataType="vm:SqliteConnectionDialogViewModel">
+    <Border
+        Padding="24"
+        Width="500">
+
+        <StackPanel Spacing="16">
+
+            <TextBlock
+                Text="Connect to SQLite Database"
+                FontSize="22"
+                FontWeight="SemiBold" />
+
+            <TextBlock
+                Text="Select an external SQLite database file."
+                Opacity="0.7"
+                TextWrapping="Wrap" />
+
+            <!-- File path -->
+            <StackPanel Spacing="6">
+
+                <TextBlock
+                    Text="Database File"
+                    FontWeight="SemiBold" />
+
+                <Grid ColumnDefinitions="*,Auto"
+                      ColumnSpacing="8">
+
+                    <TextBox
+                        Grid.Column="0"
+                        Text="{Binding FilePath}"
+                        IsReadOnly="True"
+                        Watermark="Select a SQLite database file" />
+
+                    <Button
+                        Grid.Column="1"
+                        Content="Browse"
+                        Command="{Binding BrowseCommand}" />
+
+                </Grid>
+
+            </StackPanel>
+
+            <!-- Status -->
+            <TextBlock
+                Text="{Binding StatusMessage}"
+                TextWrapping="Wrap"
+                Opacity="0.8" />
+
+            <!-- Buttons -->
+            <StackPanel
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Spacing="8">
+
+                <Button
+                    Content="Cancel"
+                    Command="{Binding CancelCommand}" />
+
+                <Button
+                    Content="Test Connection"
+                    Command="{Binding TestConnectionCommand}" />
+
+                <Button
+                    Content="Next"
+                    Command="{Binding NextCommand}" />
+
+            </StackPanel>
+
+        </StackPanel>
+
+    </Border>
+
+</UserControl>

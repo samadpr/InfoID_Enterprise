@@ -1,0 +1,99 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:InfoID.Desktop.Features.Database.ViewModels"
+    x:Class="InfoID.Desktop.Features.Database.Views.CsvTextConnectionDialogView"
+    x:DataType="vm:CsvTextConnectionDialogViewModel">
+
+    <Border
+        Padding="24"
+        Width="520">
+
+        <StackPanel Spacing="16">
+
+            <TextBlock
+                Text="Connect to CSV / TXT"
+                FontSize="22"
+                FontWeight="Bold"/>
+
+            <TextBlock
+                Text="Select a CSV or TXT file to use as a data source."
+                TextWrapping="Wrap"/>
+
+            <Grid ColumnDefinitions="*,Auto"
+                  ColumnSpacing="10">
+
+                <TextBox
+                    Grid.Column="0"
+                    Text="{Binding FilePath}"
+                    IsReadOnly="True"
+                    Watermark="Select a CSV or TXT file"/>
+
+                <Button
+                    Grid.Column="1"
+                    Content="Browse"
+                    Command="{Binding BrowseCommand}"
+                    Padding="16,8"/>
+                
+            </Grid>
+            <StackPanel Spacing="6">
+
+                <TextBlock
+                    Text="File encoding"
+                    FontWeight="SemiBold"/>
+
+                <ComboBox
+                    ItemsSource="{Binding EncodingOptions}"
+                    SelectedItem="{Binding SelectedEncoding, Mode=TwoWay}"/>
+
+            </StackPanel>
+
+            <!-- Field Delimiter -->
+            <StackPanel Spacing="6">
+
+                <TextBlock
+                    Text="Field delimiter"
+                    FontWeight="SemiBold"/>
+
+                <ComboBox
+                    ItemsSource="{Binding DelimiterOptions}"
+                    SelectedItem="{Binding SelectedDelimiter, Mode=TwoWay}"/>
+
+            </StackPanel>
+
+            <Border
+                Padding="10"
+                Background="#F5F5F5"
+                CornerRadius="6">
+
+                <TextBlock
+                    Text="{Binding StatusMessage}"
+                    TextWrapping="Wrap"/>
+            </Border>
+
+            <Grid
+                ColumnDefinitions="Auto,*,Auto,Auto"
+                ColumnSpacing="10">
+
+                <Button
+                    Grid.Column="0"
+                    Content="Previous"
+                    Command="{Binding PreviousCommand}"/>
+
+                <Button
+                    Grid.Column="2"
+                    Content="Next"
+                    Command="{Binding NextCommand}"/>
+
+                <Button
+                    Grid.Column="3"
+                    Content="Cancel"
+                    Command="{Binding CancelCommand}"/>
+
+            </Grid>
+
+        </StackPanel>
+
+    </Border>
+
+</UserControl>

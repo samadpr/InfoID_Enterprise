@@ -2,7 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="using:InfoID.Desktop"
              x:Class="InfoID.Desktop.App"
-             RequestedThemeVariant="Light">
+             RequestedThemeVariant="Light"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia">
     <!-- RequestedThemeVariant is set again at runtime by IThemeService once the OS
          theme has been detected (see App.axaml.cs / ThemeService.InitializeFromSystem). -->
 
@@ -21,11 +22,13 @@
 
     <Application.Styles>
         <FluentTheme />
+        <materialIcons:MaterialIconStyles />
         <StyleInclude Source="avares://InfoID.Desktop/Resources/Styles/Typography.axaml" />
         <StyleInclude Source="avares://InfoID.Desktop/Resources/Controls/Buttons.axaml" />
         <StyleInclude Source="avares://InfoID.Desktop/Resources/Controls/Inputs.axaml" />
         <StyleInclude Source="avares://InfoID.Desktop/Resources/Controls/Cards.axaml" />
         <StyleInclude Source="avares://InfoID.Desktop/Resources/Controls/Chrome.axaml" />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+
     </Application.Styles>
 </Application>

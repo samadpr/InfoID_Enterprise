@@ -25,7 +25,60 @@
   <Style Selector="Border.tile:pointerover">
     <Setter Property="BorderBrush" Value="{DynamicResource BrushPrimary}" />
   </Style>
+    <!-- Database selection card -->
+    <Style Selector="Button.databaseCard">
+        <Setter Property="Background"
+                Value="{DynamicResource BrushCardBackground}" />
 
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource BrushBorder}" />
+
+        <Setter Property="BorderThickness"
+                Value="1" />
+
+        <Setter Property="CornerRadius"
+                Value="{StaticResource Radius.LG}" />
+
+        <Setter Property="Padding"
+                Value="16" />
+
+        <Setter Property="Cursor"
+                Value="Hand" />
+
+        <Setter Property="HorizontalContentAlignment"
+                Value="Center" />
+
+        <Setter Property="VerticalContentAlignment"
+                Value="Center" />
+
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background"
+                                 Duration="0:0:0.12" />
+
+                <BrushTransition Property="BorderBrush"
+                                 Duration="0:0:0.12" />
+            </Transitions>
+        </Setter>
+    </Style>
+
+    <!-- Database card hover -->
+    <Style Selector="Button.databaseCard:pointerover">
+        <Setter Property="Background"
+                Value="{DynamicResource BrushSurfaceElevated}" />
+
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource BrushPrimary}" />
+    </Style>
+
+    <!-- Database card pressed -->
+    <Style Selector="Button.databaseCard:pressed">
+        <Setter Property="Background"
+                Value="{DynamicResource BrushSelectionBackground}" />
+
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource BrushPrimaryPressed}" />
+    </Style>
   <Style Selector="Border.heroSurface">
     <Setter Property="CornerRadius" Value="{StaticResource Radius.XL}" />
     <Setter Property="ClipToBounds" Value="True" />

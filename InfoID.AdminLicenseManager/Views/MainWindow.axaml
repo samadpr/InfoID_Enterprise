@@ -1,0 +1,10 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:InfoID.AdminLicenseManager.ViewModels"
+        x:Class="InfoID.AdminLicenseManager.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="InfoID License Manager"
+        Width="1280" Height="800" MinWidth="1000" MinHeight="640"
+        WindowStartupLocation="CenterScreen">
+    <ContentControl Content="{Binding CurrentPage}" />
+</Window>

@@ -6,6 +6,7 @@
              xmlns:models="using:InfoID.Desktop.Features.Printing.Models"
              xmlns:printing="using:InfoID.Desktop.Features.Printing.Views"
              xmlns:printconv="using:InfoID.Desktop.Features.Printing.Converters"
+             xmlns:conv="using:InfoID.Desktop.Features.CardDesigner.Converters"
              mc:Ignorable="d" d:DesignWidth="980" d:DesignHeight="700"
              x:Class="InfoID.Desktop.Features.Printing.Views.PrintDialogView"
              x:DataType="vm:PrintDialogViewModel"
@@ -53,7 +54,9 @@
                 <Button Grid.Column="1" Classes="secondary" Content="Digital Copy" Margin="0,0,8,0"
                         Command="{Binding SaveDigitalCopyCommand}" ToolTip.Tip="Save a rendered copy of the card(s) as a PDF" />
                 <Button Grid.Column="2" Classes="primary" Content="Print" Margin="0,0,8,0"
-                        Command="{Binding PrintCommand}" IsEnabled="{Binding !IsPrinting}" />
+                        Command="{Binding PrintCommand}" IsEnabled="{Binding !IsPrinting}"
+                        ToolTip.Tip="{Binding DriverName, StringFormat='Print to {0}'}"
+                        HotKey="Ctrl+P" />
                 <Button Grid.Column="3" Classes="secondary" Content="Close" Command="{Binding CloseCommand}" />
             </Grid>
         </Border>
@@ -103,6 +106,10 @@
                                                    Opacity="0.7" />
                                     </StackPanel>
 
+                                    <TextBlock IsVisible="{Binding IsVirtualPrinterSelected}" Classes="caption" TextWrapping="Wrap"
+                                               Foreground="{DynamicResource BrushTextSecondary}"
+                                               Text="This printer saves a file (for example a PDF) instead of printing a card. Choose your card printer above to print." />
+
                                     <Grid ColumnDefinitions="*,*">
                                         <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
                                             <TextBlock Text="Card Size" Classes="caption" />
@@ -136,6 +143,12 @@
                                         <TextBlock Grid.Column="0" Text="Print Back" VerticalAlignment="Center" />
                                         <ToggleSwitch Grid.Column="1" IsChecked="{Binding PrintBack}" OnContent="{x:Null}" OffContent="{x:Null}" />
                                     </Grid>
+                                    <Grid ColumnDefinitions="*,Auto"
+                                          ToolTip.Tip="On: Print opens the Windows print dialog (printer, Preferences, copies) before printing. Off: prints straight to the printer selected on the left.">
+                                        <TextBlock Grid.Column="0" Text="Show Windows print dialog" VerticalAlignment="Center" />
+                                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding ShowSystemPrintDialog}" OnContent="{x:Null}" OffContent="{x:Null}"
+                                                      AutomationProperties.Name="Show Windows print dialog" />
+                                    </Grid>
 
                                     <Border Height="1" Background="{DynamicResource BrushBorder}" Margin="0,4" />
 
@@ -157,15 +170,41 @@
                         <Grid ColumnDefinitions="*,*">
                             <!-- Print Range -->
                             <Border Classes="card" Grid.Column="0" Margin="0,0,8,0">
-                                <StackPanel Spacing="10">
+                                <StackPanel Spacing="8">
                                     <TextBlock Text="Print Range" Classes="section" />
-                                    <TextBlock Text="Number of Cards" Classes="caption" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Button Classes="stepper" Content="-" Command="{Binding DecrementCardsCommand}" />
-                                        <TextBlock Text="{Binding NumberOfCards}" VerticalAlignment="Center" Width="30" TextAlignment="Center" />
-                                        <Button Classes="stepper" Content="+" Command="{Binding IncrementCardsCommand}" />
+
+                                    <RadioButton GroupName="PrintRange"
+                                                 IsChecked="{Binding RangeMode, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=AllRecords}">
+                                        <TextBlock Text="{Binding Records.Count, StringFormat='All records ({0})'}" />
+                                    </RadioButton>
+                                    <RadioButton GroupName="PrintRange" Content="Current record (shown in Preview)"
+                                                 IsChecked="{Binding RangeMode, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=CurrentRecord}" />
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <RadioButton Grid.Column="0" GroupName="PrintRange" Content="Records:" VerticalAlignment="Center"
+                                                     IsChecked="{Binding RangeMode, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=CustomRange}" />
+                                        <TextBox Grid.Column="1" Margin="8,0,0,0" Watermark="e.g. 1-3, 5, 8"
+                                                 Text="{Binding CustomRangeText, UpdateSourceTrigger=PropertyChanged}"
+                                                 IsEnabled="{Binding IsCustomRange}"
+                                                 ToolTip.Tip="Record numbers in the order of the Records list on the Advanced Print Operations tab (the first record is 1). Use commas for single records and a dash for ranges, e.g. 1-3, 5."
+                                                 AutomationProperties.Name="Records to print" />
+                                    </Grid>
+
+                                    <TextBlock Text="Pages" Classes="caption" Margin="0,6,0,0" />
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <RadioButton GroupName="PageParity" Content="All"
+                                                     IsChecked="{Binding PageParity, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=AllPages}" />
+                                        <RadioButton GroupName="PageParity" Content="Odd only"
+                                                     ToolTip.Tip="Pages 1, 3, 5... With front and back on, that is every card's front."
+                                                     IsChecked="{Binding PageParity, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=OddPages}" />
+                                        <RadioButton GroupName="PageParity" Content="Even only"
+                                                     ToolTip.Tip="Pages 2, 4, 6... With front and back on, that is every card's back."
+                                                     IsChecked="{Binding PageParity, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=EvenPages}" />
                                     </StackPanel>
-                                    <TextBlock Text="{Binding Records.Count, StringFormat='of {0} available sample records'}" Classes="caption" Opacity="0.7" TextWrapping="Wrap" />
+
+                                    <TextBlock Text="{Binding RangeSummary}" Classes="caption" TextWrapping="Wrap" Opacity="0.75"
+                                               IsVisible="{Binding !HasRangeError}" />
+                                    <TextBlock Text="{Binding RangeSummary}" Classes="caption" TextWrapping="Wrap"
+                                               Foreground="#E5484D" IsVisible="{Binding HasRangeError}" />
                                 </StackPanel>
                             </Border>
 
@@ -297,30 +336,37 @@
                                 <ToggleButton Classes="toolbtn-wide" Content="Black" IsChecked="{Binding PreviewShowBlack}" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                                <Button Classes="ghost toolbtn" ToolTip.Tip="Previous sample record" Command="{Binding PreviousPreviewRecordCommand}">
+                                <Button Classes="ghost toolbtn" ToolTip.Tip="Previous record" Command="{Binding PreviousPreviewRecordCommand}">
                                     <PathIcon Data="{x:Static printing:PrintingIcons.ChevronLeft}" Width="12" Height="12" />
                                 </Button>
                                 <TextBlock Text="{Binding PreviewRecord.Label}" Classes="caption" VerticalAlignment="Center" MinWidth="130" TextAlignment="Center" />
-                                <Button Classes="ghost toolbtn" ToolTip.Tip="Next sample record" Command="{Binding NextPreviewRecordCommand}">
+                                <Button Classes="ghost toolbtn" ToolTip.Tip="Next record" Command="{Binding NextPreviewRecordCommand}">
                                     <PathIcon Data="{x:Static printing:PrintingIcons.ChevronRight}" Width="12" Height="12" />
                                 </Button>
                             </StackPanel>
+                            <TextBlock Text="{Binding PreviewPositionText}" Classes="caption" Opacity="0.7"
+                                       HorizontalAlignment="Center" />
                         </StackPanel>
                     </Grid>
 
                     <Border Background="{DynamicResource BrushSurface}" CornerRadius="8" Padding="24">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="24">
 
-                            <!-- Color (live vector) preview -->
-                            <printing:PrintCardPreviewSurface ViewModel="{Binding}" Side="Front" Width="340" Height="220"
-                                                               IsVisible="{Binding ShowFrontColorPanel}" />
-                            <printing:PrintCardPreviewSurface ViewModel="{Binding}" Side="Back" Width="340" Height="220"
-                                                               IsVisible="{Binding ShowBackColorPanel}" />
+                            <!-- Color preview: rendered by the same pipeline as the printed card,
+                                 so text, data fields and per-record photos follow the record. -->
+                            <Image Source="{Binding ColorPreviewFront}" Width="340" Height="220" Stretch="Uniform"
+                                   RenderOptions.BitmapInterpolationMode="HighQuality"
+                                   IsVisible="{Binding ShowFrontColorPanel}" />
+                            <Image Source="{Binding ColorPreviewBack}" Width="340" Height="220" Stretch="Uniform"
+                                   RenderOptions.BitmapInterpolationMode="HighQuality"
+                                   IsVisible="{Binding ShowBackColorPanel}" />
 
                             <!-- Black (real rasterized + thresholded) preview -->
                             <Image Source="{Binding BlackPreviewFront}" Width="340" Height="220" Stretch="Uniform"
+                                   RenderOptions.BitmapInterpolationMode="HighQuality"
                                    IsVisible="{Binding ShowFrontBlackPanel}" />
                             <Image Source="{Binding BlackPreviewBack}" Width="340" Height="220" Stretch="Uniform"
+                                   RenderOptions.BitmapInterpolationMode="HighQuality"
                                    IsVisible="{Binding ShowBackBlackPanel}" />
 
                         </StackPanel>

@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.AdminLicenseManager.ViewModels"
+             x:Class="InfoID.AdminLicenseManager.Views.LicenseCodesView"
+             x:DataType="vm:LicenseCodesViewModel">
+    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,*">
+        <TextBlock Grid.ColumnSpan="2" Text="Activation Codes" Classes="h1" Margin="0,0,0,12" />
+
+        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Message}" Margin="0,0,0,8"
+                   Classes.error="{Binding MessageIsError}" Classes.success="{Binding !MessageIsError}"
+                   IsVisible="{Binding Message, Converter={x:Static ObjectConverters.IsNotNull}}" TextWrapping="Wrap" />
+
+        <!-- Left: search, list, actions -->
+        <DockPanel Grid.Row="2" Grid.Column="0">
+            <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,8">
+                <TextBox Watermark="Search code, organization, email, serial key or fingerprint" Text="{Binding SearchText}">
+                    <TextBox.KeyBindings>
+                        <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
+                    </TextBox.KeyBindings>
+                </TextBox>
+                <ComboBox Grid.Column="1" Margin="8,0,0,0" MinWidth="130"
+                          ItemsSource="{Binding StatusFilters}" SelectedItem="{Binding StatusFilter}" />
+                <Button Grid.Column="2" Margin="8,0,0,0" Content="Search" Command="{Binding SearchCommand}" />
+            </Grid>
+
+            <Border DockPanel.Dock="Bottom" Classes="card" Margin="0,8,0,0" IsVisible="{Binding CanManage}">
+                <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto">
+                    <TextBlock Grid.ColumnSpan="4" Text="Selected code" Classes="section" />
+                    <TextBox Grid.Row="1" Watermark="Reason (required to revoke)" Text="{Binding ActionReason}" />
+                    <Button Grid.Row="1" Grid.Column="1" Margin="8,0,0,0" Content="Revoke" Command="{Binding RevokeCommand}" />
+                    <CalendarDatePicker Grid.Row="1" Grid.Column="2" Margin="16,0,0,0" SelectedDate="{Binding NewExpiryDate}" />
+                    <Button Grid.Row="1" Grid.Column="3" Margin="8,0,0,0" Content="Extend" Command="{Binding ExtendCommand}" />
+                </Grid>
+            </Border>
+
+            <DataGrid ItemsSource="{Binding Rows}" SelectedItem="{Binding SelectedRow}" x:CompileBindings="False"
+                      IsReadOnly="True" AutoGenerateColumns="False" CanUserResizeColumns="True"
+                      GridLinesVisibility="Horizontal">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Activation code" Binding="{Binding ActivationCode}" FontFamily="Consolas, monospace" />
+                    <DataGridTextColumn Header="Tier" Binding="{Binding Tier}" />
+                    <DataGridTextColumn Header="Type" Binding="{Binding LicenseType}" />
+                    <DataGridTextColumn Header="Expires" Binding="{Binding ExpiryDate}" />
+                    <DataGridTextColumn Header="Card limit" Binding="{Binding MaxCardsPerPeriod}" />
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" />
+                    <DataGridTextColumn Header="Machines" Binding="{Binding ActiveMachines}" />
+                    <DataGridTextColumn Header="Max" Binding="{Binding MaxActivations}" />
+                    <DataGridTextColumn Header="Customer" Binding="{Binding Customer}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+
+        <!-- Right: create form (Super Admin / License Manager only) -->
+        <ScrollViewer Grid.Row="2" Grid.Column="1" Width="360" Margin="16,0,0,0" IsVisible="{Binding CanManage}">
+            <Border Classes="card">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Create activation codes" Classes="section" />
+
+                    <TextBlock Text="Quantity" Classes="caption" />
+                    <NumericUpDown Value="{Binding Quantity}" Minimum="1" Maximum="1000" Increment="1" FormatString="0" />
+
+                    <TextBlock Text="Tier" Classes="caption" />
+                    <ComboBox ItemsSource="{Binding Tiers}" SelectedItem="{Binding Tier}" HorizontalAlignment="Stretch" />
+
+                    <TextBlock Text="License type" Classes="caption" />
+                    <ComboBox ItemsSource="{Binding Types}" SelectedItem="{Binding Type}" HorizontalAlignment="Stretch" />
+
+                    <StackPanel Spacing="4" IsVisible="{Binding NeedsExpiry}">
+                        <TextBlock Text="Expiry date" Classes="caption" />
+                        <CalendarDatePicker SelectedDate="{Binding ExpiryDate}" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+
+                    <CheckBox Content="Unlimited cards" IsChecked="{Binding UnlimitedCards}" />
+                    <Grid ColumnDefinitions="*,8,*" IsVisible="{Binding HasCardLimit}">
+                        <NumericUpDown Value="{Binding MaxCardsPerPeriod}" Minimum="100" Maximum="102300" Increment="100" FormatString="0"
+                                       ToolTip.Tip="Cards allowed per period, in steps of 100" />
+                        <ComboBox Grid.Column="2" ItemsSource="{Binding LimitPeriods}" SelectedItem="{Binding LimitPeriod}" HorizontalAlignment="Stretch" />
+                    </Grid>
+
+                    <TextBlock Text="Machines per code" Classes="caption" />
+                    <NumericUpDown Value="{Binding MaxActivations}" Minimum="1" Maximum="100" Increment="1" FormatString="0" />
+
+                    <TextBlock Text="Customer (optional)" Classes="section" Margin="0,8,0,0" />
+                    <TextBox Watermark="Organization name" Text="{Binding OrganizationName}" />
+                    <TextBox Watermark="Type (School, Corporate, Hospital...)" Text="{Binding OrganizationType}" />
+                    <TextBox Watermark="Country" Text="{Binding Country}" />
+                    <TextBox Watermark="Contact email" Text="{Binding ContactEmail}" />
+                    <TextBox Watermark="Contact phone" Text="{Binding ContactPhone}" />
+                    <TextBox Watermark="Internal notes / tags" Text="{Binding Notes}" AcceptsReturn="True" Height="60" TextWrapping="Wrap" />
+
+                    <Button Content="Create codes" Classes="accent" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                            Command="{Binding CreateCommand}" />
+
+                    <TextBlock Text="Created codes (select and copy)" Classes="caption"
+                               IsVisible="{Binding CreatedCodes, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    <TextBox Text="{Binding CreatedCodes}" IsReadOnly="True" AcceptsReturn="True" Classes="code" MaxHeight="200"
+                             IsVisible="{Binding CreatedCodes, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

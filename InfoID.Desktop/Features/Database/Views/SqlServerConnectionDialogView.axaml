@@ -1,0 +1,87 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Database.ViewModels"
+             x:Class="InfoID.Desktop.Features.Database.Views.SqlServerConnectionDialogView"
+             x:DataType="vm:SqlServerConnectionDialogViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*"
+          Margin="30"
+          RowSpacing="12">
+
+        <TextBlock Grid.Row="0"
+                   Text="SQL Server"
+                   FontSize="22"
+                   FontWeight="Bold" />
+
+        <StackPanel Grid.Row="1"
+                    Spacing="4">
+
+            <TextBlock Text="Server" />
+
+            <TextBox Text="{Binding Server, Mode=TwoWay}"
+                     Watermark="localhost or SERVER\SQLEXPRESS" />
+
+        </StackPanel>
+
+        <StackPanel Grid.Row="2"
+                    Spacing="4">
+
+            <TextBlock Text="Database" />
+
+            <TextBox Text="{Binding DatabaseName, Mode=TwoWay}"
+                     Watermark="Database name" />
+
+        </StackPanel>
+
+        <CheckBox Grid.Row="3"
+                  Content="Windows Authentication"
+                  IsChecked="{Binding WindowsAuthentication, Mode=TwoWay}" />
+
+        <StackPanel Grid.Row="4"
+                    Spacing="4">
+
+            <TextBlock Text="Username" />
+
+            <TextBox Text="{Binding Username, Mode=TwoWay}" />
+
+        </StackPanel>
+
+        <StackPanel Grid.Row="5"
+                    Spacing="4">
+
+            <TextBlock Text="Password" />
+
+            <TextBox Text="{Binding Password, Mode=TwoWay}"
+                     PasswordChar="●" />
+
+        </StackPanel>
+
+        <StackPanel Grid.Row="6"
+                    Spacing="10">
+
+            <TextBlock Text="{Binding StatusMessage}"
+                       TextWrapping="Wrap" />
+
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="10">
+
+                <Button Content="Test Connection"
+                        Command="{Binding TestConnectionCommand}" />
+
+                <Button Content="Previous"
+                        Command="{Binding PreviousCommand}" />
+
+                <Button Content="Next"
+                        Command="{Binding NextCommand}" />
+
+                <Button Content="Cancel"
+                        Command="{Binding CancelCommand}" />
+
+            </StackPanel>
+
+        </StackPanel>
+
+    </Grid>
+
+</UserControl>

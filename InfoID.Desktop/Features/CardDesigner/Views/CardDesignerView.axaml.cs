@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using Avalonia.Controls.Primitives;
+using Avalonia.VisualTree;
 using Avalonia.Data;
 
 namespace InfoID.Desktop.Features.CardDesigner.Views;
@@ -62,6 +64,16 @@ public partial class CardDesignerView : UserControl
         {
             vRuler.GuidePreviewChanged += (_, mm) => SetGuidePreview(mm, GuideOrientation.Horizontal);
             vRuler.GuideCommitted += (_, mm) => { ViewModel?.ActiveTab?.AddHorizontalGuide(mm); canvas?.InvalidateVisual(); };
+        }
+        _headerCheckBox = this.FindControl<CheckBox>("SelectAllRowsCheckBox");
+
+        if (_headerCheckBox is not null)
+        {
+            _headerCheckBox.IsCheckedChanged += (_, _) =>
+            {
+                if (_syncingHeaderCheck) return;
+                ViewModel?.ActiveTab?.SetAllDatabaseRowsChecked(_headerCheckBox.IsChecked == true);
+            };
         }
     }
 
@@ -194,15 +206,119 @@ public partial class CardDesignerView : UserControl
         }
     }
 
+    //private void ActiveTab_PropertyChanged(
+    //    object? sender,
+    //    System.ComponentModel.PropertyChangedEventArgs e)
+    //{
+    //    if (e.PropertyName == nameof(CardDesignTabViewModel.DatabaseDataView))
+    //    {
+    //        BuildDatabaseGrid();
+    //    }
+    //}
     private void ActiveTab_PropertyChanged(
-        object? sender,
-        System.ComponentModel.PropertyChangedEventArgs e)
+    object? sender,
+    System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(CardDesignTabViewModel.DatabaseDataView))
         {
             BuildDatabaseGrid();
         }
+        else if (e.PropertyName == nameof(CardDesignTabViewModel.SelectedDatabaseRow) &&
+                 ReferenceEquals(sender, ViewModel?.ActiveTab) &&
+                 sender is CardDesignTabViewModel { SelectedDatabaseRow: { } row } &&
+                 DatabaseDataGrid is not null)
+        {
+            // Record navigation (first/prev/next/last): bring the new current row on screen.
+            Dispatcher.UIThread.Post(
+                () => DatabaseDataGrid.ScrollIntoView(row, null),
+                DispatcherPriority.Background);
+        }
     }
+
+    //private void BuildDatabaseGrid()
+    //{
+    //    if (DatabaseDataGrid is null)
+    //        return;
+
+    //    DatabaseDataGrid.Columns.Clear();
+
+    //    var tab = ViewModel?.ActiveTab;
+
+    //    if (tab?.DatabaseDataView is null)
+    //        return;
+
+    //    var view = tab.DatabaseDataView;
+
+    //    if (view.Table is null)
+    //        return;
+
+    //    foreach (DataColumn column in view.Table.Columns)
+    //    {
+    //        var columnName = column.ColumnName;
+
+    //        var gridColumn = new DataGridTemplateColumn
+    //        {
+    //            Header = columnName,
+
+    //            CellTemplate = new FuncDataTemplate<object>(
+    //    (item, _) =>
+    //    {
+    //        var value = "";
+
+    //        if (item is DataRowView row)
+    //        {
+    //            value = row[columnName] == DBNull.Value
+    //                ? ""
+    //                : row[columnName]?.ToString() ?? "";
+    //        }
+
+    //        return new TextBlock
+    //        {
+    //            Text = value,
+    //            Margin = new Thickness(6, 0),
+    //            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+    //        };
+    //    },
+    //    supportsRecycling: true),
+
+    //            CellEditingTemplate = new FuncDataTemplate<object>(
+    //    (item, _) =>
+    //    {
+    //        var textBox = new TextBox
+    //        {
+    //            Margin = new Thickness(2),
+    //            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch
+    //        };
+
+    //        if (item is DataRowView row)
+    //        {
+    //            textBox.Text = row[columnName] == DBNull.Value
+    //                ? ""
+    //                : row[columnName]?.ToString() ?? "";
+
+    //            textBox.LostFocus += (_, _) =>
+    //            {
+    //                row[columnName] =
+    //                    string.IsNullOrWhiteSpace(textBox.Text)
+    //                        ? DBNull.Value
+    //                        : textBox.Text;
+    //            };
+    //        }
+
+    //        return textBox;
+    //    },
+    //    supportsRecycling: true)
+    //        };
+
+    //        DatabaseDataGrid.Columns.Add(gridColumn);
+    //    }
+    //}
+
+
+    private readonly List<Action> _rowCheckSyncs = new();
+    private CheckBox? _headerCheckBox;
+    private bool _syncingHeaderCheck;
+    private CardDesignTabViewModel? _checkEventsTab;
 
     private void BuildDatabaseGrid()
     {
@@ -210,8 +326,19 @@ public partial class CardDesignerView : UserControl
             return;
 
         DatabaseDataGrid.Columns.Clear();
+        _rowCheckSyncs.Clear();
+        
 
         var tab = ViewModel?.ActiveTab;
+
+        // Listen for tick changes on the current tab only.
+        if (_checkEventsTab is not null)
+            _checkEventsTab.DatabaseRowChecksChanged -= OnDatabaseRowChecksChanged;
+
+        _checkEventsTab = tab;
+
+        if (tab is not null)
+            tab.DatabaseRowChecksChanged += OnDatabaseRowChecksChanged;
 
         if (tab?.DatabaseDataView is null)
             return;
@@ -221,38 +348,257 @@ public partial class CardDesignerView : UserControl
         if (view.Table is null)
             return;
 
+        DatabaseDataGrid.Columns.Add(CreateRowCheckColumn(tab));
+        OnDatabaseRowChecksChanged(tab, EventArgs.Empty);
         foreach (DataColumn column in view.Table.Columns)
         {
             var columnName = column.ColumnName;
 
-            var gridColumn = new DataGridTemplateColumn
+            if (tab.IsDatabaseImageColumn(column))
+            {
+                DatabaseDataGrid.Columns.Add(CreateImageColumn(tab, columnName));
+                continue;
+            }
+
+            DatabaseDataGrid.Columns.Add(new DataGridTemplateColumn
             {
                 Header = columnName,
 
+                // FIX: the text follows the cell's CURRENT row. Previously it was read once
+                // at creation, so recycled cells showed another row's value until
+                // double-clicked.
                 CellTemplate = new FuncDataTemplate<object>(
                     (item, _) =>
                     {
-                        var value = "";
-
-                        if (item is DataRowView row)
+                        var textBlock = new TextBlock
                         {
-                            value = row[columnName] == DBNull.Value
-                                ? ""
-                                : row[columnName]?.ToString() ?? "";
-                        }
-
-                        return new TextBlock
-                        {
-                            Text = value,
+                            Text = GetCellText(item, columnName),
                             Margin = new Thickness(6, 0),
                             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
                         };
-                    },
-                    supportsRecycling: true)
-            };
 
-            DatabaseDataGrid.Columns.Add(gridColumn);
+                        textBlock.DataContextChanged += (_, _) =>
+                            textBlock.Text = GetCellText(textBlock.DataContext, columnName);
+
+                        return textBlock;
+                    },
+                    supportsRecycling: false),
+
+                // FIX: edits are written to the cell's current row, never a stale one.
+                CellEditingTemplate = new FuncDataTemplate<object>(
+                    (item, _) =>
+                    {
+                        var editRow = item as DataRowView;
+
+                        var textBox = new TextBox
+                        {
+                            Text = GetCellText(item, columnName),
+                            Margin = new Thickness(2),
+                            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch
+                        };
+
+                        textBox.DataContextChanged += (_, _) =>
+                        {
+                            if (textBox.DataContext is DataRowView row && !ReferenceEquals(row, editRow))
+                            {
+                                editRow = row;
+                                textBox.Text = GetCellText(row, columnName);
+                            }
+                        };
+
+                        textBox.LostFocus += (_, _) =>
+                        {
+                            if (editRow is null || editRow.Row.RowState == DataRowState.Detached)
+                                return;
+
+                            editRow[columnName] =
+                                string.IsNullOrWhiteSpace(textBox.Text)
+                                    ? DBNull.Value
+                                    : textBox.Text;
+                        };
+
+                        return textBox;
+                    },
+                    supportsRecycling: false)
+            });
         }
+    }
+
+    private static string GetCellText(object? item, string columnName)
+    {
+        if (item is not DataRowView row ||
+            row.Row.RowState == DataRowState.Detached ||
+            !row.Row.Table.Columns.Contains(columnName))
+        {
+            return string.Empty;
+        }
+
+        var value = row[columnName];
+        return value == DBNull.Value ? string.Empty : value?.ToString() ?? string.Empty;
+    }
+
+    /// <summary>First grid column: a tick box per row plus a select-all box in the header.
+    /// Tick state lives in the ViewModel (not the DataTable), so it never reaches the
+    /// database fields, saving, or card bindings.</summary>
+    private DataGridTemplateColumn CreateRowCheckColumn(CardDesignTabViewModel tab)
+    {
+        return new DataGridTemplateColumn
+        {
+            Header = string.Empty,
+            Width = new DataGridLength(60),
+            CanUserResize = false,
+            CanUserReorder = false,
+            CanUserSort = false,
+
+            CellTemplate = new FuncDataTemplate<object>(
+                (_, _) =>
+                {
+                    var check = new CheckBox
+                    {
+                        HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+                        VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                        MinWidth = 0,
+                        Padding = new Thickness(0),
+                        Margin = new Thickness(12, 0, 0, 0)
+                    };
+
+                    var syncing = false;
+
+                    void Sync()
+                    {
+                        syncing = true;
+                        check.IsChecked = check.DataContext is DataRowView row && tab.IsDatabaseRowChecked(row.Row);
+                        syncing = false;
+                    }
+
+                    // Recycled cells get a new DataContext: re-read the tick for the new row.
+                    check.DataContextChanged += (_, _) => Sync();
+
+                    check.IsCheckedChanged += (_, _) =>
+                    {
+                        if (syncing) return;
+                        if (check.DataContext is DataRowView row)
+                            tab.SetDatabaseRowChecked(row.Row, check.IsChecked == true);
+                    };
+
+                    _rowCheckSyncs.Add(Sync);
+                    return check;
+                },
+                supportsRecycling: true)
+        };
+    }
+
+
+    /// <summary>Image column: shows a thumbnail, or "Choose..." when empty.
+    /// Clicking opens the file picker for that row.</summary>
+    private static DataGridTemplateColumn CreateImageColumn(CardDesignTabViewModel tab, string columnName)
+    {
+        return new DataGridTemplateColumn
+        {
+            Header = columnName,
+            Width = new DataGridLength(90),
+
+            CellTemplate = new FuncDataTemplate<object>(
+                (_, _) =>
+                {
+                    var image = new Image
+                    {
+                        Width = 32,
+                        Height = 32,
+                        Stretch = Avalonia.Media.Stretch.Uniform
+                    };
+
+                    var placeholder = new TextBlock
+                    {
+                        Text = "Choose...",
+                        FontSize = 12,
+                        Opacity = 0.6,
+                        VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+                    };
+
+                    var content = new Panel();
+                    content.Children.Add(image);
+                    content.Children.Add(placeholder);
+
+                    var button = new Button
+                    {
+                        Content = content,
+                        Padding = new Thickness(4, 2),
+                        HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+                        VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                        Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand)
+                    };
+                    button.Classes.Add("ghost");
+                    ToolTip.SetTip(button, "Click to choose an image");
+
+                    void Refresh()
+                    {
+                        var bitmap = button.DataContext is DataRowView row
+                            ? tab.GetDatabaseImage(GetCellValue(row, columnName))
+                            : null;
+
+                        image.Source = bitmap;
+                        image.IsVisible = bitmap is not null;
+                        placeholder.IsVisible = bitmap is null;
+                    }
+
+                    // Recycled cells get a new row: show that row's image.
+                    button.DataContextChanged += (_, _) => Refresh();
+
+                    button.Click += async (_, _) =>
+                    {
+                        if (button.DataContext is DataRowView row)
+                            await tab.PickDatabaseImageAsync(row, columnName);
+                    };
+
+                    return button;
+                },
+                supportsRecycling: false)
+        };
+    }
+
+    private static object? GetCellValue(DataRowView row, string columnName)
+    {
+        if (row.Row.RowState == DataRowState.Detached ||
+            !row.Row.Table.Columns.Contains(columnName))
+            return null;
+
+        var value = row[columnName];
+        return value == DBNull.Value ? null : value;
+    }
+
+
+    /// <summary>Refreshes every visible checkbox and the header after ticks change
+    /// (select-all, delete, search, or a single tick).</summary>
+    private void OnDatabaseRowChecksChanged(object? sender, EventArgs e)
+    {
+        foreach (var sync in _rowCheckSyncs)
+            sync();
+
+        if (_headerCheckBox is not null && sender is CardDesignTabViewModel tab)
+        {
+            _syncingHeaderCheck = true;
+            _headerCheckBox.IsChecked = tab.AreAllVisibleDatabaseRowsChecked;
+            _syncingHeaderCheck = false;
+        }
+    }
+
+
+    /// <summary>
+    /// Commits any pending edits in the DatabaseDataGrid by moving focus away from
+    /// the current cell. This ensures that if the user was typing in a TextBox,
+    /// the LostFocus event fires and the value is copied into the DataRow before
+    /// we try to save the row to SQLite.
+    /// </summary>
+    public void CommitDatabaseGridEdit()
+    {
+        if (DatabaseDataGrid is null)
+            return;
+
+        // Avalonia DataGrid doesn't have a built-in CommitEdit() like WPF.
+        // Workaround: Move focus away from the DataGrid to trigger LostFocus on any active TextBox.
+        // This is safe because the "+ Add row" button click will naturally move focus anyway.
+        DatabaseDataGrid.Focus();
     }
 
     // ------------------------------------------------------------------ layers ----

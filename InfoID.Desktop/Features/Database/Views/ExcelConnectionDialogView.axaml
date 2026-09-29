@@ -1,0 +1,88 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:vm="using:InfoID.Desktop.Features.Database.ViewModels"
+             x:Class="InfoID.Desktop.Features.Database.Views.ExcelConnectionDialogView"
+              x:DataType="vm:ExcelConnectionDialogViewModel">
+
+
+    <Border Padding="24"
+            Background="{DynamicResource BrushSurface}"
+            CornerRadius="12">
+
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+              RowSpacing="16">
+
+            <!-- Title -->
+            <TextBlock Grid.Row="0"
+                       Text="Excel Connection"
+                       FontSize="22"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource BrushTextPrimary}"/>
+
+            <!-- File -->
+            <Grid Grid.Row="1"
+                  ColumnDefinitions="*,Auto"
+                  ColumnSpacing="10">
+
+                <TextBox Grid.Column="0"
+                         Text="{Binding FilePath}"
+                         Watermark="Select Excel file"
+                         IsReadOnly="True"/>
+
+                <Button Grid.Column="1"
+                        Content="Browse"
+                        Command="{Binding BrowseCommand}"
+                        MinWidth="100"/>
+            </Grid>
+
+            <!-- Test Connection -->
+            <StackPanel Grid.Row="2"
+            Orientation="Horizontal"
+            Spacing="10">
+
+                <Button Content="Test Connection"
+                        Command="{Binding TestConnectionCommand}"
+                        MinWidth="150"/>
+
+                <Button Content="Preview"
+                        Command="{Binding PreviewCommand}"
+                        MinWidth="100"/>
+            </StackPanel>
+            <!-- Sheets -->
+            <StackPanel Grid.Row="3"
+                        Spacing="6">
+
+                <TextBlock Text="Available Worksheets"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource BrushTextPrimary}"/>
+
+                <ComboBox ItemsSource="{Binding Sheets}"
+                          SelectedItem="{Binding SelectedSheet, Mode=TwoWay}"
+                          PlaceholderText="Select a worksheet"/>
+            </StackPanel>
+
+            <!-- Status -->
+            <TextBlock Grid.Row="4"
+                       Text="{Binding StatusMessage}"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource BrushTextSecondary}"/>
+
+            <!-- Buttons -->
+            <StackPanel Grid.Row="5"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="10">
+
+                <Button Content="Cancel"
+                        Command="{Binding CancelCommand}"
+                        MinWidth="90"/>
+
+                <Button Content="Next"
+                        Command="{Binding NextCommand}"
+                        MinWidth="90"/>
+            </StackPanel>
+
+        </Grid>
+    </Border>
+
+</UserControl>
