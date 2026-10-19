@@ -1,0 +1,88 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Account.ViewModels"
+             xmlns:contracts="using:InfoID.Shared.Contracts.Accounts"
+             x:Class="InfoID.Desktop.Features.Account.Views.RequestPlanView"
+             x:DataType="vm:RequestPlanViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <ScrollViewer>
+        <StackPanel Margin="40,24,40,40" Spacing="16" MaxWidth="900" HorizontalAlignment="Left">
+            <Button Classes="ghost" Content="&lt; Back" Padding="0" HorizontalAlignment="Left" Command="{Binding GoBackCommand}" />
+            <TextBlock Classes="h1" Text="Request a plan" />
+
+            <!-- Sent -->
+            <Border Classes="card" Padding="24" IsVisible="{Binding !IsForm}">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="h3" Text="Request sent" Foreground="{DynamicResource BrushSuccess}" />
+                    <TextBlock Text="{Binding SentMessage}" TextWrapping="Wrap" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Classes="primary" Content="Account and license" Command="{Binding GoToAccountCommand}" />
+                        <Button Classes="ghost" Content="Back" Command="{Binding GoBackCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Form -->
+            <StackPanel Spacing="16" IsVisible="{Binding IsForm}">
+                <TextBlock Classes="bodySecondary" TextWrapping="Wrap"
+                           Text="Choose a plan and tell us how to reach you. Our team will contact you about payment; once it's confirmed, you receive your activation code by email." />
+
+                <Border Classes="card" Padding="20">
+                    <Grid ColumnDefinitions="*,24,*">
+                        <StackPanel Spacing="8">
+                            <TextBlock Classes="h3" Text="Plan" />
+                            <ComboBox ItemsSource="{Binding Plans}" SelectedItem="{Binding SelectedPlan}" HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="contracts:PlanDto">
+                                        <TextBlock Text="{Binding Name}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <TextBlock Classes="label" Text="Number of computers" Margin="0,8,0,0" />
+                            <NumericUpDown Value="{Binding Machines}" Minimum="1" Maximum="100" Increment="1" FormatString="0" Width="160" HorizontalAlignment="Left" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" Text="{Binding SelectedPlanDetails}" TextWrapping="Wrap" Classes="bodySecondary" />
+                    </Grid>
+                </Border>
+
+                <Border Classes="card" Padding="20">
+                    <StackPanel Spacing="10">
+                        <TextBlock Classes="h3" Text="Contact details" />
+                        <TextBlock Classes="caption" IsVisible="{Binding IsSignedIn}"
+                                   Text="Filled in from your account. The request is linked to your account." />
+                        <Grid ColumnDefinitions="*,16,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Classes="label" Text="Full name *" Margin="0,0,0,4" />
+                            <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding FullName}" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Classes="label" Text="Company" Margin="0,0,0,4" />
+                            <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding CompanyName}" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Classes="label" Text="Email *" Margin="0,10,0,4" />
+                            <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Email}" IsReadOnly="{Binding IsSignedIn}" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Classes="label" Text="Phone" Margin="0,10,0,4" />
+                            <TextBox Grid.Row="3" Grid.Column="2" Text="{Binding Phone}" />
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Classes="label" Text="Country" Margin="0,10,0,4" />
+                            <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Country}" />
+                            <TextBlock Grid.Row="4" Grid.Column="2" Classes="label" Text="State / province" Margin="0,10,0,4" />
+                            <TextBox Grid.Row="5" Grid.Column="2" Text="{Binding StateProvince}" />
+                        </Grid>
+                        <TextBlock Classes="label" Text="Message (optional)" Margin="0,4,0,0" />
+                        <TextBox Text="{Binding Message}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="70"
+                                 Watermark="Anything we should know, e.g. preferred contact time or card printer model" />
+                        <CheckBox IsChecked="{Binding Consent}">
+                            <TextBlock TextWrapping="Wrap" Text="I agree to be contacted about this request and accept the Privacy Policy." />
+                        </CheckBox>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource BrushError}" TextWrapping="Wrap"
+                           IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Button Classes="primary" Content="Send request" Command="{Binding SendCommand}" IsEnabled="{Binding !IsBusy}" />
+                    <ProgressBar IsIndeterminate="True" Width="120" VerticalAlignment="Center" IsVisible="{Binding IsBusy}" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

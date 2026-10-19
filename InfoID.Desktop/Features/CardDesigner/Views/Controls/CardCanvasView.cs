@@ -230,6 +230,20 @@ public sealed class CardCanvasView : Control
     }
 
     private void OnTabChanged(object? sender, EventArgs e) => InvalidateVisual();
+
+    private void OnTrialModeChanged(object? sender, EventArgs e) => InvalidateVisual();
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        if (InfoID.Desktop.Features.Trial.Services.TrialModeState.Current is { } trial) trial.Changed += OnTrialModeChanged;
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        if (InfoID.Desktop.Features.Trial.Services.TrialModeState.Current is { } trial) trial.Changed -= OnTrialModeChanged;
+    }
     private void OnTabPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         InvalidateVisual();
@@ -355,6 +369,13 @@ public sealed class CardCanvasView : Control
 
                 DrawElement(context, cardRect, scale, element, tab);
             }
+
+            // Trial mode (signed in, not activated): the "INFOID TRIAL VERSION" mark the
+            // printed card will carry shows only when previewing (Preview mode here, Print
+            // Preview, the Print window) -- never while editing, where it gets in the way.
+            if (tab.PreviewModeEnabled &&
+                InfoID.Desktop.Features.Trial.Services.TrialModeState.Current?.IsTrialMode == true)
+                InfoID.Desktop.Features.Trial.Services.TrialWatermark.Draw(context, cardRect);
         }
 
         // Selection handles (including the rotation handle, which sits above the
@@ -532,10 +553,10 @@ public sealed class CardCanvasView : Control
                 DrawSignature(context, elementRect, signature);
                 break;
             case BarcodeElement barcode:
-                DrawBarcode(context, elementRect, barcode);
+                DrawBarcode(context, elementRect, barcode, ResolveCodeValue(tab, barcode));
                 break;
             case QrCodeElement qr:
-                DrawQrCode(context, elementRect, qr);
+                DrawQrCode(context, elementRect, qr, ResolveCodeValue(tab, qr));
                 break;
             case PenElement pen:
                 PenRenderer.Draw(context, elementRect, pen);
@@ -617,143 +638,39 @@ public sealed class CardCanvasView : Control
     //}
 
 
-    private static void DrawText(
-    DrawingContext context,
-    Rect rect,
-    TextElement text,
-    CardDesignTabViewModel tab)
+    // Text, Date/Time and Data Field elements all draw through CardTextRenderer -- the
+    // same routine the print/preview/PDF renderer uses -- so the canvas shows exactly what
+    // will print: real font size, wrapping that breaks long words (emails, URLs), and
+    // shrink-to-fit instead of a "..." that would never be acceptable on a printed card.
+    private static void DrawText(DrawingContext context, Rect rect, TextElement text, CardDesignTabViewModel tab)
     {
-        var brush = ParseBrush(text.ColorHex);
-        var weight = text.Bold ? FontWeight.Bold : FontWeight.Normal;
-        var style = text.Italic ? FontStyle.Italic : FontStyle.Normal;
-        var typeface = new Typeface(text.FontFamily, style, weight);
-
-        var displayText = text.IsDatabaseBound &&
-                          !string.IsNullOrWhiteSpace(text.DatabaseColumn)
-            ? tab.ResolveDisplayText(
-                text.Text,
-                text.DatabaseColumn)
+        var displayText = text.IsDatabaseBound && !string.IsNullOrWhiteSpace(text.DatabaseColumn)
+            ? tab.ResolveDisplayText(text.Text, text.DatabaseColumn)
             : string.IsNullOrEmpty(text.DataBindingExpression)
                 ? text.Text
-                : tab.ResolveDisplayText(
-                    text.DataBindingExpression,
-                    text.DataBindingExpression);
+                : tab.ResolveDisplayText(text.DataBindingExpression, text.DataBindingExpression);
 
-        var formatted = new FormattedText(
-            string.IsNullOrEmpty(displayText) ? " " : displayText,
-            CultureInfo.CurrentCulture,
-            FlowDirection.LeftToRight,
-            typeface,
-            Math.Max(1, text.FontSize * tab.Zoom),
-            brush)
-        {
-            MaxTextWidth = Math.Max(1, rect.Width),
-            MaxTextHeight = Math.Max(1, rect.Height),
-            TextAlignment = text.HorizontalAlignment switch
-            {
-                TextAlignmentX.Center => TextAlignment.Center,
-                TextAlignmentX.Right => TextAlignment.Right,
-                _ => TextAlignment.Left,
-            },
-        };
-
-        var origin = rect.TopLeft;
-
-        if (text.VerticalAlignment == TextAlignmentY.Middle)
-        {
-            origin = origin.WithY(rect.Center.Y - formatted.Height / 2);
-        }
-        else if (text.VerticalAlignment == TextAlignmentY.Bottom)
-        {
-            origin = origin.WithY(rect.Bottom - formatted.Height);
-        }
-
-        context.DrawText(formatted, origin);
+        CardTextRenderer.Draw(context, rect, displayText, text.FontFamily,
+            text.FontSize * tab.Zoom, text.MinFontSize * tab.Zoom, ParseBrush(text.ColorHex),
+            text.Bold, text.Italic, text.Underline, text.HorizontalAlignment, text.VerticalAlignment);
     }
-    private static void DrawDateTime( DrawingContext context, Rect rect,DateTimeElement element,CardDesignTabViewModel tab)
+
+    private static void DrawDateTime(DrawingContext context, Rect rect, DateTimeElement element, CardDesignTabViewModel tab)
     {
-        var brush = ParseBrush(element.ColorHex);
-
-        var weight = element.Bold
-            ? FontWeight.Bold
-            : FontWeight.Normal;
-
-        var style = element.Italic
-            ? FontStyle.Italic
-            : FontStyle.Normal;
-
-        var typeface = new Typeface(
-            element.FontFamily,
-            style,
-            weight);
-
-        // Use the stored value instead of DateTime.Now
-        var value = element.Value;
-
-        var displayText = element.DisplayFormat switch
-        {
-            DateTimeDisplayFormat.DateTime =>
-                $"{value.ToString(element.DateFormat)} {value.ToString(element.TimeFormat)}",
-
-            DateTimeDisplayFormat.Date =>
-                value.ToString(element.DateFormat),
-
-            DateTimeDisplayFormat.Time =>
-                value.ToString(element.TimeFormat),
-
-            _ => ""
-        };
-
-        var formatted = new FormattedText(
-            string.IsNullOrEmpty(displayText) ? " " : displayText,
-            CultureInfo.CurrentCulture,
-            FlowDirection.LeftToRight,
-            typeface,
-            Math.Max(1, element.FontSize * tab.Zoom),
-            brush)
-        {
-            MaxTextWidth = Math.Max(1, rect.Width),
-            MaxTextHeight = Math.Max(1, rect.Height),
-
-            TextAlignment = element.HorizontalAlignment switch
-            {
-                TextAlignmentX.Center => TextAlignment.Center,
-                TextAlignmentX.Right => TextAlignment.Right,
-                _ => TextAlignment.Left,
-            },
-        };
-
-        var origin = rect.TopLeft;
-
-        if (element.VerticalAlignment == TextAlignmentY.Middle)
-        {
-            origin = origin.WithY(
-                rect.Center.Y - formatted.Height / 2);
-        }
-        else if (element.VerticalAlignment == TextAlignmentY.Bottom)
-        {
-            origin = origin.WithY(
-                rect.Bottom - formatted.Height);
-        }
-
-        context.DrawText(formatted, origin);
+        CardTextRenderer.Draw(context, rect, CardTextRenderer.FormatDateTime(element), element.FontFamily,
+            element.FontSize * tab.Zoom, CardTextRenderer.DefaultMinFontSize * tab.Zoom, ParseBrush(element.ColorHex),
+            element.Bold, element.Italic, element.Underline, element.HorizontalAlignment, element.VerticalAlignment);
     }
+
     private static void DrawDataField(DrawingContext context, Rect rect, DataFieldElement field, CardDesignTabViewModel tab)
     {
-        var brush = ParseBrush(field.ColorHex);
-        var typeface = new Typeface(field.FontFamily);
         var placeholder = $"{{{{{field.FieldKey}}}}}";
         var displayText = tab.ResolveDisplayText(placeholder, placeholder);
 
-        var formatted = new FormattedText(displayText, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface,
-            // Priority 4 fix: same reasoning as DrawText above -- field.FontSize must
-            // scale with tab.Zoom or a data-field's text vanishes at low zoom exactly
-            // like a plain TextElement's did.
-            Math.Max(1, field.FontSize * tab.Zoom), brush)
-        {
-            MaxTextWidth = Math.Max(1, rect.Width),
-        };
-        context.DrawText(formatted, rect.TopLeft);
+        // FontSize scales with tab.Zoom (Priority 4 fix) so the text never vanishes at low zoom.
+        CardTextRenderer.Draw(context, rect, displayText, field.FontFamily,
+            field.FontSize * tab.Zoom, CardTextRenderer.DefaultMinFontSize * tab.Zoom, ParseBrush(field.ColorHex),
+            horizontal: field.HorizontalAlignment);
     }
 
     private Avalonia.Media.Imaging.Bitmap? LoadBitmap(string? assetReference)
@@ -934,11 +851,19 @@ public sealed class CardCanvasView : Control
     /// original honest text-label placeholder (symbology + value, no fake bars) only
     /// when encoding genuinely fails -- an invalid value for the chosen symbology (e.g.
     /// a bad EAN-13 checksum length), not a missing capability.</summary>
-    private static void DrawBarcode(DrawingContext context, Rect rect, BarcodeElement barcode)
+    /// <summary>A QR code / barcode bound to a field ("{{VisitorId}}") shows the selected
+    /// record's value, like bound text does; otherwise its own Value.</summary>
+    private static string? ResolveCodeValue(CardDesignTabViewModel tab, DesignerElement element)
+    {
+        var expression = CodeValueBinding.Expression(element);
+        return CodeValueBinding.IsBound(expression) ? tab.ResolveDisplayText(expression!, expression!) : expression;
+    }
+
+    private static void DrawBarcode(DrawingContext context, Rect rect, BarcodeElement barcode, string? value = null)
     {
         using var clip = context.PushClip(rect);
 
-        var bitmap = BarcodeRenderer.TryGenerate(barcode);
+        var bitmap = BarcodeRenderer.TryGenerate(barcode, value);
         if (bitmap is not null)
         {
             DrawFit(context, rect, bitmap);
@@ -950,11 +875,11 @@ public sealed class CardCanvasView : Control
 
     /// <summary>Real QR Code rendering via BarcodeRenderer/ZXing.Net. Same fit/fallback
     /// reasoning as DrawBarcode above.</summary>
-    private static void DrawQrCode(DrawingContext context, Rect rect, QrCodeElement qr)
+    private static void DrawQrCode(DrawingContext context, Rect rect, QrCodeElement qr, string? value = null)
     {
         using var clip = context.PushClip(rect);
 
-        var bitmap = BarcodeRenderer.TryGenerate(qr);
+        var bitmap = BarcodeRenderer.TryGenerate(qr, value);
         if (bitmap is not null)
         {
             DrawFit(context, rect, bitmap);

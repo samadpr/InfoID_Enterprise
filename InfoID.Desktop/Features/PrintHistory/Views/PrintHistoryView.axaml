@@ -1,0 +1,156 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Features.PrintHistory.ViewModels"
+             xmlns:components="using:InfoID.Desktop.Shell.Components"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+             x:Class="InfoID.Desktop.Features.PrintHistory.Views.PrintHistoryView"
+             x:DataType="vm:PrintHistoryViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <UserControl.Styles>
+        <Style Selector="Border.stat">
+            <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+            <Setter Property="CornerRadius" Value="{StaticResource Radius.MD}" />
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="MinWidth" Value="150" />
+        </Style>
+        <Style Selector="TextBlock.statValue">
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="TextBlock.jobStatus">
+            <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="12,0" />
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+        <Style Selector="TextBlock.jobStatus.failed">
+            <Setter Property="Foreground" Value="{DynamicResource BrushError}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" Margin="40,28,40,24">
+
+        <components:PageHeaderView Grid.Row="0" Title="Print history" BackCommand="{Binding GoHomeCommand}" />
+
+        <!-- Filters -->
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="0,16,0,0">
+            <ComboBox Grid.Column="0" ItemsSource="{Binding Periods}" SelectedItem="{Binding SelectedPeriod}"
+                      MinWidth="160" AutomationProperties.Name="Period" ToolTip.Tip="Show print runs from this period">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:HistoryPeriodOption">
+                        <TextBlock Text="{Binding Label}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBox Grid.Column="1" Margin="12,0" MaxWidth="460" HorizontalAlignment="Left" MinWidth="320"
+                     Text="{Binding SearchText}" Watermark="Search design, printer, person name or ID"
+                     AutomationProperties.Name="Search print history">
+                <TextBox.InnerRightContent>
+                    <Button Classes="ghost toolbtn" Command="{Binding ClearSearchCommand}" ToolTip.Tip="Clear search"
+                            IsVisible="{Binding SearchText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                            AutomationProperties.Name="Clear search" Content="✕" />
+                </TextBox.InnerRightContent>
+            </TextBox>
+            <Button Grid.Column="2" Classes="secondary" Content="Refresh" Command="{Binding RefreshCommand}"
+                    HotKey="F5" ToolTip.Tip="Reload print history (F5)" />
+        </Grid>
+
+        <!-- Totals for the period / search -->
+        <WrapPanel Grid.Row="2" Margin="0,16,0,0" Orientation="Horizontal">
+            <Border Classes="stat" Margin="0,0,12,12">
+                <StackPanel>
+                    <TextBlock Classes="caption" Text="Print runs" />
+                    <TextBlock Classes="statValue" Text="{Binding JobCount, StringFormat='{}{0:N0}'}" />
+                </StackPanel>
+            </Border>
+            <Border Classes="stat" Margin="0,0,12,12">
+                <StackPanel>
+                    <TextBlock Classes="caption" Text="Cards printed" />
+                    <TextBlock Classes="statValue" Text="{Binding CardCount, StringFormat='{}{0:N0}'}" />
+                </StackPanel>
+            </Border>
+            <Border Classes="stat" Margin="0,0,12,12">
+                <StackPanel>
+                    <TextBlock Classes="caption" Text="Reprints" />
+                    <TextBlock Classes="statValue" Text="{Binding ReprintCount, StringFormat='{}{0:N0}'}" />
+                </StackPanel>
+            </Border>
+            <Border Classes="stat" Margin="0,0,12,12">
+                <StackPanel>
+                    <TextBlock Classes="caption" Text="Failed runs" />
+                    <TextBlock Classes="statValue" Text="{Binding FailedCount, StringFormat='{}{0:N0}'}"
+                               Foreground="{DynamicResource BrushError}" />
+                </StackPanel>
+            </Border>
+        </WrapPanel>
+
+        <StackPanel Grid.Row="3" Spacing="4">
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoading}" Height="3" />
+            <TextBlock Text="{Binding Message}" Classes="caption" TextWrapping="Wrap" Foreground="{DynamicResource BrushWarning}"
+                       IsVisible="{Binding Message, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        </StackPanel>
+
+        <!-- Jobs (top) and the selected job's cards (bottom) -->
+        <Grid Grid.Row="4" RowDefinitions="3*,Auto,2*" Margin="0,8,0,0">
+
+            <Border Grid.Row="0" Classes="card" Padding="0" ClipToBounds="True">
+                <Panel>
+                    <DataGrid ItemsSource="{Binding Jobs}" SelectedItem="{Binding SelectedJob, Mode=TwoWay}"
+                              AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True"
+                              CanUserResizeColumns="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                              SelectionMode="Single" AutomationProperties.Name="Print runs">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn x:DataType="vm:PrintJobRow" Header="Date / time" Binding="{Binding WhenText}"
+                                                SortMemberPath="When" Width="150" />
+                            <DataGridTextColumn x:DataType="vm:PrintJobRow" Header="Design" Binding="{Binding DesignName}" Width="2*" />
+                            <DataGridTextColumn x:DataType="vm:PrintJobRow" Header="Printer" Binding="{Binding PrinterName}" Width="2*" />
+                            <DataGridTextColumn x:DataType="vm:PrintJobRow" Header="Type" Binding="{Binding TypeText}" Width="90" />
+                            <DataGridTextColumn x:DataType="vm:PrintJobRow" Header="Records" Binding="{Binding Records}" Width="90" />
+                            <DataGridTextColumn x:DataType="vm:PrintJobRow" Header="Cards" Binding="{Binding TotalCards}" Width="80" />
+                            <DataGridTextColumn x:DataType="vm:PrintJobRow" Header="Reprints" Binding="{Binding ReprintText}" Width="90" />
+                            <DataGridTemplateColumn Header="Status" Width="110" SortMemberPath="StatusText">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:PrintJobRow">
+                                        <TextBlock Classes="jobStatus" Classes.failed="{Binding IsFailed}" Text="{Binding StatusText}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel IsVisible="{Binding IsEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                        <TextBlock Text="No print runs here yet" Classes="h3" HorizontalAlignment="Center" />
+                        <TextBlock Classes="caption" TextWrapping="Wrap" MaxWidth="420" TextAlignment="Center"
+                                   Text="Every print from the Card Designer is recorded here. Try another period, or clear the search." />
+                    </StackPanel>
+                </Panel>
+            </Border>
+
+            <GridSplitter Grid.Row="1" Height="10" Background="Transparent" ResizeDirection="Rows" />
+
+            <Border Grid.Row="2" Classes="card" Padding="0" ClipToBounds="True">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="{Binding SelectionTitle}" FontWeight="SemiBold"
+                               Margin="16,12" TextTrimming="CharacterEllipsis" />
+                    <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False" IsReadOnly="True"
+                              CanUserSortColumns="True" CanUserResizeColumns="True" GridLinesVisibility="Horizontal"
+                              HeadersVisibility="Column" IsVisible="{Binding HasSelection}"
+                              AutomationProperties.Name="Cards in the selected print run">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn x:DataType="vm:PrintJobItemRow" Header="#" Binding="{Binding Sequence}" Width="60" />
+                            <DataGridTextColumn x:DataType="vm:PrintJobItemRow" Header="Card no." Binding="{Binding CardNumber}" Width="120" />
+                            <DataGridTextColumn x:DataType="vm:PrintJobItemRow" Header="Name" Binding="{Binding FullName}" Width="2*" />
+                            <DataGridTextColumn x:DataType="vm:PrintJobItemRow" Header="Person ID" Binding="{Binding PersonKey}" Width="*" />
+                            <DataGridTextColumn x:DataType="vm:PrintJobItemRow" Header="Reprint" Binding="{Binding ReprintText}" Width="*" />
+                            <DataGridTextColumn x:DataType="vm:PrintJobItemRow" Header="Card status" Binding="{Binding CardStatusText}" Width="110" />
+                            <DataGridTextColumn x:DataType="vm:PrintJobItemRow" Header="Expires" Binding="{Binding ExpiryText}" Width="110" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

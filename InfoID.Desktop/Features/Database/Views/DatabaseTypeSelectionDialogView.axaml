@@ -64,6 +64,25 @@
 
                 </Button>
 
+                <!-- Visitors (Visitor Management) -->
+                <Button Classes="databaseCard"
+                        Command="{Binding SelectDatabaseCommand}"
+                        CommandParameter="{x:Static models:DatabaseType.Visitors}"
+                        ToolTip.Tip="Visitor registrations from the Visitors page: use these fields to design the visitor badge">
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+                        <mi:MaterialIcon Kind="BadgeAccountHorizontalOutline"
+                                         Width="52"
+                                         Height="52"
+                                         Foreground="{DynamicResource BrushPrimary}"
+                                         HorizontalAlignment="Center" />
+                        <TextBlock Text="Visitors"
+                                   FontSize="12"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
                 <!-- Excel -->
                 <Button Classes="databaseCard"
                         Command="{Binding SelectDatabaseCommand}"
@@ -256,7 +275,7 @@
                 </Button>
 
                 <!-- Active Directory -->
-                <Button Classes="databaseCard">
+                <!--<Button Classes="databaseCard">
 
                     <StackPanel HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
@@ -274,7 +293,7 @@
 
                     </StackPanel>
 
-                </Button>
+                </Button>-->
 
                 <!-- Google Sheets -->
                 <Button Classes="databaseCard"

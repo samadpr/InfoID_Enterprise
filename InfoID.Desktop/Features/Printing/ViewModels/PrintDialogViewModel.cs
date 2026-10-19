@@ -43,6 +43,8 @@ namespace InfoID.Desktop.Features.Printing.ViewModels;
 /// </summary>
 public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
 {
+    private static readonly InfoID.Shared.Logging.AppLogger Log = InfoID.Shared.Logging.AppLog.For<PrintDialogViewModel>();
+
     private readonly IPrinterService _printerService;
     private readonly IPrintStatusStore _statusStore;
     private readonly ICardFormatCatalogService _formatCatalogService;
@@ -50,6 +52,18 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
     private readonly IDesignAssetService _assetService;
     private readonly IFilePickerService _filePickerService;
     private readonly Func<ImageElement, IReadOnlyDictionary<string, string>, string?>? _resolveImagePath;
+    /// <summary>Licensing (FR-LIC-12): printing needs a valid, unexpired license and
+    /// consumes the card allowance. Null only for callers outside the designer (none
+    /// today), which then print unlicensed-unchecked.</summary>
+    private readonly Microsoft.Extensions.DependencyInjection.IServiceScopeFactory? _licenseScopes;
+
+    // Trial mode: who may print (license / trial / sign in first) and the on-screen state.
+    private readonly InfoID.Desktop.Features.Trial.Services.PrintAuthorizationService? _printAuthorization;
+    /// <summary>The licensed feature this print uses: Printing (counts toward the card
+    /// limit) or VisitorBadges (visitor badges: valid license needed, not counted).</summary>
+    private readonly string _licensedFeature;
+    private readonly InfoID.Desktop.Features.Trial.Services.TrialModeState? _trialState;
+
     private static readonly IReadOnlyDictionary<string, string> EmptyFields = new Dictionary<string, string>();
 
     /// <summary>On-screen preview resolution. Lower than print DPI on purpose: this is
@@ -188,7 +202,7 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsMonoChrome))]
-    private PrintColorMode _colorMode = PrintColorMode.MonoChrome;
+    private PrintColorMode _colorMode = PrintColorMode.Composite;
 
     public bool IsMonoChrome => ColorMode != PrintColorMode.Composite;
 
@@ -316,6 +330,82 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
     [ObservableProperty]
     private string? _statusMessage;
 
+    // ---------------------------------------------------------------- card records (print history) ----
+
+    /// <summary>True when the run prints real database/spreadsheet rows. False for a
+    /// static design (sample preview data), which is recorded as generic cards.</summary>
+    public bool IsDataBound { get; }
+
+    /// <summary>Data columns for the Person ID / Name / Expiry pickers, with "(none)" first.</summary>
+    public ObservableCollection<string> HistoryColumnOptions { get; } = new();
+
+    public IReadOnlyList<CardValidityOption> ValidityOptions { get; } =
+        Enum.GetValues<CardValidityMode>().Select(m => new CardValidityOption(m, PrintHistoryPlanner.ValidityLabel(m))).ToList();
+
+    /// <summary>Column that identifies the person, so printing the same person again with
+    /// this design is recognized as a reprint (Lost / Damaged / Renewed).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CardRecordsSummary))]
+    [NotifyPropertyChangedFor(nameof(HasPersonIdColumn))]
+    private string _personIdColumn = PrintHistoryPlanner.NoColumn;
+
+    [ObservableProperty]
+    private string _nameColumn = PrintHistoryPlanner.NoColumn;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsValidUntilDate))]
+    [NotifyPropertyChangedFor(nameof(IsValidityFromColumn))]
+    [NotifyPropertyChangedFor(nameof(CardRecordsSummary))]
+    private CardValidityOption? _selectedValidity;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CardRecordsSummary))]
+    private DateTime? _validUntilDate;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CardRecordsSummary))]
+    private string _expiryColumn = PrintHistoryPlanner.NoColumn;
+
+    public bool HasPersonIdColumn => IsColumn(PersonIdColumn);
+    public bool IsValidUntilDate => SelectedValidity?.Mode == CardValidityMode.UntilDate;
+    public bool IsValidityFromColumn => SelectedValidity?.Mode == CardValidityMode.FromColumn;
+
+    /// <summary>One line telling the operator exactly what Print history will record.</summary>
+    public string CardRecordsSummary
+    {
+        get
+        {
+            var validity = SelectedValidity?.Mode switch
+            {
+                CardValidityMode.OneYear or CardValidityMode.TwoYears or CardValidityMode.ThreeYears =>
+                    $"valid until {PrintHistoryPlanner.ComputeExpiry(BuildHistorySettings(), EmptyFields, DateTime.Today):d}",
+                CardValidityMode.UntilDate => ValidUntilDate is { } until ? $"valid until {until:d}" : "pick the expiry date",
+                CardValidityMode.FromColumn => IsColumn(ExpiryColumn) ? $"expiry from \"{ExpiryColumn}\"" : "pick the expiry column",
+                _ => "no expiry date",
+            };
+
+            if (!IsDataBound)
+                return $"Each printed card is recorded in Print history ({validity}).";
+
+            return HasPersonIdColumn
+                ? $"Cards are recorded per person by \"{PersonIdColumn}\" ({validity}). Printing someone again asks for a reprint reason."
+                : $"Cards are recorded ({validity}), but without a Person ID column reprints can't be recognized.";
+        }
+    }
+
+    /// <summary>Shown over the dialog when people in the run already have a card.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsReprintPromptOpen))]
+    private ReprintPromptViewModel? _reprintPrompt;
+
+    public bool IsReprintPromptOpen => ReprintPrompt is not null;
+
+    private string _historyDesignKey = string.Empty;
+    private bool _historySettingsLoaded;
+
+    private static bool IsColumn(string? column) =>
+        !string.IsNullOrWhiteSpace(column) && column != PrintHistoryPlanner.NoColumn;
+
     public PrintDialogViewModel(
         CardDesignDocument document,
         IPrinterService printerService,
@@ -326,8 +416,20 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
         IDesignAssetService assetService,
         IFilePickerService filePickerService,
         IReadOnlyList<PreviewRecord>? databaseRecords = null,
-        Func<ImageElement, IReadOnlyDictionary<string, string>, string?>? resolveImagePath = null)
+        Func<ImageElement, IReadOnlyDictionary<string, string>, string?>? resolveImagePath = null,
+        Microsoft.Extensions.DependencyInjection.IServiceScopeFactory? licenseScopes = null,
+        InfoID.Desktop.Features.Trial.Services.PrintAuthorizationService? printAuthorization = null,
+        InfoID.Desktop.Features.Trial.Services.TrialModeState? trialState = null,
+        string licensedFeature = InfoID.Application.Services.LicensedFeatures.Printing)
     {
+        _licensedFeature = licensedFeature;
+        _printAuthorization = printAuthorization;
+        _trialState = trialState;
+        if (_trialState is not null)
+        {
+            _trialState.Changed += OnTrialStateChanged;
+            _ = _trialState.RefreshAsync();
+        }
         Document = document;
         _printerService = printerService;
         _statusStore = statusStore;
@@ -336,12 +438,13 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
         _assetService = assetService;
         _filePickerService = filePickerService;
         _resolveImagePath = resolveImagePath;
+        _licenseScopes = licenseScopes;
 
         if (_resolveImagePath is null)
         {
             // Diagnostic for the "photo never changes per record" symptom: without this
             // resolver every ImageElement falls back to its design-time AssetReference.
-            Debug.WriteLine("[PrintDialogViewModel] resolveImagePath was not supplied: " +
+            Log.Warn("resolveImagePath was not supplied: " +
                             "database-bound photos will show the design-time image for every record.");
         }
 
@@ -361,6 +464,12 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
         }
         StatusMappings.Add(new PrintStatusMappingRow());
 
+        IsDataBound = databaseRecords is { Count: > 0 };
+        HistoryColumnOptions.Add(PrintHistoryPlanner.NoColumn);
+        foreach (var key in AvailableFieldKeys) HistoryColumnOptions.Add(key);
+        SelectedValidity = ValidityOptions[0];
+        _historyDesignKey = PrintHistoryPlanner.BuildDesignKey(document.PersistedTemplateId, document.SourceFilePath, document.Name);
+
         NumberOfCards = Math.Max(1, records.Count);
 
         _ = InitializeAsync(records);
@@ -369,6 +478,7 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
     private async Task InitializeAsync(IReadOnlyList<PreviewRecord> records)
     {
         await LoadRememberedSettingsAsync();
+        await LoadHistorySettingsAsync();
 
         var statuses = await _statusStore.LoadAsync();
         foreach (var record in records)
@@ -420,17 +530,23 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
     public bool IsVisibleNow(DesignerElement element) =>
         _evaluator.EvaluateCondition(element.VisibilityCondition, PreviewRecord?.Fields ?? EmptyFields);
 
-    private ThumbnailRenderer.RenderOptions BuildRenderOptions(PreviewRecord? record)
+    /// <summary>Render options for one record. <paramref name="trialWatermark"/>: for the
+    /// printed/saved output it comes from the print authorization; for the on-screen
+    /// previews (null) from the current mode -- trial users see what will print.</summary>
+    private ThumbnailRenderer.RenderOptions BuildRenderOptions(PreviewRecord? record, bool? trialWatermark = null)
     {
         var fields = record?.Fields ?? EmptyFields;
 
         return new()
         {
+            TrialWatermark = trialWatermark ?? _trialState?.IsTrialMode == true,
             ResolveAssetPath = _assetService.ResolveToFullPath,
             ResolveText = t => ResolveTextFor(t, fields),
             ResolveField = f => _evaluator.Evaluate($"{{{{{f.FieldKey}}}}}", fields),
             IsVisibleNow = e => _evaluator.EvaluateCondition(e.VisibilityCondition, fields),
             ResolveImagePath = image => _resolveImagePath?.Invoke(image, fields),
+            // QR codes / barcodes bound to a field ("{{VisitorId}}") encode this record's value.
+            ResolveCodeValue = element => InfoID.Desktop.Features.CardDesigner.Services.CodeValueBinding.Resolve(element, fields, _evaluator),
         };
     }
 
@@ -473,7 +589,7 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
         { "PDF", "XPS", "OneNote", "Fax", "Send To", "Snagit", "Document Writer" };
 
     /// <summary>True for software printers that save a file instead of printing.</summary>
-    private static bool IsVirtualPrinter(string name) =>
+    internal static bool IsVirtualPrinter(string name) =>
         VirtualPrinterKeywords.Any(k => name.Contains(k, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>Shown under the printer list when a file-saving printer is selected, so
@@ -661,6 +777,341 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
         });
     }
 
+    // ---------------------------------------------------------------- trial mode ----
+
+    /// <summary>Trial mode banner: signed in without a license.</summary>
+    public bool ShowTrialBanner => _trialState?.IsTrialMode == true;
+
+    /// <summary>No license and not signed in: printing needs a login.</summary>
+    public bool ShowSignInBanner => _trialState?.NeedsSignIn == true;
+
+    public bool TrialUsedUp => _trialState?.TrialUsedUp == true;
+
+    /// <summary>"Trial mode · 3 of 10 trial cards used · 7 left".</summary>
+    public string TrialBannerText
+    {
+        get
+        {
+            if (_trialState is not { } t) return string.Empty;
+            if (t.TrialUsedUp) return $"You've used all {t.CardLimit} trial cards. Activate InfoID to keep printing. You can still design, save and preview cards.";
+            var counts = t.HasTrialStatus ? $"{t.TrialUsageText} · {t.TrialRemainingText}" : "checking your trial cards...";
+            var offline = t.TrialError is null ? "" : " (couldn't reach the server: printing needs an internet connection)";
+            return $"Trial mode · {counts}{offline}. Printed cards carry an \"{InfoID.Desktop.Features.Trial.Services.TrialWatermark.Text}\" watermark.";
+        }
+    }
+
+    public string SignInBannerText =>
+        $"InfoID isn't activated. Log in to start your free trial and print up to {_trialState?.CardLimit ?? InfoID.Desktop.Features.Trial.Services.TrialModeState.DefaultCardLimit} cards, or activate InfoID.";
+
+    private void OnTrialStateChanged(object? sender, EventArgs e)
+    {
+        OnPropertyChanged(nameof(ShowTrialBanner));
+        OnPropertyChanged(nameof(ShowSignInBanner));
+        OnPropertyChanged(nameof(TrialUsedUp));
+        OnPropertyChanged(nameof(TrialBannerText));
+        OnPropertyChanged(nameof(SignInBannerText));
+        // The previews show the watermark exactly when a print would carry it.
+        if (_previewWatermark != (_trialState?.IsTrialMode == true)) RefreshAllPreviews();
+    }
+
+    private bool _previewWatermark;
+
+    /// <summary>Shown over the dialog when printing needs a login first.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLoginPromptOpen))]
+    private InfoID.Desktop.Features.Trial.ViewModels.TrialLoginPromptViewModel? _loginPrompt;
+
+    public bool IsLoginPromptOpen => LoginPrompt is not null;
+
+    [RelayCommand]
+    private Task ShowLogin() => PromptLoginAsync(null);
+
+    /// <summary>"Please log in to start your trial..." with Log in / Cancel. After a login
+    /// the license and trial are checked again; printing then needs a new click on Print
+    /// (with the watermark now visible in the preview).</summary>
+    private async Task PromptLoginAsync(string? message)
+    {
+        if (_trialState is null || LoginPrompt is not null) return;
+        var services = InfoID.Desktop.App.Services;
+        var session = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+            .GetRequiredService<InfoID.Desktop.Features.Account.Services.AccountSession>(services);
+        var portal = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+            .GetRequiredService<InfoID.Desktop.Features.Account.Services.CustomerPortalClient>(services);
+
+        var prompt = new InfoID.Desktop.Features.Trial.ViewModels.TrialLoginPromptViewModel(session, portal, _trialState.CardLimit, message);
+        LoginPrompt = prompt;
+        var result = await prompt.Completion;
+        LoginPrompt = null;
+
+        switch (result)
+        {
+            case InfoID.Desktop.Features.Trial.ViewModels.TrialLoginResult.SignedIn:
+                StatusMessage = "Logged in. Checking your license and trial...";
+                await _trialState.RefreshAsync();
+                RefreshAllPreviews();
+                StatusMessage = _trialState.IsActivated
+                    ? "Logged in. InfoID is activated on this computer: click Print to print."
+                    : _trialState.TrialUsedUp
+                        ? $"Logged in. You've used all {_trialState.CardLimit} trial cards. Activate InfoID to keep printing."
+                        : $"Logged in. Trial mode: {_trialState.TrialUsageText}. The preview shows the trial watermark; click Print to print.";
+                break;
+            case InfoID.Desktop.Features.Trial.ViewModels.TrialLoginResult.OpenAccountPage:
+                OpenAccountPage(InfoID.Desktop.Features.Account.ViewModels.AccountPanel.LogIn);
+                break;
+            default:
+                StatusMessage = "Printing needs a login or an activated license. You can keep designing and previewing.";
+                break;
+        }
+    }
+
+    /// <summary>Activate / buy: closes the Print window and opens Account and license.</summary>
+    [RelayCommand]
+    private void Activate() => OpenAccountPage(null);
+
+    private void OpenAccountPage(InfoID.Desktop.Features.Account.ViewModels.AccountPanel? panel)
+    {
+        Close();
+        var navigation = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+            .GetService<InfoID.Desktop.Core.Navigation.INavigationService>(InfoID.Desktop.App.Services);
+        navigation?.NavigateTo<InfoID.Desktop.Features.Account.ViewModels.AccountLicenseViewModel>(panel);
+    }
+
+    /// <summary>Asks permission for a job of <paramref name="cards"/> cards. Null = allowed
+    /// without a print gate (no services available: old behaviour, license check only).</summary>
+    private async Task<InfoID.Desktop.Features.Trial.Services.PrintAuthorization?> AuthorizeAsync(int cards)
+    {
+        if (_printAuthorization is null) return null;
+        StatusMessage = _trialState?.IsTrialMode == true ? "Reserving trial cards..." : StatusMessage;
+        return await _printAuthorization.AuthorizeAsync(cards, Document.Name, feature: _licensedFeature);
+    }
+
+    /// <summary>Explains a refusal; for "log in first" opens the login prompt.</summary>
+    private async Task HandleDenialAsync(InfoID.Desktop.Features.Trial.Services.PrintAuthorization authorization)
+    {
+        StatusMessage = authorization.Message;
+        if (authorization.Denial == InfoID.Desktop.Features.Trial.Services.PrintDenial.SignInRequired)
+            await PromptLoginAsync(authorization.Message);
+        else if (_trialState is not null)
+            await _trialState.RefreshAsync();
+    }
+
+    /// <summary>Null when printing is allowed, otherwise the reason to show. Only used
+    /// when no print gate is available (see AuthorizeAsync).</summary>
+    private async Task<string?> CheckLicenseAsync(int cardCount)
+    {
+        if (_licenseScopes is null) return null;
+        try
+        {
+            using var scope = _licenseScopes.CreateScope();
+            var license = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+                .GetRequiredService<InfoID.Application.Interfaces.ILicenseService>(scope.ServiceProvider);
+            var check = await license.CheckFeatureAllowedAsync(_licensedFeature, cardCount);
+            return check.IsAllowed ? null : check.Reason;
+        }
+        catch (Exception ex)
+        {
+            return "The license could not be checked: " + ex.GetBaseException().Message;
+        }
+    }
+
+    private async Task CountPrintedCardsAsync(int cardCount)
+    {
+        if (_licenseScopes is null || cardCount <= 0) return;
+        if (!InfoID.Application.Services.LicensedFeatures.CountsCards(_licensedFeature)) return; // visitor badges
+        try
+        {
+            using var scope = _licenseScopes.CreateScope();
+            var license = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+                .GetRequiredService<InfoID.Application.Interfaces.ILicenseService>(scope.ServiceProvider);
+            await license.IncrementCardsIssuedAsync(cardCount);
+        }
+        catch (Exception ex)
+        {
+            // The cards are already printed; don't turn a counting problem into a
+            // print failure message.
+            Log.Warn("License card count failed", ex);
+        }
+    }
+
+    // ---------------------------------------------------------------- print history ----
+
+    private static readonly HashSet<string> HistoryProperties = new()
+    {
+        nameof(PersonIdColumn), nameof(NameColumn), nameof(SelectedValidity), nameof(ValidUntilDate), nameof(ExpiryColumn),
+    };
+
+    /// <summary>Restores this design's Person ID / name / validity choices, or detects the
+    /// columns the first time (EmployeeNo, RollNo, Name...). A remembered column that no
+    /// longer exists in the data is detected again rather than kept.</summary>
+    private async Task LoadHistorySettingsAsync()
+    {
+        var saved = await PrintHistorySettingsStore.Shared.LoadAsync(_historyDesignKey);
+        var columns = AvailableFieldKeys.ToList();
+
+        string Pick(string? remembered, Func<IEnumerable<string>, string?> detect)
+        {
+            if (remembered == PrintHistoryPlanner.NoColumn) return PrintHistoryPlanner.NoColumn;
+            if (remembered is not null && columns.Contains(remembered)) return remembered;
+            return detect(columns) ?? PrintHistoryPlanner.NoColumn;
+        }
+
+        if (IsDataBound)
+        {
+            PersonIdColumn = Pick(saved?.PersonIdColumn, PrintHistoryPlanner.DetectPersonIdColumn);
+            NameColumn = Pick(saved?.NameColumn, PrintHistoryPlanner.DetectNameColumn);
+            ExpiryColumn = Pick(saved?.ExpiryColumn, PrintHistoryPlanner.DetectExpiryColumn);
+        }
+
+        var mode = saved?.Validity ?? CardValidityMode.NoExpiry;
+        // "From a data column" means nothing without data; fall back to no expiry.
+        if (mode == CardValidityMode.FromColumn && !IsDataBound) mode = CardValidityMode.NoExpiry;
+        SelectedValidity = ValidityOptions.FirstOrDefault(o => o.Mode == mode) ?? ValidityOptions[0];
+        ValidUntilDate = saved?.ValidUntil;
+
+        _historySettingsLoaded = true;
+        PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is not null && HistoryProperties.Contains(e.PropertyName))
+                _ = PrintHistorySettingsStore.Shared.SaveAsync(_historyDesignKey, BuildHistorySettings());
+        };
+    }
+
+    partial void OnSelectedValidityChanged(CardValidityOption? value)
+    {
+        // Suggest a sensible date the first time "Until a date" is picked.
+        if (_historySettingsLoaded && value?.Mode == CardValidityMode.UntilDate && ValidUntilDate is null)
+            ValidUntilDate = DateTime.Today.AddYears(1);
+    }
+
+    private PrintHistorySettings BuildHistorySettings() => new()
+    {
+        PersonIdColumn = PersonIdColumn,
+        NameColumn = NameColumn,
+        Validity = SelectedValidity?.Mode ?? CardValidityMode.NoExpiry,
+        ValidUntil = ValidUntilDate?.Date,
+        ExpiryColumn = ExpiryColumn,
+    };
+
+    private string? PersonKeyOf(PreviewRecord record)
+    {
+        if (!IsDataBound || !IsColumn(PersonIdColumn)) return null;
+        return record.Fields.TryGetValue(PersonIdColumn, out var value) && !string.IsNullOrWhiteSpace(value)
+            ? value.Trim()
+            : null;
+    }
+
+    private string DisplayNameOf(PreviewRecord record, string? personKey)
+    {
+        if (!IsDataBound) return string.IsNullOrWhiteSpace(Document.Name) ? "Card" : Document.Name;
+        if (IsColumn(NameColumn) && record.Fields.TryGetValue(NameColumn, out var name) && !string.IsNullOrWhiteSpace(name))
+            return name.Trim();
+        return personKey ?? record.Label;
+    }
+
+    /// <summary>Runs one call against IPrintHistoryService in its own DI scope (the
+    /// dialog outlives any single DbContext). Null when no service is available.</summary>
+    private async Task<T?> WithHistoryAsync<T>(Func<InfoID.Application.Interfaces.IPrintHistoryService, Task<T>> action)
+    {
+        if (_licenseScopes is null) return default;
+        using var scope = _licenseScopes.CreateScope();
+        var service = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+            .GetService<InfoID.Application.Interfaces.IPrintHistoryService>(scope.ServiceProvider);
+        return service is null ? default : await action(service);
+    }
+
+    /// <summary>Before printing: if people in the run already have a card for this
+    /// design, asks whether to reprint them (and why), print only the new people, or
+    /// cancel. Returns the rows to print (null = cancelled) and the reprint decision.</summary>
+    private async Task<(List<PrintQueueRow>? Rows, ReprintDecision? Decision)> ConfirmReprintsAsync(List<PrintQueueRow> rows)
+    {
+        if (!IsDataBound || !HasPersonIdColumn) return (rows, null);
+
+        var keys = rows.Select(r => PersonKeyOf(r.Record)).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        if (keys.Count == 0) return (rows, null);
+
+        IReadOnlyList<InfoID.Application.Dtos.PrintingModule.ExistingCardDto>? existing;
+        try
+        {
+            existing = await WithHistoryAsync(s => s.FindExistingCardsAsync(Document.PersistedTemplateId, keys));
+        }
+        catch (Exception ex)
+        {
+            // History is a record of printing, never a gate on it.
+            Log.Warn("Print history lookup failed", ex);
+            return (rows, null);
+        }
+        if (existing is not { Count: > 0 }) return (rows, null);
+
+        var existingKeys = existing.Select(e => e.PersonKey).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        bool IsExisting(PrintQueueRow row) => PersonKeyOf(row.Record) is { } key && existingKeys.Contains(key);
+        var newRows = rows.Where(r => !IsExisting(r)).ToList();
+
+        var prompt = new ReprintPromptViewModel(existing, newRows.Count);
+        ReprintPrompt = prompt;
+        var previousStatus = StatusMessage;
+        StatusMessage = "Some people already have a card. Choose what to do.";
+        var decision = await prompt.Completion;
+        ReprintPrompt = null;
+        StatusMessage = previousStatus;
+
+        return decision.Choice switch
+        {
+            ReprintChoice.ReprintAll => (rows, decision),
+            ReprintChoice.SkipExisting => (newRows, null),
+            _ => (null, null),
+        };
+    }
+
+    /// <summary>After printing: records the run in Print history (PrintJob, Card,
+    /// PrintJobItem, CardStatusHistory). Returns a short note for the status line, or
+    /// null. Never throws -- the cards are already printed.</summary>
+    private async Task<string?> RecordPrintHistoryAsync(
+        IReadOnlyList<PrintQueueRow> rows, bool succeeded, string? error, string printerName,
+        DateTime startedUtc, ReprintDecision? decision, int? copiesPerRecord = null)
+    {
+        try
+        {
+            var settings = BuildHistorySettings();
+            var request = new InfoID.Application.Dtos.PrintingModule.RecordPrintJobRequest
+            {
+                DesignName = Document.Name,
+                TemplateId = Document.PersistedTemplateId,
+                PrinterName = printerName,
+                IsDataBound = IsDataBound,
+                CopiesPerRecord = copiesPerRecord ?? NumberOfCopies,
+                Succeeded = succeeded,
+                FailureMessage = error,
+                StartedUtc = startedUtc,
+                ReprintReason = decision?.Reason,
+                ReprintNote = decision?.Note,
+            };
+            foreach (var row in rows)
+            {
+                var key = PersonKeyOf(row.Record);
+                request.Records.Add(new InfoID.Application.Dtos.PrintingModule.PrintedRecordInput
+                {
+                    PersonKey = key,
+                    DisplayName = DisplayNameOf(row.Record, key),
+                    ExpiryDate = PrintHistoryPlanner.ComputeExpiry(settings, row.Record.Fields, DateTime.Today),
+                    ExpiryFromData = settings.Validity == CardValidityMode.FromColumn,
+                });
+            }
+
+            var result = await WithHistoryAsync(s => s.RecordJobAsync(request));
+            if (result is null || !succeeded) return null;
+
+            var parts = new List<string>();
+            if (result.NewCards > 0) parts.Add($"{result.NewCards} new card{(result.NewCards == 1 ? "" : "s")}");
+            if (result.Reprints > 0) parts.Add($"{result.Reprints} reprint{(result.Reprints == 1 ? "" : "s")}");
+            return parts.Count == 0 ? null : "Recorded " + string.Join(", ", parts) + " in Print history.";
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Print history couldn't be recorded", ex);
+            return "The cards printed, but Print history couldn't be updated: " + ex.GetBaseException().Message;
+        }
+    }
+
     // ---------------------------------------------------------------- range helpers ----
 
     /// <summary>The records the current Print Range selects, in print order.</summary>
@@ -795,6 +1246,7 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
         IsPrinting = true;
         StatusMessage = "Preparing pages...";
         string? tempDir = null;
+        InfoID.Desktop.Features.Trial.Services.PrintAuthorization? authorization = null;
 
         try
         {
@@ -804,6 +1256,68 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
                 StatusMessage = "No records match the print range.";
                 return;
             }
+
+            // An "Even pages only" run is the second (back-side) pass of a manual duplex
+            // job whose cards were already counted and recorded on the first pass.
+            var isSecondDuplexPass = PageParity == PageParityFilter.EvenPages;
+            var startedUtc = DateTime.UtcNow;
+
+            // Print history (FR-PRN-4): people who already have a card for this design
+            // are a reprint -- ask why, or let the operator print only the new people.
+            ReprintDecision? reprintDecision = null;
+            if (!isSecondDuplexPass)
+            {
+                var (confirmedRows, decision) = await ConfirmReprintsAsync(recordsToPrint);
+                if (confirmedRows is null)
+                {
+                    StatusMessage = "Printing cancelled.";
+                    return;
+                }
+                if (confirmedRows.Count == 0)
+                {
+                    StatusMessage = "Nothing to print: everyone in this run already has a card.";
+                    return;
+                }
+                recordsToPrint = confirmedRows;
+                reprintDecision = decision;
+            }
+
+            // Physical cards this job produces.
+            var cardsInJob = isSecondDuplexPass ? 0 : recordsToPrint.Count * NumberOfCopies;
+
+            // Who may print (licensed / trial / log in first) is decided here, in the
+            // print routine itself, for every job -- never just by the button's state.
+            if (_printAuthorization is not null)
+            {
+                // Trial cards are counted per card: odd/even page passes would print
+                // pages without counting them, so they need an activated license.
+                if (PageParity != PageParityFilter.AllPages && _trialState is { IsActivated: false })
+                {
+                    StatusMessage = "Printing odd or even pages only needs an activated license. Set Pages to All pages.";
+                    return;
+                }
+
+                authorization = await AuthorizeAsync(cardsInJob);
+                if (authorization is { IsAllowed: false })
+                {
+                    await HandleDenialAsync(authorization);
+                    return;
+                }
+
+            }
+            else
+            {
+                var licenseProblem = await CheckLicenseAsync(cardsInJob);
+                if (licenseProblem is not null)
+                {
+                    StatusMessage = licenseProblem;
+                    return;
+                }
+            }
+            var watermark = authorization?.Watermark == true;
+            // Trial: the cards were reserved for exactly NumberOfCopies, so the Windows
+            // print dialog may lower the copies but not raise them, and has no page range.
+            var copiesAreLimit = authorization is { IsTrial: true };
 
             var applyRotation = ShouldApplyRotation;
 
@@ -815,7 +1329,7 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
             var pageIndex = 0;
             foreach (var row in recordsToPrint)
             {
-                var options = BuildRenderOptions(row.Record);
+                var options = BuildRenderOptions(row.Record, trialWatermark: watermark);
                 if (PrintFront) foreach (var p in await SavePageAsync(tempDir, CardSide.Front, options, pageIndex++, applyRotation)) { pagePaths.Add(p.Path); pdfPages.Add(p.PdfPage); }
                 if (PrintBack) foreach (var p in await SavePageAsync(tempDir, CardSide.Back, options, pageIndex++, applyRotation)) { pagePaths.Add(p.Path); pdfPages.Add(p.PdfPage); }
             }
@@ -837,7 +1351,7 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
             if (useSystemDialog)
             {
                 StatusMessage = "Choose the printer and settings in the Windows print dialog...";
-                result = await _printerService.PrintPagesWithSystemDialogAsync(printerName, pagePaths, NumberOfCopies);
+                result = await _printerService.PrintPagesWithSystemDialogAsync(printerName, pagePaths, NumberOfCopies, copiesAreLimit);
             }
             else
             {
@@ -847,14 +1361,26 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
             }
 
             // Closing the Windows print dialog is not a failure: leave every record's
-            // print status exactly as it was.
+            // print status exactly as it was (the finally block gives trial cards back).
             if (result.Cancelled)
             {
-                StatusMessage = "Printing cancelled.";
+                StatusMessage = string.IsNullOrWhiteSpace(result.Error) ? "Printing cancelled." : result.Error;
                 return;
             }
 
             var success = result.Succeeded;
+            // Copies really printed (the Windows dialog can change them) and the cards
+            // that makes -- what the license counter / trial count is charged.
+            var copiesPrinted = result.CopiesPrinted is { } reported && reported > 0 ? reported : NumberOfCopies;
+            if (copiesAreLimit) copiesPrinted = Math.Min(copiesPrinted, NumberOfCopies);
+            var cardsPrinted = isSecondDuplexPass ? 0 : recordsToPrint.Count * copiesPrinted;
+            // Counts and printer only -- never cardholder data in the log.
+            if (success)
+                Log.Info($"Print run sent: {recordsToPrint.Count} record(s) x {copiesPrinted} copies, {pagePaths.Count} page(s), " +
+                         $"design \"{Document.Name}\", printer \"{result.PrinterName ?? printerName}\", colour mode {ColorMode}, pages {PageParity}.");
+            else
+                Log.Warn($"Print run failed on printer \"{result.PrinterName ?? printerName}\" for design \"{Document.Name}\": " +
+                         (string.IsNullOrWhiteSpace(result.Error) ? "no error text from the printer" : result.Error));
             foreach (var row in recordsToPrint)
             {
                 if (success)
@@ -869,23 +1395,52 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
             }
             await PersistStatusesAsync();
 
+            if (success)
+            {
+                if (authorization is not null && _printAuthorization is not null)
+                    await _printAuthorization.CompleteAsync(authorization, cardsPrinted); // license counter or trial cards
+                else
+                    await CountPrintedCardsAsync(cardsPrinted);
+            }
+
+            // Recorded for successful AND failed runs (a failed job shows in history
+            // without cards); skipped for the even-pages pass, which isn't a new job.
+            string? historyNote = null;
+            if (!isSecondDuplexPass)
+            {
+                historyNote = await RecordPrintHistoryAsync(
+                    recordsToPrint, success,
+                    string.IsNullOrWhiteSpace(result.Error) ? "The printer reported the job could not be sent." : result.Error,
+                    result.PrinterName ?? printerName, startedUtc, reprintDecision, copiesPrinted);
+            }
+
             if (success && DigitalCopyMode != DigitalCopyMode.Off)
             {
                 await SaveAutomaticDigitalCopyAsync(pagePaths, pdfPages);
             }
 
+            var trialNote = authorization is { IsTrial: true } && success && _trialState is { HasTrialStatus: true } trial
+                ? $" Trial: {trial.TrialUsageText}, {trial.TrialRemainingText}."
+                : "";
             StatusMessage = success
-                ? $"Sent {recordsToPrint.Count} card(s) to {result.PrinterName ?? printerName}."
+                ? $"Sent {recordsToPrint.Count} card(s) to {result.PrinterName ?? printerName}." +
+                  (historyNote is null ? "" : " " + historyNote) + trialNote
                 : string.IsNullOrWhiteSpace(result.Error)
                     ? "The printer reported the job could not be sent. Check Preferences and try again."
                     : $"Print failed: {result.Error}";
         }
         catch (Exception ex)
         {
+            Log.Error("Print failed with an exception", ex);
             StatusMessage = $"Print failed: {ex.Message}";
         }
         finally
         {
+            // Cancelled, failed, or an error before the job was sent: the reserved trial
+            // cards go back (a completed job was already counted and is left alone).
+            if (authorization is { IsAllowed: true, Finished: false } && _printAuthorization is not null)
+                await _printAuthorization.CancelAsync(authorization);
+
             IsPrinting = false;
             if (tempDir is not null)
             {
@@ -1065,6 +1620,7 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
         try
         {
             var options = BuildRenderOptions(PreviewRecord);
+            _previewWatermark = options.TrialWatermark;
 
             // Assign the new bitmap first, THEN dispose the old one, so the Image
             // control is never asked to draw an already-disposed bitmap.
@@ -1135,6 +1691,21 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
     [RelayCommand]
     private async Task SaveDigitalCopy()
     {
+        // With a license a digital copy isn't a card, so it isn't counted -- but it
+        // still needs a valid license, or it would be a way around the printing lock.
+        // In trial mode it is a card (a PDF can be printed anywhere): it uses one trial
+        // card and carries the watermark. Without either, log in first.
+        InfoID.Desktop.Features.Trial.Services.PrintAuthorization? authorization = null;
+        if (_printAuthorization is null)
+        {
+            var licenseProblem = await CheckLicenseAsync(0);
+            if (licenseProblem is not null)
+            {
+                StatusMessage = licenseProblem;
+                return;
+            }
+        }
+
         try
         {
             var suffix = ColorMode switch
@@ -1144,12 +1715,23 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
                 _ => string.Empty,
             };
 
+            if (_printAuthorization is not null)
+            {
+                var isLicensed = _trialState?.IsActivated == true;
+                authorization = await AuthorizeAsync(isLicensed ? 0 : 1);
+                if (authorization is { IsAllowed: false })
+                {
+                    await HandleDenialAsync(authorization);
+                    return;
+                }
+            }
+
             var path = await _filePickerService.PickSaveFileAsync(
                 "Save Digital Copy", "PDF", new[] { "*.pdf" }, $"{Document.Name}_DigitalCopy{suffix}", "pdf");
             if (path is null) return;
 
             var record = PreviewRecord ?? Records.FirstOrDefault()?.Record;
-            var options = BuildRenderOptions(record);
+            var options = BuildRenderOptions(record, trialWatermark: authorization?.Watermark == true);
             var disableAntialiasing = AntialiasMode == PrintAntialiasMode.No;
             var applyRotation = ShouldApplyRotation;
 
@@ -1177,11 +1759,21 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
                 PrintColorMode.CompositeAndMonoChrome => "color + black",
                 _ => "color",
             };
-            StatusMessage = $"Digital copy ({modeText}) saved to {path}.";
+            if (authorization is not null && _printAuthorization is not null)
+                await _printAuthorization.CompleteAsync(authorization, authorization.Cards);
+            StatusMessage = $"Digital copy ({modeText}) saved to {path}." +
+                            (authorization is { IsTrial: true } && _trialState is { HasTrialStatus: true } trial
+                                ? $" Trial: {trial.TrialUsageText}, {trial.TrialRemainingText}."
+                                : "");
         }
         catch (Exception ex)
         {
             StatusMessage = $"Couldn't save digital copy: {ex.Message}";
+        }
+        finally
+        {
+            if (authorization is { IsAllowed: true, Finished: false } && _printAuthorization is not null)
+                await _printAuthorization.CancelAsync(authorization);
         }
     }
 
@@ -1189,5 +1781,12 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
         new(page.Bgra, page.Width, page.Height, Document.WidthMm, Document.HeightMm);
 
     [RelayCommand]
-    private void Close() => RequestClose(true);
+    private void Close()
+    {
+        // Closing with the reprint question open counts as Cancel for that print.
+        ReprintPrompt?.CancelCommand.Execute(null);
+        LoginPrompt?.CancelCommand.Execute(null);
+        if (_trialState is not null) _trialState.Changed -= OnTrialStateChanged;
+        RequestClose(true);
+    }
 }

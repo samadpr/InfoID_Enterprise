@@ -19,6 +19,8 @@ public class CardConfiguration : IEntityTypeConfiguration<Card>
             .HasMaxLength(100);
         builder.Property(x => x.RFIDUid)
             .HasMaxLength(100);
+        builder.HasIndex(x => x.CardNumber);
+        builder.HasIndex(x => x.ExpiryDate);
         builder.Property(x => x.Status)
             .HasConversion<string>()
             .HasMaxLength(30);

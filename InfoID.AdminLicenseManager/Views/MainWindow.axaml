@@ -4,6 +4,7 @@
         x:Class="InfoID.AdminLicenseManager.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="InfoID License Manager"
+        Icon="avares://InfoID.AdminLicenseManager/Assets/Icons/InfoID.ico"
         Width="1280" Height="800" MinWidth="1000" MinHeight="640"
         WindowStartupLocation="CenterScreen">
     <ContentControl Content="{Binding CurrentPage}" />

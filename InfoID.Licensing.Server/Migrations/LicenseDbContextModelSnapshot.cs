@@ -47,6 +47,9 @@ namespace InfoID.Licensing.Server.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
 
+                    b.Property<int?>("CardsIssuedReported")
+                        .HasColumnType("integer");
+
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
@@ -290,6 +293,91 @@ namespace InfoID.Licensing.Server.Migrations
                     b.ToTable("BlacklistEntry", (string)null);
                 });
 
+            modelBuilder.Entity("InfoID.Licensing.Server.Entities.CustomerAccount", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Cancelled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("CompanyName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Country")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("CustomerRecordId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("EmailVerified")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("EmailVerifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FailedLoginCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("LastLoginDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LockoutEndUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("TermsAcceptedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerRecordId");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("CustomerAccount", (string)null);
+                });
+
             modelBuilder.Entity("InfoID.Licensing.Server.Entities.CustomerRecord", b =>
                 {
                     b.Property<long>("Id")
@@ -343,6 +431,121 @@ namespace InfoID.Licensing.Server.Migrations
                     b.HasIndex("ContactEmail");
 
                     b.ToTable("CustomerRecord", (string)null);
+                });
+
+            modelBuilder.Entity("InfoID.Licensing.Server.Entities.CustomerSession", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AppVersion")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("Cancelled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedFromIp")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<long>("CustomerAccountId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("ExpiresUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("RevokedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerAccountId");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.ToTable("CustomerSession", (string)null);
+                });
+
+            modelBuilder.Entity("InfoID.Licensing.Server.Entities.EmailCode", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("Cancelled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("CustomerAccountId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("ExpiresUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTime?>("UsedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerAccountId", "Purpose");
+
+                    b.ToTable("EmailCode", (string)null);
                 });
 
             modelBuilder.Entity("InfoID.Licensing.Server.Entities.EmailTemplate", b =>
@@ -462,6 +665,9 @@ namespace InfoID.Licensing.Server.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<bool>("AllowOfflineActivation")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("BatchId")
                         .HasColumnType("uuid");
 
@@ -484,6 +690,9 @@ namespace InfoID.Licensing.Server.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("CustomerAccountId")
+                        .HasColumnType("bigint");
 
                     b.Property<long?>("CustomerRecordId")
                         .HasColumnType("bigint");
@@ -515,6 +724,13 @@ namespace InfoID.Licensing.Server.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("text");
 
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasDefaultValue("INFOID");
+
                     b.Property<DateTime?>("RevokedDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -537,11 +753,257 @@ namespace InfoID.Licensing.Server.Migrations
 
                     b.HasIndex("CreatedByAdminUserId");
 
+                    b.HasIndex("CustomerAccountId");
+
                     b.HasIndex("CustomerRecordId");
+
+                    b.HasIndex("ProductCode");
 
                     b.HasIndex("Status");
 
                     b.ToTable("LicenseCode", (string)null);
+                });
+
+            modelBuilder.Entity("InfoID.Licensing.Server.Entities.LicenseRequest", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AppVersion")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("Cancelled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("CompanyName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Country")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("CustomerAccountId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<long?>("HandledByAdminUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("HandledDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("LicenseCodeId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("MachineFingerprint")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("Machines")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<long>("PlanId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("StateProvince")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("StatusReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerAccountId");
+
+                    b.HasIndex("Email");
+
+                    b.HasIndex("HandledByAdminUserId");
+
+                    b.HasIndex("LicenseCodeId");
+
+                    b.HasIndex("PlanId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("LicenseRequest", (string)null);
+                });
+
+            modelBuilder.Entity("InfoID.Licensing.Server.Entities.Plan", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Cancelled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("CardLimitPeriod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DefaultMachines")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("DurationMonths")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FeaturesText")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("MaxCardsPerPeriod")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("PriceText")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Tagline")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("Tier")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductCode", "SortOrder");
+
+                    b.ToTable("Plan", (string)null);
+                });
+
+            modelBuilder.Entity("InfoID.Licensing.Server.Entities.Product", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Cancelled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Product", (string)null);
                 });
 
             modelBuilder.Entity("InfoID.Licensing.Server.Entities.SupportTicket", b =>
@@ -658,6 +1120,142 @@ namespace InfoID.Licensing.Server.Migrations
                     b.ToTable("TransferHistory", (string)null);
                 });
 
+            modelBuilder.Entity("InfoID.Licensing.Server.Entities.TrialReservation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AppVersion")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("Cancelled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("Cards")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("CardsPrinted")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("CompletedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("CustomerAccountId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("DesignName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("ExpiresUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MachineFingerprint")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ReservationKey")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<long>("TrialUsageId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReservationKey")
+                        .IsUnique();
+
+                    b.HasIndex("TrialUsageId", "Status");
+
+                    b.ToTable("TrialReservation", (string)null);
+                });
+
+            modelBuilder.Entity("InfoID.Licensing.Server.Entities.TrialUsage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Cancelled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("CardLimit")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CardsReserved")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CardsUsed")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("CustomerAccountId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("FirstPrintDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LastPrintDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerAccountId", "ProductCode")
+                        .IsUnique();
+
+                    b.ToTable("TrialUsage", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_TrialUsage_NonNegative", "\"CardsUsed\" >= 0 AND \"CardsReserved\" >= 0 AND \"CardLimit\" >= 0");
+                        });
+                });
+
             modelBuilder.Entity("InfoID.Licensing.Server.Entities.ActivationRecord", b =>
                 {
                     b.HasOne("InfoID.Licensing.Server.Entities.AdminUser", "GeneratedByAdminUser")
@@ -686,6 +1284,38 @@ namespace InfoID.Licensing.Server.Migrations
                     b.Navigation("AdminUser");
                 });
 
+            modelBuilder.Entity("InfoID.Licensing.Server.Entities.CustomerAccount", b =>
+                {
+                    b.HasOne("InfoID.Licensing.Server.Entities.CustomerRecord", "CustomerRecord")
+                        .WithMany()
+                        .HasForeignKey("CustomerRecordId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CustomerRecord");
+                });
+
+            modelBuilder.Entity("InfoID.Licensing.Server.Entities.CustomerSession", b =>
+                {
+                    b.HasOne("InfoID.Licensing.Server.Entities.CustomerAccount", "CustomerAccount")
+                        .WithMany()
+                        .HasForeignKey("CustomerAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CustomerAccount");
+                });
+
+            modelBuilder.Entity("InfoID.Licensing.Server.Entities.EmailCode", b =>
+                {
+                    b.HasOne("InfoID.Licensing.Server.Entities.CustomerAccount", "CustomerAccount")
+                        .WithMany()
+                        .HasForeignKey("CustomerAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CustomerAccount");
+                });
+
             modelBuilder.Entity("InfoID.Licensing.Server.Entities.FraudAlert", b =>
                 {
                     b.HasOne("InfoID.Licensing.Server.Entities.ActivationRecord", "ActivationRecord")
@@ -703,6 +1333,11 @@ namespace InfoID.Licensing.Server.Migrations
                         .HasForeignKey("CreatedByAdminUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("InfoID.Licensing.Server.Entities.CustomerAccount", "CustomerAccount")
+                        .WithMany()
+                        .HasForeignKey("CustomerAccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("InfoID.Licensing.Server.Entities.CustomerRecord", "CustomerRecord")
                         .WithMany("LicenseCodes")
                         .HasForeignKey("CustomerRecordId")
@@ -710,7 +1345,41 @@ namespace InfoID.Licensing.Server.Migrations
 
                     b.Navigation("CreatedByAdminUser");
 
+                    b.Navigation("CustomerAccount");
+
                     b.Navigation("CustomerRecord");
+                });
+
+            modelBuilder.Entity("InfoID.Licensing.Server.Entities.LicenseRequest", b =>
+                {
+                    b.HasOne("InfoID.Licensing.Server.Entities.CustomerAccount", "CustomerAccount")
+                        .WithMany()
+                        .HasForeignKey("CustomerAccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("InfoID.Licensing.Server.Entities.AdminUser", "HandledByAdminUser")
+                        .WithMany()
+                        .HasForeignKey("HandledByAdminUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("InfoID.Licensing.Server.Entities.LicenseCode", "LicenseCode")
+                        .WithMany()
+                        .HasForeignKey("LicenseCodeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("InfoID.Licensing.Server.Entities.Plan", "Plan")
+                        .WithMany()
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CustomerAccount");
+
+                    b.Navigation("HandledByAdminUser");
+
+                    b.Navigation("LicenseCode");
+
+                    b.Navigation("Plan");
                 });
 
             modelBuilder.Entity("InfoID.Licensing.Server.Entities.SupportTicket", b =>
@@ -761,6 +1430,28 @@ namespace InfoID.Licensing.Server.Migrations
                     b.Navigation("NewActivationRecord");
 
                     b.Navigation("OldActivationRecord");
+                });
+
+            modelBuilder.Entity("InfoID.Licensing.Server.Entities.TrialReservation", b =>
+                {
+                    b.HasOne("InfoID.Licensing.Server.Entities.TrialUsage", "TrialUsage")
+                        .WithMany()
+                        .HasForeignKey("TrialUsageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("TrialUsage");
+                });
+
+            modelBuilder.Entity("InfoID.Licensing.Server.Entities.TrialUsage", b =>
+                {
+                    b.HasOne("InfoID.Licensing.Server.Entities.CustomerAccount", "CustomerAccount")
+                        .WithMany()
+                        .HasForeignKey("CustomerAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CustomerAccount");
                 });
 
             modelBuilder.Entity("InfoID.Licensing.Server.Entities.CustomerRecord", b =>

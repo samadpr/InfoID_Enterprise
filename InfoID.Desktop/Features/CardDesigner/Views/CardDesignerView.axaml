@@ -7,6 +7,7 @@
              xmlns:controls="using:InfoID.Desktop.Features.CardDesigner.Views.Controls"
              xmlns:conv="using:InfoID.Desktop.Features.CardDesigner.Converters"
              xmlns:icons="using:InfoID.Desktop.Features.CardDesigner.Views.Icons"
+             xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:services="using:InfoID.Desktop.Features.CardDesigner.Services"
              xmlns:printing="using:InfoID.Desktop.Features.Printing.Views"
              mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="820"
@@ -205,6 +206,15 @@
 
         <!-- Database area action buttons (Add database / Apply / Disconnect):
              clear hover and pressed feedback, with a smooth fade. -->
+        <!-- Data grid: a typed value that doesn't fit its field (number, date...) -->
+        <Style Selector="TextBox.cellError /template/ Border#PART_BorderElement">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushError}" />
+            <Setter Property="BorderThickness" Value="1.5" />
+        </Style>
+        <Style Selector="TextBox.cellError:focus /template/ Border#PART_BorderElement">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushError}" />
+        </Style>
+
         <Style Selector="Button.dbAction">
             <Setter Property="Cursor" Value="Hand" />
         </Style>
@@ -582,12 +592,12 @@
                                               ConverterParameter=Fixed}" />
 
                                     <!-- Link -->
-                                    <ToggleButton Content="Link"
+                                    <!--<ToggleButton Content="Link"
                                                   Padding="14,8"
                                                   IsChecked="{Binding SourceType,
                                               Mode=TwoWay,
                                               Converter={x:Static conv:EnumToBoolConverter.Instance},
-                                              ConverterParameter=Link}" />
+                                              ConverterParameter=Link}" />-->
 
                                     <!-- Database -->
                                     <ToggleButton Content="Database"
@@ -2074,7 +2084,7 @@
                      Show/Hide Rulers, all bound to these exact same commands), and having
                      both made this toolbar row noticeably more crowded for no added
                      capability. -->
-					<ToggleButton Classes="toolbtn-wide" Content="Grid" ToolTip.Tip="Show/hide the design grid"
+					<!--<ToggleButton Classes="toolbtn-wide" Content="Grid" ToolTip.Tip="Show/hide the design grid"
 								  IsChecked="{Binding ActiveTab.ShowGrid, Mode=OneWay}"
 								  Command="{Binding ActiveTab.ToggleShowGridCommand}" />
 					<ToggleButton Classes="toolbtn-wide" Content="Snap" ToolTip.Tip="Snap elements to the grid while dragging"
@@ -2082,7 +2092,7 @@
 								  Command="{Binding ActiveTab.ToggleSnapToGridCommand}" />
 					<ToggleButton Classes="toolbtn-wide" Content="Rulers" ToolTip.Tip="Show/hide the mm rulers"
 								  IsChecked="{Binding ActiveTab.ShowRulers, Mode=OneWay}"
-								  Command="{Binding ActiveTab.ToggleShowRulersCommand}" />
+								  Command="{Binding ActiveTab.ToggleShowRulersCommand}" />-->
 
 					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
 
@@ -2433,24 +2443,63 @@
                                             IsVisible="{Binding ActiveTab.HasDatabaseConnection, FallbackValue=False}">
 
                                     <Button Classes="ghost toolbtn"
-                                            ToolTip.Tip="Add row"
+                                            ToolTip.Tip="Add row (the row you were typing in is saved first)"
                                             AutomationProperties.Name="Add row"
                                             Command="{Binding ActiveTab.AddDatabaseRowCommand}">
                                         <PathIcon Data="{x:Static icons:DesignerIcons.Add}" Width="14" Height="14" />
                                     </Button>
 
                                     <Button Classes="ghost toolbtn"
-                                            ToolTip.Tip="Remove selected rows from the grid (Ctrl/Shift+click to select several)"
+                                            ToolTip.Tip="{Binding ActiveTab.DeleteDatabaseRowsToolTip}"
                                             AutomationProperties.Name="Delete rows"
                                             Command="{Binding ActiveTab.DeleteDatabaseRowsCommand}"
                                             CommandParameter="{Binding #DatabaseDataGrid.SelectedItems}">
                                         <PathIcon Data="{x:Static icons:DesignerIcons.Delete}" Width="14" Height="14" />
                                     </Button>
 
-                                    <!--<Button Classes="ghost"
+                                    <!-- Internal Database: rows save automatically when finished;
+                                         Save writes the row still being typed right now. -->
+                                    <Button Classes="ghost dbAction"
                                             Padding="12,7"
-                                            Content="Save row"
-                                            Command="{Binding ActiveTab.SaveDatabaseRowCommand}" />-->
+                                            IsVisible="{Binding ActiveTab.IsDatabaseEditable, FallbackValue=False}"
+                                            Command="{Binding ActiveTab.SaveDatabaseChangesCommand}"
+                                            ToolTip.Tip="Save rows now. Rows are also saved automatically when you move to another row, click outside the grid, print or save the design."
+                                            AutomationProperties.Name="Save rows">
+                                        <TextBlock Text="Save" />
+                                    </Button>
+
+                                    <!-- Read-only source (Excel, SQL Server, ...): an info icon; the
+                                         explanation is its tooltip, so it never crowds the toolbar. -->
+                                    <Border Background="Transparent"
+                                            Padding="4"
+                                            VerticalAlignment="Center"
+                                            Focusable="True"
+                                            IsVisible="{Binding ActiveTab.IsDatabaseSessionOnly, FallbackValue=False}"
+                                            ToolTip.Tip="{Binding ActiveTab.DatabaseReadOnlyInfo}"
+                                            ToolTip.ShowDelay="200"
+                                            AutomationProperties.Name="Read-only source"
+                                            AutomationProperties.HelpText="{Binding ActiveTab.DatabaseReadOnlyInfo}">
+                                        <mi:MaterialIcon Kind="InformationOutline"
+                                                         Width="16" Height="16"
+                                                         Foreground="{DynamicResource BrushTextSecondary}" />
+                                    </Border>
+
+                                    <!-- Saving state (Internal Database): "2 unsaved rows", "Saved 1 row",
+                                         errors. Short on the toolbar; the full text is the tooltip. -->
+                                    <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center"
+                                                MaxWidth="220"
+                                                Background="Transparent"
+                                                IsVisible="{Binding ActiveTab.DatabaseSaveStatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}, FallbackValue=False}"
+                                                ToolTip.Tip="{Binding ActiveTab.DatabaseSaveStatusText}">
+                                        <PathIcon Width="12" Height="12"
+                                                  Data="{x:Static icons:DesignerIcons.AlertTriangle}"
+                                                  Foreground="{DynamicResource BrushError}"
+                                                  IsVisible="{Binding ActiveTab.DatabaseSaveHasError, FallbackValue=False}" />
+                                        <TextBlock Classes="caption"
+                                                   VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Text="{Binding ActiveTab.DatabaseSaveStatusText}" />
+                                    </StackPanel>
 
                                     <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="2,4" />
 

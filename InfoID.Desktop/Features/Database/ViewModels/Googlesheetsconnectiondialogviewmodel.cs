@@ -17,6 +17,8 @@ namespace InfoID.Desktop.Features.Database.ViewModels;
 public partial class GoogleSheetsConnectionDialogViewModel
     : DialogViewModelBase<DatabaseConnection?>
 {
+    private static readonly InfoID.Shared.Logging.AppLogger Log = InfoID.Shared.Logging.AppLog.For<GoogleSheetsConnectionDialogViewModel>();
+
     private const string UserDataPolicyUrl =
         "https://developers.google.com/terms/api-services-user-data-policy";
 
@@ -190,7 +192,7 @@ public partial class GoogleSheetsConnectionDialogViewModel
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"GOOGLE SESSION RESTORE FAILED: {ex.Message}");
+            Log.Warn("Google session restore failed", ex);
             hasSavedSignIn = false;
         }
 

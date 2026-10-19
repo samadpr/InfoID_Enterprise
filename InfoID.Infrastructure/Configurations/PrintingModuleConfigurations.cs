@@ -48,6 +48,11 @@ public class PrintJobConfiguration : IEntityTypeConfiguration<PrintJob>
         builder.Property(x => x.Status)
             .HasConversion<string>()
             .HasMaxLength(30);
+        builder.Property(x => x.DesignName)
+            .HasMaxLength(200);
+        builder.Property(x => x.FailureReason)
+            .HasMaxLength(500);
+        builder.HasIndex(x => x.CreatedDate);
 
         builder.HasOne(x => x.Branch)
             .WithMany()

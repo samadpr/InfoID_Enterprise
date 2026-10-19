@@ -11,6 +11,8 @@ namespace InfoID.AdminLicenseManager.ViewModels;
 /// and the first license actions -- revoke and extend (FR-ADM-8).</summary>
 public sealed partial class LicenseCodesViewModel : ViewModelBase, ILoadable
 {
+    private static readonly InfoID.Shared.Logging.AppLogger Log = InfoID.Shared.Logging.AppLog.For<LicenseCodesViewModel>();
+
     private readonly LicenseCodeService _codes;
 
     public LicenseCodesViewModel(LicenseCodeService codes, AdminContext admin)
@@ -46,6 +48,7 @@ public sealed partial class LicenseCodesViewModel : ViewModelBase, ILoadable
         }
         catch (Exception ex)
         {
+            Log.Error("LicenseCodes: search failed", ex);
             Show("Search failed: " + ex.GetBaseException().Message, error: true);
         }
     }
@@ -74,6 +77,10 @@ public sealed partial class LicenseCodesViewModel : ViewModelBase, ILoadable
     [ObservableProperty] private decimal? _maxCardsPerPeriod = 1000;
     [ObservableProperty] private CardLimitPeriod _limitPeriod = CardLimitPeriod.Monthly;
     [ObservableProperty] private decimal? _maxActivations = 1;
+
+    /// <summary>Off by default: the license can only be activated online (the secure
+    /// path). Turn on for customers whose computers have no internet.</summary>
+    [ObservableProperty] private bool _allowOfflineActivation;
     [ObservableProperty] private string _organizationName = "";
     [ObservableProperty] private string _organizationType = "";
     [ObservableProperty] private string _country = "";
@@ -100,7 +107,8 @@ public sealed partial class LicenseCodesViewModel : ViewModelBase, ILoadable
                 UnlimitedCards ? null : (int?)(MaxCardsPerPeriod ?? 0),
                 LimitPeriod,
                 (int)(MaxActivations ?? 1),
-                OrganizationName, OrganizationType, Country, ContactEmail, ContactPhone, Notes);
+                OrganizationName, OrganizationType, Country, ContactEmail, ContactPhone, Notes,
+                AllowOfflineActivation);
 
             var codes = await _codes.CreateAsync(request);
             CreatedCodes = string.Join(Environment.NewLine, codes);
@@ -113,6 +121,7 @@ public sealed partial class LicenseCodesViewModel : ViewModelBase, ILoadable
         }
         catch (Exception ex)
         {
+            Log.Error("LicenseCodes: create failed", ex);
             Show("Couldn't create codes: " + ex.GetBaseException().Message, error: true);
         }
     }
@@ -136,6 +145,7 @@ public sealed partial class LicenseCodesViewModel : ViewModelBase, ILoadable
         }
         catch (Exception ex)
         {
+            Log.Error("LicenseCodes: revoke failed", ex);
             Show(ex.GetBaseException().Message, error: true);
         }
     }
@@ -153,6 +163,48 @@ public sealed partial class LicenseCodesViewModel : ViewModelBase, ILoadable
         }
         catch (Exception ex)
         {
+            Log.Error("LicenseCodes: extend failed", ex);
+            Show(ex.GetBaseException().Message, error: true);
+        }
+    }
+
+    [RelayCommand]
+    private async Task FreeSlots()
+    {
+        if (SelectedRow is null) { Show("Select a code first.", error: true); return; }
+        if (string.IsNullOrWhiteSpace(ActionReason)) { Show("Enter a reason (e.g. \"Customer moved to a new PC\").", error: true); return; }
+        try
+        {
+            var count = await _codes.FreeMachineSlotsAsync(SelectedRow.Id, ActionReason.Trim());
+            Show(count == 0
+                ? $"{SelectedRow.ActivationCode} had no machines in use."
+                : $"Freed {count} machine slot(s) of {SelectedRow.ActivationCode}. The customer can now activate on a new computer.", error: false);
+            ActionReason = "";
+            await Search();
+        }
+        catch (Exception ex)
+        {
+            Log.Error("LicenseCodes: free slots failed", ex);
+            Show(ex.GetBaseException().Message, error: true);
+        }
+    }
+
+    [RelayCommand]
+    private async Task ToggleOffline()
+    {
+        if (SelectedRow is null) { Show("Select a code first.", error: true); return; }
+        try
+        {
+            var allow = !SelectedRow.AllowOfflineActivation;
+            await _codes.SetAllowOfflineAsync(SelectedRow.Id, allow);
+            Show(allow
+                ? $"{SelectedRow.ActivationCode} can now also be activated offline (phone/QR)."
+                : $"{SelectedRow.ActivationCode} can now only be activated online.", error: false);
+            await Search();
+        }
+        catch (Exception ex)
+        {
+            Log.Error("LicenseCodes: toggle offline failed", ex);
             Show(ex.GetBaseException().Message, error: true);
         }
     }

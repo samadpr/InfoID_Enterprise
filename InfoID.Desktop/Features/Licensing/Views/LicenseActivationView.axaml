@@ -1,0 +1,87 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Licensing.ViewModels"
+             xmlns:components="using:InfoID.Desktop.Shell.Components"
+             x:Class="InfoID.Desktop.Features.Licensing.Views.LicenseActivationView"
+             x:DataType="vm:LicenseActivationViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <ScrollViewer>
+        <StackPanel Margin="40,28,40,40" Spacing="16" MaxWidth="720" HorizontalAlignment="Left">
+            <components:PageHeaderView Title="Activate InfoID" />
+
+            <Border Classes="card" IsVisible="{Binding Reason, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <TextBlock Text="{Binding Reason}" Foreground="{DynamicResource BrushWarning}" TextWrapping="Wrap" />
+            </Border>
+
+            <!-- Online: one step -->
+            <Border Classes="card" Padding="24">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="h3" Text="Enter your activation code" />
+                    <TextBlock Classes="bodySecondary" TextWrapping="Wrap"
+                               Text="You received it with your purchase (e.g. 7K3M-QX9D-2HFA-P8ZR). InfoID activates over the internet in a few seconds." />
+                    <TextBox Text="{Binding ActivationCode}" Watermark="XXXX-XXXX-XXXX-XXXX" FontSize="18"
+                             FontFamily="Consolas, Cascadia Mono, monospace" AutomationProperties.Name="Activation code">
+                        <TextBox.KeyBindings>
+                            <KeyBinding Gesture="Enter" Command="{Binding ActivateCommand}" />
+                        </TextBox.KeyBindings>
+                    </TextBox>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button Classes="primary" Content="Activate" Command="{Binding ActivateCommand}" IsEnabled="{Binding !IsBusy}" />
+                        <ProgressBar IsIndeterminate="True" Width="120" VerticalAlignment="Center" IsVisible="{Binding IsBusy}" />
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource BrushError}" TextWrapping="Wrap"
+                               IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Offline: QR + phone -->
+            <Button Classes="ghost" HorizontalAlignment="Left" Command="{Binding ToggleOfflineCommand}"
+                    Content="No internet on this computer? Activate offline" />
+
+            <Border x:Name="OfflineCard" Classes="card" Padding="24" IsVisible="{Binding ShowOffline}">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="h3" Text="Activate offline" />
+                    <TextBlock Foreground="{DynamicResource BrushWarning}" TextWrapping="Wrap" Text="{Binding OfflineMessage}"
+                               IsVisible="{Binding OfflineMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                    <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding HasRequestCode}">
+                        <Border Grid.Column="0" Background="White" CornerRadius="8" Padding="8" Margin="0,0,20,0"
+                                VerticalAlignment="Top" IsVisible="{Binding HasQr}">
+                            <Image Source="{Binding QrImage}" Width="180" Height="180"
+                                   RenderOptions.BitmapInterpolationMode="None" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBlock TextWrapping="Wrap" IsVisible="{Binding HasQr}"
+                                       Text="1. Scan this QR code with your phone's camera." />
+                            <TextBlock TextWrapping="Wrap" IsVisible="{Binding HasQr}"
+                                       Text="2. Your phone shows a 20-character serial key. Type it below and click Activate offline." />
+                            <Button Classes="ghost" HorizontalAlignment="Left" Padding="0,4" IsVisible="{Binding HasPhoneUrl}"
+                                    Content="Can't scan? Open the page in this computer's browser"
+                                    Command="{Binding OpenPhonePageCommand}" />
+                            <TextBlock Classes="caption" TextWrapping="Wrap" Margin="0,8,0,0"
+                                       Text="Can't scan? Send this request code to your vendor instead:" />
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBox Text="{Binding RequestCode}" IsReadOnly="True" FontFamily="Consolas, Cascadia Mono, monospace" />
+                                <Button Grid.Column="1" Classes="secondary" Margin="8,0,0,0" Content="Copy" Click="OnCopyRequestCode" />
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Classes="label" Text="Serial key" Margin="0,8,0,0" />
+                    <TextBox Text="{Binding SerialKey}" Watermark="XXXXX-XXXXX-XXXXX-XXXXX" FontSize="18"
+                             FontFamily="Consolas, Cascadia Mono, monospace" AutomationProperties.Name="Serial key" />
+                    <Button Classes="primary" Content="Activate offline" HorizontalAlignment="Left"
+                            Command="{Binding ActivateOfflineCommand}" IsEnabled="{Binding !IsBusy}" />
+                </StackPanel>
+            </Border>
+
+            <StackPanel Spacing="4">
+                <Button Classes="ghost" Content="Skip for now" Command="{Binding SkipForNowCommand}" HorizontalAlignment="Left" />
+                <TextBlock Classes="caption" TextWrapping="Wrap"
+                           Text="You can design cards and view your data without activating. Printing needs an active license. Activate anytime from Help > Account and license." />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

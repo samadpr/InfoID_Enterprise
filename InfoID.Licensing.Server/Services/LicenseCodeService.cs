@@ -20,7 +20,10 @@ public sealed record CreateLicenseCodesRequest(
     string? Country,
     string? ContactEmail,
     string? ContactPhone,
-    string? Notes);
+    string? Notes,
+    bool AllowOfflineActivation = false,
+    long? CustomerAccountId = null,
+    string ProductCode = ProductCodes.InfoID);
 
 public sealed record LicenseCodeRow(
     long Id,
@@ -33,7 +36,8 @@ public sealed record LicenseCodeRow(
     int ActiveMachines,
     int MaxActivations,
     string? Customer,
-    DateTime CreatedDate);
+    DateTime CreatedDate,
+    bool AllowOfflineActivation);
 
 /// <summary>License Creation and search (FR-ADM-4, FR-ADM-7) plus the license actions
 /// (FR-ADM-8) that change the database. Actions that must reach a customer's machine
@@ -91,6 +95,9 @@ public sealed class LicenseCodeService
                 MaxCardsPerPeriod = request.MaxCardsPerPeriod,
                 CardLimitPeriod = request.LimitPeriod.ToString(),
                 MaxActivations = request.MaxActivations,
+                AllowOfflineActivation = request.AllowOfflineActivation,
+                CustomerAccountId = request.CustomerAccountId,
+                ProductCode = request.ProductCode,
                 Status = LicenseCodeStatus.Available,
                 BatchId = batchId,
                 CustomerRecord = customer,
@@ -150,7 +157,8 @@ public sealed class LicenseCodeService
                 c.Activations.Count(a => a.Status == ActivationStatus.Active && !a.Cancelled),
                 c.MaxActivations,
                 c.CustomerRecord != null ? c.CustomerRecord.OrganizationName : null,
-                c.CreatedDate))
+                c.CreatedDate,
+                c.AllowOfflineActivation))
             .ToListAsync();
     }
 
@@ -188,6 +196,47 @@ public sealed class LicenseCodeService
         code.ExpiryDate = newExpiry;
         await db.SaveChangesAsync();
         await _audit.LogAsync("LicenseCode.Extended", new { code.ActivationCode, OldExpiry = old, NewExpiry = newExpiry });
+    }
+
+    /// <summary>Turns offline activation (phone/QR page) on or off for a code.</summary>
+    public async Task SetAllowOfflineAsync(long licenseCodeId, bool allow)
+    {
+        _admin.Require(_admin.CanManageLicenses, "change offline activation");
+        await using var db = await _dbFactory.CreateDbContextAsync();
+        db.CurrentUser = _admin.Email;
+        var code = await db.LicenseCodes.FirstAsync(c => c.Id == licenseCodeId);
+        code.AllowOfflineActivation = allow;
+        await db.SaveChangesAsync();
+        await _audit.LogAsync(allow ? "LicenseCode.OfflineAllowed" : "LicenseCode.OfflineDisallowed", new { code.ActivationCode });
+    }
+
+    /// <summary>Frees every machine slot of a code, e.g. after the customer deactivated
+    /// offline or their old PC died (FR-ADM-8 transfer). Online machines stop at their
+    /// next check-in; offline machines keep their key, so use this knowingly.</summary>
+    public async Task<int> FreeMachineSlotsAsync(long licenseCodeId, string reason)
+    {
+        _admin.Require(_admin.CanManageLicenses, "free machine slots");
+        await using var db = await _dbFactory.CreateDbContextAsync();
+        db.CurrentUser = _admin.Email;
+        var code = await db.LicenseCodes.Include(c => c.Activations).FirstAsync(c => c.Id == licenseCodeId);
+        var active = code.Activations.Where(a => a.Status == ActivationStatus.Active && !a.Cancelled).ToList();
+        foreach (var activation in active)
+        {
+            activation.Status = ActivationStatus.Deactivated;
+            activation.DeactivatedDate = DateTime.UtcNow;
+            db.TransferHistories.Add(new TransferHistory
+            {
+                LicenseCodeId = code.Id,
+                OldActivationRecordId = activation.Id,
+                TransferDate = DateTime.UtcNow,
+                Reason = reason,
+            });
+        }
+        if (code.Status == LicenseCodeStatus.Active && active.Count > 0)
+            code.Status = LicenseCodeStatus.Available;
+        await db.SaveChangesAsync();
+        await _audit.LogAsync("LicenseCode.SlotsFreed", new { code.ActivationCode, Count = active.Count, Reason = reason });
+        return active.Count;
     }
 
     private static async Task<CustomerRecord?> FindOrCreateCustomerAsync(LicenseDbContext db, CreateLicenseCodesRequest request)

@@ -6,6 +6,8 @@ namespace InfoID.AdminLicenseManager.ViewModels;
 
 public sealed partial class DashboardViewModel : ViewModelBase, ILoadable
 {
+    private static readonly InfoID.Shared.Logging.AppLogger Log = InfoID.Shared.Logging.AppLog.For<DashboardViewModel>();
+
     private readonly DashboardService _dashboard;
 
     [ObservableProperty] private DashboardSummary? _summary;
@@ -23,6 +25,7 @@ public sealed partial class DashboardViewModel : ViewModelBase, ILoadable
         }
         catch (Exception ex)
         {
+            Log.Error("Dashboard: load failed", ex);
             Error = "Couldn't load the dashboard: " + ex.GetBaseException().Message;
         }
     }

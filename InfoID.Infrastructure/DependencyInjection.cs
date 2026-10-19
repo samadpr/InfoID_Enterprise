@@ -36,6 +36,20 @@ public static class DependencyInjection
         services.AddScoped<IDatabaseInitializer, DatabaseInitializer>();
         services.AddScoped<IDatabaseDiagnosticsService, DatabaseDiagnosticsService>();
 
+        // Backup & Restore (FR-ENT-4). The host app registers a BackupOptions singleton
+        // describing what goes into a backup (it knows where its own files live).
+        services.AddScoped<InfoID.Infrastructure.Backup.IBackupService, InfoID.Infrastructure.Backup.BackupService>();
+
+        // Audit trail (FR-REP-4, FR-REP-7): append-only, hash-chained AuditLog. The host
+        // can replace IAuditActorProvider (the Desktop app adds the signed-in account).
+        services.AddSingleton(new InfoID.Infrastructure.Auditing.AuditTrailOptions
+        {
+            AnchorPath = Path.Combine(DatabaseLocation.GetApplicationRoot(), "AuditAnchor.json"),
+        });
+        services.AddSingleton<InfoID.Domain.Common.Interfaces.IAuditActorProvider, InfoID.Infrastructure.Auditing.DefaultAuditActorProvider>();
+        services.AddScoped<InfoID.Domain.Common.Interfaces.IAuditTrail, InfoID.Infrastructure.Auditing.AuditTrail>();
+        services.AddScoped<InfoID.Infrastructure.Auditing.IAuditLogReader, InfoID.Infrastructure.Auditing.AuditLogReader>();
+
         return services;
     }
 }

@@ -45,16 +45,38 @@ public static class BarcodeRenderer
     private const int LinearPixelHeight = 220;
 
     private static readonly Dictionary<string, WriteableBitmap?> Cache = new();
+    private static readonly object CacheGate = new();
 
-    /// <summary>Never disposed by callers -- Cache owns every bitmap's lifetime for the
-    /// process's duration, same "never evicted, fine for one editing session's realistic
-    /// distinct-barcode count" reasoning CardCanvasView's own _bitmapCache already
-    /// uses.</summary>
-    public static WriteableBitmap? TryGenerate(QrCodeElement qr)
+    /// <summary>Codes bound to data ("{{VisitorId}}") produce a different bitmap per record,
+    /// so bulk printing would otherwise grow the cache by ~1 MB per card. Past this many
+    /// entries the cache starts over; dropped bitmaps are left to the GC (never disposed
+    /// here, because a canvas render may still be drawing one).</summary>
+    private const int MaxCacheEntries = 256;
+
+    private static bool TryGetCached(string key, out WriteableBitmap? bitmap)
     {
-        var key = string.Join('|', "qr", qr.Value, qr.ErrorCorrection, qr.Version, qr.MaskPattern,
+        lock (CacheGate) return Cache.TryGetValue(key, out bitmap);
+    }
+
+    private static void AddToCache(string key, WriteableBitmap? bitmap)
+    {
+        lock (CacheGate)
+        {
+            if (Cache.Count >= MaxCacheEntries) Cache.Clear();
+            Cache[key] = bitmap;
+        }
+    }
+
+    /// <summary>Never disposed by callers -- the cache owns the bitmaps (bounded, see
+    /// MaxCacheEntries).</summary>
+    /// <param name="value">What to encode for the current record (see CodeValueBinding);
+    /// null = the element's own Value.</param>
+    public static WriteableBitmap? TryGenerate(QrCodeElement qr, string? value = null)
+    {
+        value ??= qr.Value;
+        var key = string.Join('|', "qr", value, qr.ErrorCorrection, qr.Version, qr.MaskPattern,
             qr.CharacterSet, qr.Format, qr.ForegroundColorHex, qr.BackgroundColorHex, qr.MarginMm);
-        if (Cache.TryGetValue(key, out var cached)) return cached;
+        if (TryGetCached(key, out var cached)) return cached;
 
         WriteableBitmap? result;
         try
@@ -84,7 +106,7 @@ public static class BarcodeRenderer
                 Renderer = BuildRenderer(qr.ForegroundColorHex, qr.BackgroundColorHex),
             };
 
-            result = ToBitmap(writer.Write(qr.Value ?? string.Empty));
+            result = ToBitmap(writer.Write(value ?? string.Empty));
         }
         catch
         {
@@ -93,15 +115,18 @@ public static class BarcodeRenderer
             result = null;
         }
 
-        Cache[key] = result;
+        AddToCache(key, result);
         return result;
     }
 
-    public static WriteableBitmap? TryGenerate(BarcodeElement barcode)
+    /// <param name="value">What to encode for the current record (see CodeValueBinding);
+    /// null = the element's own Value.</param>
+    public static WriteableBitmap? TryGenerate(BarcodeElement barcode, string? value = null)
     {
-        var key = string.Join('|', "bc", barcode.Symbology, barcode.Value,
+        value ??= barcode.Value;
+        var key = string.Join('|', "bc", barcode.Symbology, value,
             barcode.ForegroundColorHex, barcode.BackgroundColorHex, barcode.QuietZoneMm);
-        if (Cache.TryGetValue(key, out var cached)) return cached;
+        if (TryGetCached(key, out var cached)) return cached;
 
         WriteableBitmap? result;
         try
@@ -121,7 +146,7 @@ public static class BarcodeRenderer
                 Renderer = BuildRenderer(barcode.ForegroundColorHex, barcode.BackgroundColorHex),
             };
 
-            result = ToBitmap(writer.Write(barcode.Value ?? string.Empty));
+            result = ToBitmap(writer.Write(value ?? string.Empty));
         }
         catch
         {
@@ -133,7 +158,7 @@ public static class BarcodeRenderer
             result = null;
         }
 
-        Cache[key] = result;
+        AddToCache(key, result);
         return result;
     }
 

@@ -67,6 +67,9 @@ public partial class CardDesignerView : UserControl
         }
         _headerCheckBox = this.FindControl<CheckBox>("SelectAllRowsCheckBox");
 
+        if (DatabaseDataGrid is not null)
+            DatabaseDataGrid.LostFocus += OnDatabaseGridLostFocus;
+
         if (_headerCheckBox is not null)
         {
             _headerCheckBox.IsCheckedChanged += (_, _) =>
@@ -223,6 +226,12 @@ public partial class CardDesignerView : UserControl
         {
             BuildDatabaseGrid();
         }
+        else if (e.PropertyName is nameof(CardDesignTabViewModel.DatabaseUnsavedCount)
+                     or nameof(CardDesignTabViewModel.DatabaseFailedCount) &&
+                 ReferenceEquals(sender, ViewModel?.ActiveTab))
+        {
+            Dispatcher.UIThread.Post(RefreshDatabaseGridCells, DispatcherPriority.Background);
+        }
         else if (e.PropertyName == nameof(CardDesignTabViewModel.SelectedDatabaseRow) &&
                  ReferenceEquals(sender, ViewModel?.ActiveTab) &&
                  sender is CardDesignTabViewModel { SelectedDatabaseRow: { } row } &&
@@ -340,6 +349,13 @@ public partial class CardDesignerView : UserControl
         if (tab is not null)
             tab.DatabaseRowChecksChanged += OnDatabaseRowChecksChanged;
 
+        // Rows saved (new IDs, cleared "unsaved" marks): refresh the visible cells.
+        if (_saveEventsTab is not null)
+            _saveEventsTab.DatabaseRowsSaved -= OnDatabaseRowsSaved;
+        _saveEventsTab = tab;
+        if (tab is not null)
+            tab.DatabaseRowsSaved += OnDatabaseRowsSaved;
+
         if (tab?.DatabaseDataView is null)
             return;
 
@@ -360,63 +376,89 @@ public partial class CardDesignerView : UserControl
                 continue;
             }
 
+            var isKeyColumn = tab.IsDatabaseKeyColumn(column);
+
             DatabaseDataGrid.Columns.Add(new DataGridTemplateColumn
             {
                 Header = columnName,
+                // Internal Database: the key is given by the database, never typed.
+                IsReadOnly = isKeyColumn,
 
-                // FIX: the text follows the cell's CURRENT row. Previously it was read once
-                // at creation, so recycled cells showed another row's value until
-                // double-clicked.
+                // The text follows the cell's CURRENT row (recycled cells must not show
+                // another row's value). Tagged so saved rows can be refreshed in place.
                 CellTemplate = new FuncDataTemplate<object>(
                     (item, _) =>
                     {
                         var textBlock = new TextBlock
                         {
-                            Text = GetCellText(item, columnName),
+                            Text = tab.GetDatabaseCellText(item as DataRowView, columnName),
                             Margin = new Thickness(6, 0),
-                            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+                            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                            Tag = new DatabaseCellTag(columnName),
                         };
 
+                        if (isKeyColumn)
+                            textBlock.Classes.Add("caption");
+
                         textBlock.DataContextChanged += (_, _) =>
-                            textBlock.Text = GetCellText(textBlock.DataContext, columnName);
+                            textBlock.Text = tab.GetDatabaseCellText(textBlock.DataContext as DataRowView, columnName);
 
                         return textBlock;
                     },
                     supportsRecycling: false),
 
-                // FIX: edits are written to the cell's current row, never a stale one.
+                // Typed values go through the view model, which converts them to the
+                // field's type (number, date, yes/no) and marks the row for saving.
+                // Valid text is written as you type, so nothing is lost if the next
+                // click goes straight to Print or another row; a value that doesn't
+                // fit is shown on the cell when you leave it.
                 CellEditingTemplate = new FuncDataTemplate<object>(
                     (item, _) =>
                     {
                         var editRow = item as DataRowView;
+                        var loading = true;
 
                         var textBox = new TextBox
                         {
-                            Text = GetCellText(item, columnName),
+                            Text = tab.GetDatabaseCellText(editRow, columnName),
                             Margin = new Thickness(2),
                             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch
                         };
+                        Avalonia.Automation.AutomationProperties.SetName(textBox, columnName);
+
+                        void Apply(bool showError)
+                        {
+                            if (loading || editRow is null || editRow.Row.RowState == DataRowState.Detached)
+                                return;
+
+                            if (tab.TrySetDatabaseCell(editRow, columnName, textBox.Text, out var error))
+                            {
+                                textBox.Classes.Remove("cellError");
+                                ToolTip.SetTip(textBox, null);
+                            }
+                            else if (showError)
+                            {
+                                textBox.Classes.Add("cellError");
+                                ToolTip.SetTip(textBox, error);
+                                tab.ReportDatabaseCellError(columnName, error);
+                            }
+                        }
 
                         textBox.DataContextChanged += (_, _) =>
                         {
                             if (textBox.DataContext is DataRowView row && !ReferenceEquals(row, editRow))
                             {
+                                loading = true;
                                 editRow = row;
-                                textBox.Text = GetCellText(row, columnName);
+                                textBox.Text = tab.GetDatabaseCellText(row, columnName);
+                                loading = false;
                             }
                         };
 
-                        textBox.LostFocus += (_, _) =>
-                        {
-                            if (editRow is null || editRow.Row.RowState == DataRowState.Detached)
-                                return;
+                        textBox.TextChanged += (_, _) => Apply(showError: textBox.Classes.Contains("cellError"));
+                        textBox.LostFocus += (_, _) => Apply(showError: true);
 
-                            editRow[columnName] =
-                                string.IsNullOrWhiteSpace(textBox.Text)
-                                    ? DBNull.Value
-                                    : textBox.Text;
-                        };
-
+                        loading = false;
                         return textBox;
                     },
                     supportsRecycling: false)
@@ -462,6 +504,26 @@ public partial class CardDesignerView : UserControl
                         Margin = new Thickness(12, 0, 0, 0)
                     };
 
+                    // Saving state of the row (Internal Database): amber = not saved
+                    // yet, red = couldn't be saved (tooltip says why).
+                    var mark = new Avalonia.Controls.Shapes.Ellipse
+                    {
+                        Width = 7,
+                        Height = 7,
+                        Margin = new Thickness(6, 0, 0, 0),
+                        VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                        IsVisible = false,
+                        Tag = DatabaseRowMarkTag.Instance,
+                    };
+
+                    var cell = new StackPanel
+                    {
+                        Orientation = Avalonia.Layout.Orientation.Horizontal,
+                        VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                    };
+                    cell.Children.Add(check);
+                    cell.Children.Add(mark);
+
                     var syncing = false;
 
                     void Sync()
@@ -473,6 +535,7 @@ public partial class CardDesignerView : UserControl
 
                     // Recycled cells get a new DataContext: re-read the tick for the new row.
                     check.DataContextChanged += (_, _) => Sync();
+                    mark.DataContextChanged += (_, _) => UpdateRowMark(tab, mark);
 
                     check.IsCheckedChanged += (_, _) =>
                     {
@@ -482,7 +545,7 @@ public partial class CardDesignerView : UserControl
                     };
 
                     _rowCheckSyncs.Add(Sync);
-                    return check;
+                    return cell;
                 },
                 supportsRecycling: true)
         };
@@ -583,6 +646,70 @@ public partial class CardDesignerView : UserControl
         }
     }
 
+
+    private CardDesignTabViewModel? _saveEventsTab;
+
+    /// <summary>Marks the text cells of the data grid (so saved rows can be refreshed
+    /// in place without rebuilding the grid, which would interrupt typing).</summary>
+    private sealed record DatabaseCellTag(string Column);
+
+    /// <summary>Marks the per-row "unsaved / not saved" dot in the tick column.</summary>
+    private sealed class DatabaseRowMarkTag
+    {
+        public static readonly DatabaseRowMarkTag Instance = new();
+    }
+
+    private static void UpdateRowMark(CardDesignTabViewModel tab, Avalonia.Controls.Shapes.Ellipse mark)
+    {
+        string? tip = null;
+        var state = mark.DataContext is DataRowView row ? tab.GetDatabaseRowMark(row.Row, out tip) : null;
+
+        mark.IsVisible = state is not null;
+        if (state is not null)
+        {
+            mark.Fill = mark.FindResource(state == "error" ? "BrushError" : "BrushWarning") as Avalonia.Media.IBrush
+                        ?? (state == "error" ? Avalonia.Media.Brushes.IndianRed : Avalonia.Media.Brushes.Orange);
+        }
+        ToolTip.SetTip(mark, tip);
+    }
+
+    /// <summary>After saving (or any change of the unsaved count): refresh the visible
+    /// cells' text (new IDs instead of "New") and the row dots.</summary>
+    private void RefreshDatabaseGridCells()
+    {
+        var tab = ViewModel?.ActiveTab;
+        if (DatabaseDataGrid is null || tab is null) return;
+
+        foreach (var visual in DatabaseDataGrid.GetVisualDescendants())
+        {
+            switch (visual)
+            {
+                case TextBlock { Tag: DatabaseCellTag cellTag } textBlock:
+                    textBlock.Text = tab.GetDatabaseCellText(textBlock.DataContext as DataRowView, cellTag.Column);
+                    break;
+                case Avalonia.Controls.Shapes.Ellipse { Tag: DatabaseRowMarkTag } mark:
+                    UpdateRowMark(tab, mark);
+                    break;
+            }
+        }
+    }
+
+    private void OnDatabaseRowsSaved(object? sender, EventArgs e)
+    {
+        if (ReferenceEquals(sender, ViewModel?.ActiveTab))
+            RefreshDatabaseGridCells();
+    }
+
+    /// <summary>Focus left the data grid (clicked the canvas, a panel, a menu...):
+    /// the row being edited is finished, so save it (Internal Database).</summary>
+    private void OnDatabaseGridLostFocus(object? sender, RoutedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (DatabaseDataGrid is null || DatabaseDataGrid.IsKeyboardFocusWithin) return;
+            ViewModel?.ActiveTab?.QueueDatabaseAutoSave(includeCurrentRow: true);
+        }, DispatcherPriority.Background);
+    }
 
     /// <summary>
     /// Commits any pending edits in the DatabaseDataGrid by moving focus away from

@@ -39,9 +39,12 @@ public interface IPrinterService
     /// <paramref name="printerName"/> and <paramref name="copies"/>, then prints the pages
     /// to whatever printer and copy count the user confirms there. Returns
     /// <see cref="PrintJobResult.Cancelled"/> if the user closes the dialog. The default
-    /// implementation (platforms without a system dialog) prints directly.</summary>
+    /// implementation (platforms without a system dialog) prints directly.
+    /// <paramref name="copiesAreLimit"/> (trial printing, where every card is counted):
+    /// the dialog has no page range, fewer copies may be chosen but never more than
+    /// <paramref name="copies"/> -- more is refused before anything prints.</summary>
     async Task<PrintJobResult> PrintPagesWithSystemDialogAsync(
-        string printerName, IReadOnlyList<string> pageImagePaths, int copies, CancellationToken ct = default)
+        string printerName, IReadOnlyList<string> pageImagePaths, int copies, bool copiesAreLimit = false, CancellationToken ct = default)
     {
         var ok = await PrintPagesAsync(printerName, pageImagePaths, copies, ct);
         return ok ? PrintJobResult.Success(printerName) : PrintJobResult.Failure(null);

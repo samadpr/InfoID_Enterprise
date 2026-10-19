@@ -196,10 +196,18 @@ namespace InfoID.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
                     b.Property<long?>("EntityId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("EntityName")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MachineName")
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
@@ -225,7 +233,11 @@ namespace InfoID.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ActionDate");
+
                     b.HasIndex("AppUserId");
+
+                    b.HasIndex("Module");
 
                     b.ToTable("AuditLog", (string)null);
                 });
@@ -809,14 +821,18 @@ namespace InfoID.Infrastructure.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("TEXT");
 
-                    b.Property<long>("TemplateId")
+                    b.Property<long?>("TemplateId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BranchId");
 
+                    b.HasIndex("CardNumber");
+
                     b.HasIndex("CardholderId");
+
+                    b.HasIndex("ExpiryDate");
 
                     b.HasIndex("ReplacesCardId");
 
@@ -1308,8 +1324,16 @@ namespace InfoID.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("DesignName")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("FailureCount")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("FailureReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("JobType")
                         .IsRequired()
@@ -1350,6 +1374,8 @@ namespace InfoID.Infrastructure.Migrations
                     b.HasIndex("ApprovalRecordId");
 
                     b.HasIndex("BranchId");
+
+                    b.HasIndex("CreatedDate");
 
                     b.HasIndex("PrinterProfileId");
 
@@ -1951,6 +1977,97 @@ namespace InfoID.Infrastructure.Migrations
                     b.ToTable("TemplateVersion", (string)null);
                 });
 
+            modelBuilder.Entity("InfoID.Domain.Entities.VisitorModule.Visitor", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Cancelled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Company")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExtraFieldsJson")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("ImportBatchKey")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PersonToMeet")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PhotoPath")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Purpose")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SourceKey")
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SourceName")
+                        .HasMaxLength(260)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("VisitDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VisitorCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedDate");
+
+                    b.HasIndex("SourceKey");
+
+                    b.HasIndex("VisitDate");
+
+                    b.HasIndex("VisitorCode")
+                        .IsUnique();
+
+                    b.ToTable("Visitor", (string)null);
+                });
+
             modelBuilder.Entity("InfoID.Domain.Entities.VisitorModule.VisitorBadge", b =>
                 {
                     b.Property<long>("Id")
@@ -2327,8 +2444,7 @@ namespace InfoID.Infrastructure.Migrations
                     b.HasOne("InfoID.Domain.Entities.TemplateModule.Template", "Template")
                         .WithMany()
                         .HasForeignKey("TemplateId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Branch");
 

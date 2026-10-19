@@ -30,6 +30,13 @@ public sealed class AuditService
             await using var db = await _dbFactory.CreateDbContextAsync();
             db.CurrentUser = _admin.Email;
 
+            // The License API and License Manager can write at the same moment from
+            // different processes; a PostgreSQL advisory lock keeps the hash chain
+            // strictly sequential across all of them (the SemaphoreSlim only covers
+            // one process).
+            await using var transaction = await db.Database.BeginTransactionAsync();
+            await db.Database.ExecuteSqlRawAsync("SELECT pg_advisory_xact_lock(734000101)");
+
             var previousHash = await db.AdminAuditLogs
                 .OrderByDescending(a => a.Id)
                 .Select(a => a.RecordHash)
@@ -50,6 +57,7 @@ public sealed class AuditService
 
             db.AdminAuditLogs.Add(entry);
             await db.SaveChangesAsync();
+            await transaction.CommitAsync();
         }
         finally
         {

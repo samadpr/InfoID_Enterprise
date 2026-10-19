@@ -74,6 +74,10 @@ public sealed partial class PrintPreviewViewModel : DialogViewModelBase<bool>
             ? text.Text
             : _evaluator.Evaluate(text.DataBindingExpression, SelectedRecord?.Fields ?? EmptyRecord);
 
+    /// <summary>The value a QR code / barcode encodes for the selected record.</summary>
+    public string? ResolveCodeValue(DesignerElement element) =>
+        InfoID.Desktop.Features.CardDesigner.Services.CodeValueBinding.Resolve(element, SelectedRecord?.Fields ?? EmptyRecord, _evaluator);
+
     public string ResolveField(DataFieldElement field)
     {
         var placeholder = $"{{{{{field.FieldKey}}}}}";

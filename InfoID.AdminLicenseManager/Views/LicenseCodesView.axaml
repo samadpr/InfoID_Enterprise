@@ -24,12 +24,18 @@
             </Grid>
 
             <Border DockPanel.Dock="Bottom" Classes="card" Margin="0,8,0,0" IsVisible="{Binding CanManage}">
-                <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto">
+                <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto">
                     <TextBlock Grid.ColumnSpan="4" Text="Selected code" Classes="section" />
-                    <TextBox Grid.Row="1" Watermark="Reason (required to revoke)" Text="{Binding ActionReason}" />
+                    <TextBox Grid.Row="1" Watermark="Reason (required to revoke or free slots)" Text="{Binding ActionReason}" />
                     <Button Grid.Row="1" Grid.Column="1" Margin="8,0,0,0" Content="Revoke" Command="{Binding RevokeCommand}" />
                     <CalendarDatePicker Grid.Row="1" Grid.Column="2" Margin="16,0,0,0" SelectedDate="{Binding NewExpiryDate}" />
                     <Button Grid.Row="1" Grid.Column="3" Margin="8,0,0,0" Content="Extend" Command="{Binding ExtendCommand}" />
+                    <StackPanel Grid.Row="2" Grid.ColumnSpan="4" Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                        <Button Content="Free machine slots" Command="{Binding FreeSlotsCommand}"
+                                ToolTip.Tip="Frees the computers using this code, e.g. after the customer deactivated or their PC died. Needs a reason." />
+                        <Button Content="Allow / disallow offline activation" Command="{Binding ToggleOfflineCommand}"
+                                ToolTip.Tip="Offline activation lets computers without internet activate with the phone/QR page." />
+                    </StackPanel>
                 </Grid>
             </Border>
 
@@ -45,6 +51,7 @@
                     <DataGridTextColumn Header="Status" Binding="{Binding Status}" />
                     <DataGridTextColumn Header="Machines" Binding="{Binding ActiveMachines}" />
                     <DataGridTextColumn Header="Max" Binding="{Binding MaxActivations}" />
+                    <DataGridCheckBoxColumn Header="Offline" Binding="{Binding AllowOfflineActivation}" />
                     <DataGridTextColumn Header="Customer" Binding="{Binding Customer}" Width="*" />
                 </DataGrid.Columns>
             </DataGrid>
@@ -79,6 +86,9 @@
 
                     <TextBlock Text="Machines per code" Classes="caption" />
                     <NumericUpDown Value="{Binding MaxActivations}" Minimum="1" Maximum="100" Increment="1" FormatString="0" />
+
+                    <CheckBox Content="Allow offline activation (no internet)" IsChecked="{Binding AllowOfflineActivation}"
+                              ToolTip.Tip="Off: activation only online (recommended). On: computers without internet can also activate using a phone (QR code)." />
 
                     <TextBlock Text="Customer (optional)" Classes="section" Margin="0,8,0,0" />
                     <TextBox Watermark="Organization name" Text="{Binding OrganizationName}" />

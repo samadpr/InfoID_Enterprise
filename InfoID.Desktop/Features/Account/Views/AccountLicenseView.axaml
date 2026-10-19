@@ -1,0 +1,285 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Account.ViewModels"
+             x:Class="InfoID.Desktop.Features.Account.Views.AccountLicenseView"
+             x:DataType="vm:AccountLicenseViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <Grid ColumnDefinitions="*,420">
+        <!-- Left: everything the user does -->
+        <ScrollViewer Grid.Column="0">
+            <StackPanel Margin="40,24,40,40" Spacing="16" MaxWidth="640" HorizontalAlignment="Left">
+                <Button Classes="ghost" Content="&lt; Back" Padding="0" HorizontalAlignment="Left" Command="{Binding GoHomeCommand}" />
+                <TextBlock Classes="h1" Text="Account and license" />
+
+                <!-- This computer's license -->
+                <Border Classes="card" Padding="16,12">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Classes="caption" Text="This computer" />
+                            <TextBlock Text="{Binding LicenseText}" FontWeight="SemiBold" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Classes="secondary" Content="License details" Command="{Binding OpenLicenseDetailsCommand}" />
+                    </Grid>
+                </Border>
+
+                <!-- Activation code: never needs an account -->
+                <Border Classes="card" Padding="20">
+                    <StackPanel Spacing="10">
+                        <TextBlock Classes="h3" Text="License information" />
+                        <TextBlock Classes="label" Text="Enter your activation code" />
+                        <TextBox Text="{Binding ActivationCode}" Watermark="XXXX-XXXX-XXXX-XXXX" FontSize="18"
+                                 FontFamily="Consolas, Cascadia Mono, monospace" AutomationProperties.Name="Activation code">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Enter" Command="{Binding ActivateCodeCommand}" />
+                            </TextBox.KeyBindings>
+                        </TextBox>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Button Classes="primary" Content="Activate" Command="{Binding ActivateCodeCommand}" IsEnabled="{Binding !IsBusy}" />
+                            <Button Classes="ghost" Content="No internet? Activate offline" Command="{Binding ActivateOfflineCommand}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource BrushError}" TextWrapping="Wrap"
+                           IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <TextBlock Text="{Binding InfoMessage}" Foreground="{DynamicResource BrushSuccess}" TextWrapping="Wrap"
+                           IsVisible="{Binding InfoMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                <!-- Signed out: account cards -->
+                <StackPanel Spacing="12" IsVisible="{Binding ShowAccountCards}">
+                    <Border Classes="card" Padding="20">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Classes="h3" Text="Already have an account?" />
+                                <TextBlock Classes="bodySecondary" TextWrapping="Wrap" Text="Log in to see and activate your licenses." />
+                            </StackPanel>
+                            <Button Grid.Column="1" Classes="primary" Content="Log in" Command="{Binding ShowLogInCommand}" />
+                        </Grid>
+                    </Border>
+                    <Border Classes="card" Padding="20">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Classes="h3" Text="Create an account" />
+                                <TextBlock Classes="bodySecondary" TextWrapping="Wrap" Text="Keep your licenses online and request plans easily." />
+                            </StackPanel>
+                            <Button Grid.Column="1" Classes="secondary" Content="Create an account" Command="{Binding ShowSignUpCommand}" />
+                        </Grid>
+                    </Border>
+                    <Border Classes="card" Padding="20">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Classes="h3" Text="Need a license?" />
+                                <TextBlock Classes="bodySecondary" TextWrapping="Wrap" Text="Compare the editions and send us a request." />
+                            </StackPanel>
+                            <Button Grid.Column="1" Classes="secondary" Content="See editions" Command="{Binding OpenEditionsCommand}" />
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+                <!-- Log in -->
+                <Border Classes="card" Padding="20" IsVisible="{Binding IsLogIn}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Classes="h3" Text="Log in" />
+                        <TextBlock Classes="label" Text="Email" />
+                        <TextBox Text="{Binding Email}" Watermark="you@company.com" />
+                        <TextBlock Classes="label" Text="Password" />
+                        <TextBox Text="{Binding Password}" PasswordChar="●">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Enter" Command="{Binding LogInCommand}" />
+                            </TextBox.KeyBindings>
+                        </TextBox>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Button Classes="primary" Content="Log in" Command="{Binding LogInCommand}" IsEnabled="{Binding !IsBusy}" />
+                            <Button Classes="ghost" Content="Forgot password?" Command="{Binding ShowForgotCommand}" />
+                            <Button Classes="ghost" Content="Cancel" Command="{Binding ShowStartCommand}" />
+                        </StackPanel>
+                        <Button Classes="ghost" Padding="0" HorizontalAlignment="Left" Content="No account yet? Create one"
+                                Command="{Binding ShowSignUpCommand}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Sign up -->
+                <Border Classes="card" Padding="20" IsVisible="{Binding IsSignUp}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Classes="h3" Text="Create an account" />
+                        <Grid ColumnDefinitions="*,16,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Classes="label" Text="Full name *" Margin="0,0,0,4" />
+                            <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding FullName}" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Classes="label" Text="Company" Margin="0,0,0,4" />
+                            <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding CompanyName}" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Classes="label" Text="Email *" Margin="0,10,0,4" />
+                            <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Email}" Watermark="you@company.com" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Classes="label" Text="Phone" Margin="0,10,0,4" />
+                            <TextBox Grid.Row="3" Grid.Column="2" Text="{Binding Phone}" />
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Classes="label" Text="Country" Margin="0,10,0,4" />
+                            <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Country}" />
+
+                            <TextBlock Grid.Row="6" Grid.Column="0" Classes="label" Text="Password *" Margin="0,10,0,4" />
+                            <TextBox Grid.Row="7" Grid.Column="0" Text="{Binding Password}" PasswordChar="●"
+                                     Watermark="8+ characters, letters and numbers" />
+                            <TextBlock Grid.Row="6" Grid.Column="2" Classes="label" Text="Confirm password *" Margin="0,10,0,4" />
+                            <TextBox Grid.Row="7" Grid.Column="2" Text="{Binding ConfirmPassword}" PasswordChar="●" />
+                        </Grid>
+                        <CheckBox IsChecked="{Binding AcceptTerms}">
+                            <TextBlock TextWrapping="Wrap" Text="I agree to the Terms of Use and the Privacy Policy, and to receive emails about my account and licenses." />
+                        </CheckBox>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Button Classes="primary" Content="Create account" Command="{Binding SignUpCommand}" IsEnabled="{Binding !IsBusy}" />
+                            <Button Classes="ghost" Content="Cancel" Command="{Binding ShowStartCommand}" />
+                        </StackPanel>
+                        <TextBlock Classes="caption" TextWrapping="Wrap"
+                                   Text="We'll email you a 6-digit code to verify your address." />
+                    </StackPanel>
+                </Border>
+
+                <!-- Verify email -->
+                <Border Classes="card" Padding="20" IsVisible="{Binding IsVerify}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Classes="h3" Text="Verify your email" />
+                        <TextBlock Classes="bodySecondary" TextWrapping="Wrap">
+                            <Run Text="Enter the 6-digit code we sent to" />
+                            <Run Text="{Binding Email}" FontWeight="SemiBold" />
+                        </TextBlock>
+                        <TextBox Text="{Binding Code}" Watermark="000000" FontSize="22" MaxLength="6" Width="180" HorizontalAlignment="Left"
+                                 FontFamily="Consolas, Cascadia Mono, monospace" AutomationProperties.Name="Verification code">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Enter" Command="{Binding VerifyCommand}" />
+                            </TextBox.KeyBindings>
+                        </TextBox>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Button Classes="primary" Content="Verify" Command="{Binding VerifyCommand}" IsEnabled="{Binding !IsBusy}" />
+                            <Button Classes="ghost" Content="Resend code" Command="{Binding ResendCodeCommand}" />
+                            <Button Classes="ghost" Content="Cancel" Command="{Binding ShowStartCommand}" />
+                        </StackPanel>
+                        <TextBlock Classes="caption" TextWrapping="Wrap" Text="The code expires after 15 minutes. Check your spam folder if you don't see it." />
+                    </StackPanel>
+                </Border>
+
+                <!-- Forgot password -->
+                <Border Classes="card" Padding="20" IsVisible="{Binding IsForgot}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Classes="h3" Text="Reset your password" />
+                        <TextBlock Classes="label" Text="Email" />
+                        <TextBox Text="{Binding Email}" Watermark="you@company.com" />
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Button Classes="primary" Content="Send code" Command="{Binding SendResetCodeCommand}" IsEnabled="{Binding !IsBusy}" />
+                            <Button Classes="ghost" Content="Cancel" Command="{Binding ShowLogInCommand}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Reset password -->
+                <Border Classes="card" Padding="20" IsVisible="{Binding IsReset}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Classes="h3" Text="Choose a new password" />
+                        <TextBlock Classes="label" Text="Code from the email" />
+                        <TextBox Text="{Binding Code}" Watermark="000000" FontSize="22" MaxLength="6" Width="180" HorizontalAlignment="Left"
+                                 FontFamily="Consolas, Cascadia Mono, monospace" />
+                        <TextBlock Classes="label" Text="New password" />
+                        <TextBox Text="{Binding Password}" PasswordChar="●" Watermark="8+ characters, letters and numbers" />
+                        <TextBlock Classes="label" Text="Confirm new password" />
+                        <TextBox Text="{Binding ConfirmPassword}" PasswordChar="●" />
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Button Classes="primary" Content="Save password" Command="{Binding ResetPasswordCommand}" IsEnabled="{Binding !IsBusy}" />
+                            <Button Classes="ghost" Content="Cancel" Command="{Binding ShowLogInCommand}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Signed in -->
+                <StackPanel Spacing="12" IsVisible="{Binding IsSignedIn}">
+                    <Border Classes="card" Padding="20">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Classes="caption" Text="Signed in as" />
+                                <TextBlock Text="{Binding AccountName}" FontWeight="SemiBold" />
+                                <TextBlock Classes="caption" Text="{Binding AccountEmail}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Button Classes="ghost" Content="Refresh" Command="{Binding RefreshAccountCommand}" />
+                                <Button Classes="secondary" Content="Sign out" Command="{Binding SignOutCommand}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border Classes="card" Padding="20">
+                        <StackPanel Spacing="10">
+                            <TextBlock Classes="h3" Text="My licenses" />
+                            <TextBlock Classes="bodySecondary" TextWrapping="Wrap" IsVisible="{Binding HasNoLicenses}"
+                                       Text="No licenses yet. Request a plan, and once it's approved your license appears here." />
+                            <ItemsControl ItemsSource="{Binding Licenses}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:AccountLicenseItem">
+                                        <Border BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,0,0,1" Padding="0,8">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <StackPanel Spacing="2">
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                                    <SelectableTextBlock Text="{Binding ActivationCode}" FontFamily="Consolas, Cascadia Mono, monospace" />
+                                                    <TextBlock Classes="caption" Text="{Binding Details}" TextWrapping="Wrap" />
+                                                </StackPanel>
+                                                <Button Grid.Column="1" Classes="primary" VerticalAlignment="Center"
+                                                        Content="Activate on this computer"
+                                                        IsVisible="{Binding CanActivate}"
+                                                        Command="{Binding $parent[ItemsControl].((vm:AccountLicenseViewModel)DataContext).ActivateLicenseCommand}"
+                                                        CommandParameter="{Binding}" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="card" Padding="20">
+                        <StackPanel Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Classes="h3" Text="My requests" VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                    <Button Classes="ghost" Content="See editions" Command="{Binding OpenEditionsCommand}" />
+                                    <Button Classes="primary" Content="Request a plan" Command="{Binding RequestPlanCommand}" />
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Classes="bodySecondary" IsVisible="{Binding HasNoRequests}" Text="No requests yet." />
+                            <ItemsControl ItemsSource="{Binding Requests}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:AccountRequestItem">
+                                        <Border BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,0,0,1" Padding="0,8">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <StackPanel Spacing="2">
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                                    <TextBlock Classes="caption" Text="{Binding StatusText}" TextWrapping="Wrap" />
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1" Classes="caption" Text="{Binding DateText}" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Right: brand panel -->
+        <Border Grid.Column="1" Margin="0,24,24,24" CornerRadius="16" ClipToBounds="True">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                    <GradientStop Color="#DA3025" Offset="0" />
+                    <GradientStop Color="#7A1710" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="24" Margin="32">
+                <Image Source="avares://InfoID.Desktop/Assets/Images/InfoID.png" Width="120" Height="120" Stretch="Uniform" />
+                <TextBlock Text="Print every ID card you need" Foreground="White" FontSize="30" FontWeight="Bold"
+                           TextAlignment="Center" TextWrapping="Wrap" />
+                <TextBlock Text="Design, issue and print professional ID cards. One account for all your licenses."
+                           Foreground="#F2FFFFFF" FontSize="15" TextAlignment="Center" TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

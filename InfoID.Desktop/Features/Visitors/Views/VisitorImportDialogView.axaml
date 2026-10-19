@@ -1,0 +1,212 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Visitors.ViewModels"
+             xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="InfoID.Desktop.Features.Visitors.Views.VisitorImportDialogView"
+             x:DataType="vm:VisitorImportDialogViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.secondary">
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+        </Style>
+        <Style Selector="Border.count">
+            <Setter Property="CornerRadius" Value="{StaticResource Radius.MD}" />
+            <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+        </Style>
+        <Style Selector="TextBlock.rowStatus">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="8,0" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}" />
+        </Style>
+        <Style Selector="TextBlock.rowStatus.warning">
+            <Setter Property="Foreground" Value="{DynamicResource BrushWarning}" />
+        </Style>
+        <Style Selector="TextBlock.rowStatus.error">
+            <Setter Property="Foreground" Value="{DynamicResource BrushError}" />
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+        <Style Selector="TextBlock.rowStatus.skipped">
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+        </Style>
+        <Style Selector="TextBlock.message">
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+        </Style>
+        <Style Selector="TextBlock.message.error">
+            <Setter Property="Foreground" Value="{DynamicResource BrushError}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="28,22,28,20">
+
+        <!-- File -->
+        <StackPanel Grid.Row="0" Spacing="6">
+            <TextBlock Text="Import visitors" FontSize="22" FontWeight="Bold" />
+            <TextBlock Classes="secondary" TextWrapping="Wrap"
+                       Text="Choose an Excel, CSV or JSON file with one visitor per row (for example a Google Form export). InfoID matches the columns and checks every row before anything is saved." />
+            <WrapPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <Button Classes="primary" Command="{Binding ChooseFileCommand}" Margin="0,0,12,8"
+                        ToolTip.Tip="Choose the visitors file (Excel, CSV, TXT or JSON)">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <mi:MaterialIcon Kind="FileImportOutline" Width="18" Height="18" />
+                        <TextBlock Text="Choose file…" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,16,8"
+                           IsVisible="{Binding HasFile}" />
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,16,8" IsVisible="{Binding HasSheets}">
+                    <TextBlock Text="Sheet" Classes="secondary" VerticalAlignment="Center" />
+                    <ComboBox ItemsSource="{Binding Sheets}" SelectedItem="{Binding SelectedSheet}" MinWidth="150"
+                              AutomationProperties.Name="Worksheet" />
+                </StackPanel>
+                <Button Classes="secondary" Command="{Binding ChoosePhotosFolderCommand}" Margin="0,0,8,8"
+                        ToolTip.Tip="A folder with the visitors' photos, when the Photo column holds file names">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <mi:MaterialIcon Kind="FolderImage" Width="18" Height="18" />
+                        <TextBlock Text="Photos folder…" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,0,0,8" IsVisible="{Binding HasPhotosFolder}">
+                    <TextBlock Text="{Binding PhotosFolder}" Classes="secondary" VerticalAlignment="Center" MaxWidth="320"
+                               TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding PhotosFolder}" />
+                    <Button Classes="ghost" Content="✕" Command="{Binding ClearPhotosFolderCommand}"
+                            ToolTip.Tip="Don't use a photos folder" AutomationProperties.Name="Clear photos folder" />
+                </StackPanel>
+            </WrapPanel>
+        </StackPanel>
+
+        <ProgressBar Grid.Row="1" IsIndeterminate="True" IsVisible="{Binding IsBusy}" Height="3" Margin="0,4,0,0" />
+
+        <!-- Matches + rows -->
+        <Grid Grid.Row="2" ColumnDefinitions="270,16,*" Margin="0,8,0,0" IsVisible="{Binding HasFile}">
+
+            <Border Grid.Column="0" Classes="card" Padding="14">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,10">
+                        <TextBlock Text="Column matches" FontWeight="SemiBold" />
+                        <TextBlock Classes="caption" TextWrapping="Wrap" Text="Which column of the file holds each field. Other columns are kept as extra fields for the badge." />
+                    </StackPanel>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Mappings}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:VisitorFieldMappingViewModel">
+                                    <StackPanel Spacing="3" Margin="0,0,0,10">
+                                        <TextBlock Text="{Binding Label}" FontWeight="Medium" />
+                                        <ComboBox ItemsSource="{Binding Columns}" SelectedItem="{Binding SelectedColumn}"
+                                                  HorizontalAlignment="Stretch" AutomationProperties.Name="{Binding Label}"
+                                                  ToolTip.Tip="{Binding Hint}" />
+                                        <TextBlock Classes="caption" Text="{Binding Hint}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <Grid Grid.Column="2" RowDefinitions="Auto,*,Auto">
+                <DockPanel Grid.Row="0" Margin="0,0,0,8">
+                    <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShowOnlyProblems}"
+                                  OnContent="Only rows needing attention" OffContent="All rows"
+                                  ToolTip.Tip="Show only rows with warnings, errors or skipped" />
+                    <WrapPanel Orientation="Horizontal">
+                        <Border Classes="count"><TextBlock Text="{Binding ReadyCount, StringFormat='{}{0} ready'}" Foreground="{DynamicResource BrushSuccess}" /></Border>
+                        <Border Classes="count"><TextBlock Text="{Binding WarningCount, StringFormat='{}{0} with warnings'}" Foreground="{DynamicResource BrushWarning}" /></Border>
+                        <Border Classes="count"><TextBlock Text="{Binding ErrorCount, StringFormat='{}{0} with errors'}" Foreground="{DynamicResource BrushError}" /></Border>
+                        <Border Classes="count"><TextBlock Text="{Binding SkippedCount, StringFormat='{}{0} skipped'}" Classes="secondary" /></Border>
+                    </WrapPanel>
+                </DockPanel>
+
+                <Border Grid.Row="1" Classes="card" Padding="0" ClipToBounds="True">
+                    <DataGrid ItemsSource="{Binding VisibleRows}" SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
+                              AutoGenerateColumns="False" IsReadOnly="False" CanUserSortColumns="True"
+                              CanUserResizeColumns="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                              SelectionMode="Single" AutomationProperties.Name="Rows to import">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Import" Width="64" CanUserSort="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:VisitorImportRowViewModel">
+                                        <CheckBox IsChecked="{Binding Include}" HorizontalAlignment="Center"
+                                                  IsEnabled="{Binding !IsSkipped}"
+                                                  ToolTip.Tip="Untick to leave this row out" AutomationProperties.Name="Import this row" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn x:DataType="vm:VisitorImportRowViewModel" Header="Row" Binding="{Binding RowNumber}" IsReadOnly="True" Width="56" />
+                            <DataGridTemplateColumn Header="Status" Width="150" SortMemberPath="Status">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:VisitorImportRowViewModel">
+                                        <TextBlock Classes="rowStatus" Text="{Binding StatusText}"
+                                                   Classes.warning="{Binding IsWarning}" Classes.error="{Binding IsError}" Classes.skipped="{Binding IsSkipped}"
+                                                   ToolTip.Tip="{Binding IssuesText}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn x:DataType="vm:VisitorImportRowViewModel" Header="Full name" Binding="{Binding FullName}" Width="1.6*" />
+                            <DataGridTextColumn x:DataType="vm:VisitorImportRowViewModel" Header="Phone" Binding="{Binding Phone}" Width="*" />
+                            <DataGridTextColumn x:DataType="vm:VisitorImportRowViewModel" Header="Email" Binding="{Binding Email}" Width="1.4*" />
+                            <DataGridTextColumn x:DataType="vm:VisitorImportRowViewModel" Header="Company" Binding="{Binding Company}" Width="*" />
+                            <DataGridTextColumn x:DataType="vm:VisitorImportRowViewModel" Header="Person to meet" Binding="{Binding PersonToMeet}" Width="*" />
+                            <DataGridTextColumn x:DataType="vm:VisitorImportRowViewModel" Header="Purpose" Binding="{Binding Purpose}" Width="*" />
+                            <DataGridTextColumn x:DataType="vm:VisitorImportRowViewModel" Header="Visit date" Binding="{Binding VisitDateText}" Width="110" />
+                            <DataGridTemplateColumn Header="Photo" Width="120" SortMemberPath="HasPhoto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:VisitorImportRowViewModel">
+                                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="8,0" VerticalAlignment="Center"
+                                                    ToolTip.Tip="{Binding PhotoText}">
+                                            <mi:MaterialIcon Kind="CheckCircleOutline" Width="16" Height="16" Foreground="{DynamicResource BrushSuccess}"
+                                                             IsVisible="{Binding HasPhoto}" />
+                                            <mi:MaterialIcon Kind="ImageOffOutline" Width="16" Height="16" Foreground="{DynamicResource BrushTextSecondary}"
+                                                             IsVisible="{Binding !HasPhoto}" />
+                                            <TextBlock Text="{Binding PhotoText}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" MaxWidth="80" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+
+                <!-- Selected row: what's wrong, and its photo -->
+                <Border Grid.Row="2" Classes="card" Padding="14,10" Margin="0,8,0,0"
+                        IsVisible="{Binding SelectedRow, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Grid.Column="0" Spacing="2">
+                            <TextBlock FontWeight="SemiBold"
+                                       Text="{Binding SelectedRow.RowNumber, StringFormat='Row {0}', FallbackValue=''}" />
+                            <TextBlock Text="{Binding SelectedRow.IssuesText, FallbackValue=''}" TextWrapping="Wrap" Classes="secondary" />
+                            <TextBlock Classes="caption" Text="{Binding SelectedRow.VisitDateMeaning, StringFormat='Visit date read as: {0}', FallbackValue=''}" />
+                            <TextBlock Classes="caption" Text="Correct any value in the grid (double-click a cell); the row is checked again straight away." />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                            <Button Classes="secondary" Content="Choose photo…" Command="{Binding ChooseRowPhotoCommand}"
+                                    CommandParameter="{Binding SelectedRow}" ToolTip.Tip="Pick the photo for this visitor" />
+                            <Button Classes="ghost" Content="Remove photo" Command="{Binding RemoveRowPhotoCommand}"
+                                    CommandParameter="{Binding SelectedRow}" ToolTip.Tip="Import this visitor without a photo" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Nothing chosen yet -->
+        <StackPanel Grid.Row="2" IsVisible="{Binding !HasFile}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" MaxWidth="520">
+            <mi:MaterialIcon Kind="FileTableOutline" Width="48" Height="48" HorizontalAlignment="Center" Foreground="{DynamicResource BrushTextSecondary}" />
+            <TextBlock Classes="secondary" TextWrapping="Wrap" TextAlignment="Center"
+                       Text="Columns InfoID recognises: name, phone, email, company, person to meet (host), purpose, visit date, photo, and a response ID or timestamp. Photos can be file names (next to the file or in a photos folder)." />
+        </StackPanel>
+
+        <!-- Footer -->
+        <Grid Grid.Row="3" ColumnDefinitions="*,Auto" Margin="0,14,0,0">
+            <TextBlock Grid.Column="0" Text="{Binding Message}" Classes="message" Classes.error="{Binding MessageIsError}"
+                       TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,16,0" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                <Button Classes="secondary" Content="Cancel" Command="{Binding CancelCommand}" Padding="22,10" IsCancel="True" />
+                <Button Classes="primary" Content="{Binding ImportButtonText}" Command="{Binding ImportCommand}" Padding="22,10"
+                        ToolTip.Tip="Save the ticked rows that are ready (rows with errors are never imported)" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -18,6 +18,8 @@ namespace InfoID.Desktop.Features.Database.Models
         TXT,
         Access,
         API,
-        GoogleSheets
+        GoogleSheets,
+        /// <summary>Visitor registrations from the Visitors page (read-only in the designer).</summary>
+        Visitors
     }
 }

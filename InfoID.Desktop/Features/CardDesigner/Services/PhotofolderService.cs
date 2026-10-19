@@ -62,6 +62,8 @@ public interface IPhotoFolderService
 
 public sealed class PhotoFolderService : IPhotoFolderService, IDisposable
 {
+    private static readonly InfoID.Shared.Logging.AppLogger Log = InfoID.Shared.Logging.AppLog.For<PhotoFolderService>();
+
     /// <summary>One shared instance for the whole app, so every open design tab uses
     /// the same folder scans and photo cache. Can be moved to DI registration later
     /// without changing any callers' behavior.</summary>
@@ -247,7 +249,7 @@ public sealed class PhotoFolderService : IPhotoFolderService, IDisposable
         catch (Exception ex)
         {
             // A corrupt or locked file shows as "no photo" instead of crashing.
-            System.Diagnostics.Debug.WriteLine($"PHOTO LOAD ERROR ({photoPath}): {ex.Message}");
+            Log.Warn($"Photo couldn't be loaded ({photoPath})", ex);
         }
 
         lock (_cacheLock)
@@ -371,7 +373,7 @@ public sealed class PhotoFolderService : IPhotoFolderService, IDisposable
             catch (Exception ex)
             {
                 // Watching is a convenience; the Refresh button still works without it.
-                System.Diagnostics.Debug.WriteLine($"PHOTO FOLDER WATCH ERROR: {ex.Message}");
+                Log.Warn("Photo folder watch error", ex);
                 _watcher = null;
             }
         }
@@ -408,7 +410,7 @@ public sealed class PhotoFolderService : IPhotoFolderService, IDisposable
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"PHOTO FOLDER SCAN ERROR: {ex.Message}");
+                Log.Warn("Photo folder scan error", ex);
             }
 
             lock (_lock)

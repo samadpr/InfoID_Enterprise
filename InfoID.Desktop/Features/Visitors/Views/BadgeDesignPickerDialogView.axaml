@@ -1,0 +1,51 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Visitors.ViewModels"
+             xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="InfoID.Desktop.Features.Visitors.Views.BadgeDesignPickerDialogView"
+             x:DataType="vm:BadgeDesignPickerDialogViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="28,22,28,20">
+
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,14">
+            <TextBlock Text="Visitor badge design" FontSize="20" FontWeight="Bold" />
+            <TextBlock Classes="caption" TextWrapping="Wrap"
+                       Text="Choose the saved design used for visitor badges. Bind its fields to the &quot;Visitors&quot; data source in the Card Designer (FullName, Company, PersonToMeet, VisitDate, Photo, VisitorId for the QR code…)." />
+        </StackPanel>
+
+        <Border Grid.Row="1" Classes="card" Padding="0" ClipToBounds="True">
+            <ListBox ItemsSource="{Binding Designs}" SelectedItem="{Binding SelectedDesign}"
+                     AutomationProperties.Name="Saved designs">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:BadgeDesignOption">
+                        <Grid ColumnDefinitions="Auto,*" Margin="4">
+                            <Border Grid.Column="0" Width="96" Height="62" CornerRadius="{StaticResource Radius.SM}" ClipToBounds="True"
+                                    Background="{DynamicResource BrushSurface}" Margin="0,0,12,0">
+                                <Panel>
+                                    <mi:MaterialIcon Kind="CardAccountDetailsOutline" Width="28" Height="28"
+                                                     Foreground="{DynamicResource BrushTextSecondary}" />
+                                    <Image Source="{Binding Thumbnail}" Stretch="Uniform"
+                                           IsVisible="{Binding Thumbnail, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                </Panel>
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding Details}" Classes="caption" />
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="0,14,0,0">
+            <CheckBox Grid.Column="0" IsChecked="{Binding Remember}" Content="Use this design for every visitor badge"
+                      VerticalAlignment="Center" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                <Button Classes="secondary" Content="Cancel" Command="{Binding CancelCommand}" Padding="22,10" IsCancel="True" />
+                <Button Classes="primary" Content="Use this design" Command="{Binding ChooseCommand}" Padding="22,10" IsDefault="True" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

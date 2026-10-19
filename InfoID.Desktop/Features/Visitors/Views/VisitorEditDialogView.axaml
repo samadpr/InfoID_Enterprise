@@ -1,0 +1,112 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Visitors.ViewModels"
+             xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="InfoID.Desktop.Features.Visitors.Views.VisitorEditDialogView"
+             x:DataType="vm:VisitorEditDialogViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.fieldLabel">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+        <Style Selector="StackPanel.field">
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="28,22,28,20">
+
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,16">
+            <TextBlock Text="{Binding Heading}" FontSize="20" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+            <TextBlock Text="{Binding SourceText}" Classes="caption" IsVisible="{Binding !IsNew}" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid ColumnDefinitions="*,24,200">
+
+                <StackPanel Grid.Column="0">
+                    <StackPanel Classes="field">
+                        <TextBlock Classes="fieldLabel" Text="Full name *" />
+                        <TextBox Text="{Binding FullName}" PlaceholderText="Visitor's full name" AutomationProperties.Name="Full name" />
+                    </StackPanel>
+                    <Grid ColumnDefinitions="*,12,*">
+                        <StackPanel Grid.Column="0" Classes="field">
+                            <TextBlock Classes="fieldLabel" Text="Phone" />
+                            <TextBox Text="{Binding Phone}" PlaceholderText="Phone or email required" AutomationProperties.Name="Phone" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Classes="field">
+                            <TextBlock Classes="fieldLabel" Text="Email" />
+                            <TextBox Text="{Binding Email}" PlaceholderText="name@company.com" AutomationProperties.Name="Email" />
+                        </StackPanel>
+                    </Grid>
+                    <StackPanel Classes="field">
+                        <TextBlock Classes="fieldLabel" Text="Company" />
+                        <TextBox Text="{Binding Company}" AutomationProperties.Name="Company" />
+                    </StackPanel>
+                    <Grid ColumnDefinitions="*,12,*">
+                        <StackPanel Grid.Column="0" Classes="field">
+                            <TextBlock Classes="fieldLabel" Text="Person to meet" />
+                            <TextBox Text="{Binding PersonToMeet}" AutomationProperties.Name="Person to meet" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Classes="field">
+                            <TextBlock Classes="fieldLabel" Text="Visit date" />
+                            <CalendarDatePicker SelectedDate="{Binding VisitDate}" HorizontalAlignment="Stretch"
+                                                AutomationProperties.Name="Visit date" />
+                        </StackPanel>
+                    </Grid>
+                    <StackPanel Classes="field">
+                        <TextBlock Classes="fieldLabel" Text="Purpose" />
+                        <TextBox Text="{Binding Purpose}" AutomationProperties.Name="Purpose" />
+                    </StackPanel>
+
+                    <StackPanel Classes="field" IsVisible="{Binding HasExtraFields}">
+                        <TextBlock Classes="fieldLabel" Text="Other fields (from the form or file)" />
+                        <ItemsControl ItemsSource="{Binding ExtraFields}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:VisitorExtraFieldViewModel">
+                                    <Grid ColumnDefinitions="160,*" Margin="0,0,0,6">
+                                        <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}" />
+                                        <TextBox Grid.Column="1" Text="{Binding Value}" AutomationProperties.Name="{Binding Name}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Photo -->
+                <StackPanel Grid.Column="2" Spacing="8">
+                    <TextBlock Classes="fieldLabel" Text="Photo" />
+                    <Border Width="160" Height="200" CornerRadius="{StaticResource Radius.MD}" ClipToBounds="True"
+                            Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+                        <Panel>
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6" IsVisible="{Binding !HasPhoto}">
+                                <mi:MaterialIcon Kind="AccountOutline" Width="48" Height="48" Foreground="{DynamicResource BrushTextSecondary}" />
+                                <TextBlock Text="No photo" Classes="caption" HorizontalAlignment="Center" />
+                            </StackPanel>
+                            <Image Source="{Binding PhotoPreview}" Stretch="UniformToFill" IsVisible="{Binding HasPhoto}" />
+                        </Panel>
+                    </Border>
+                    <Button Classes="secondary" Content="Choose photo…" Command="{Binding ChoosePhotoCommand}" Width="160"
+                            ToolTip.Tip="JPG or PNG; large photos are reduced and turned upright" />
+                    <Button Classes="ghost" Content="Remove photo" Command="{Binding RemovePhotoCommand}" Width="160"
+                            IsVisible="{Binding HasPhoto}" />
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="0,16,0,0">
+            <TextBlock Grid.Column="0" Text="{Binding ErrorText}" Foreground="{DynamicResource BrushError}" TextWrapping="Wrap"
+                       VerticalAlignment="Center" Margin="0,0,16,0"
+                       IsVisible="{Binding ErrorText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                <Button Classes="secondary" Content="Cancel" Command="{Binding CancelCommand}" Padding="22,10" IsCancel="True" />
+                <Button Classes="primary" Content="Save" Command="{Binding SaveCommand}" Padding="22,10" IsDefault="True" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

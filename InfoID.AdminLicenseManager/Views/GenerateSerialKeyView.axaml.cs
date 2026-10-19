@@ -1,7 +1,7 @@
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using InfoID.AdminLicenseManager.ViewModels;
-using Avalonia.Input.Platform;
 
 namespace InfoID.AdminLicenseManager.Views;
 

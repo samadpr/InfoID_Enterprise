@@ -1,0 +1,376 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Features.Backup.ViewModels"
+             xmlns:components="using:InfoID.Desktop.Shell.Components"
+             xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="900"
+             x:Class="InfoID.Desktop.Features.Backup.Views.BackupView"
+             x:DataType="vm:BackupViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <UserControl.Styles>
+        <Style Selector="Border.panel">
+            <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+            <Setter Property="CornerRadius" Value="{StaticResource Radius.MD}" />
+            <Setter Property="Padding" Value="20" />
+        </Style>
+        <Style Selector="TextBlock.panelTitle">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="mi|MaterialIcon.panelIcon">
+            <Setter Property="Width" Value="20" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="Margin" Value="0,0,10,0" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushPrimary}" />
+        </Style>
+        <Style Selector="TextBlock.fieldLabel">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+        <Style Selector="TextBlock.secondary">
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="TextBlock.error">
+            <Setter Property="Foreground" Value="{DynamicResource BrushError}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="TextBlock.attention">
+            <Setter Property="Foreground" Value="{DynamicResource BrushWarning}" />
+        </Style>
+        <Style Selector="Border.banner">
+            <Setter Property="CornerRadius" Value="{StaticResource Radius.MD}" />
+            <Setter Property="Padding" Value="14,10" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushWarning}" />
+            <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+        </Style>
+        <Style Selector="Border.banner.info">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}" />
+        </Style>
+        <Style Selector="Border.banner.error">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushError}" />
+        </Style>
+        <Style Selector="ListBox.backups ListBoxItem">
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Margin" Value="0,0,0,2" />
+        </Style>
+        <Style Selector="Button.rowAction">
+            <Setter Property="Padding" Value="6" />
+            <Setter Property="MinWidth" Value="0" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*" Margin="40,28,40,24">
+        <components:PageHeaderView Grid.Row="0" Title="Backup &amp; Restore" BackCommand="{Binding GoHomeCommand}" />
+
+        <!-- Messages and progress -->
+        <StackPanel Grid.Row="1" Spacing="8" Margin="0,12,0,0">
+            <Border Classes="banner" IsVisible="{Binding RestorePending}">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <mi:MaterialIcon Kind="FileRestoreOutline" Width="20" Height="20" Margin="0,0,10,0" Foreground="{DynamicResource BrushWarning}" />
+                    <TextBlock Grid.Column="1" VerticalAlignment="Center" TextWrapping="Wrap"
+                               Text="A restore is ready. Restart InfoID to finish it; until then nothing has changed." />
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="12,0,0,0">
+                        <Button Classes="primary" Content="Restart now" Command="{Binding RestartToFinishRestoreCommand}"
+                                ToolTip.Tip="Close InfoID and open it again to finish the restore" />
+                        <Button Classes="secondary" Content="Cancel restore" Command="{Binding CancelPendingRestoreCommand}"
+                                ToolTip.Tip="Discard the prepared restore. Nothing has been changed yet." />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Classes="banner error" IsVisible="{Binding LastFailureText, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <Grid ColumnDefinitions="Auto,*">
+                    <mi:MaterialIcon Kind="AlertOutline" Width="20" Height="20" Margin="0,0,10,0" Foreground="{DynamicResource BrushError}" />
+                    <TextBlock Grid.Column="1" Text="{Binding LastFailureText}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <Border Classes="banner info" IsVisible="{Binding StatusMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
+                    Classes.error="{Binding StatusIsError}">
+                <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" Classes.error="{Binding StatusIsError}" />
+            </Border>
+
+            <StackPanel Spacing="4" IsVisible="{Binding IsBusy}">
+                <TextBlock Text="{Binding ProgressText}" Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" />
+                <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressValue}" Height="4" />
+            </StackPanel>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="2" Margin="0,16,0,0" HorizontalScrollBarVisibility="Disabled">
+            <Grid ColumnDefinitions="*,20,*">
+
+                <!-- ============================== Backup ============================== -->
+                <StackPanel Grid.Column="0" Spacing="16">
+
+                    <Border Classes="panel">
+                        <StackPanel Spacing="12">
+                            <StackPanel Orientation="Horizontal">
+                                <mi:MaterialIcon Classes="panelIcon" Kind="ContentSaveOutline" />
+                                <TextBlock Classes="panelTitle" Text="Back up now" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="Last backup:" Classes="secondary" />
+                                <TextBlock Text="{Binding LastBackupText}" FontWeight="SemiBold"
+                                           Classes.attention="{Binding LastBackupNeedsAttention}" />
+                            </StackPanel>
+
+                            <TextBlock Classes="secondary" FontSize="12">
+                                <Run Text="Includes:" />
+                                <Run Text="{Binding IncludedText}" />
+                            </TextBlock>
+
+                            <CheckBox Content="Protect the backup with a password" IsChecked="{Binding ProtectWithPassword}"
+                                      ToolTip.Tip="Encrypts the backup file (AES-256). Recommended when the backup leaves this PC: it contains cardholder data." />
+                            <StackPanel Spacing="8" IsVisible="{Binding ProtectWithPassword}" Margin="28,0,0,0">
+                                <TextBox Text="{Binding BackupPassword}" PasswordChar="●" PlaceholderText="Password (at least 6 characters)"
+                                         MaxWidth="320" HorizontalAlignment="Left" MinWidth="280" AutomationProperties.Name="Backup password" />
+                                <TextBox Text="{Binding BackupPasswordConfirm}" PasswordChar="●" PlaceholderText="Repeat the password"
+                                         MaxWidth="320" HorizontalAlignment="Left" MinWidth="280" AutomationProperties.Name="Repeat backup password" />
+                                <TextBlock Classes="error" Text="{Binding PasswordError}"
+                                           IsVisible="{Binding PasswordError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                <TextBlock Classes="secondary" FontSize="12"
+                                           Text="Keep this password safe. Without it, the backup can't be restored." />
+                            </StackPanel>
+
+                            <WrapPanel>
+                                <Button Classes="primary" Command="{Binding BackUpNowCommand}" IsEnabled="{Binding IsNotBusy}" Margin="0,0,8,8"
+                                        ToolTip.Tip="Save a complete backup in the backup folder">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <mi:MaterialIcon Kind="ContentSaveOutline" Width="16" Height="16" />
+                                        <TextBlock Text="Back up now" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Classes="secondary" Command="{Binding SaveBackupAsCommand}" IsEnabled="{Binding IsNotBusy}" Margin="0,0,8,8"
+                                        ToolTip.Tip="Save a backup somewhere else, e.g. on a USB drive">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <mi:MaterialIcon Kind="DatabaseExportOutline" Width="16" Height="16" />
+                                        <TextBlock Text="Save backup as..." />
+                                    </StackPanel>
+                                </Button>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="panel">
+                        <StackPanel Spacing="14">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <mi:MaterialIcon Classes="panelIcon" Kind="History" />
+                                <TextBlock Grid.Column="1" Classes="panelTitle" Text="Automatic backups" />
+                                <ToggleSwitch Grid.Column="2" IsChecked="{Binding AutoBackupEnabled}" OnContent="On" OffContent="Off"
+                                              AutomationProperties.Name="Automatic backups" />
+                            </Grid>
+                            <TextBlock Classes="secondary" FontSize="12"
+                                       Text="While InfoID is open, a backup is made automatically when the last one is older than the interval below." />
+
+                            <WrapPanel IsEnabled="{Binding AutoBackupEnabled}">
+                                <StackPanel Margin="0,0,20,8">
+                                    <TextBlock Classes="fieldLabel" Text="How often" />
+                                    <ComboBox ItemsSource="{Binding Intervals}" SelectedItem="{Binding SelectedInterval}" MinWidth="160"
+                                              AutomationProperties.Name="Backup interval">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:IntervalOption">
+                                                <TextBlock Text="{Binding Label}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel Margin="0,0,20,8">
+                                    <TextBlock Classes="fieldLabel" Text="Keep the last" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <NumericUpDown Value="{Binding KeepCount}" Minimum="1" Maximum="100" Increment="1" FormatString="0"
+                                                       Width="120" AutomationProperties.Name="Number of automatic backups to keep" />
+                                        <TextBlock Text="automatic backups" VerticalAlignment="Center" Classes="secondary" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </WrapPanel>
+
+                            <StackPanel Spacing="6">
+                                <TextBlock Classes="fieldLabel" Text="Backup folder" />
+                                <TextBox Text="{Binding BackupFolder}" IsReadOnly="True" AutomationProperties.Name="Backup folder" />
+                                <WrapPanel>
+                                    <Button Classes="secondary" Content="Change..." Command="{Binding ChangeFolderCommand}" Margin="0,0,8,0"
+                                            ToolTip.Tip="Choose where backups are saved (a USB drive, network folder or OneDrive folder is safest)" />
+                                    <Button Classes="ghost" Command="{Binding OpenFolderCommand}" Margin="0,0,8,0" ToolTip.Tip="Open the backup folder">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <mi:MaterialIcon Kind="FolderOpenOutline" Width="16" Height="16" />
+                                            <TextBlock Text="Open folder" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Classes="ghost" Content="Use default folder" Command="{Binding UseDefaultFolderCommand}"
+                                            IsVisible="{Binding !IsDefaultFolder}" ToolTip.Tip="Documents\InfoID Backups" />
+                                </WrapPanel>
+                                <TextBlock Classes="attention" FontSize="12" TextWrapping="Wrap" Text="{Binding FolderHint}"
+                                           IsVisible="{Binding FolderHint, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ============================== Restore ============================== -->
+                <StackPanel Grid.Column="2" Spacing="16">
+
+                    <Border Classes="panel">
+                        <StackPanel Spacing="12">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <mi:MaterialIcon Classes="panelIcon" Kind="BackupRestore" />
+                                <TextBlock Grid.Column="1" Classes="panelTitle" Text="Restore" />
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+                                    <Button Classes="ghost" Command="{Binding RefreshCommand}" ToolTip.Tip="Refresh the list" Padding="6"
+                                            AutomationProperties.Name="Refresh">
+                                        <mi:MaterialIcon Kind="Refresh" Width="16" Height="16" />
+                                    </Button>
+                                    <Button Classes="secondary" Command="{Binding ChooseRestoreFileCommand}" IsEnabled="{Binding IsNotBusy}"
+                                            ToolTip.Tip="Restore a backup from another folder or a USB drive">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <mi:MaterialIcon Kind="DatabaseImportOutline" Width="16" Height="16" />
+                                            <TextBlock Text="Restore from file..." />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Classes="secondary" FontSize="12" Text="Backups in the backup folder. Select one to check it before restoring." />
+
+                            <TextBlock Classes="secondary" Text="No backups in this folder yet." IsVisible="{Binding !HasBackups}" Margin="0,4" />
+                            <ListBox Classes="backups" ItemsSource="{Binding Backups}" SelectedItem="{Binding SelectedBackup}"
+                                     IsVisible="{Binding HasBackups}" MaxHeight="300" Background="Transparent"
+                                     AutomationProperties.Name="Backups">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:BackupListItem">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ToolTip.Tip="{Binding ToolTip}">
+                                            <mi:MaterialIcon Kind="{Binding Icon}" Width="20" Height="20" Margin="0,0,10,0"
+                                                             Foreground="{DynamicResource BrushTextSecondary}" VerticalAlignment="Center" />
+                                            <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Title}" FontWeight="Medium" />
+                                                <TextBlock Text="{Binding Detail}" Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                                                <Button Classes="ghost rowAction" ToolTip.Tip="Show in folder" AutomationProperties.Name="Show in folder"
+                                                        Command="{Binding $parent[UserControl].((vm:BackupViewModel)DataContext).ShowInFolderCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <mi:MaterialIcon Kind="FolderOutline" Width="16" Height="16" />
+                                                </Button>
+                                                <Button Classes="ghost rowAction" ToolTip.Tip="Delete this backup" AutomationProperties.Name="Delete backup"
+                                                        Command="{Binding $parent[UserControl].((vm:BackupViewModel)DataContext).DeleteBackupCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <mi:MaterialIcon Kind="DeleteOutline" Width="16" Height="16" />
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <!-- Selected backup: check result, password, summary, restore -->
+                            <Border IsVisible="{Binding HasRestoreFile}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1"
+                                    CornerRadius="8" Padding="16">
+                                <StackPanel Spacing="10">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Text="{Binding RestoreTitle}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                                                   ToolTip.Tip="{Binding RestoreFilePath}" VerticalAlignment="Center" />
+                                        <Button Grid.Column="1" Classes="ghost rowAction" Command="{Binding ClearRestoreCommand}" ToolTip.Tip="Close"
+                                                AutomationProperties.Name="Close">
+                                            <TextBlock Text="✕" />
+                                        </Button>
+                                    </Grid>
+
+                                    <StackPanel Spacing="4" IsVisible="{Binding IsChecking}">
+                                        <TextBlock Text="Checking the backup..." Classes="secondary" />
+                                        <ProgressBar IsIndeterminate="True" Height="3" />
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="8" IsVisible="{Binding RestoreNeedsPassword}">
+                                        <TextBlock Text="This backup is password protected." Classes="secondary" />
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBox Text="{Binding RestorePassword}" PasswordChar="●" PlaceholderText="Backup password" MinWidth="240"
+                                                     AutomationProperties.Name="Backup password">
+                                                <TextBox.KeyBindings>
+                                                    <KeyBinding Gesture="Enter" Command="{Binding UnlockBackupCommand}" />
+                                                </TextBox.KeyBindings>
+                                            </TextBox>
+                                            <Button Classes="secondary" Command="{Binding UnlockBackupCommand}" IsEnabled="{Binding !IsChecking}">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <mi:MaterialIcon Kind="LockOutline" Width="16" Height="16" />
+                                                    <TextBlock Text="Unlock" />
+                                                </StackPanel>
+                                            </Button>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <TextBlock Classes="error" Text="{Binding RestoreProblem}"
+                                               IsVisible="{Binding RestoreProblem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                                    <StackPanel Spacing="10" IsVisible="{Binding CanRestore}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <mi:MaterialIcon Kind="CheckCircleOutline" Width="16" Height="16" Foreground="{DynamicResource BrushSuccess}" />
+                                            <TextBlock Text="The backup is complete and can be restored." Foreground="{DynamicResource BrushSuccess}" />
+                                        </StackPanel>
+                                        <ItemsControl ItemsSource="{Binding RestoreSummary}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:SummaryLine">
+                                                    <Grid ColumnDefinitions="130,*" Margin="0,2">
+                                                        <TextBlock Text="{Binding Label}" Classes="secondary" />
+                                                        <TextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <TextBlock Classes="secondary" FontSize="12"
+                                                   Text="Restoring replaces all of InfoID's data with this backup. A safety backup of the current data is made first, and this PC's license is kept. InfoID restarts to finish." />
+                                        <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding StartRestoreCommand}"
+                                                IsEnabled="{Binding IsNotBusy}" ToolTip.Tip="Replace InfoID's data with this backup">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <mi:MaterialIcon Kind="BackupRestore" Width="16" Height="16" />
+                                                <TextBlock Text="Restore this backup..." />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="panel">
+                        <StackPanel Spacing="10">
+                            <StackPanel Orientation="Horizontal">
+                                <mi:MaterialIcon Classes="panelIcon" Kind="ShieldCheckOutline" />
+                                <TextBlock Classes="panelTitle" Text="History" />
+                            </StackPanel>
+                            <TextBlock Classes="secondary" Text="No backups or restores yet."
+                                       IsVisible="{Binding !HasHistory}" />
+                            <ItemsControl ItemsSource="{Binding History}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:BackupHistoryItem">
+                                        <Grid ColumnDefinitions="Auto,150,70,*" Margin="0,3">
+                                            <mi:MaterialIcon Width="14" Height="14" Margin="0,0,8,0" VerticalAlignment="Center"
+                                                             Kind="CheckCircleOutline" Foreground="{DynamicResource BrushSuccess}"
+                                                             IsVisible="{Binding Succeeded}" />
+                                            <mi:MaterialIcon Width="14" Height="14" Margin="0,0,8,0" VerticalAlignment="Center"
+                                                             Kind="AlertOutline" Foreground="{DynamicResource BrushError}"
+                                                             IsVisible="{Binding !Succeeded}" />
+                                            <TextBlock Grid.Column="1" Text="{Binding When}" Classes="secondary" FontSize="12" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="2" FontSize="12" VerticalAlignment="Center">
+                                                <Run Text="{Binding What}" />
+                                            </TextBlock>
+                                            <TextBlock Grid.Column="3" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                                       Text="{Binding FileName}" ToolTip.Tip="{Binding StatusText}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

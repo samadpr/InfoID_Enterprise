@@ -11,6 +11,8 @@ namespace InfoID.AdminLicenseManager.ViewModels;
 /// override tier/expiry, generate, copy. SRS target: under 60 seconds.</summary>
 public sealed partial class GenerateSerialKeyViewModel : ViewModelBase
 {
+    private static readonly InfoID.Shared.Logging.AppLogger Log = InfoID.Shared.Logging.AppLog.For<GenerateSerialKeyViewModel>();
+
     private readonly ActivationService _activation;
 
     public GenerateSerialKeyViewModel(ActivationService activation, AdminContext admin)
@@ -90,6 +92,7 @@ public sealed partial class GenerateSerialKeyViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error("GenerateSerialKey: generate failed", ex);
             Error = ex.GetBaseException().Message;
         }
     }

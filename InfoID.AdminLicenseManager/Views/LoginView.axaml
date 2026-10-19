@@ -3,42 +3,183 @@
              xmlns:vm="using:InfoID.AdminLicenseManager.ViewModels"
              x:Class="InfoID.AdminLicenseManager.Views.LoginView"
              x:DataType="vm:LoginViewModel">
-    <Border Classes="card" Width="420" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <StackPanel Spacing="12">
-            <TextBlock Text="InfoID License Manager" Classes="h1" />
-            <TextBlock Text="Vendor staff only. Every action is recorded in the audit log." Classes="caption" TextWrapping="Wrap" />
 
-            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+    <UserControl.Styles>
+        <!-- Brand (InfoID red) primary button for this screen. -->
+        <Style Selector="Button.brand">
+            <Setter Property="Height" Value="42" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+        <Style Selector="Button.brand /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#DA3025" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button.brand:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#C42A20" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button.brand:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#A8231A" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button.brand:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#80DA3025" />
+            <Setter Property="Foreground" Value="#CCFFFFFF" />
+        </Style>
 
-            <TextBlock Text="{Binding Error}" Classes="error" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
-            <Button Content="Retry" Command="{Binding RetryCommand}"
-                    IsVisible="{Binding !IsReady}" IsEnabled="{Binding !IsBusy}" />
+        <!-- Form fields: label above, comfortable height. -->
+        <Style Selector="TextBlock.fieldLabel">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Margin" Value="0,0,0,6" />
+        </Style>
+        <Style Selector="TextBox.field">
+            <Setter Property="MinHeight" Value="40" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
 
-            <StackPanel Spacing="12" IsVisible="{Binding IsReady}">
-                <TextBlock Text="{Binding Warning}" Foreground="#9D5D00" TextWrapping="Wrap"
-                           IsVisible="{Binding Warning, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        <!-- Brand panel bullet rows. -->
+        <Style Selector="TextBlock.brandPoint">
+            <Setter Property="Foreground" Value="#F2FFFFFF" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </UserControl.Styles>
 
-                <!-- First run: create the initial Super Admin -->
-                <StackPanel Spacing="8" IsVisible="{Binding IsFirstRun}">
-                    <TextBlock Text="First-time setup: create the Super Admin account" Classes="section" TextWrapping="Wrap" />
-                    <TextBox Watermark="Full name" Text="{Binding FullName}" />
-                    <TextBox Watermark="Email" Text="{Binding Email}" />
-                    <TextBox Watermark="Password (10+ chars, upper, lower, digit)" PasswordChar="●" Text="{Binding Password}" />
-                    <TextBox Watermark="Confirm password" PasswordChar="●" Text="{Binding ConfirmPassword}" />
-                    <Button Content="Create account and sign in" IsDefault="True" HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Center" Classes="accent"
-                            Command="{Binding CreateAdminCommand}" IsEnabled="{Binding !IsBusy}" />
+    <Grid ColumnDefinitions="5*,6*">
+
+        <!-- Left: brand panel -->
+        <Border Grid.Column="0">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                    <GradientStop Color="#DA3025" Offset="0" />
+                    <GradientStop Color="#8E1B13" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Grid RowDefinitions="*,Auto" Margin="56,48">
+                <StackPanel VerticalAlignment="Center" Spacing="28" MaxWidth="420" HorizontalAlignment="Left">
+                    <Border Width="88" Height="88" CornerRadius="44" Background="White" HorizontalAlignment="Left">
+                        <Image Source="avares://InfoID.AdminLicenseManager/Assets/Images/InfoID.png"
+                               Width="80" Height="80" Stretch="Uniform" />
+                    </Border>
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="InfoID" Foreground="White" FontSize="40" FontWeight="Bold" />
+                        <TextBlock Text="License Manager" Foreground="#F2FFFFFF" FontSize="22" FontWeight="SemiBold" />
+                    </StackPanel>
+
+                    <TextBlock Foreground="#E6FFFFFF" FontSize="15" TextWrapping="Wrap" LineHeight="22"
+                               Text="Manage licenses, customers and activations for InfoID from one secure place." />
+
+                    <StackPanel Spacing="14">
+                        <Grid ColumnDefinitions="28,*">
+                            <TextBlock Text="✓" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Classes="brandPoint" Text="Activation codes, serial keys and machine slots" />
+                        </Grid>
+                        <Grid ColumnDefinitions="28,*">
+                            <TextBlock Text="✓" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Classes="brandPoint" Text="Customer requests, plans and accounts" />
+                        </Grid>
+                        <Grid ColumnDefinitions="28,*">
+                            <TextBlock Text="✓" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Classes="brandPoint" Text="Tamper-evident audit log of every action" />
+                        </Grid>
+                    </StackPanel>
                 </StackPanel>
 
-                <!-- Normal sign-in -->
-                <StackPanel Spacing="8" IsVisible="{Binding !IsFirstRun}">
-                    <TextBox Watermark="Email" Text="{Binding Email}" />
-                    <TextBox Watermark="Password" PasswordChar="●" Text="{Binding Password}" />
-                    <Button Content="Sign in" IsDefault="True" HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Center" Classes="accent"
-                            Command="{Binding SignInCommand}" IsEnabled="{Binding !IsBusy}" />
+                <TextBlock Grid.Row="1" Foreground="#B3FFFFFF" FontSize="12"
+                           Text="Authorized vendor staff only" />
+            </Grid>
+        </Border>
+
+        <!-- Right: sign-in -->
+        <Grid Grid.Column="1" RowDefinitions="*,Auto" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                <StackPanel Width="380" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,48" Spacing="20">
+
+                    <!-- Heading -->
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Sign in" FontSize="28" FontWeight="SemiBold" IsVisible="{Binding !IsFirstRun}" />
+                        <TextBlock Text="Welcome back. Sign in with your staff account." Classes="caption" FontSize="14"
+                                   TextWrapping="Wrap" IsVisible="{Binding !IsFirstRun}" />
+                        <TextBlock Text="Set up License Manager" FontSize="28" FontWeight="SemiBold" IsVisible="{Binding IsFirstRun}" />
+                        <TextBlock Text="Create the first Super Admin account. You can add other staff later." Classes="caption"
+                                   FontSize="14" TextWrapping="Wrap" IsVisible="{Binding IsFirstRun}" />
+                    </StackPanel>
+
+                    <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+
+                    <!-- Error (connection or sign-in) -->
+                    <Border Background="#1AD13438" BorderBrush="#66D13438" BorderThickness="1" CornerRadius="6" Padding="12,10"
+                            IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <TextBlock Text="{Binding Error}" Classes="error" />
+                    </Border>
+                    <Button Content="Retry" Command="{Binding RetryCommand}" HorizontalAlignment="Left"
+                            IsVisible="{Binding !IsReady}" IsEnabled="{Binding !IsBusy}" />
+
+                    <StackPanel Spacing="20" IsVisible="{Binding IsReady}">
+                        <!-- Setup warning (e.g. license secret missing) -->
+                        <Border Background="#1AC27C0E" BorderBrush="#66C27C0E" BorderThickness="1" CornerRadius="6" Padding="12,10"
+                                IsVisible="{Binding Warning, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <TextBlock Text="{Binding Warning}" Foreground="#C27C0E" TextWrapping="Wrap" FontSize="13" />
+                        </Border>
+
+                        <!-- First run: create the initial Super Admin -->
+                        <StackPanel Spacing="14" IsVisible="{Binding IsFirstRun}">
+                            <StackPanel>
+                                <TextBlock Classes="fieldLabel" Text="Full name" />
+                                <TextBox Classes="field" Text="{Binding FullName}" Watermark="Your name" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Classes="fieldLabel" Text="Work email" />
+                                <TextBox Classes="field" Text="{Binding Email}" Watermark="name@company.com" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Classes="fieldLabel" Text="Password" />
+                                <TextBox Classes="field revealPasswordButton" PasswordChar="●" Text="{Binding Password}" />
+                                <TextBlock Classes="caption" Margin="0,6,0,0" TextWrapping="Wrap"
+                                           Text="At least 10 characters, with upper-case, lower-case and a number." />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Classes="fieldLabel" Text="Confirm password" />
+                                <TextBox Classes="field revealPasswordButton" PasswordChar="●" Text="{Binding ConfirmPassword}" />
+                            </StackPanel>
+                            <Button Classes="brand" Content="Create account and sign in" IsDefault="True" Margin="0,6,0,0"
+                                    Command="{Binding CreateAdminCommand}" IsEnabled="{Binding !IsBusy}" />
+                        </StackPanel>
+
+                        <!-- Normal sign-in -->
+                        <StackPanel Spacing="14" IsVisible="{Binding !IsFirstRun}">
+                            <StackPanel>
+                                <TextBlock Classes="fieldLabel" Text="Email" />
+                                <TextBox x:Name="EmailBox" Classes="field" Text="{Binding Email}" Watermark="name@company.com"
+                                         AutomationProperties.Name="Email" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Classes="fieldLabel" Text="Password" />
+                                <TextBox Classes="field revealPasswordButton" PasswordChar="●" Text="{Binding Password}"
+                                         AutomationProperties.Name="Password" />
+                            </StackPanel>
+                            <Button Classes="brand" Content="Sign in" IsDefault="True" Margin="0,6,0,0"
+                                    Command="{Binding SignInCommand}" IsEnabled="{Binding !IsBusy}" />
+                            <TextBlock Classes="caption" TextWrapping="Wrap"
+                                       Text="Forgot your password? Ask a Super Admin to reset it." />
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
-        </StackPanel>
-    </Border>
+            </ScrollViewer>
+
+            <!-- Footer -->
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="32,0,32,20">
+                <TextBlock Classes="caption" Text="Every action is recorded in the audit log." />
+                <TextBlock x:Name="VersionText" Grid.Column="1" Classes="caption" />
+            </Grid>
+        </Grid>
+    </Grid>
 </UserControl>

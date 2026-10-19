@@ -32,6 +32,8 @@ namespace InfoID.Desktop.Features.CardDesigner.ViewModels;
 /// </summary>
 public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 {
+    private static readonly InfoID.Shared.Logging.AppLogger Log = InfoID.Shared.Logging.AppLog.For<CardDesignTabViewModel>();
+
     private readonly IDesignClipboard _clipboard;
     private readonly ICardDesignRepository _repository;
     private readonly IFilePickerService _filePicker;
@@ -283,7 +285,6 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     [ObservableProperty]
     private bool _lineToolActive;
 
-    private bool _isNewDatabaseRow;
     private string _activeDatabaseTableName = string.Empty;
 
     /// <summary>Same idea as <see cref="LineToolActive"/> but for freehand drawing --
@@ -438,6 +439,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     [RelayCommand]
     private async Task ShowPrintPreview()
     {
+        SaveDatabaseRows(includeCurrentRow: true);
         var previewViewModel = new PrintPreviewViewModel(Document, _evaluator, _previewDataProvider, _assetService);
         await _dialogService.ShowDialogAsync<PrintPreviewViewModel, bool>(previewViewModel);
     }
@@ -456,6 +458,10 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     //}
     private async Task ShowPrintDialog()
     {
+        // Rows typed into the Internal Database grid get their real IDs before
+        // printing, so print history is recorded against the saved records.
+        SaveDatabaseRows(includeCurrentRow: true);
+
         // Scan every photo folder used on the card before rendering starts.
         foreach (var image in Document.Front.Elements.Concat(Document.Back.Elements).OfType<ImageElement>())
         {
@@ -467,7 +473,21 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
             Document, _printerService, _printStatusStore, _cardFormatCatalogService,
             _previewDataProvider, _evaluator, _assetService, _filePicker,
             databaseRecords: BuildPrintRecords(),
-            resolveImagePath: ResolvePrintImagePath);
+            resolveImagePath: ResolvePrintImagePath,
+            // Licensing check + card counting inside Print (FR-LIC-12). Resolved via
+            // App.Services, same as AssetReferenceToBitmapConverter, rather than adding
+            // another parameter to this tab's already long constructor chain.
+            licenseScopes: InfoID.Desktop.App.Services.GetService(typeof(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory))
+                as Microsoft.Extensions.DependencyInjection.IServiceScopeFactory,
+            // Trial mode: who may print (license / trial / log in first) and the watermark.
+            printAuthorization: InfoID.Desktop.App.Services.GetService(typeof(InfoID.Desktop.Features.Trial.Services.PrintAuthorizationService))
+                as InfoID.Desktop.Features.Trial.Services.PrintAuthorizationService,
+            trialState: InfoID.Desktop.App.Services.GetService(typeof(InfoID.Desktop.Features.Trial.Services.TrialModeState))
+                as InfoID.Desktop.Features.Trial.Services.TrialModeState,
+            // Visitor badges need a valid license but don't use up the card allowance.
+            licensedFeature: _activeDatabaseType == DatabaseType.Visitors
+                ? InfoID.Application.Services.LicensedFeatures.VisitorBadges
+                : InfoID.Application.Services.LicensedFeatures.Printing);
 
         await _dialogService.ShowDialogAsync<PrintDialogViewModel, bool>(printViewModel);
     }
@@ -590,7 +610,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"DATABASE IMAGE RESOLVE ERROR: {ex.Message}");
+            Log.Warn("Database image resolve error", ex);
             return null;
         }
     }
@@ -1922,6 +1942,9 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
             // Checkboxes: forget ticks that belong to a previous table (new connection / disconnect)
             _checkedDatabaseRows.RemoveWhere(r => r.Table != DatabaseData);
             DatabaseRowChecksChanged?.Invoke(this, EventArgs.Empty);
+
+            // Saving grid edits: follow the new table's changes.
+            OnDatabaseTableReplaced();
         }
 
         // Navigation: keep the "5 of 12" text up to date
@@ -2059,6 +2082,52 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         if (selectedType is null)
             return;
 
+        // Switching to another table/source: save the grid's pending rows first.
+        if (!await ConfirmLeaveDatabaseAsync("Switch table"))
+            return;
+
+        var previousData = DatabaseData;
+        var previousTable = _activeDatabaseTableName;
+        var previousType = _activeDatabaseType;
+
+        // Which kind of source is being connected (only the Internal Database is
+        // written back to from the grid). Set before connecting, so the grid is built
+        // with the right editing rules; put back if nothing gets connected.
+        _activeDatabaseType = selectedType.Value;
+
+        _connectingDatabase = true;
+        try
+        {
+            await ConnectDatabaseAsync(selectedType.Value);
+        }
+        finally
+        {
+            _connectingDatabase = false;
+        }
+
+        if (ReferenceEquals(previousData, DatabaseData) &&
+            string.Equals(previousTable, _activeDatabaseTableName, StringComparison.Ordinal))
+        {
+            _activeDatabaseType = previousType; // cancelled
+        }
+        else if (DatabaseData is null)
+        {
+            _activeDatabaseType = null;
+        }
+
+        OnDatabaseTableReplaced();
+    }
+
+    /// <summary>The connection branches for each source type (unchanged; split out of
+    /// AddDatabase so the type of whatever got connected can be recorded).</summary>
+    private async Task ConnectDatabaseAsync(DatabaseType? selectedType)
+    {
+        if (selectedType == DatabaseType.Visitors)
+        {
+            await ConnectVisitorsAsync();
+            return;
+        }
+
         if (selectedType == DatabaseType.Excel)
         {
             var excelDialog =
@@ -2133,8 +2202,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(
-                    $"EXCEL DATA ERROR: {ex}");
+                Log.Error("Excel data error", ex);
             }
 
             return;
@@ -2222,8 +2290,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(
-                        $"DATABASE DATA ERROR: {ex}");
+                    Log.Error("Database data error", ex);
                 }
             }
             return;
@@ -2308,8 +2375,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(
-                    $"SQLITE DATA ERROR: {ex}");
+                Log.Error("SQLite data error", ex);
             }
 
             return;
@@ -2379,8 +2445,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(
-                        $"SQL SERVER DATA ERROR: {ex}");
+                    Log.Error("SQL Server data error", ex);
                 }
             }
 
@@ -2463,8 +2528,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(
-                        $"MYSQL DATA ERROR: {ex}");
+                    Log.Error("MySQL data error", ex);
                 }
             }
 
@@ -2496,8 +2560,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 
                 if (tables.Count == 0)
                 {
-                    Debug.WriteLine(
-                        "ACCESS: No tables found.");
+                    Log.Debug("ACCESS: No tables found.");
 
                     return;
                 }
@@ -2567,8 +2630,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(
-                    $"ACCESS DATA ERROR: {ex}");
+                Log.Error("Access data error", ex);
             }
 
             return;
@@ -2649,8 +2711,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine(
-                        $"POSTGRESQL DATA ERROR: {ex}");
+                    Log.Error("PostgreSQL data error", ex);
                 }
             }
 
@@ -2683,8 +2744,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 
                 if (DatabaseData.Columns.Count == 0)
                 {
-                    Debug.WriteLine(
-                        "CSV/TXT file contains no columns.");
+                    Log.Debug("CSV/TXT file contains no columns.");
 
                     return;
                 }
@@ -2759,9 +2819,9 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"CSV/TXT DATA ERROR: {ex}");
+                Log.Error("CSV/TXT data error", ex);
 
-                Debug.WriteLine($"Could not load CSV/TXT file: {ex.Message}");
+                Log.Warn("Could not load CSV/TXT file", ex);
             }
 
             return;
@@ -2826,8 +2886,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(
-                        $"INTERNAL SQLITE DATA ERROR: {ex}");
+                    Log.Error("Internal SQLite data error", ex);
                 }
             }
 
@@ -2911,8 +2970,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(
-                        $"SAMPLE DATABASE DATA ERROR: {ex}");
+                    Log.Error("Sample database data error", ex);
                 }
             }
 
@@ -2947,7 +3005,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 
                 if (data.Columns.Count == 0)
                 {
-                    Debug.WriteLine("API returned no columns.");
+                    Log.Debug("API returned no columns.");
                     return;
                 }
 
@@ -3007,7 +3065,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"API DATA ERROR: {ex}");
+                Log.Error("API data error", ex);
             }
 
             return;
@@ -3032,7 +3090,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 
                 if (data.Columns.Count == 0)
                 {
-                    Debug.WriteLine("GOOGLE SHEETS: sheet has no columns.");
+                    Log.Debug("GOOGLE SHEETS: sheet has no columns.");
                     return;
                 }
 
@@ -3044,7 +3102,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"GOOGLE SHEETS DATA ERROR: {ex}");
+                Log.Error("Google Sheets data error", ex);
             }
 
             return;
@@ -3111,8 +3169,13 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     /// <summary>Clears all database state and returns the UI to "Add Database" only.
     /// Element bindings on the card (DatabaseColumn etc.) are design data and are kept.</summary>
     [RelayCommand]
-    private void DisconnectDatabase()
+    private async Task DisconnectDatabase()
     {
+        // Rows typed into the Internal Database grid are saved first; if some can't
+        // be, ask before throwing them away.
+        if (!await ConfirmLeaveDatabaseAsync("Disconnect"))
+            return;
+
         // Clear the row selection first, while the old DataView is still bound.
         // OnSelectedDatabaseRowChanged clears SelectedDatabaseValues as well.
         SelectedDatabaseRow = null;
@@ -3124,7 +3187,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         SelectedDatabaseValues.Clear();
 
         _activeDatabaseTableName = string.Empty;
-        _isNewDatabaseRow = false;
+        _activeDatabaseType = null;
 
         OnPropertyChanged(nameof(DatabaseData));
         OnPropertyChanged(nameof(DatabaseDataView));
@@ -3180,7 +3243,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"DATABASE IMAGE LOAD ERROR: {ex.Message}");
+            Log.Error("Database image load error", ex);
             return null;
         }
     }
@@ -3215,7 +3278,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"DATABASE IMAGE PICK ERROR: {ex}");
+            Log.Error("Database image pick error", ex);
             return;
         }
 
@@ -3328,7 +3391,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"PHOTO FOLDER PREPARE ERROR: {ex.Message}");
+            Log.Warn("Photo folder prepare error", ex);
             _preparedPhotoFolders.Remove(folderPath);
         }
     }
@@ -3465,49 +3528,6 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     [RelayCommand]
     private void LastDatabaseRow() => MoveToDatabaseRow((_, count) => count - 1);
 
-    /// <summary>Removes the selected rows from the grid only -- the source database is
-    /// never touched. Reconnecting brings them back. Falls back to the current row if
-    /// nothing is multi-selected.</summary>
-    /// <summary>Removes rows from the grid only -- the source database is never
-    /// touched. Priority: ticked rows, then Ctrl/Shift-selected rows, then the
-    /// current row.</summary>
-    [RelayCommand]
-    private void DeleteDatabaseRows(System.Collections.IList? selectedItems)
-    {
-        if (DatabaseData is null) return;
-
-        var rowsToDelete = _checkedDatabaseRows.Where(r => r.Table == DatabaseData).ToList();
-
-        if (rowsToDelete.Count == 0)
-            rowsToDelete = selectedItems?.OfType<DataRowView>().Select(v => v.Row).ToList()
-                           ?? new List<DataRow>();
-
-        if (rowsToDelete.Count == 0 && SelectedDatabaseRow is not null)
-            rowsToDelete.Add(SelectedDatabaseRow.Row);
-
-        if (rowsToDelete.Count == 0) return;
-
-        var firstIndex = GetVisibleDatabaseRows().FindIndex(r => rowsToDelete.Contains(r.Row));
-
-        // Clear selection first: the selection handler reads the row's values,
-        // which fails once the row has been removed.
-        SelectedDatabaseRow = null;
-
-        foreach (var row in rowsToDelete)
-        {
-            if (row.RowState == DataRowState.Added) _isNewDatabaseRow = false;
-            _checkedDatabaseRows.Remove(row);
-            if (row.Table == DatabaseData) DatabaseData.Rows.Remove(row);
-        }
-
-        ReplaceDatabaseTable(DatabaseData, DatabaseData.DefaultView.RowFilter);
-
-        var remaining = GetVisibleDatabaseRows();
-        if (remaining.Count > 0)
-            SelectedDatabaseRow = remaining[Math.Clamp(firstIndex, 0, remaining.Count - 1)];
-
-        NotifyDocumentChanged();
-    }
     [RelayCommand]
     private void ApplyDatabaseSearch()
     {
@@ -3521,7 +3541,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"DATABASE SEARCH ERROR: {ex}");
+            Log.Error("Database search error", ex);
             ReplaceDatabaseTable(DatabaseData, string.Empty);
         }
 
@@ -3642,154 +3662,6 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 
         return "API";
     }
-    [RelayCommand]
-
-    private async Task AddDatabaseRow()
-    {
-        if (DatabaseData is null)
-            return;
-
-        if (DatabaseData.Columns.Count == 0)
-            return;
-
-        if (string.IsNullOrWhiteSpace(_activeDatabaseTableName))
-            return;
-
-        // CRITICAL: Wait a moment for the DataGrid's TextBox.LostFocus event to complete.
-        // When the user types in a cell and immediately clicks "+ Add row", the button
-        // click triggers LostFocus on the TextBox, but the LostFocus handler (which copies
-        // the TextBox value into the DataRow) might not finish before this command executes.
-        // A 50ms delay lets the event queue drain and ensures the DataRow has the typed values.
-        await Task.Delay(50);
-
-        // BEFORE creating a new row, save the previous pending row if it has data.
-        if (_isNewDatabaseRow && SelectedDatabaseRow is not null)
-        {
-            // CRITICAL: Accept any pending cell edits from the DataGrid BEFORE checking row data.
-            // The user might have just typed into a cell and clicked "+ Add row" immediately.
-            // Without this, the typed values are still in the TextBox and not yet in the DataRow.
-            if (SelectedDatabaseRow.Row.RowState == DataRowState.Detached)
-            {
-                // Row was never properly added to the table - this shouldn't happen,
-                // but if it does, we can't save it.
-                Debug.WriteLine("ADD DATABASE ROW: Skipping detached row.");
-            }
-            else if (RowHasData(SelectedDatabaseRow.Row))
-            {
-                // Row has data - save it to SQLite and reload the table to get the generated ID.
-                if (!SavePendingRowAndReload())
-                {
-                    // Save failed - don't create a new row.
-                    return;
-                }
-                // At this point, DatabaseData has been reloaded from SQLite with the saved row.
-            }
-            else
-            {
-                // Row is empty - don't save it, just discard it by proceeding to create a new one.
-                Debug.WriteLine("ADD DATABASE ROW: Discarding empty pending row.");
-            }
-        }
-
-        // Create a new DataTable so the DataGrid gets a new DataView.
-        var newTable = DatabaseData.Clone();
-
-        // Copy existing rows (these are now the freshly reloaded rows from SQLite if we saved).
-        foreach (DataRow existingRow in DatabaseData.Rows)
-        {
-            newTable.ImportRow(existingRow);
-        }
-
-        // Create the new empty row.
-        var newRow = newTable.NewRow();
-
-        foreach (DataColumn column in newTable.Columns)
-        {
-            if (column.AutoIncrement)
-                continue;
-
-            newRow[column] = DBNull.Value;
-        }
-
-        newTable.Rows.Add(newRow);
-
-        // Replace the DataTable instance.
-        DatabaseData = newTable;
-
-        // Tell the DataGrid that its ItemsSource has changed.
-        OnPropertyChanged(nameof(DatabaseData));
-        OnPropertyChanged(nameof(DatabaseDataView));
-
-        // Select the new row.
-        SelectedDatabaseRow = DatabaseData.DefaultView
-            .Cast<DataRowView>()
-            .FirstOrDefault(x => x.Row == newRow);
-
-        _isNewDatabaseRow = true;
-
-        NotifyDocumentChanged();
-    }
-
-
-    [RelayCommand]
-    private void SaveDatabaseRow()
-    {
-        if (DatabaseData is null)
-            return;
-
-        if (SelectedDatabaseRow is null)
-            return;
-
-        if (string.IsNullOrWhiteSpace(_activeDatabaseTableName))
-            return;
-
-        // Do not save rows that have no actual data.
-        if (!RowHasData(SelectedDatabaseRow.Row))
-        {
-            Debug.WriteLine("SAVE DATABASE ROW: Skipping empty row.");
-            return;
-        }
-
-        try
-        {
-            var sqliteService =
-                new InternalSqliteDatabaseService();
-
-            sqliteService.InsertRow(
-                _activeDatabaseTableName,
-                SelectedDatabaseRow.Row);
-
-            _isNewDatabaseRow = false;
-
-            DatabaseData =
-                sqliteService.GetData(
-                    _activeDatabaseTableName);
-            var tableDefinition = DatabaseTables
-    .FirstOrDefault(x =>
-        x.TableName.Equals(
-            _activeDatabaseTableName,
-            StringComparison.OrdinalIgnoreCase));
-
-            if (tableDefinition is not null &&
-                !string.IsNullOrWhiteSpace(tableDefinition.PrimaryKey))
-            {
-                DatabaseData.DefaultView.Sort =
-                    $"[{tableDefinition.PrimaryKey}] ASC";
-            }
-
-
-            OnPropertyChanged(nameof(DatabaseData));
-            OnPropertyChanged(nameof(DatabaseDataView));
-
-            NotifyDocumentChanged();
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(
-                $"SAVE DATABASE ROW ERROR: {ex}");
-        }
-    }
-
     /// <summary>
     /// Checks if a DataRow contains any actual data (non-null, non-empty values)
     /// in columns other than auto-increment primary keys.
@@ -3813,55 +3685,6 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         }
 
         return false;
-    }
-
-    /// <summary>
-    /// Saves a pending row to the database and reloads DatabaseData from SQLite.
-    /// This ensures the saved row (with its generated ID) appears in the grid.
-    /// </summary>
-    /// <returns>True if save succeeded, false otherwise.</returns>
-    private bool SavePendingRowAndReload()
-    {
-        if (string.IsNullOrWhiteSpace(_activeDatabaseTableName))
-            return false;
-
-        if (SelectedDatabaseRow is null)
-            return false;
-
-        try
-        {
-            var sqliteService = new InternalSqliteDatabaseService();
-
-            // Insert the row into SQLite.
-            sqliteService.InsertRow(_activeDatabaseTableName, SelectedDatabaseRow.Row);
-
-            // CRITICAL: Reload DatabaseData from SQLite to get the saved row with its generated ID.
-            // Without this reload, the old temporary row disappears and the saved row never appears.
-            DatabaseData = sqliteService.GetData(_activeDatabaseTableName);
-
-            // Reapply primary key sorting to maintain ascending ID order after reload.
-            var tableDefinition = DatabaseTables.FirstOrDefault(t =>
-                t.TableName.Equals(_activeDatabaseTableName, StringComparison.OrdinalIgnoreCase));
-
-            if (tableDefinition is not null && !string.IsNullOrWhiteSpace(tableDefinition.PrimaryKey))
-            {
-                DatabaseData.DefaultView.Sort = $"[{tableDefinition.PrimaryKey}] ASC";
-            }
-
-            _isNewDatabaseRow = false;
-
-            OnPropertyChanged(nameof(DatabaseData));
-            OnPropertyChanged(nameof(DatabaseDataView));
-
-            Debug.WriteLine($"SAVE PENDING ROW: Successfully saved and reloaded data from {_activeDatabaseTableName}");
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"SAVE PENDING ROW ERROR: {ex}");
-            return false;
-        }
     }
 
     [RelayCommand]
@@ -4176,6 +3999,11 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     private async Task SaveInternal(bool isAutosave)
     {
         _autosaveCts?.Cancel();
+
+        // Data-grid rows (Internal Database) are saved with the design. Autosave leaves
+        // the row being typed in alone; it's saved when that row is finished.
+        SaveDatabaseRows(includeCurrentRow: !isAutosave);
+
         SaveStatusText = isAutosave ? "Autosaving..." : "Saving...";
         try
         {
@@ -4207,14 +4035,14 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
                     // A thumbnail render failure must never make an otherwise-successful
                     // save look failed to the user -- the Recent Cards/Templates list just
                     // falls back to no image for this one design; log and move on.
-                    System.Diagnostics.Debug.WriteLine($"Thumbnail generation failed: {thumbnailEx}");
+                    Log.Warn("Thumbnail generation failed", thumbnailEx);
                 }
             }
         }
         catch (Exception ex)
         {
             SaveStatusText = isAutosave ? "Autosave failed" : "Save failed";
-            System.Diagnostics.Debug.WriteLine($"Card design save failed: {ex}");
+            Log.Error("Card design save failed", ex);
         }
     }
 

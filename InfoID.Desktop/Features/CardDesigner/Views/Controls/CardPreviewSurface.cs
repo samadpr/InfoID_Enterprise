@@ -49,6 +49,20 @@ public sealed class CardPreviewSurface : Control
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e) => InvalidateVisual();
 
+    private void OnTrialModeChanged(object? sender, System.EventArgs e) => InvalidateVisual();
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        if (InfoID.Desktop.Features.Trial.Services.TrialModeState.Current is { } trial) trial.Changed += OnTrialModeChanged;
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        if (InfoID.Desktop.Features.Trial.Services.TrialModeState.Current is { } trial) trial.Changed -= OnTrialModeChanged;
+    }
+
     public override void Render(DrawingContext context)
     {
         base.Render(context);
@@ -59,9 +73,12 @@ public sealed class CardPreviewSurface : Control
         {
             ResolveText = vm.ResolveText,
             ResolveField = vm.ResolveField,
+            ResolveCodeValue = vm.ResolveCodeValue,
             IsVisibleNow = vm.IsVisibleNow,
             ShowBleedAndSafeZone = vm.ShowBleedAndSafeZone,
             ResolveAssetPath = vm.ResolveAssetPath,
+            // Trial mode (signed in, not activated): preview shows the trial watermark.
+            TrialWatermark = InfoID.Desktop.Features.Trial.Services.TrialModeState.Current?.IsTrialMode == true,
         };
         ThumbnailRenderer.Render(context, vm.Document, Side, new Rect(Bounds.Size), options);
     }

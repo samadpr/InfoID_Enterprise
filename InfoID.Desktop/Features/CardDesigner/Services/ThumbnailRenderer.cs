@@ -37,7 +37,14 @@ public static class ThumbnailRenderer
         public Func<DataFieldElement, string>? ResolveField { get; init; }
         public Func<DesignerElement, bool>? IsVisibleNow { get; init; }
         public Func<ImageElement, string?>? ResolveImagePath { get; init; }
+        /// <summary>The value a QR code / barcode encodes for the current record
+        /// (CodeValueBinding). Null, or a null result, encodes the element's Value.</summary>
+        public Func<DesignerElement, string?>? ResolveCodeValue { get; init; }
         public bool ShowBleedAndSafeZone { get; init; }
+
+        /// <summary>Trial mode: draws "INFOID TRIAL VERSION" over the card. Part of the
+        /// render itself, so it is in every printed page, PDF and preview made from it.</summary>
+        public bool TrialWatermark { get; init; }
 
         /// <summary>Resolves an element's AssetReference to a real file path (see
         /// IDesignAssetService.ResolveToFullPath). Null, or a null/failed result from
@@ -87,6 +94,9 @@ public static class ThumbnailRenderer
             {
                 DrawElement(context, cardRect, scale, element, options);
             }
+
+            if (options?.TrialWatermark == true)
+                InfoID.Desktop.Features.Trial.Services.TrialWatermark.Draw(context, cardRect);
         }
 
         if (options?.ShowBleedAndSafeZone == true)
@@ -110,15 +120,34 @@ public static class ThumbnailRenderer
         var rect = new Rect(cardRect.X + element.X * scale, cardRect.Y + element.Y * scale,
             Math.Max(0.5, element.Width * scale), Math.Max(0.5, element.Height * scale));
 
+        // Same opacity and rotation as the design canvas (CardCanvasView.DrawElement):
+        // rotate about the element's own centre, so a rotated or faded element prints
+        // exactly as designed instead of straight and solid.
+        using var opacityScope = context.PushOpacity(Math.Clamp(element.Opacity, 0, 1));
+        var center = rect.Center;
+        using var rotationScope = context.PushTransform(
+            Matrix.CreateTranslation(-center.X, -center.Y)
+            * Matrix.CreateRotation(element.Rotation * Math.PI / 180.0)
+            * Matrix.CreateTranslation(center.X, center.Y));
+
         switch (element)
         {
             case TextElement text:
                 var textValue = options?.ResolveText?.Invoke(text) ?? text.Text;
-                DrawText(context, rect, textValue, text.FontFamily, text.ColorHex, text.HorizontalAlignment);
+                CardTextRenderer.Draw(context, rect, textValue, text.FontFamily,
+                    FontPx(text.FontSize, scale), FontPx(text.MinFontSize, scale), ParseBrush(text.ColorHex),
+                    text.Bold, text.Italic, text.Underline, text.HorizontalAlignment, text.VerticalAlignment);
                 break;
             case DataFieldElement field:
                 var fieldValue = options?.ResolveField?.Invoke(field) ?? $"{{{{{field.FieldKey}}}}}";
-                DrawText(context, rect, fieldValue, field.FontFamily, field.ColorHex, field.HorizontalAlignment);
+                CardTextRenderer.Draw(context, rect, fieldValue, field.FontFamily,
+                    FontPx(field.FontSize, scale), FontPx(CardTextRenderer.DefaultMinFontSize, scale), ParseBrush(field.ColorHex),
+                    horizontal: field.HorizontalAlignment);
+                break;
+            case DateTimeElement dateTime:
+                CardTextRenderer.Draw(context, rect, CardTextRenderer.FormatDateTime(dateTime), dateTime.FontFamily,
+                    FontPx(dateTime.FontSize, scale), FontPx(CardTextRenderer.DefaultMinFontSize, scale), ParseBrush(dateTime.ColorHex),
+                    dateTime.Bold, dateTime.Italic, dateTime.Underline, dateTime.HorizontalAlignment, dateTime.VerticalAlignment);
                 break;
             case ShapeElement shape:
                 DrawShape(context, rect, shape);
@@ -149,10 +178,10 @@ public static class ThumbnailRenderer
                 DrawImageOrPlaceholder(context, rect, signature.AssetReference, options);
                 break;
             case BarcodeElement barcode:
-                DrawBarcodeOrQr(context, rect, BarcodeRenderer.TryGenerate(barcode));
+                DrawBarcodeOrQr(context, rect, BarcodeRenderer.TryGenerate(barcode, options?.ResolveCodeValue?.Invoke(barcode)));
                 break;
             case QrCodeElement qr:
-                DrawBarcodeOrQr(context, rect, BarcodeRenderer.TryGenerate(qr));
+                DrawBarcodeOrQr(context, rect, BarcodeRenderer.TryGenerate(qr, options?.ResolveCodeValue?.Invoke(qr)));
                 break;
             case PenElement pen:
                 PenRenderer.Draw(context, rect, pen);
@@ -238,30 +267,12 @@ public static class ThumbnailRenderer
         return overridePath.Length == 0 ? null : overridePath;
     }
 
-    private static void DrawText(DrawingContext context, Rect rect, string? value, string fontFamily, string colorHex, TextAlignmentX alignment)
-    {
-        if (string.IsNullOrEmpty(value) || rect.Height < 1) return;
-
-        // Small renders (list thumbnails) need font sizes clamped to the element's own
-        // scaled height, or an entirely reasonable full-canvas font size (8-40pt)
-        // becomes sub-pixel noise. At Print Preview's larger scale this clamp rarely
-        // engages since rect.Height is already generous.
-        var fontSize = Math.Clamp(rect.Height * 0.75, 1, rect.Height);
-        var typeface = new Typeface(fontFamily);
-        var formatted = new FormattedText(value, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-            typeface, fontSize, ParseBrush(colorHex))
-        {
-            MaxTextWidth = Math.Max(1, rect.Width),
-            MaxTextHeight = Math.Max(1, rect.Height),
-            TextAlignment = alignment switch
-            {
-                TextAlignmentX.Center => TextAlignment.Center,
-                TextAlignmentX.Right => TextAlignment.Right,
-                _ => TextAlignment.Left,
-            },
-        };
-        context.DrawText(formatted, rect.TopLeft);
-    }
+    /// <summary>The canvas draws text at FontSize x Zoom pixels while drawing
+    /// (96/25.4) x Zoom pixels per millimetre, so one font unit = 25.4/96 mm. Here the card
+    /// is drawn at <paramref name="scale"/> pixels per millimetre, so the same text is
+    /// FontSize x scale x 25.4/96 pixels -- the printed size matches the designer exactly
+    /// at any DPI (thumbnail, preview or 300 DPI print).</summary>
+    private static double FontPx(double fontSize, double scale) => fontSize * scale * 25.4 / 96.0;
 
     /// <summary>Delegates to the shared ShapeRenderer (Services/ShapeRenderer.cs) so
     /// thumbnails/Print Preview always render every ShapeKind identically to the live

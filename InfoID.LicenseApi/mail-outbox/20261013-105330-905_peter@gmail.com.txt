@@ -1,0 +1,10 @@
+To: peter@gmail.com
+Subject: Verify your email
+Date (UTC): 2026-10-13 10:53:30Z
+
+Hello Peter,
+
+Your verification code is: 739750
+
+Enter it in the app to finish creating your account. It expires in 15 minutes.
+If you didn't create an account, you can ignore this email.

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 
 namespace InfoID.Infrastructure.Persistence;
@@ -6,6 +6,8 @@ namespace InfoID.Infrastructure.Persistence;
 /// <summary>
 /// Appends timestamped lines to %AppData%\InfoID\Logs\startup.log. Never throws --
 /// logging must not be able to crash startup, so every write is best-effort.
+/// Every message is also written to the main daily log (AppLog) so one file tells
+/// the whole story.
 /// </summary>
 public sealed class FileStartupLogger : IStartupLogger
 {
@@ -17,11 +19,26 @@ public sealed class FileStartupLogger : IStartupLogger
         _logFilePath = Path.Combine(DatabaseLocation.GetLogsDirectory(), "startup.log");
     }
 
-    public void Info(string message) => Write("INFO", message);
-    public void Warn(string message) => Write("WARN", message);
+    private static readonly InfoID.Shared.Logging.AppLogger Log =
+        InfoID.Shared.Logging.AppLog.For("InfoID.Startup");
 
-    public void Error(string message, Exception? exception = null) =>
+    public void Info(string message)
+    {
+        Write("INFO", message);
+        Log.Info(message);
+    }
+
+    public void Warn(string message)
+    {
+        Write("WARN", message);
+        Log.Warn(message);
+    }
+
+    public void Error(string message, Exception? exception = null)
+    {
         Write("ERROR", exception is null ? message : $"{message} :: {exception}");
+        Log.Error(message, exception);
+    }
 
     private void Write(string level, string message)
     {

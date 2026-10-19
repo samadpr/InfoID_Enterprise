@@ -20,7 +20,9 @@ public sealed class PrintSettings
     public bool PrintBack { get; set; } = true;
     public int NumberOfCopies { get; set; } = 1;
     public bool ReversedOrder { get; set; }
-    public PrintColorMode ColorMode { get; set; } = PrintColorMode.MonoChrome;
+    // Full colour by default (new installs only -- a saved PrintSettings.json keeps the
+    // operator's choice). MonoChrome is for black-panel-only resin printing.
+    public PrintColorMode ColorMode { get; set; } = PrintColorMode.Composite;
     public PrintAntialiasMode AntialiasMode { get; set; } = PrintAntialiasMode.OnlyImages;
     public double BlackPanelThreshold { get; set; } = 128;
     public bool Rotate180 { get; set; }
@@ -36,6 +38,8 @@ public sealed class PrintSettings
 /// to DI registration later without changing callers.</summary>
 public sealed class PrintSettingsStore
 {
+    private static readonly InfoID.Shared.Logging.AppLogger Log = InfoID.Shared.Logging.AppLog.For<PrintSettingsStore>();
+
     public static PrintSettingsStore Shared { get; } = new();
 
     private static readonly JsonSerializerOptions Options = new()
@@ -85,7 +89,7 @@ public sealed class PrintSettingsStore
         catch (Exception ex)
         {
             // Remembering settings is a convenience; never fail a print over it.
-            System.Diagnostics.Debug.WriteLine($"PRINT SETTINGS SAVE ERROR: {ex.Message}");
+            Log.Warn("Print settings save error", ex);
         }
         finally
         {

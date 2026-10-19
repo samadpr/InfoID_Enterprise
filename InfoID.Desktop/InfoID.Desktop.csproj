@@ -38,6 +38,7 @@
     <PackageReference Include="Npgsql" Version="10.0.3" />
     <PackageReference Include="SSH.NET" Version="2026.0.0" />
     <PackageReference Include="System.Data.Odbc" Version="10.0.12" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.12" />
     <!-- Barcode / QR Code generation (Card Designer's Barcode and QR Code elements).
          Real encoding (Reed-Solomon error correction for QR, exact symbol-pattern
          tables for Code128/PDF417/DataMatrix/Aztec/EAN-UPC) is correctness-critical

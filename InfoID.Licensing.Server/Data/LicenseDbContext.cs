@@ -26,6 +26,14 @@ public class LicenseDbContext : DbContext
     public DbSet<FraudAlert> FraudAlerts => Set<FraudAlert>();
     public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
     public DbSet<BlacklistEntry> BlacklistEntries => Set<BlacklistEntry>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<CustomerAccount> CustomerAccounts => Set<CustomerAccount>();
+    public DbSet<EmailCode> EmailCodes => Set<EmailCode>();
+    public DbSet<CustomerSession> CustomerSessions => Set<CustomerSession>();
+    public DbSet<Plan> Plans => Set<Plan>();
+    public DbSet<LicenseRequest> LicenseRequests => Set<LicenseRequest>();
+    public DbSet<TrialUsage> TrialUsages => Set<TrialUsage>();
+    public DbSet<TrialReservation> TrialReservations => Set<TrialReservation>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -64,6 +72,9 @@ public class LicenseDbContext : DbContext
             e.HasIndex(x => x.BatchId);
             e.HasOne(x => x.CustomerRecord).WithMany(c => c.LicenseCodes).HasForeignKey(x => x.CustomerRecordId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(x => x.CreatedByAdminUser).WithMany().HasForeignKey(x => x.CreatedByAdminUserId).OnDelete(DeleteBehavior.Restrict);
+            e.Property(x => x.ProductCode).HasMaxLength(30).IsRequired().HasDefaultValue(ProductCodes.InfoID);
+            e.HasIndex(x => x.ProductCode);
+            e.HasOne(x => x.CustomerAccount).WithMany().HasForeignKey(x => x.CustomerAccountId).OnDelete(DeleteBehavior.Restrict);
         });
 
         b.Entity<ActivationRecord>(e =>
@@ -133,6 +144,105 @@ public class LicenseDbContext : DbContext
             e.Property(x => x.Value).HasMaxLength(500).IsRequired();
             e.Property(x => x.Reason).HasMaxLength(300);
             e.HasIndex(x => new { x.EntryType, x.Value });
+        });
+
+        b.Entity<Product>(e =>
+        {
+            e.ToTable("Product");
+            e.Property(x => x.Code).HasMaxLength(30).IsRequired();
+            e.HasIndex(x => x.Code).IsUnique();
+            e.Property(x => x.Name).HasMaxLength(150).IsRequired();
+        });
+
+        b.Entity<CustomerAccount>(e =>
+        {
+            e.ToTable("CustomerAccount");
+            e.Property(x => x.FullName).HasMaxLength(200).IsRequired();
+            e.Property(x => x.CompanyName).HasMaxLength(200);
+            e.Property(x => x.Email).HasMaxLength(200).IsRequired();
+            e.HasIndex(x => x.Email).IsUnique();
+            e.Property(x => x.Phone).HasMaxLength(50);
+            e.Property(x => x.Country).HasMaxLength(100);
+            e.Property(x => x.PasswordHash).HasMaxLength(300).IsRequired();
+            e.HasOne(x => x.CustomerRecord).WithMany().HasForeignKey(x => x.CustomerRecordId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        b.Entity<EmailCode>(e =>
+        {
+            e.ToTable("EmailCode");
+            e.Property(x => x.Purpose).HasMaxLength(30).IsRequired();
+            e.Property(x => x.CodeHash).HasMaxLength(200).IsRequired();
+            e.HasIndex(x => new { x.CustomerAccountId, x.Purpose });
+            e.HasOne(x => x.CustomerAccount).WithMany().HasForeignKey(x => x.CustomerAccountId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<CustomerSession>(e =>
+        {
+            e.ToTable("CustomerSession");
+            e.Property(x => x.TokenHash).HasMaxLength(100).IsRequired();
+            e.HasIndex(x => x.TokenHash).IsUnique();
+            e.Property(x => x.CreatedFromIp).HasMaxLength(50);
+            e.Property(x => x.AppVersion).HasMaxLength(50);
+            e.HasOne(x => x.CustomerAccount).WithMany().HasForeignKey(x => x.CustomerAccountId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<Plan>(e =>
+        {
+            e.ToTable("Plan");
+            e.Property(x => x.ProductCode).HasMaxLength(30).IsRequired();
+            e.Property(x => x.Name).HasMaxLength(150).IsRequired();
+            e.Property(x => x.Tier).HasMaxLength(50).IsRequired();
+            e.Property(x => x.Tagline).HasMaxLength(300);
+            e.Property(x => x.CardLimitPeriod).HasMaxLength(20).IsRequired();
+            e.Property(x => x.PriceText).HasMaxLength(100);
+            e.HasIndex(x => new { x.ProductCode, x.SortOrder });
+        });
+
+        b.Entity<LicenseRequest>(e =>
+        {
+            e.ToTable("LicenseRequest");
+            e.Property(x => x.ProductCode).HasMaxLength(30).IsRequired();
+            e.Property(x => x.FullName).HasMaxLength(200).IsRequired();
+            e.Property(x => x.CompanyName).HasMaxLength(200);
+            e.Property(x => x.Email).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Phone).HasMaxLength(50);
+            e.Property(x => x.Country).HasMaxLength(100);
+            e.Property(x => x.StateProvince).HasMaxLength(100);
+            e.Property(x => x.Message).HasMaxLength(2000);
+            e.Property(x => x.Status).HasMaxLength(30).IsRequired();
+            e.Property(x => x.StatusReason).HasMaxLength(500);
+            e.Property(x => x.MachineFingerprint).HasMaxLength(100);
+            e.Property(x => x.AppVersion).HasMaxLength(50);
+            e.HasIndex(x => x.Status);
+            e.HasIndex(x => x.Email);
+            e.HasOne(x => x.Plan).WithMany().HasForeignKey(x => x.PlanId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.CustomerAccount).WithMany().HasForeignKey(x => x.CustomerAccountId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.HandledByAdminUser).WithMany().HasForeignKey(x => x.HandledByAdminUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.LicenseCode).WithMany().HasForeignKey(x => x.LicenseCodeId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        b.Entity<TrialUsage>(e =>
+        {
+            e.ToTable("TrialUsage", t =>
+            {
+                // Belt and braces: the service's conditional updates keep these in range.
+                t.HasCheckConstraint("CK_TrialUsage_NonNegative", "\"CardsUsed\" >= 0 AND \"CardsReserved\" >= 0 AND \"CardLimit\" >= 0");
+            });
+            e.Property(x => x.ProductCode).HasMaxLength(30).IsRequired();
+            e.HasIndex(x => new { x.CustomerAccountId, x.ProductCode }).IsUnique();
+            e.HasOne(x => x.CustomerAccount).WithMany().HasForeignKey(x => x.CustomerAccountId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        b.Entity<TrialReservation>(e =>
+        {
+            e.ToTable("TrialReservation");
+            e.HasIndex(x => x.ReservationKey).IsUnique();
+            e.Property(x => x.Status).HasMaxLength(20).IsRequired();
+            e.HasIndex(x => new { x.TrialUsageId, x.Status });
+            e.Property(x => x.DesignName).HasMaxLength(200);
+            e.Property(x => x.MachineFingerprint).HasMaxLength(100);
+            e.Property(x => x.AppVersion).HasMaxLength(50);
+            e.HasOne(x => x.TrialUsage).WithMany().HasForeignKey(x => x.TrialUsageId).OnDelete(DeleteBehavior.Restrict);
         });
 
         // Common base fields on every table.

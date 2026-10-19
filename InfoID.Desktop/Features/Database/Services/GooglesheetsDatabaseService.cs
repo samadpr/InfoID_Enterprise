@@ -50,6 +50,8 @@ public sealed class GoogleSheetNotPublicException : InvalidOperationException
 /// </summary>
 public sealed class GoogleSheetsDatabaseService
 {
+    private static readonly InfoID.Shared.Logging.AppLogger Log = InfoID.Shared.Logging.AppLog.For<GoogleSheetsDatabaseService>();
+
     public const string PublicLinkMode = "Public link";
     public const string GoogleAccountMode = "Google account";
     public const string ClientFileName = "GoogleOAuthClient.json";
@@ -214,7 +216,7 @@ public sealed class GoogleSheetsDatabaseService
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"GOOGLE REVOKE FAILED: {ex.Message}");
+                    Log.Warn("Google revoke failed", ex);
                 }
 
                 _session.Sheets.Dispose();

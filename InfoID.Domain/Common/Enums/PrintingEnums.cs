@@ -2,7 +2,7 @@ namespace InfoID.Domain.Common.Enums;
 
 public enum PrinterBrand
 {
-    Fargo, Evolis, Zebra, Magicard
+    Fargo, Evolis, Zebra, Magicard, Other
 }
 
 public enum PrinterConnectionType
@@ -27,5 +27,5 @@ public enum PrintOutcome
 
 public enum ReprintReasonCode
 {
-    Lost, Damaged, Renewed
+    Lost, Damaged, Renewed, Other
 }

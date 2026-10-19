@@ -7,6 +7,8 @@ namespace InfoID.Desktop.Features.Database.Services;
 
 public sealed class OdbcDatabaseService
 {
+    private static readonly InfoID.Shared.Logging.AppLogger Log = InfoID.Shared.Logging.AppLog.For<OdbcDatabaseService>();
+
     public ObservableCollection<string> GetTables(
     string connectionString)
     {
@@ -28,8 +30,7 @@ public sealed class OdbcDatabaseService
             var tableType =
                 row["TABLE_TYPE"]?.ToString();
 
-            System.Diagnostics.Debug.WriteLine(
-                $"ODBC TABLE: Name={tableName}, Type={tableType}");
+            Log.Debug($"ODBC TABLE: Name={tableName}, Type={tableType}");
 
             if (string.IsNullOrWhiteSpace(tableName))
                 continue;
@@ -132,8 +133,7 @@ public sealed class OdbcDatabaseService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine(
-                $"ODBC COLUMN ERROR: {ex}");
+            Log.Error("ODBC column error", ex);
         }
 
         return columns;

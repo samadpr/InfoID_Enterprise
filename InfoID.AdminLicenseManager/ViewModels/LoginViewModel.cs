@@ -11,6 +11,8 @@ namespace InfoID.AdminLicenseManager.ViewModels;
 /// reports connection/secret problems in plain words before anyone can sign in.</summary>
 public sealed partial class LoginViewModel : ViewModelBase
 {
+    private static readonly InfoID.Shared.Logging.AppLogger Log = InfoID.Shared.Logging.AppLog.For<LoginViewModel>();
+
     private readonly AuthService _auth;
     private readonly IDbContextFactory<LicenseDbContext> _dbFactory;
     private readonly LicenseSecretStore _secrets;
@@ -27,8 +29,11 @@ public sealed partial class LoginViewModel : ViewModelBase
     [ObservableProperty] private string? _error;
     [ObservableProperty] private string? _warning;
 
-    public LoginViewModel(AuthService auth, IDbContextFactory<LicenseDbContext> dbFactory, LicenseSecretStore secrets)
+    private readonly PlanService _plans;
+
+    public LoginViewModel(AuthService auth, IDbContextFactory<LicenseDbContext> dbFactory, LicenseSecretStore secrets, PlanService plans)
     {
+        _plans = plans;
         _auth = auth;
         _dbFactory = dbFactory;
         _secrets = secrets;
@@ -45,6 +50,9 @@ public sealed partial class LoginViewModel : ViewModelBase
                 await db.Database.MigrateAsync();
             }
 
+            // First run after the platform update: InfoID product + default plans.
+            await _plans.EnsureDefaultsAsync();
+
             IsFirstRun = !await _auth.HasAnyAdminAsync();
             Warning = _secrets.IsConfigured
                 ? null
@@ -53,6 +61,7 @@ public sealed partial class LoginViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error("Login: initialize failed", ex);
             Error = "Can't connect to the license database. Check the LicenseDb connection string in appsettings.json " +
                     "(or the INFOID_LICENSE_DB environment variable) and that PostgreSQL is running.\n\nDetails: " + ex.GetBaseException().Message;
         }
@@ -80,6 +89,7 @@ public sealed partial class LoginViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error("Login: sign in failed", ex);
             Error = "Sign-in failed: " + ex.GetBaseException().Message;
         }
         finally
@@ -109,6 +119,7 @@ public sealed partial class LoginViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error("Login: create admin failed", ex);
             Error = "Couldn't create the administrator: " + ex.GetBaseException().Message;
         }
         finally

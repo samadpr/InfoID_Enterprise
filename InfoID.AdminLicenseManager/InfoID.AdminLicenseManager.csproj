@@ -8,6 +8,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Same logo as InfoID: icon of the .exe (Explorer, desktop shortcut, pinned taskbar). -->
+    <ApplicationIcon>Assets\Icons\InfoID.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
   <ItemGroup>
@@ -28,6 +30,12 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InfoID.Licensing.Server\InfoID.Licensing.Server.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Window / taskbar icon at runtime (MainWindow Icon="avares://..."). -->
+    <AvaloniaResource Include="Assets\Icons\InfoID.ico" />
+    <!-- InfoID logo on the sign-in screen. -->
+    <AvaloniaResource Include="Assets\Images\InfoID.png" />
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json">

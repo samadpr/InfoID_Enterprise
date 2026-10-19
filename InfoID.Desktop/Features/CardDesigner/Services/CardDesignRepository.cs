@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -16,10 +17,12 @@ namespace InfoID.Desktop.Features.CardDesigner.Services;
 public sealed class CardDesignRepository : ICardDesignRepository
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuditTrail? _audit;
 
-    public CardDesignRepository(IUnitOfWork unitOfWork)
+    public CardDesignRepository(IUnitOfWork unitOfWork, IAuditTrail? audit = null)
     {
         _unitOfWork = unitOfWork;
+        _audit = audit;
     }
 
     public async Task<long> SaveAsync(CardDesignDocument document, CancellationToken ct = default)
@@ -31,6 +34,8 @@ public sealed class CardDesignRepository : ICardDesignRepository
             : null;
 
         var isNew = entity is null;
+        var before = isNew ? null : AuditSnapshot(entity!);
+        var contentBefore = isNew ? null : entity!.FrontDesignJson + "|" + entity.BackDesignJson + "|" + entity.DocumentMetadataJson + "|" + entity.CardSize;
         if (isNew)
         {
             entity = new Template
@@ -61,8 +66,70 @@ public sealed class CardDesignRepository : ICardDesignRepository
         await _unitOfWork.SaveChangesAsync(ct);
 
         document.PersistedTemplateId = entity.Id;
+        await AuditSaveAsync(entity, isNew, before, contentBefore, ct);
         return entity.Id;
     }
+
+    // ------------------------------------------------------------------ audit ----
+
+    // Ordinary edits are grouped by DesignEditAudit (autosave saves every few seconds):
+    // the first change is recorded at once, later ones within 15 minutes are held and
+    // written as one entry -- never dropped. Create, rename, version, delete: always.
+    private static DesignAuditSnapshot AuditSnapshot(Template t) =>
+        new(t.Name, t.CardSize, t.CurrentVersionNumber, CountElements(t.FrontDesignJson), CountElements(t.BackDesignJson));
+
+    private static int CountElements(string? sideJson)
+    {
+        if (string.IsNullOrEmpty(sideJson)) return 0;
+        try
+        {
+            using var doc = JsonDocument.Parse(sideJson);
+            return doc.RootElement.TryGetProperty("Elements", out var elements) && elements.ValueKind == JsonValueKind.Array
+                ? elements.GetArrayLength()
+                : 0;
+        }
+        catch (JsonException)
+        {
+            return 0;
+        }
+    }
+
+    private async Task AuditSaveAsync(Template entity, bool isNew, DesignAuditSnapshot? before, string? contentBefore, CancellationToken ct)
+    {
+        if (_audit is null) return;
+        var after = AuditSnapshot(entity);
+
+        if (isNew)
+        {
+            DesignEditAudit.MarkWritten(entity.Id);
+            await Record("DesignCreated", $"Design '{entity.Name}' created ({entity.CardSize})", entity.Id, null, after, ct);
+            return;
+        }
+
+        if (before is null) return;
+
+        if (!string.Equals(before.Name, after.Name, StringComparison.Ordinal))
+        {
+            // Covers any held edits too (Before = state at the last entry).
+            var from = DesignEditAudit.MarkWritten(entity.Id) ?? before;
+            await Record("DesignRenamed", $"Design '{before.Name}' renamed to '{after.Name}'", entity.Id, from, after, ct);
+            return;
+        }
+
+        var contentAfter = entity.FrontDesignJson + "|" + entity.BackDesignJson + "|" + entity.DocumentMetadataJson + "|" + entity.CardSize;
+        if (string.Equals(contentBefore, contentAfter, StringComparison.Ordinal)) return; // saved without changes
+
+        if (DesignEditAudit.OnEdited(entity.Id, before, after) is { } now)
+            await _audit.RecordAsync(DesignEditAudit.BuildChangedEntry(entity.Id, now.Before, now.After), ct);
+    }
+
+    private Task Record(string action, string description, long templateId, object? before, object? after, CancellationToken ct) =>
+        _audit is null
+            ? Task.CompletedTask
+            : _audit.RecordAsync(new AuditEntry(AuditModules.Designs, action, description)
+            {
+                EntityName = "Template", EntityId = templateId, Before = before, After = after,
+            }, ct);
 
     public async Task<CardDesignDocument?> LoadAsync(long templateId, CancellationToken ct = default)
     {
@@ -111,8 +178,11 @@ public sealed class CardDesignRepository : ICardDesignRepository
         var entity = await repo.GetByIdAsync(templateId, ct);
         if (entity is null) return;
 
+        var before = AuditSnapshot(entity);
         repo.SoftDelete(entity);
         await _unitOfWork.SaveChangesAsync(ct);
+        DesignEditAudit.Forget(templateId);
+        await Record("DesignDeleted", $"Design '{entity.Name}' deleted", templateId, before, null, ct);
     }
 
     public async Task SaveVersionSnapshotAsync(long templateId, CardDesignDocument document, string? changeNote, CancellationToken ct = default)
@@ -129,6 +199,9 @@ public sealed class CardDesignRepository : ICardDesignRepository
         }, ct);
 
         await _unitOfWork.SaveChangesAsync(ct);
+        await Record("DesignVersionSaved",
+            $"Design '{document.Name}' saved as version {document.VersionNumber}" + (string.IsNullOrWhiteSpace(changeNote) ? "" : $": {changeNote}"),
+            templateId, null, new { document.Name, Version = document.VersionNumber, Note = changeNote }, ct);
     }
 
     public async Task<IReadOnlyList<TemplateVersionSummary>> GetVersionsAsync(long templateId, CancellationToken ct = default)

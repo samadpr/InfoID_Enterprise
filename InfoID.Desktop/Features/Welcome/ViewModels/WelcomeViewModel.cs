@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InfoID.Desktop.Core.Dialogs;
 using InfoID.Desktop.Core.Navigation;
@@ -68,4 +68,20 @@ public sealed partial class WelcomeViewModel : RecentCardListViewModelBase
 
     [RelayCommand]
     private void UseTemplate() => NavigationService.NavigateTo<TemplatesViewModel>();
+
+    [RelayCommand]
+    private void OpenEditions() => NavigationService.NavigateTo<InfoID.Desktop.Features.Account.ViewModels.EditionsViewModel>();
+
+    [RelayCommand]
+    private void OpenReports() => NavigationService.NavigateTo<InfoID.Desktop.Features.Reports.ViewModels.ReportsViewModel>();
+
+    /// <summary>Home tile: Backup &amp; Restore (FR-ENT-4).</summary>
+    [RelayCommand]
+    private void OpenBackup() => NavigationService.NavigateTo<InfoID.Desktop.Features.Backup.ViewModels.BackupViewModel>();
+
+    [RelayCommand]
+    private void OpenDashboard() => NavigationService.NavigateTo<InfoID.Desktop.Features.Dashboard.ViewModels.DashboardViewModel>();
+
+    [RelayCommand]
+    private void OpenPrintHistory() => NavigationService.NavigateTo<InfoID.Desktop.Features.PrintHistory.ViewModels.PrintHistoryViewModel>();
 }

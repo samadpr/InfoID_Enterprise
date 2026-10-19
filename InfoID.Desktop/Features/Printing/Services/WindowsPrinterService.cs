@@ -31,6 +31,8 @@ namespace InfoID.Desktop.Features.Printing.Services;
 /// </summary>
 public sealed class WindowsPrinterService : IPrinterService
 {
+    private static readonly InfoID.Shared.Logging.AppLogger Log = InfoID.Shared.Logging.AppLog.For<WindowsPrinterService>();
+
     public bool IsSupported => OperatingSystem.IsWindows();
 
     public async Task<IReadOnlyList<PrinterInfo>> GetPrintersAsync(CancellationToken ct = default)
@@ -84,14 +86,14 @@ public sealed class WindowsPrinterService : IPrinterService
     public bool SupportsSystemPrintDialog => IsSupported;
 
     public async Task<bool> PrintPagesAsync(string printerName, IReadOnlyList<string> pageImagePaths, int copies, CancellationToken ct = default) =>
-        (await RunPrintJobAsync(printerName, pageImagePaths, copies, showDialog: false, ct)).Succeeded;
+        (await RunPrintJobAsync(printerName, pageImagePaths, copies, showDialog: false, copiesAreLimit: false, ct)).Succeeded;
 
     public Task<PrintJobResult> PrintPagesWithSystemDialogAsync(
-        string printerName, IReadOnlyList<string> pageImagePaths, int copies, CancellationToken ct = default) =>
-        RunPrintJobAsync(printerName, pageImagePaths, copies, showDialog: true, ct);
+        string printerName, IReadOnlyList<string> pageImagePaths, int copies, bool copiesAreLimit = false, CancellationToken ct = default) =>
+        RunPrintJobAsync(printerName, pageImagePaths, copies, showDialog: true, copiesAreLimit, ct);
 
     private async Task<PrintJobResult> RunPrintJobAsync(
-        string printerName, IReadOnlyList<string> pageImagePaths, int copies, bool showDialog, CancellationToken ct)
+        string printerName, IReadOnlyList<string> pageImagePaths, int copies, bool showDialog, bool copiesAreLimit, CancellationToken ct)
     {
         if (!IsSupported) return PrintJobResult.Failure("Printing isn't supported on this system.");
         if (pageImagePaths.Count == 0) return PrintJobResult.Failure("There are no pages to print.");
@@ -115,6 +117,7 @@ public sealed class WindowsPrinterService : IPrinterService
                 CardRasterizer.DefaultPrintDpi.ToString(CultureInfo.InvariantCulture),
                 "InfoID Cards",
                 showDialog ? "dialog" : "direct",
+                copiesAreLimit ? "limit" : "free",
             };
             jobLines.AddRange(pageImagePaths);
 
@@ -129,11 +132,15 @@ public sealed class WindowsPrinterService : IPrinterService
 
             if (result.ExitCode == CancelledExitCode)
                 return PrintJobResult.Canceled();
+            if (result.ExitCode == RefusedExitCode)
+                return PrintJobResult.Canceled(
+                    $"Nothing was printed: this job has {copies} {(copies == 1 ? "copy" : "copies")} reserved, and more were chosen in the Windows print dialog. " +
+                    "Set Copies in InfoID's Print window and print again.");
 
             if (result.ExitCode != 0)
             {
                 var error = result.StdErr.Trim();
-                Debug.WriteLine($"PRINT FAILED (exit {result.ExitCode}): {error} {result.StdOut.Trim()}");
+                Log.Error($"Print failed (exit {result.ExitCode}): {error} {result.StdOut.Trim()}");
                 return PrintJobResult.Failure(string.IsNullOrWhiteSpace(error) ? null : error);
             }
 
@@ -145,7 +152,16 @@ public sealed class WindowsPrinterService : IPrinterService
                 .Select(line => line["PRINTER:".Length..].Trim())
                 .LastOrDefault();
 
-            return PrintJobResult.Success(string.IsNullOrWhiteSpace(usedPrinter) ? printerName : usedPrinter);
+            // ...and how many copies it printed (the Windows dialog can change that).
+            int? copiesPrinted = null;
+            var copiesLine = result.StdOut
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .LastOrDefault(line => line.StartsWith("COPIES:", StringComparison.Ordinal));
+            if (copiesLine is not null &&
+                int.TryParse(copiesLine["COPIES:".Length..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var printed) && printed > 0)
+                copiesPrinted = printed;
+
+            return PrintJobResult.Success(string.IsNullOrWhiteSpace(usedPrinter) ? printerName : usedPrinter, copiesPrinted);
         }
         finally
         {
@@ -156,6 +172,10 @@ public sealed class WindowsPrinterService : IPrinterService
     /// <summary>Exit code the script uses when the user closes the Windows print dialog
     /// without printing.</summary>
     private const int CancelledExitCode = 4;
+
+    /// <summary>Exit code when the copies chosen in the Windows dialog exceed the limit
+    /// (trial printing): stopped before anything printed.</summary>
+    private const int RefusedExitCode = 5;
 
     /// <summary>
     /// Windows PowerShell 5.1 script (always present on Windows 10/11) that prints the
@@ -182,7 +202,9 @@ public sealed class WindowsPrinterService : IPrinterService
             $dpi = [double]::Parse($lines[2], [System.Globalization.CultureInfo]::InvariantCulture)
             $docName = $lines[3]
             $showDialog = ($lines[4] -eq 'dialog')
-            $pages = @($lines | Select-Object -Skip 5 | Where-Object { $_ -and $_.Trim().Length -gt 0 })
+            # 'limit' (trial printing): no page range, and no more copies than InfoID reserved.
+            $copiesAreLimit = ($lines[5] -eq 'limit')
+            $pages = @($lines | Select-Object -Skip 6 | Where-Object { $_ -and $_.Trim().Length -gt 0 })
 
             if ($pages.Count -eq 0) { [Console]::Error.WriteLine('No pages to print.'); exit 3 }
 
@@ -203,11 +225,13 @@ public sealed class WindowsPrinterService : IPrinterService
                 $dlg.UseEXDialog = $true
                 # Page range ("Pages: 1-4") in the Windows dialog, counted over the
                 # pages InfoID generated for this run (card 1 front = page 1, ...).
-                $dlg.AllowSomePages = $true
-                $doc.PrinterSettings.MinimumPage = 1
-                $doc.PrinterSettings.MaximumPage = $pages.Count
-                $doc.PrinterSettings.FromPage = 1
-                $doc.PrinterSettings.ToPage = $pages.Count
+                $dlg.AllowSomePages = (-not $copiesAreLimit)
+                if (-not $copiesAreLimit) {
+                    $doc.PrinterSettings.MinimumPage = 1
+                    $doc.PrinterSettings.MaximumPage = $pages.Count
+                    $doc.PrinterSettings.FromPage = 1
+                    $doc.PrinterSettings.ToPage = $pages.Count
+                }
                 $dlg.AllowSelection = $false
                 $dlg.AllowCurrentPage = $false
 
@@ -231,10 +255,12 @@ public sealed class WindowsPrinterService : IPrinterService
 
                 # Copies are produced by repeating the pages below (collated), so the
                 # driver itself must print each page once.
-                $copies = [Math]::Max(1, [int]$doc.PrinterSettings.Copies)
+                $chosen = [Math]::Max(1, [int]$doc.PrinterSettings.Copies)
+                if ($copiesAreLimit -and $chosen -gt $copies) { exit 5 }
+                $copies = $chosen
                 $doc.PrinterSettings.Copies = 1
 
-                if ($doc.PrinterSettings.PrintRange -eq [System.Drawing.Printing.PrintRange]::SomePages) {
+                if ((-not $copiesAreLimit) -and $doc.PrinterSettings.PrintRange -eq [System.Drawing.Printing.PrintRange]::SomePages) {
                     $from = [Math]::Max(1, $doc.PrinterSettings.FromPage)
                     $to = [Math]::Min($pages.Count, $doc.PrinterSettings.ToPage)
                     if ($to -lt $from) { [Console]::Error.WriteLine('The page range is empty.'); exit 3 }
@@ -319,6 +345,7 @@ public sealed class WindowsPrinterService : IPrinterService
 
             $doc.Print()
             [Console]::Out.WriteLine("PRINTER:" + $doc.PrinterSettings.PrinterName)
+            [Console]::Out.WriteLine("COPIES:" + $copies)
             $doc.Dispose()
             exit 0
         }

@@ -4,6 +4,7 @@ using InfoID.Desktop.Core.Dialogs;
 using InfoID.Desktop.Core.Navigation;
 using InfoID.Desktop.Core.Services;
 using InfoID.Desktop.Features.BlankCard.Models;
+using InfoID.Desktop.Features.CardDesigner.Models;
 using InfoID.Desktop.Features.CardDesigner.Models.Document;
 using InfoID.Desktop.Features.CardDesigner.Services;
 using InfoID.Desktop.Features.Printing.Services;
@@ -113,6 +114,12 @@ public sealed partial class CardDesignerViewModel : ViewModelBase
         // the "new blank document" behavior below.
         if (parameter is null && Tabs.Count > 0) return;
 
+        if (parameter is OpenDesignWithDataRequest dataRequest)
+        {
+            await OpenWithDataAsync(dataRequest);
+            return;
+        }
+
         if (parameter is long templateId)
         {
             // Priority 11 fix: reuse an already-open tab for this same database-backed
@@ -155,6 +162,23 @@ public sealed partial class CardDesignerViewModel : ViewModelBase
             : DesignerSideView.Both;
 
         OpenNewTab(newDocument, initialSideView);
+    }
+
+    /// <summary>Switching designs finishes editing the previous one's data grid.</summary>
+    partial void OnActiveTabChanged(CardDesignTabViewModel? oldValue, CardDesignTabViewModel? newValue)
+    {
+        oldValue?.SaveDatabaseRows(includeCurrentRow: true);
+    }
+
+    /// <summary>InfoID is closing: save every open design's pending data-grid rows
+    /// (Internal Database). Nothing can be asked at this point; failures are logged.</summary>
+    public void SavePendingDatabaseRows()
+    {
+        foreach (var tab in Tabs)
+        {
+            try { tab.SaveDatabaseRows(includeCurrentRow: true); }
+            catch (System.Exception) { /* SaveDatabaseRows never throws; belt and braces while exiting */ }
+        }
     }
 
     partial void OnActiveTabChanged(CardDesignTabViewModel? value)
@@ -203,6 +227,45 @@ public sealed partial class CardDesignerViewModel : ViewModelBase
     /// keep CardDesignTabViewModel's own default (DesignerSideView.Both) exactly as
     /// before. Only OpenFromParameterAsync's Blank-Card/Template branch passes an
     /// explicit value.</summary>
+    /// <summary>Opens (or reuses) a saved design, shows the given rows as its data and,
+    /// when asked, opens the Print dialog -- e.g. Visitors page → Print badges.</summary>
+    private async System.Threading.Tasks.Task OpenWithDataAsync(OpenDesignWithDataRequest request)
+    {
+        var tab = Tabs.FirstOrDefault(t => t.Document.PersistedTemplateId == request.TemplateId);
+        if (tab is null)
+        {
+            var document = await _repository.LoadAsync(request.TemplateId);
+            if (document is null)
+            {
+                await _dialogService.ShowDialogAsync<MessageDialogViewModel, bool>(new MessageDialogViewModel(
+                    "Design not found",
+                    "The badge design no longer exists. Choose another design on the Visitors page.",
+                    isError: true));
+                if (Tabs.Count == 0) _navigationService.GoBack();
+                return;
+            }
+            await _repository.MarkOpenedAsync(request.TemplateId);
+            OpenNewTab(document);
+            tab = ActiveTab;
+            if (tab is null) return;
+        }
+        else
+        {
+            ActiveTab = tab;
+        }
+
+        tab.AttachExternalData(request.Data, request.SourceType, request.SourceName, request.KeyColumn);
+
+        if (request.OpenPrintDialog)
+        {
+            // After the designer page has been laid out, so the dialog opens over it.
+            var target = tab;
+            Avalonia.Threading.Dispatcher.UIThread.Post(
+                () => target.ShowPrintDialogCommand.Execute(null),
+                Avalonia.Threading.DispatcherPriority.Background);
+        }
+    }
+
     private void OpenNewTab(CardDesignDocument document, DesignerSideView? initialSideView = null)
     {
         var tab = new CardDesignTabViewModel(document, _clipboard, _repository, _filePicker, _assetService, _evaluator, _previewData, _preferences, _designChecker, _thumbnailService, _dialogService, _infoIdFileService, _recentFilesService, _imageEditingService, _cameraService, _faceDetectionService, _printerService, _printStatusStore, _cardFormatCatalogService);
@@ -282,6 +345,9 @@ public sealed partial class CardDesignerViewModel : ViewModelBase
         try
         {
             await _infoIdFileService.ExportAsync(ActiveTab.Document, path);
+            InfoID.Desktop.Core.Services.Audit.Record(InfoID.Domain.Common.Interfaces.AuditModules.Designs, "DesignExported",
+                $"Design '{ActiveTab.Document.Name}' exported to {System.IO.Path.GetFileName(path)}",
+                "Template", ActiveTab.Document.PersistedTemplateId, after: new { ActiveTab.Document.Name, File = path });
         }
         catch (InfoIdFileException ex)
         {
@@ -348,6 +414,10 @@ public sealed partial class CardDesignerViewModel : ViewModelBase
         if (path is null) return;
 
         await OpenFileAsNewOrExistingTabAsync(path);
+        if (string.Equals(ActiveTab?.Document.SourceFilePath, path, System.StringComparison.OrdinalIgnoreCase))
+            InfoID.Desktop.Core.Services.Audit.Record(InfoID.Domain.Common.Interfaces.AuditModules.Designs, "DesignImported",
+                $"Design '{ActiveTab!.Document.Name}' imported from {System.IO.Path.GetFileName(path)}",
+                after: new { ActiveTab.Document.Name, File = path });
     }
 
     private static string SanitizeFileName(string name)
@@ -358,13 +428,23 @@ public sealed partial class CardDesignerViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void CloseTab(CardDesignTabViewModel? tab)
+    private async System.Threading.Tasks.Task CloseTab(CardDesignTabViewModel? tab)
     {
         tab ??= ActiveTab;
         if (tab is null) return;
 
+        // Rows typed into the design's data grid (Internal Database) are saved before
+        // the design closes; if some can't be, ask first.
+        if (!await tab.ConfirmLeaveDatabaseAsync("Close")) return;
+        if (!Tabs.Contains(tab)) return;
+
         var index = Tabs.IndexOf(tab);
         Tabs.Remove(tab);
+
+        // Design changes held back by the audit log's 15-minute grouping are written
+        // now that the design is closed (not left waiting for the timer).
+        if (tab.Document.PersistedTemplateId is { } closedTemplateId)
+            _ = InfoID.Desktop.Features.CardDesigner.Services.DesignEditAudit.FlushAsync(closedTemplateId);
 
         if (ActiveTab == tab)
         {

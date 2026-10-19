@@ -15,6 +15,8 @@
                     <TextBlock Text="{Binding AdminName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{Binding AdminRole}" Classes="caption" />
                     <Button Content="Sign out" Command="{Binding SignOutCommand}" Margin="0,6,0,0" />
+                    <Button Content="Open log folder" Command="{Binding OpenLogFolderCommand}"
+                            ToolTip.Tip="Technical log files (errors) for troubleshooting. Staff actions are in the Audit log page." />
                 </StackPanel>
 
                 <ListBox ItemsSource="{Binding NavItems}" SelectedItem="{Binding SelectedNav}" Background="Transparent">

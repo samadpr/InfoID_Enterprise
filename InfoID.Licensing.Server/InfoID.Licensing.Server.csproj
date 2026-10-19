@@ -16,5 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InfoID.Licensing.Core\InfoID.Licensing.Core.csproj" />
+    <!-- Shared file logger (InfoID.Shared.Logging), used by the License API and License Manager. -->
+    <ProjectReference Include="..\InfoID.Shared\InfoID.Shared.csproj" />
   </ItemGroup>
 </Project>
