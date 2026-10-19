@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.AdminLicenseManager.ViewModels"
+             x:Class="InfoID.AdminLicenseManager.Views.ActivationSimulatorView"
+             x:DataType="vm:ActivationSimulatorViewModel">
+    <ScrollViewer>
+        <StackPanel Spacing="16" MaxWidth="860" HorizontalAlignment="Left">
+            <TextBlock Text="Test: Customer Simulator" Classes="h1" />
+            <TextBlock Classes="caption" TextWrapping="Wrap"
+                       Text="Plays the customer's InfoID for testing: it creates the request code a customer would send you, and checks a serial key exactly the way InfoID will. Change the machine name to simulate a different computer. Nothing here is saved." />
+
+            <Border Classes="card">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="1. Customer enters the activation code" Classes="section" />
+                    <TextBox Classes="code" Watermark="XXXX-XXXX-XXXX-XXXX" Text="{Binding ActivationCodeText}" />
+                    <TextBlock Text="Simulated computer name" Classes="caption" />
+                    <TextBox Text="{Binding MachineName}" Width="260" HorizontalAlignment="Left" />
+                    <Button Content="Create request code" Classes="accent" Command="{Binding CreateRequestCodeCommand}" />
+
+                    <StackPanel Spacing="6" IsVisible="{Binding HasRequestCode}">
+                        <TextBlock Text="Request code (copy it into Generate Serial Key)" Classes="caption" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox Text="{Binding RequestCode}" IsReadOnly="True" Classes="code" />
+                            <Button Grid.Column="1" Margin="8,0,0,0" Content="Copy" Click="OnCopyRequestCode" />
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="Machine fingerprint:" Classes="caption" />
+                            <SelectableTextBlock Text="{Binding FingerprintHex}" FontFamily="Consolas, monospace" FontSize="12" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="2. Customer types the serial key" Classes="section" />
+                    <TextBox Classes="code" Watermark="XXXXX-XXXXX-XXXXX-XXXXX" Text="{Binding SerialKeyText}" />
+                    <Button Content="Verify like InfoID would" Classes="accent" Command="{Binding VerifySerialKeyCommand}" />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="{Binding Result}" FontSize="15"
+                       Classes.error="{Binding ResultIsError}" Classes.success="{Binding !ResultIsError}"
+                       IsVisible="{Binding Result, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

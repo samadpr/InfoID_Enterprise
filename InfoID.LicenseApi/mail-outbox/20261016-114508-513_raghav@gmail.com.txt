@@ -1,0 +1,10 @@
+To: raghav@gmail.com
+Subject: Verify your email
+Date (UTC): 2026-10-16 11:45:08Z
+
+Hello Raghav,
+
+Your verification code is: 261670
+
+Enter it in the app to finish creating your account. It expires in 15 minutes.
+If you didn't create an account, you can ignore this email.

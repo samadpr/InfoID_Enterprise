@@ -1,0 +1,54 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Database.ViewModels"
+             x:DataType="vm:ExcelPreviewDialogViewModel"
+             x:Class="InfoID.Desktop.Features.Database.Views.ExcelPreviewDialogView">
+
+    <Border Padding="24"
+            Background="{DynamicResource BrushSurface}"
+            CornerRadius="12">
+
+        <Grid RowDefinitions="Auto,*,Auto"
+              RowSpacing="14">
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0"
+                        Spacing="4">
+
+                <TextBlock Text="Excel Preview"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource BrushTextPrimary}"/>
+
+                <TextBlock Text="{Binding FileName}"
+                           Foreground="{DynamicResource BrushTextSecondary}"/>
+
+                <TextBlock Text="{Binding SheetName}"
+                           Foreground="{DynamicResource BrushTextSecondary}"/>
+            </StackPanel>
+
+            <!-- Data (the DataGrid draws its own column headers) -->
+            <DataGrid x:Name="PreviewGrid"
+                      Grid.Row="1"
+                      ItemsSource="{Binding Data.DefaultView}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      GridLinesVisibility="All"
+                      HeadersVisibility="Column"
+                      CanUserResizeColumns="True"
+                      CanUserSortColumns="False"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto"/>
+
+            <!-- Close -->
+            <Button Grid.Row="2"
+                    Content="Close"
+                    Command="{Binding CloseCommand}"
+                    HorizontalAlignment="Right"
+                    MinWidth="100"/>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>

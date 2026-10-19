@@ -42,6 +42,14 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
         builder.Property(x => x.RecordHash)
             .IsRequired()
             .HasMaxLength(200);
+        builder.Property(x => x.Description)
+            .HasMaxLength(500);
+        builder.Property(x => x.MachineName)
+            .HasMaxLength(100);
+
+        // The audit viewer filters by date and module.
+        builder.HasIndex(x => x.ActionDate);
+        builder.HasIndex(x => x.Module);
 
         builder.HasOne(x => x.AppUser)
             .WithMany()

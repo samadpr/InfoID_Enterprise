@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.AdminLicenseManager.ViewModels"
+             x:Class="InfoID.AdminLicenseManager.Views.GenerateSerialKeyView"
+             x:DataType="vm:GenerateSerialKeyViewModel">
+    <ScrollViewer>
+        <StackPanel Spacing="16" MaxWidth="860" HorizontalAlignment="Left">
+            <TextBlock Text="Generate Serial Key (offline activation)" Classes="h1" />
+            <TextBlock Classes="caption" TextWrapping="Wrap"
+                       Text="Paste the 40-character request code the customer sent (from InfoID's activation screen), check the decoded details, then generate the 20-character serial key." />
+
+            <Border Classes="card">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Customer's request code" Classes="section" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Classes="code" Watermark="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                                 Text="{Binding SoftCodeText}">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Enter" Command="{Binding DecodeCommand}" />
+                            </TextBox.KeyBindings>
+                        </TextBox>
+                        <Button Grid.Column="1" Margin="8,0,0,0" Content="Decode" Command="{Binding DecodeCommand}" />
+                    </Grid>
+                    <TextBlock Text="{Binding Error}" Classes="error" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card" IsVisible="{Binding HasPreview}">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Decoded request" Classes="section" />
+                    <Grid ColumnDefinitions="170,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                        <TextBlock Grid.Row="0" Text="Activation code" Classes="caption" />
+                        <SelectableTextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Preview.ActivationCode}" FontFamily="Consolas, monospace" />
+                        <TextBlock Grid.Row="1" Text="Machine fingerprint" Classes="caption" />
+                        <SelectableTextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Preview.FingerprintHex}" FontFamily="Consolas, monospace" />
+                        <TextBlock Grid.Row="2" Text="Requested on" Classes="caption" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Preview.RequestDate}" />
+                        <TextBlock Grid.Row="3" Text="Customer" Classes="caption" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Preview.Customer}" />
+                        <TextBlock Grid.Row="4" Text="Tier / type" Classes="caption" />
+                        <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{Binding Preview.Tier}" />
+                            <TextBlock Text="{Binding Preview.LicenseType}" />
+                        </StackPanel>
+                        <TextBlock Grid.Row="5" Text="Expires" Classes="caption" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Preview.ExpiryDate}" />
+                        <TextBlock Grid.Row="6" Text="Code status" Classes="caption" />
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding Preview.CodeStatus}" />
+                        <TextBlock Grid.Row="7" Text="Machines in use" Classes="caption" />
+                        <StackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="{Binding Preview.ActiveMachines}" />
+                            <TextBlock Text="of" />
+                            <TextBlock Text="{Binding Preview.MaxActivations}" />
+                            <TextBlock Text="(this machine already active: re-issue)" Classes="caption"
+                                       IsVisible="{Binding Preview.IsReactivationOfSameMachine}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <ItemsControl ItemsSource="{Binding Problems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <TextBlock Text="{Binding}" Classes="error" Margin="0,2" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <StackPanel Spacing="8" IsVisible="{Binding CanOverride}">
+                        <TextBlock Text="Overrides (optional)" Classes="section" Margin="0,8,0,0" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <CheckBox Content="Tier" IsChecked="{Binding OverrideTier}" MinWidth="90" />
+                            <ComboBox ItemsSource="{Binding Tiers}" SelectedItem="{Binding OverrideTierValue}"
+                                      IsEnabled="{Binding OverrideTier}" MinWidth="160" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <CheckBox Content="Expiry" IsChecked="{Binding OverrideExpiry}" MinWidth="90" />
+                            <CalendarDatePicker SelectedDate="{Binding OverrideExpiryDate}" IsEnabled="{Binding OverrideExpiry}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Button Content="Generate serial key" Classes="accent" Margin="0,8,0,0" Command="{Binding GenerateCommand}" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card" IsVisible="{Binding HasSerialKey}">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Serial key for the customer" Classes="section" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Text="{Binding SerialKey}" IsReadOnly="True" Classes="code" FontSize="22" />
+                        <Button Grid.Column="1" Margin="8,0,0,0" Content="Copy" Click="OnCopySerialKey" />
+                    </Grid>
+                    <TextBlock Text="{Binding IssuedSummary}" Classes="caption" TextWrapping="Wrap" />
+                    <TextBlock Classes="caption" TextWrapping="Wrap"
+                               Text="This key works only on the machine that produced the request code, with that activation code." />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

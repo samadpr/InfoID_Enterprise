@@ -1,0 +1,96 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Database.ViewModels"
+             x:Class="InfoID.Desktop.Features.Database.Views.PostgreSqlConnectionDialogView"
+             x:DataType="vm:PostgreSqlConnectionDialogViewModel">
+
+    <Border
+        Padding="24"
+        Width="500">
+
+        <StackPanel Spacing="14">
+
+            <TextBlock
+                Text="Connect to PostgreSQL"
+                FontSize="22"
+                FontWeight="SemiBold"/>
+
+            <TextBlock
+                Text="Server"
+                FontWeight="SemiBold"/>
+
+            <TextBox
+                Text="{Binding Server}"
+                Watermark="localhost"/>
+
+            <TextBlock
+                Text="Port"
+                FontWeight="SemiBold"/>
+
+            <TextBox
+                Text="{Binding Port}"
+                Watermark="5432"/>
+
+            <TextBlock
+                Text="Username"
+                FontWeight="SemiBold"/>
+
+            <TextBox
+                Text="{Binding Username}"
+                Watermark="postgres"/>
+
+            <TextBlock
+                Text="Password"
+                FontWeight="SemiBold"/>
+
+            <TextBox
+                Text="{Binding Password}"
+                PasswordChar="*"/>
+
+            <TextBlock
+                Text="SSL Connection"
+                FontWeight="SemiBold"/>
+
+            <ComboBox
+                ItemsSource="{Binding SslConnectionOptions}"
+                SelectedItem="{Binding SslConnection, Mode=TwoWay}"/>
+
+            <TextBlock Text="Database" FontWeight="SemiBold"/>
+
+            <ComboBox
+                ItemsSource="{Binding Databases}"
+                SelectedItem="{Binding SelectedDatabase, Mode=TwoWay}"
+                PlaceholderText="Select a database"/>
+
+            <CheckBox
+                Content="Keep credentials"
+                IsChecked="{Binding KeepCredentials}"/>
+
+            <TextBlock
+                Text="{Binding StatusMessage}"
+                TextWrapping="Wrap"/>
+
+            <StackPanel
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Spacing="10">
+
+                <Button
+                    Content="Test Connection"
+                    Command="{Binding TestConnectionCommand}"/>
+
+                <Button
+                    Content="Next"
+                    Command="{Binding NextCommand}"/>
+
+                <Button
+                    Content="Cancel"
+                    Command="{Binding CancelCommand}"/>
+
+            </StackPanel>
+
+        </StackPanel>
+
+    </Border>
+
+</UserControl>

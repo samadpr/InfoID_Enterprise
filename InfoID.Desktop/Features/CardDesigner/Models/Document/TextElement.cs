@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using InfoID.Desktop.Features.CardDesigner.Services;
 
 namespace InfoID.Desktop.Features.CardDesigner.Models.Document;
@@ -8,9 +8,23 @@ public sealed partial class TextElement : DesignerElement
     public override ElementType ElementType => ElementType.Text;
 
     [ObservableProperty] private string _text = "Text";
+    [ObservableProperty] private string _databaseBindingExpression = string.Empty;
+
+    [ObservableProperty]
+    private bool _isDatabaseBound;
+
+    [ObservableProperty]
+    private TextSourceType _sourceType = TextSourceType.Fixed;
+
+    [ObservableProperty]
+    private string _databaseColumn = string.Empty;
     [ObservableProperty] private string _fontFamily = "Segoe UI";
 
     partial void OnFontFamilyChanged(string value) => RecentFontsTracker.Record(value);
+    partial void OnSourceTypeChanged(TextSourceType value)
+    {
+        IsDatabaseBound = value == TextSourceType.Database;
+    }
     [ObservableProperty] private double _fontSize = 12;
     [ObservableProperty] private bool _bold;
     [ObservableProperty] private bool _italic;
@@ -28,3 +42,9 @@ public sealed partial class TextElement : DesignerElement
 
 public enum TextAlignmentX { Left, Center, Right, Justify }
 public enum TextAlignmentY { Top, Middle, Bottom }
+public enum TextSourceType
+{
+    Fixed,
+    Link,
+    Database
+}

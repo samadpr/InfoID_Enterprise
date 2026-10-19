@@ -32,20 +32,19 @@
                     Spacing="25">
 
             <!-- Table -->
-            <StackPanel Spacing="8">
-
-                <TextBlock Text="Database"
-                           FontSize="16"
-                           FontWeight="Bold" />
-
-                <TextBlock Text="Table"
-                           FontSize="14"
-                           Opacity="0.7" />
+            <StackPanel Orientation="Horizontal"
+             Spacing="8">
 
                 <ComboBox ItemsSource="{Binding Tables}"
-                          SelectedItem="{Binding SelectedTable}"
-                          Height="45"
-                          HorizontalAlignment="Stretch" />
+                          SelectedItem="{Binding SelectedTable, Mode=TwoWay}"
+                          HorizontalAlignment="Stretch"
+                          Width="500" />
+
+                <Button Content="+"
+                        Command="{Binding AddTableCommand}"
+                        Width="45"
+                        Height="40" />
+
 
             </StackPanel>
 

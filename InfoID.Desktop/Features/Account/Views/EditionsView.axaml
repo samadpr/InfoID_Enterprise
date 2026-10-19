@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Account.ViewModels"
+             x:Class="InfoID.Desktop.Features.Account.Views.EditionsView"
+             x:DataType="vm:EditionsViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <ScrollViewer>
+        <StackPanel Margin="40,24,40,40" Spacing="16">
+            <Button Classes="ghost" Content="&lt; Back" Padding="0" HorizontalAlignment="Left" Command="{Binding GoBackCommand}" />
+            <TextBlock Classes="h1" Text="Editions" />
+            <TextBlock Classes="bodySecondary" TextWrapping="Wrap"
+                       Text="Choose the edition that fits your organization and send us a request. Our team will contact you about payment and send your activation code." />
+
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoading}" HorizontalAlignment="Left" Width="240" />
+            <StackPanel Spacing="8" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource BrushError}" TextWrapping="Wrap" />
+                <Button Classes="secondary" Content="Try again" Command="{Binding LoadCommand}" HorizontalAlignment="Left" />
+            </StackPanel>
+
+            <ItemsControl ItemsSource="{Binding Plans}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:PlanCard">
+                        <Border Classes="card" Width="320" MinHeight="420" Margin="0,0,16,16" Padding="0" ClipToBounds="True">
+                            <DockPanel>
+                                <!-- Header band -->
+                                <Border DockPanel.Dock="Top" Padding="20,16">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                            <GradientStop Color="#DA3025" Offset="0" />
+                                            <GradientStop Color="#7A1710" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <StackPanel Spacing="4">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <TextBlock Text="{Binding Name}" Foreground="White" FontSize="20" FontWeight="Bold" />
+                                            <Border Grid.Column="1" Background="White" CornerRadius="10" Padding="8,2"
+                                                    VerticalAlignment="Center" IsVisible="{Binding IsCurrent}">
+                                                <TextBlock Text="Your edition" Foreground="#DA3025" FontSize="11" FontWeight="SemiBold" />
+                                            </Border>
+                                        </Grid>
+                                        <TextBlock Text="{Binding Terms}" Foreground="#E6FFFFFF" FontSize="12" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Request -->
+                                <StackPanel DockPanel.Dock="Bottom" Margin="20,8,20,20" Spacing="8">
+                                    <TextBlock Text="{Binding PriceText}" FontWeight="SemiBold" />
+                                    <Button Classes="primary" Content="Request" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                            Command="{Binding $parent[ItemsControl].((vm:EditionsViewModel)DataContext).RequestCommand}"
+                                            CommandParameter="{Binding}" />
+                                </StackPanel>
+
+                                <!-- Features -->
+                                <StackPanel Margin="20,16,20,0" Spacing="6">
+                                    <TextBlock Text="{Binding Tagline}" FontWeight="SemiBold" TextWrapping="Wrap"
+                                               IsVisible="{Binding Tagline, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                    <ItemsControl ItemsSource="{Binding Features}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <Grid ColumnDefinitions="16,*" Margin="0,2">
+                                                    <TextBlock Text="•" Foreground="{DynamicResource BrushPrimary}" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding}" TextWrapping="Wrap" Classes="bodySecondary" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

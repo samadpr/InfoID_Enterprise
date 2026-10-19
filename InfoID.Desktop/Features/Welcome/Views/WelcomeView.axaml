@@ -162,6 +162,15 @@
                 <TextBlock Text="Go further" Classes="h2" />
 
                 <WrapPanel>
+                    <Button Classes="ghost" Padding="0" Margin="0,0,16,16" Command="{Binding OpenEditionsCommand}"
+                            AutomationProperties.Name="Editions">
+                        <Border Classes="tile" Width="260" Height="120" Padding="20">
+                            <StackPanel Spacing="6" VerticalAlignment="Center">
+                                <TextBlock Text="Editions" Classes="h3" />
+                                <TextBlock Text="Compare Standard, Professional and Enterprise, and request a plan" Classes="caption" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </Button>
                     <Border Classes="tile" Width="260" Height="120" Padding="20" Margin="0,0,16,16">
                         <StackPanel Spacing="6" VerticalAlignment="Center">
                             <TextBlock Text="Templates" Classes="h3" />
@@ -174,12 +183,42 @@
                             <TextBlock Text="Manage the people cards are issued to" Classes="caption" TextWrapping="Wrap" />
                         </StackPanel>
                     </Border>
-                    <Border Classes="tile" Width="260" Height="120" Padding="20" Margin="0,0,16,16">
-                        <StackPanel Spacing="6" VerticalAlignment="Center">
-                            <TextBlock Text="Printing" Classes="h3" />
-                            <TextBlock Text="Single, batch and reprint workflows" Classes="caption" TextWrapping="Wrap" />
-                        </StackPanel>
-                    </Border>
+                    <Button Classes="ghost" Padding="0" Margin="0,0,16,16" Command="{Binding OpenDashboardCommand}"
+                            AutomationProperties.Name="Dashboard" ToolTip.Tip="Today's cards, expiring cards, license and system health">
+                        <Border Classes="tile" Width="260" Height="120" Padding="20">
+                            <StackPanel Spacing="6" VerticalAlignment="Center">
+                                <TextBlock Text="Dashboard" Classes="h3" />
+                                <TextBlock Text="Cards printed, cards expiring soon, license and system health at a glance" Classes="caption" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </Button>
+                    <Button Classes="ghost" Padding="0" Margin="0,0,16,16" Command="{Binding OpenReportsCommand}"
+                            AutomationProperties.Name="Reports" ToolTip.Tip="Card issuance, print log, expiring and replacement cards, with Excel and PDF export">
+                        <Border Classes="tile" Width="260" Height="120" Padding="20">
+                            <StackPanel Spacing="6" VerticalAlignment="Center">
+                                <TextBlock Text="Reports" Classes="h3" />
+                                <TextBlock Text="Issuance, print log, expiring and replacement cards. Export to Excel or PDF" Classes="caption" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </Button>
+                    <Button Classes="ghost" Padding="0" Margin="0,0,16,16" Command="{Binding OpenPrintHistoryCommand}"
+                            AutomationProperties.Name="Print history" ToolTip.Tip="Every card printed, with reprints and reasons">
+                        <Border Classes="tile" Width="260" Height="120" Padding="20">
+                            <StackPanel Spacing="6" VerticalAlignment="Center">
+                                <TextBlock Text="Print history" Classes="h3" />
+                                <TextBlock Text="Every print run and card, including reprints and their reasons" Classes="caption" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </Button>
+                    <Button Classes="ghost" Padding="0" Margin="0,0,16,16" Command="{Binding OpenBackupCommand}"
+                            AutomationProperties.Name="Backup and restore" ToolTip.Tip="Back up InfoID's data, set automatic backups, or restore a backup">
+                        <Border Classes="tile" Width="260" Height="120" Padding="20">
+                            <StackPanel Spacing="6" VerticalAlignment="Center">
+                                <TextBlock Text="Backup &amp; Restore" Classes="h3" />
+                                <TextBlock Text="Back up designs, cardholders and print history. Restore them on this or a new PC" Classes="caption" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </Button>
                     <Border Classes="tile" Width="260" Height="120" Padding="20" Margin="0,0,16,16">
                         <StackPanel Spacing="6" VerticalAlignment="Center">
                             <TextBlock Text="Learning" Classes="h3" />

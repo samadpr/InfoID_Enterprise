@@ -13,7 +13,10 @@ public class Card : BaseEntity
 {
     public long CardholderId { get; set; }
     public Cardholder? Cardholder { get; set; }
-    public long TemplateId { get; set; }
+    /// <summary>Design the card was printed from. Optional: cards printed from a design
+    /// that was never saved to the database (new or file-based designs) still get a
+    /// history record. Changed from required in migration AddPrintHistory.</summary>
+    public long? TemplateId { get; set; }
     public Template? Template { get; set; }
     public long? BranchId { get; set; }
     public Branch? Branch { get; set; }

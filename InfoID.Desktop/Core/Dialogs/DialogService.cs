@@ -22,6 +22,8 @@ public sealed class DialogService : IDialogService
 
         var content = _viewLocator.Build(viewModel);
 
+        var owner = GetOwnerWindow();
+
         var window = new Window
         {
             Content = content,
@@ -69,7 +71,6 @@ public sealed class DialogService : IDialogService
 
         viewModel.CloseRequested += OnCloseRequested;
 
-        var owner = GetOwnerWindow();
         window.Closed += (_, _) => tcs.TrySetResult(default);
 
         if (owner is not null)
@@ -82,6 +83,30 @@ public sealed class DialogService : IDialogService
         }
 
         return tcs.Task;
+    }
+
+    /// <summary>Keeps a dialog within the working area of the screen the main window
+    /// is on (so it is never bigger than the display, whatever size the main window
+    /// currently is). Falls back to the unclamped size if screen info isn't available.</summary>
+    private static (double Width, double Height) ClampToOwner(double width, double height, Window? owner)
+    {
+        try
+        {
+            var screens = owner?.Screens;
+            var screen = owner is null ? null : screens?.ScreenFromTopLevel(owner) ?? screens?.Primary;
+            if (screen is null)
+                return (width, height);
+
+            var scaling = screen.Scaling > 0 ? screen.Scaling : 1.0;
+            var availableWidth = screen.WorkingArea.Width / scaling;
+            var availableHeight = screen.WorkingArea.Height / scaling;
+
+            return (Math.Min(width, availableWidth * 0.94), Math.Min(height, availableHeight * 0.92));
+        }
+        catch (Exception)
+        {
+            return (width, height);
+        }
     }
 
     private static Window? GetOwnerWindow()

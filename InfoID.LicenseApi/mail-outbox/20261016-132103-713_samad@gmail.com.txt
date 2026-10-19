@@ -1,0 +1,10 @@
+To: samad@gmail.com
+Subject: Verify your email
+Date (UTC): 2026-10-16 13:21:03Z
+
+Hello samad,
+
+Your verification code is: 906960
+
+Enter it in the app to finish creating your account. It expires in 15 minutes.
+If you didn't create an account, you can ignore this email.

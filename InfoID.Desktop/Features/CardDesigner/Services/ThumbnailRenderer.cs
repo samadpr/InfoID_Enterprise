@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Linq;
 using Avalonia;
@@ -36,7 +36,15 @@ public static class ThumbnailRenderer
         public Func<TextElement, string>? ResolveText { get; init; }
         public Func<DataFieldElement, string>? ResolveField { get; init; }
         public Func<DesignerElement, bool>? IsVisibleNow { get; init; }
+        public Func<ImageElement, string?>? ResolveImagePath { get; init; }
+        /// <summary>The value a QR code / barcode encodes for the current record
+        /// (CodeValueBinding). Null, or a null result, encodes the element's Value.</summary>
+        public Func<DesignerElement, string?>? ResolveCodeValue { get; init; }
         public bool ShowBleedAndSafeZone { get; init; }
+
+        /// <summary>Trial mode: draws "INFOID TRIAL VERSION" over the card. Part of the
+        /// render itself, so it is in every printed page, PDF and preview made from it.</summary>
+        public bool TrialWatermark { get; init; }
 
         /// <summary>Resolves an element's AssetReference to a real file path (see
         /// IDesignAssetService.ResolveToFullPath). Null, or a null/failed result from
@@ -86,6 +94,9 @@ public static class ThumbnailRenderer
             {
                 DrawElement(context, cardRect, scale, element, options);
             }
+
+            if (options?.TrialWatermark == true)
+                InfoID.Desktop.Features.Trial.Services.TrialWatermark.Draw(context, cardRect);
         }
 
         if (options?.ShowBleedAndSafeZone == true)
@@ -109,22 +120,57 @@ public static class ThumbnailRenderer
         var rect = new Rect(cardRect.X + element.X * scale, cardRect.Y + element.Y * scale,
             Math.Max(0.5, element.Width * scale), Math.Max(0.5, element.Height * scale));
 
+        // Same opacity and rotation as the design canvas (CardCanvasView.DrawElement):
+        // rotate about the element's own centre, so a rotated or faded element prints
+        // exactly as designed instead of straight and solid.
+        using var opacityScope = context.PushOpacity(Math.Clamp(element.Opacity, 0, 1));
+        var center = rect.Center;
+        using var rotationScope = context.PushTransform(
+            Matrix.CreateTranslation(-center.X, -center.Y)
+            * Matrix.CreateRotation(element.Rotation * Math.PI / 180.0)
+            * Matrix.CreateTranslation(center.X, center.Y));
+
         switch (element)
         {
             case TextElement text:
                 var textValue = options?.ResolveText?.Invoke(text) ?? text.Text;
-                DrawText(context, rect, textValue, text.FontFamily, text.ColorHex, text.HorizontalAlignment);
+                CardTextRenderer.Draw(context, rect, textValue, text.FontFamily,
+                    FontPx(text.FontSize, scale), FontPx(text.MinFontSize, scale), ParseBrush(text.ColorHex),
+                    text.Bold, text.Italic, text.Underline, text.HorizontalAlignment, text.VerticalAlignment);
                 break;
             case DataFieldElement field:
                 var fieldValue = options?.ResolveField?.Invoke(field) ?? $"{{{{{field.FieldKey}}}}}";
-                DrawText(context, rect, fieldValue, field.FontFamily, field.ColorHex, field.HorizontalAlignment);
+                CardTextRenderer.Draw(context, rect, fieldValue, field.FontFamily,
+                    FontPx(field.FontSize, scale), FontPx(CardTextRenderer.DefaultMinFontSize, scale), ParseBrush(field.ColorHex),
+                    horizontal: field.HorizontalAlignment);
+                break;
+            case DateTimeElement dateTime:
+                CardTextRenderer.Draw(context, rect, CardTextRenderer.FormatDateTime(dateTime), dateTime.FontFamily,
+                    FontPx(dateTime.FontSize, scale), FontPx(CardTextRenderer.DefaultMinFontSize, scale), ParseBrush(dateTime.ColorHex),
+                    dateTime.Bold, dateTime.Italic, dateTime.Underline, dateTime.HorizontalAlignment, dateTime.VerticalAlignment);
                 break;
             case ShapeElement shape:
                 DrawShape(context, rect, shape);
                 break;
             case ImageElement image:
-                DrawImageOrPlaceholder(context, rect, image.AssetReference, options, image.MaskShape, image.FlipHorizontal, image.FlipVertical);
-                break;
+                {
+                    // Photo folders: the printing caller can supply a per-record photo.
+                    // null = normal image, "" = draw nothing (never a placeholder box on a printed card).
+                    var overridePath = options?.ResolveImagePath?.Invoke(image);
+
+                    var fullPath = overridePath is null
+                        ? options?.ResolveAssetPath?.Invoke(image.AssetReference)
+                        : overridePath;
+
+                    var drawn = TryDrawImageFile(context, rect, fullPath,
+                        image.FitMode, image.CornerRadius * scale,
+                        image.CropX, image.CropY, image.CropZoom,
+                        image.MaskShape, image.FlipHorizontal, image.FlipVertical);
+
+                    if (!drawn && overridePath is null)
+                        context.DrawRectangle(ImagePlaceholderBrush, null, rect);
+                    break;
+                }
             case PhotoElement photo:
                 DrawImageOrPlaceholder(context, rect, photo.AssetReference, options);
                 break;
@@ -132,10 +178,10 @@ public static class ThumbnailRenderer
                 DrawImageOrPlaceholder(context, rect, signature.AssetReference, options);
                 break;
             case BarcodeElement barcode:
-                DrawBarcodeOrQr(context, rect, BarcodeRenderer.TryGenerate(barcode));
+                DrawBarcodeOrQr(context, rect, BarcodeRenderer.TryGenerate(barcode, options?.ResolveCodeValue?.Invoke(barcode)));
                 break;
             case QrCodeElement qr:
-                DrawBarcodeOrQr(context, rect, BarcodeRenderer.TryGenerate(qr));
+                DrawBarcodeOrQr(context, rect, BarcodeRenderer.TryGenerate(qr, options?.ResolveCodeValue?.Invoke(qr)));
                 break;
             case PenElement pen:
                 PenRenderer.Draw(context, rect, pen);
@@ -211,30 +257,22 @@ public static class ThumbnailRenderer
         }
     }
 
-    private static void DrawText(DrawingContext context, Rect rect, string? value, string fontFamily, string colorHex, TextAlignmentX alignment)
+    private static string? ResolveImageFullPath(ImageElement image, RenderOptions options)
     {
-        if (string.IsNullOrEmpty(value) || rect.Height < 1) return;
+        var overridePath = options.ResolveImagePath?.Invoke(image);
 
-        // Small renders (list thumbnails) need font sizes clamped to the element's own
-        // scaled height, or an entirely reasonable full-canvas font size (8-40pt)
-        // becomes sub-pixel noise. At Print Preview's larger scale this clamp rarely
-        // engages since rect.Height is already generous.
-        var fontSize = Math.Clamp(rect.Height * 0.75, 1, rect.Height);
-        var typeface = new Typeface(fontFamily);
-        var formatted = new FormattedText(value, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-            typeface, fontSize, ParseBrush(colorHex))
-        {
-            MaxTextWidth = Math.Max(1, rect.Width),
-            MaxTextHeight = Math.Max(1, rect.Height),
-            TextAlignment = alignment switch
-            {
-                TextAlignmentX.Center => TextAlignment.Center,
-                TextAlignmentX.Right => TextAlignment.Right,
-                _ => TextAlignment.Left,
-            },
-        };
-        context.DrawText(formatted, rect.TopLeft);
+        if (overridePath is null)
+            return options.ResolveAssetPath?.Invoke(image.AssetReference);
+
+        return overridePath.Length == 0 ? null : overridePath;
     }
+
+    /// <summary>The canvas draws text at FontSize x Zoom pixels while drawing
+    /// (96/25.4) x Zoom pixels per millimetre, so one font unit = 25.4/96 mm. Here the card
+    /// is drawn at <paramref name="scale"/> pixels per millimetre, so the same text is
+    /// FontSize x scale x 25.4/96 pixels -- the printed size matches the designer exactly
+    /// at any DPI (thumbnail, preview or 300 DPI print).</summary>
+    private static double FontPx(double fontSize, double scale) => fontSize * scale * 25.4 / 96.0;
 
     /// <summary>Delegates to the shared ShapeRenderer (Services/ShapeRenderer.cs) so
     /// thumbnails/Print Preview always render every ShapeKind identically to the live
@@ -248,15 +286,85 @@ public static class ThumbnailRenderer
     /// and Print Preview now supply one), falling back to a plain tinted box only when
     /// there's no resolver, no asset reference, or the file can't be loaded -- never a
     /// crash, and never claiming an image exists when it doesn't.</summary>
+    //private static void DrawImageOrPlaceholder(DrawingContext context, Rect rect, string? assetReference, RenderOptions? options,
+    //    PhotoMaskShape maskShape = PhotoMaskShape.Rectangle, bool flipHorizontal = false, bool flipVertical = false)
+    //{
+    //    var fullPath = options?.ResolveAssetPath?.Invoke(assetReference);
+    //    if (string.IsNullOrWhiteSpace(fullPath))
+    //    {
+    //        context.DrawRectangle(ImagePlaceholderBrush, null, rect);
+    //        return;
+    //    }
+
+    //    Bitmap? bitmap;
+    //    try
+    //    {
+    //        bitmap = new Bitmap(fullPath);
+    //    }
+    //    catch
+    //    {
+    //        bitmap = null;
+    //    }
+
+    //    if (bitmap is null)
+    //    {
+    //        context.DrawRectangle(ImagePlaceholderBrush, null, rect);
+    //        return;
+    //    }
+
+    //    using (bitmap)
+    //    using (ShapeRenderer.BuildMaskClipGeometry(rect, maskShape) is { } maskGeometry ? context.PushGeometryClip(maskGeometry) : context.PushClip(rect))
+    //    {
+    //        // Contain-fit within the element's own box, centered -- consistent with how
+    //        // this renderer already contain-fits the whole card into its target rect,
+    //        // and a safe universal default across Image/Photo/Signature without needing
+    //        // each element's own FitMode here.
+    //        var sourceSize = bitmap.PixelSize.ToSizeWithDpi(bitmap.Dpi);
+    //        var fitScale = Math.Min(rect.Width / sourceSize.Width, rect.Height / sourceSize.Height);
+    //        var destSize = new Size(sourceSize.Width * fitScale, sourceSize.Height * fitScale);
+    //        var destRect = new Rect(
+    //            rect.Center.X - destSize.Width / 2, rect.Center.Y - destSize.Height / 2,
+    //            destSize.Width, destSize.Height);
+
+    //        if (flipHorizontal || flipVertical)
+    //        {
+    //            var center = destRect.Center;
+    //            var flipTransform = Matrix.CreateTranslation(-center.X, -center.Y)
+    //                                 * new Matrix(flipHorizontal ? -1 : 1, 0, 0, flipVertical ? -1 : 1, 0, 0)
+    //                                 * Matrix.CreateTranslation(center.X, center.Y);
+    //            using var flipScope = context.PushTransform(flipTransform);
+    //            context.DrawImage(bitmap, new Rect(sourceSize), destRect);
+    //        }
+    //        else
+    //        {
+    //            context.DrawImage(bitmap, new Rect(sourceSize), destRect);
+    //        }
+    //    }
+    //}
+
+
+    /// <summary>Photo and Signature elements (and anything else without its own fit
+    /// settings): contain-fit, falling back to a plain tinted box when there's no
+    /// resolver, no asset reference, or the file can't be loaded.</summary>
     private static void DrawImageOrPlaceholder(DrawingContext context, Rect rect, string? assetReference, RenderOptions? options,
         PhotoMaskShape maskShape = PhotoMaskShape.Rectangle, bool flipHorizontal = false, bool flipVertical = false)
     {
         var fullPath = options?.ResolveAssetPath?.Invoke(assetReference);
-        if (string.IsNullOrWhiteSpace(fullPath))
-        {
+
+        if (!TryDrawImageFile(context, rect, fullPath, ImageFitMode.Fit, 0, 0, 0, 1.0, maskShape, flipHorizontal, flipVertical))
             context.DrawRectangle(ImagePlaceholderBrush, null, rect);
-            return;
-        }
+    }
+
+    /// <summary>Loads and draws an image file with the same fit, crop, corner and mask
+    /// rules as CardCanvasView.DrawImage, so printed cards match the design canvas.
+    /// Returns false (drawing nothing) if the path is empty or the file can't be loaded.</summary>
+    private static bool TryDrawImageFile(DrawingContext context, Rect rect, string? fullPath,
+        ImageFitMode fitMode, double cornerRadius,
+        double cropX, double cropY, double cropZoom,
+        PhotoMaskShape maskShape, bool flipHorizontal, bool flipVertical)
+    {
+        if (string.IsNullOrWhiteSpace(fullPath))
+            return false;
 
         Bitmap? bitmap;
         try
@@ -265,45 +373,66 @@ public static class ThumbnailRenderer
         }
         catch
         {
-            bitmap = null;
-        }
-
-        if (bitmap is null)
-        {
-            context.DrawRectangle(ImagePlaceholderBrush, null, rect);
-            return;
+            return false;
         }
 
         using (bitmap)
-        using (ShapeRenderer.BuildMaskClipGeometry(rect, maskShape) is { } maskGeometry ? context.PushGeometryClip(maskGeometry) : context.PushClip(rect))
+        using (ShapeRenderer.BuildMaskClipGeometry(rect, maskShape) is { } maskGeometry
+                   ? context.PushGeometryClip(maskGeometry)
+                   : maskShape == PhotoMaskShape.RoundedRectangle || cornerRadius > 0
+                       ? context.PushClip(new RoundedRect(rect, Math.Min(cornerRadius, Math.Min(rect.Width, rect.Height) / 2)))
+                       : context.PushClip(rect))
         {
-            // Contain-fit within the element's own box, centered -- consistent with how
-            // this renderer already contain-fits the whole card into its target rect,
-            // and a safe universal default across Image/Photo/Signature without needing
-            // each element's own FitMode here.
             var sourceSize = bitmap.PixelSize.ToSizeWithDpi(bitmap.Dpi);
-            var fitScale = Math.Min(rect.Width / sourceSize.Width, rect.Height / sourceSize.Height);
-            var destSize = new Size(sourceSize.Width * fitScale, sourceSize.Height * fitScale);
-            var destRect = new Rect(
-                rect.Center.X - destSize.Width / 2, rect.Center.Y - destSize.Height / 2,
-                destSize.Width, destSize.Height);
+            Rect sourceRect;
+            Rect destRect;
+
+            switch (fitMode)
+            {
+                case ImageFitMode.Stretch:
+                    sourceRect = new Rect(sourceSize);
+                    destRect = rect;
+                    break;
+
+                case ImageFitMode.Fill:
+                    // Same pan + zoom formula as CardCanvasView.DrawImage.
+                    var fillScale = Math.Max(rect.Width / sourceSize.Width, rect.Height / sourceSize.Height) * Math.Max(cropZoom, 0.1);
+                    var visibleW = rect.Width / fillScale;
+                    var visibleH = rect.Height / fillScale;
+                    var maxOffsetX = Math.Max(0, sourceSize.Width - visibleW);
+                    var maxOffsetY = Math.Max(0, sourceSize.Height - visibleH);
+                    var offsetX = Math.Clamp((sourceSize.Width - visibleW) / 2 + cropX, 0, maxOffsetX);
+                    var offsetY = Math.Clamp((sourceSize.Height - visibleH) / 2 + cropY, 0, maxOffsetY);
+                    sourceRect = new Rect(offsetX, offsetY, Math.Min(visibleW, sourceSize.Width), Math.Min(visibleH, sourceSize.Height));
+                    destRect = rect;
+                    break;
+
+                default: // Fit
+                    var fitScale = Math.Min(rect.Width / sourceSize.Width, rect.Height / sourceSize.Height);
+                    var fitW = sourceSize.Width * fitScale;
+                    var fitH = sourceSize.Height * fitScale;
+                    sourceRect = new Rect(sourceSize);
+                    destRect = new Rect(rect.X + (rect.Width - fitW) / 2, rect.Y + (rect.Height - fitH) / 2, fitW, fitH);
+                    break;
+            }
 
             if (flipHorizontal || flipVertical)
             {
-                var center = destRect.Center;
+                var center = rect.Center;
                 var flipTransform = Matrix.CreateTranslation(-center.X, -center.Y)
                                      * new Matrix(flipHorizontal ? -1 : 1, 0, 0, flipVertical ? -1 : 1, 0, 0)
                                      * Matrix.CreateTranslation(center.X, center.Y);
                 using var flipScope = context.PushTransform(flipTransform);
-                context.DrawImage(bitmap, new Rect(sourceSize), destRect);
+                context.DrawImage(bitmap, sourceRect, destRect);
             }
             else
             {
-                context.DrawImage(bitmap, new Rect(sourceSize), destRect);
+                context.DrawImage(bitmap, sourceRect, destRect);
             }
         }
-    }
 
+        return true;
+    }
     private static IBrush ResolveBackgroundBrush(BackgroundSettings background) => background.Kind switch
     {
         BackgroundKind.Transparent => Brushes.White,

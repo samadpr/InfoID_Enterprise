@@ -30,3 +30,13 @@ public enum DigitalCopyMode { Off, PdfFile, ImageFiles }
 /// a record into (a running per-record print count, and a last-printed timestamp
 /// distinct from the always-on one used for sorting/display).</summary>
 public enum PrintStatusMarker { PrintStatus, PrintCounter, PrintDate, PrintStatusAndCounter, PrintStatusAndCounterAndDate }
+
+/// <summary>Which records a Print run covers: every record, only the record currently
+/// shown in Preview, or a custom list such as "1-3, 5, 8" (1-based record numbers).</summary>
+public enum PrintRangeMode { AllRecords, CurrentRecord, CustomRange }
+
+/// <summary>Which of the generated pages are sent, counted across the whole run
+/// (page 1 = first card's front, page 2 = its back, ...). Odd/Even is the classic manual
+/// duplex workflow on an office printer: print odd pages (fronts), turn the stack over,
+/// then print even pages (backs).</summary>
+public enum PageParityFilter { AllPages, OddPages, EvenPages }

@@ -1,0 +1,121 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:InfoID.Desktop.Features.Database.ViewModels"
+    x:Class="InfoID.Desktop.Features.Database.Views.ApiConnectionDialogView"
+    x:DataType="vm:ApiConnectionDialogViewModel">
+
+    <Border Padding="24" Width="500">
+
+        <StackPanel Spacing="14">
+
+            <TextBlock
+                Text="Connect to API"
+                FontSize="22"
+                FontWeight="SemiBold"/>
+
+            <TextBlock
+                Text="API URL"
+                FontWeight="SemiBold"/>
+
+            <TextBox
+                Text="{Binding ApiUrl}"
+                Watermark="https://api.example.com/customers"/>
+
+            <TextBlock
+                Text="Authentication"
+                FontWeight="SemiBold"/>
+
+            <ComboBox
+                HorizontalAlignment="Stretch"
+                ItemsSource="{Binding AuthenticationOptions}"
+                SelectedItem="{Binding AuthenticationType, Mode=TwoWay}"/>
+
+            <!-- API Key -->
+            <StackPanel
+                Spacing="6"
+                IsVisible="{Binding IsApiKeyAuth}">
+
+                <TextBlock Text="API Key"/>
+
+                <TextBox
+                    Text="{Binding ApiKey}"
+                    Watermark="Enter API key"/>
+
+            </StackPanel>
+
+            <!-- Bearer Token -->
+            <StackPanel
+                Spacing="6"
+                IsVisible="{Binding IsBearerAuth}">
+
+                <TextBlock Text="Bearer Token"/>
+
+                <TextBox
+                    Text="{Binding BearerToken}"
+                    Watermark="Enter bearer token"/>
+
+            </StackPanel>
+
+            <!-- Basic Authentication -->
+            <StackPanel
+                Spacing="14"
+                IsVisible="{Binding IsBasicAuth}">
+
+                <StackPanel Spacing="6">
+
+                    <TextBlock Text="Username"/>
+
+                    <TextBox
+                        Text="{Binding Username}"
+                        Watermark="Username"/>
+
+                </StackPanel>
+
+                <StackPanel Spacing="6">
+
+                    <TextBlock Text="Password"/>
+
+                    <TextBox
+                        Text="{Binding Password}"
+                        PasswordChar="*"
+                        Watermark="Password"/>
+
+                </StackPanel>
+
+            </StackPanel>
+
+            <!-- Only meaningful when there are credentials to keep -->
+            <CheckBox
+                Content="Keep credentials"
+                IsVisible="{Binding UsesCredentials}"
+                IsChecked="{Binding KeepCredentials}"/>
+
+            <TextBlock
+                Text="{Binding StatusMessage}"
+                TextWrapping="Wrap"/>
+
+            <StackPanel
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Spacing="10">
+
+                <Button
+                    Content="Test Connection"
+                    Command="{Binding TestConnectionCommand}"/>
+
+                <Button
+                    Content="Next"
+                    Command="{Binding NextCommand}"/>
+
+                <Button
+                    Content="Cancel"
+                    Command="{Binding CancelCommand}"/>
+
+            </StackPanel>
+
+        </StackPanel>
+
+    </Border>
+
+</UserControl>

@@ -1,0 +1,225 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Features.Reports.ViewModels"
+             xmlns:components="using:InfoID.Desktop.Shell.Components"
+             xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="820"
+             x:Class="InfoID.Desktop.Features.Reports.Views.ReportsView"
+             x:DataType="vm:ReportsViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <UserControl.Styles>
+        <Style Selector="Border.panel">
+            <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+            <Setter Property="CornerRadius" Value="{StaticResource Radius.MD}" />
+        </Style>
+        <Style Selector="TextBlock.filterLabel">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+        <Style Selector="StackPanel.filter">
+            <Setter Property="Margin" Value="0,0,12,10" />
+        </Style>
+        <Style Selector="ListBox.reports ListBoxItem">
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+        <Style Selector="Border.chip">
+            <Setter Property="Background" Value="{DynamicResource BrushBackground}" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Margin" Value="0,0,10,10" />
+            <Setter Property="MinWidth" Value="120" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,*" Margin="40,28,40,24">
+        <components:PageHeaderView Grid.Row="0" Title="Reports" BackCommand="{Binding GoHomeCommand}" />
+
+        <Grid Grid.Row="1" ColumnDefinitions="270,*" Margin="0,16,0,0">
+
+            <!-- Report list -->
+            <Border Grid.Column="0" Classes="panel" Padding="8" Margin="0,0,16,0">
+                <ListBox Classes="reports" ItemsSource="{Binding Reports}" SelectedItem="{Binding SelectedReport}" SelectionMode="Single,AlwaysSelected"
+                         Background="Transparent" AutomationProperties.Name="Reports">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ReportOption">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <mi:MaterialIcon Kind="{Binding Icon}" Width="20" Height="20" VerticalAlignment="Top"
+                                                 Margin="0,1,12,0" Foreground="{DynamicResource BrushPrimary}" />
+                                <StackPanel Grid.Column="1" Spacing="2">
+                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding Description}" Classes="caption" TextWrapping="Wrap"
+                                               Foreground="{DynamicResource BrushTextSecondary}" />
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <!-- Selected report -->
+            <Grid Grid.Column="1" RowDefinitions="Auto,Auto,Auto,Auto,*">
+
+                <!-- Filters -->
+                <Border Grid.Row="0" Classes="panel" Padding="16,12,16,2">
+                    <WrapPanel>
+                        <StackPanel Classes="filter" IsVisible="{Binding UsesPeriod}">
+                            <TextBlock Classes="filterLabel" Text="Period" />
+                            <ComboBox ItemsSource="{Binding Periods}" SelectedItem="{Binding SelectedPeriod}" MinWidth="150"
+                                      AutomationProperties.Name="Period">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:PeriodOption">
+                                        <TextBlock Text="{Binding Label}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Classes="filter" IsVisible="{Binding UsesPeriod}">
+                            <TextBlock Classes="filterLabel" Text="From" />
+                            <CalendarDatePicker SelectedDate="{Binding FromDate}" Watermark="Any date" MinWidth="140"
+                                                AutomationProperties.Name="From date" />
+                        </StackPanel>
+                        <StackPanel Classes="filter" IsVisible="{Binding UsesPeriod}">
+                            <TextBlock Classes="filterLabel" Text="To" />
+                            <CalendarDatePicker SelectedDate="{Binding ToDate}" Watermark="Any date" MinWidth="140"
+                                                AutomationProperties.Name="To date" />
+                        </StackPanel>
+                        <StackPanel Classes="filter" IsVisible="{Binding IsExpiring}">
+                            <TextBlock Classes="filterLabel" Text="Expiring within" />
+                            <ComboBox ItemsSource="{Binding LeadTimes}" SelectedItem="{Binding SelectedLeadTime}" MinWidth="150"
+                                      AutomationProperties.Name="Expiring within">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:LeadTimeOption">
+                                        <TextBlock Text="{Binding Label}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Classes="filter" IsVisible="{Binding IsExpiring}" VerticalAlignment="Bottom">
+                            <CheckBox Content="Include expired cards" IsChecked="{Binding IncludeExpired}" Margin="0,0,0,4"
+                                      ToolTip.Tip="Also list cards whose expiry date has passed but are still marked issued" />
+                        </StackPanel>
+                        <StackPanel Classes="filter" IsVisible="{Binding UsesDesign}">
+                            <TextBlock Classes="filterLabel" Text="Design" />
+                            <ComboBox ItemsSource="{Binding Designs}" SelectedItem="{Binding SelectedDesign}" MinWidth="180"
+                                      AutomationProperties.Name="Design">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:DesignOption">
+                                        <TextBlock Text="{Binding Label}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Classes="filter" IsVisible="{Binding IsPrintLog}">
+                            <TextBlock Classes="filterLabel" Text="Show" />
+                            <ComboBox ItemsSource="{Binding PrintLogFilters}" SelectedItem="{Binding SelectedPrintLogFilter}" MinWidth="190"
+                                      AutomationProperties.Name="Print log filter">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:PrintLogFilterOption">
+                                        <TextBlock Text="{Binding Label}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Classes="filter" VerticalAlignment="Bottom">
+                            <Button Classes="secondary" Command="{Binding RunCommand}" HotKey="F5"
+                                    ToolTip.Tip="Run the report again (F5). It also updates when a filter changes.">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <mi:MaterialIcon Kind="Refresh" Width="16" Height="16" />
+                                    <TextBlock Text="Refresh" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </WrapPanel>
+                </Border>
+
+                <!-- Title + export -->
+                <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,16,0,0">
+                    <StackPanel Spacing="2" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding ReportTitle}" Classes="h2" />
+                        <TextBlock Text="{Binding ReportSubtitle}" Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"
+                                IsEnabled="{Binding HasReport}">
+                        <Button Classes="primary" Command="{Binding ExportExcelCommand}" ToolTip.Tip="Save as an Excel workbook (.xlsx)"
+                                AutomationProperties.Name="Export to Excel">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="FileExcelOutline" Width="16" Height="16" />
+                                <TextBlock Text="Excel" />
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="secondary" Command="{Binding ExportPdfCommand}" ToolTip.Tip="Save as a PDF (A4 landscape)"
+                                AutomationProperties.Name="Export to PDF">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="FilePdfBox" Width="16" Height="16" />
+                                <TextBlock Text="PDF" />
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="secondary" Command="{Binding ExportCsvCommand}" ToolTip.Tip="Save as CSV for other programs"
+                                AutomationProperties.Name="Export to CSV">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="FileDelimitedOutline" Width="16" Height="16" />
+                                <TextBlock Text="CSV" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Status / last export -->
+                <StackPanel Grid.Row="2" Spacing="6" Margin="0,10,0,0">
+                    <ProgressBar IsIndeterminate="True" Height="3" IsVisible="{Binding IsBusy}" />
+                    <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Message, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource BrushError}" IsVisible="{Binding MessageIsError}" />
+                        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource BrushSuccess}" IsVisible="{Binding !MessageIsError}" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" IsVisible="{Binding HasLastExport}">
+                            <Button Classes="ghost" Content="Open file" Command="{Binding OpenLastExportCommand}" />
+                            <Button Classes="ghost" Content="Show in folder" Command="{Binding ShowLastExportInFolderCommand}" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Summary -->
+                <ItemsControl Grid.Row="3" ItemsSource="{Binding Summary}" Margin="0,10,0,0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SummaryItem">
+                            <Border Classes="chip">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Label}" Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" />
+                                    <TextBlock Text="{Binding Value}" FontSize="18" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Table -->
+                <Border Grid.Row="4" Classes="panel" ClipToBounds="True" Margin="0,4,0,0">
+                    <Panel>
+                        <DataGrid x:Name="ReportGrid" ItemsSource="{Binding Rows}" AutoGenerateColumns="False" IsReadOnly="True"
+                                  CanUserSortColumns="False" CanUserResizeColumns="True" GridLinesVisibility="Horizontal"
+                                  HeadersVisibility="Column" SelectionMode="Extended" IsVisible="{Binding HasRows}"
+                                  AutomationProperties.Name="Report rows" />
+                        <StackPanel IsVisible="{Binding IsEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6" Margin="24">
+                            <TextBlock Text="Nothing to report" Classes="h3" HorizontalAlignment="Center" />
+                            <TextBlock Classes="caption" TextWrapping="Wrap" MaxWidth="420" TextAlignment="Center"
+                                       Foreground="{DynamicResource BrushTextSecondary}"
+                                       Text="No records match these filters. Try a longer period or All designs." />
+                        </StackPanel>
+                    </Panel>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

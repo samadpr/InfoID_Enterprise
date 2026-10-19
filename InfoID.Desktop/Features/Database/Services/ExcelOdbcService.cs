@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Data.Odbc;
+using System.Linq;
 
 namespace InfoID.Desktop.Features.Database.Services;
 
@@ -53,7 +54,23 @@ public sealed class ExcelOdbcService
         var table = new DataTable();
 
         adapter.Fill(table);
+        RemoveEmptyRows(table);
 
         return table;
+    }
+    public static void RemoveEmptyRows(DataTable table)
+    {
+        for (var i = table.Rows.Count - 1; i >= 0; i--)
+        {
+            var isEmpty = table.Rows[i].ItemArray.All(value =>
+                value is null ||
+                value == DBNull.Value ||
+                string.IsNullOrWhiteSpace(value.ToString()));
+
+            if (isEmpty)
+                table.Rows.RemoveAt(i);
+        }
+
+        table.AcceptChanges();
     }
 }

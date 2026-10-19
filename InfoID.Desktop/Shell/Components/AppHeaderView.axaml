@@ -5,6 +5,7 @@
              xmlns:vm="using:InfoID.Desktop.Shell.ViewModels"
              xmlns:components="using:InfoID.Desktop.Shell.Components"
              xmlns:conv="using:InfoID.Desktop.Features.CardDesigner.Converters"
+             xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="44"
              x:Class="InfoID.Desktop.Shell.Components.AppHeaderView"
              x:DataType="vm:ShellViewModel"
@@ -54,8 +55,16 @@
                                   ToolTip.Tip="Saves the current tab as a portable .infoid design file." />
                         <MenuItem Header="Print Preview" Command="{Binding ActiveDesigner.ActiveTab.ShowPrintPreviewCommand}"
                                   IsVisible="{Binding ActiveDesigner, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                        <MenuItem Header="Print" IsEnabled="False"
-                                  ToolTip.Tip="Not yet implemented -- no printing engine exists yet." />
+                        <MenuItem Header="Print..." Command="{Binding ActiveDesigner.ActiveTab.ShowPrintDialogCommand}"
+                                  IsVisible="{Binding ActiveDesigner, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                  InputGesture="Ctrl+P" />
+                        <MenuItem Header="Dashboard" Command="{Binding OpenDashboardCommand}" InputGesture="Ctrl+Shift+D" />
+                        <MenuItem Header="Visitors..." Command="{Binding OpenVisitorsCommand}"
+                                  ToolTip.Tip="Import visitors and print visitor badges" />
+                        <MenuItem Header="Print History..." Command="{Binding OpenPrintHistoryCommand}" />
+                        <MenuItem Header="Reports..." Command="{Binding OpenReportsCommand}" />
+                        <MenuItem Header="Audit Log..." Command="{Binding OpenAuditLogCommand}" />
+                        <MenuItem Header="Backup &amp; Restore..." Command="{Binding OpenBackupCommand}" />
                         <Separator />
                         <MenuItem Header="Recent Cards" IsEnabled="False"
                                   ToolTip.Tip="See the Recent Cards list on the Home screen." />
@@ -133,6 +142,11 @@
                     <MenuItem Header="Help">
                         <MenuItem Header="Documentation" IsEnabled="False" ToolTip.Tip="Not yet implemented" />
                         <MenuItem Header="Keyboard Shortcuts" IsEnabled="False" ToolTip.Tip="Not yet implemented" />
+                        <MenuItem Header="Account and license..." Command="{Binding OpenLicenseCommand}" />
+                        <MenuItem Header="Editions..." Command="{Binding OpenEditionsCommand}" />
+                        <MenuItem Header="Open log folder" Command="{Binding OpenLogFolderCommand}"
+                                  ToolTip.Tip="Folder with InfoID's log files. Send today's file to support when reporting a problem." />
+                        <Separator />
                         <MenuItem Header="About InfoID" Command="{Binding ShowAboutCommand}" />
                     </MenuItem>
                 </Menu>
@@ -142,7 +156,57 @@
             <ContentControl Grid.Column="1" />
 
             <!-- Utility area: theme toggle, future notifications/license/account -->
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" Margin="0,0,12,0" VerticalAlignment="Center">
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="0,0,12,0" VerticalAlignment="Center">
+                <!-- Dashboard (SRS 4.1): today's cards, expiring cards, license, system health -->
+                <Button Classes="ghost" Command="{Binding OpenDashboardCommand}" VerticalAlignment="Center"
+                        HotKey="Ctrl+Shift+D" ToolTip.Tip="Dashboard (Ctrl+Shift+D)" AutomationProperties.Name="Dashboard">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <mi:MaterialIcon Kind="ViewDashboardOutline" Width="16" Height="16" />
+                        <TextBlock Text="Dashboard" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Editions: "Get a license" / "Upgrade" / "Editions" depending on the license -->
+                <Button Classes="ghost" Command="{Binding OpenEditionsCommand}" VerticalAlignment="Center"
+                        Content="{Binding LicenseBadge.EditionsButtonText}"
+                        ToolTip.Tip="Compare the editions and request a plan" />
+
+                <!-- Trial mode (signed in, not activated): cards used of the trial allowance -->
+                <Button Classes="ghost" Command="{Binding OpenLicenseCommand}" VerticalAlignment="Center"
+                        IsVisible="{Binding Trial.IsTrialMode}" AutomationProperties.Name="Trial cards"
+                        ToolTip.Tip="{Binding Trial.TrialUsageText, StringFormat='{}{0}. Printed trial cards carry a watermark. Click to activate InfoID.'}">
+                    <Border CornerRadius="10" Padding="8,2" BorderThickness="1" BorderBrush="{DynamicResource BrushWarning}">
+                        <TextBlock Text="{Binding Trial.HeaderText}" FontSize="12" VerticalAlignment="Center" />
+                    </Border>
+                </Button>
+
+                <!-- Signed out: Log in -->
+                <Button Classes="secondary" Content="Log in" Command="{Binding AccountLogInCommand}"
+                        IsVisible="{Binding !Account.IsSignedIn}" VerticalAlignment="Center"
+                        ToolTip.Tip="Log in or create an account (optional -- activation codes work without one)" />
+
+                <!-- Signed in: avatar + first name, menu -->
+                <Button Classes="ghost" Padding="4,2" IsVisible="{Binding Account.IsSignedIn}" VerticalAlignment="Center"
+                        ToolTip.Tip="{Binding Account.Profile.Email}"
+                        AutomationProperties.Name="Account menu">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border Width="28" Height="28" CornerRadius="14" Background="{DynamicResource BrushPrimary}">
+                            <TextBlock Text="{Binding AccountInitials}" Foreground="White" FontSize="12" FontWeight="SemiBold"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Text="{Binding AccountFirstName}" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource BrushTextPrimary}" />
+                    </StackPanel>
+                    <Button.Flyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedRight">
+                            <MenuItem Header="Account and license" Command="{Binding OpenLicenseCommand}" />
+                            <MenuItem Header="Editions" Command="{Binding OpenEditionsCommand}" />
+                            <Separator />
+                            <MenuItem Header="Sign out" Command="{Binding AccountSignOutCommand}" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+
                 <components:ThemeToggleView />
             </StackPanel>
         </Grid>

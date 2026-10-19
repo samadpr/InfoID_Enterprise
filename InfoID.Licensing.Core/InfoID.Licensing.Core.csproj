@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Shared licensing protocol: activation codes, soft (request) codes, 20-character
+       serial keys and fingerprint hashing. Referenced by InfoID.Desktop (client side),
+       InfoID.Licensing.Server (Admin Portal / future License API). No NuGet
+       dependencies on purpose: only BCL cryptography, so both sides always agree. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="InfoID.Licensing.Core.Tests" />
+  </ItemGroup>
+</Project>

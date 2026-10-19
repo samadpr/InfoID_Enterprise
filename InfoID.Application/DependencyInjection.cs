@@ -20,6 +20,10 @@ public static class DependencyInjection
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<ITemplateService, TemplateService>();
         services.AddScoped<ICardholderService, CardholderService>();
+        services.AddScoped<IPrintHistoryService, PrintHistoryService>();
+        services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IVisitorService, VisitorService>();
 
         return services;
     }

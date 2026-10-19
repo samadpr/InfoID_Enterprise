@@ -1,0 +1,146 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:InfoID.Desktop.Features.Database.ViewModels"
+    x:Class="InfoID.Desktop.Features.Database.Views.AccessConnectionDialogView"
+    x:DataType="vm:AccessConnectionDialogViewModel">
+
+    <Border
+        Padding="24"
+        Width="520">
+
+        <StackPanel Spacing="16">
+
+            <TextBlock
+                Text="Microsoft Access"
+                FontSize="22"
+                FontWeight="Bold"/>
+
+            <TextBlock
+                Text="Select an Access database file (.accdb or .mdb)."
+                TextWrapping="Wrap"/>
+
+            <Grid
+                ColumnDefinitions="*,Auto"
+                ColumnSpacing="10">
+
+                <TextBox
+                    Grid.Column="0"
+                    Text="{Binding FilePath}"
+                    IsReadOnly="True"
+                    Watermark="Select an Access database"/>
+
+                <Button
+                    Grid.Column="1"
+                    Content="Browse"
+                    Command="{Binding BrowseCommand}"
+                    Padding="16,8"/>
+
+            </Grid>
+
+            <Button
+                Content="Test Connection"
+                Command="{Binding TestConnectionCommand}"
+                HorizontalAlignment="Left"
+                Padding="16,8"/>
+            <TextBlock
+    Text="Available Tables"
+    FontWeight="SemiBold"/>
+
+            <ComboBox
+                ItemsSource="{Binding Tables}"
+                SelectedItem="{Binding SelectedTable, Mode=TwoWay}"
+                 PlaceholderText="Select a table"/>
+
+            <StackPanel Spacing="8"
+            Margin="0,15,0,0">
+
+                <TextBlock
+                    Text="Fields"
+                    FontWeight="SemiBold"/>
+
+                <Border
+                    BorderBrush="#444444"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="8">
+
+                    <ScrollViewer
+                        MaxHeight="180">
+
+                        <ItemsControl
+                            ItemsSource="{Binding Fields}">
+
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+
+                                    <Grid
+                                        ColumnDefinitions="Auto,*,Auto"
+                                        Margin="0,4">
+
+                                        <CheckBox
+                                            IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                            VerticalAlignment="Center"/>
+
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Text="{Binding Name}"
+                                            Margin="8,0,0,0"
+                                            VerticalAlignment="Center"/>
+
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            Text="{Binding DataType}"
+                                            Opacity="0.7"
+                                            Margin="15,0,0,0"
+                                            VerticalAlignment="Center"/>
+
+                                    </Grid>
+
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+
+                        </ItemsControl>
+
+                    </ScrollViewer>
+
+                </Border>
+
+            </StackPanel>
+            <Border
+                Padding="10"
+                Background="#F5F5F5"
+                CornerRadius="6">
+
+                <TextBlock
+                    Text="{Binding StatusMessage}"
+                    TextWrapping="Wrap"/>
+
+            </Border>
+
+            <Grid
+                ColumnDefinitions="Auto,*,Auto,Auto"
+                ColumnSpacing="10">
+
+                <Button
+                    Grid.Column="0"
+                    Content="Previous"
+                    Command="{Binding PreviousCommand}"/>
+
+                <Button
+                    Grid.Column="2"
+                    Content="Next"
+                    Command="{Binding NextCommand}"/>
+
+                <Button
+                    Grid.Column="3"
+                    Content="Cancel"
+                    Command="{Binding CancelCommand}"/>
+
+            </Grid>
+
+        </StackPanel>
+
+    </Border>
+
+</UserControl>

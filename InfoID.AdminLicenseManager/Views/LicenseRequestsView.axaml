@@ -1,0 +1,150 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.AdminLicenseManager.ViewModels"
+             x:Class="InfoID.AdminLicenseManager.Views.LicenseRequestsView"
+             x:DataType="vm:LicenseRequestsViewModel">
+    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,*">
+        <TextBlock Grid.ColumnSpan="2" Text="License Requests" Classes="h1" Margin="0,0,0,12" />
+
+        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Message}" Margin="0,0,0,8"
+                   Classes.error="{Binding MessageIsError}" Classes.success="{Binding !MessageIsError}"
+                   IsVisible="{Binding Message, Converter={x:Static ObjectConverters.IsNotNull}}" TextWrapping="Wrap" />
+
+        <!-- Left: search and list -->
+        <DockPanel Grid.Row="2" Grid.Column="0">
+            <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,8">
+                <TextBox Watermark="Search name, company, email or phone" Text="{Binding SearchText}">
+                    <TextBox.KeyBindings>
+                        <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
+                    </TextBox.KeyBindings>
+                </TextBox>
+                <ComboBox Grid.Column="1" Margin="8,0,0,0" MinWidth="190"
+                          ItemsSource="{Binding StatusFilters}" SelectedItem="{Binding StatusFilter}" />
+                <Button Grid.Column="2" Margin="8,0,0,0" Content="Refresh" Command="{Binding SearchCommand}" />
+            </Grid>
+
+            <DataGrid ItemsSource="{Binding Rows}" SelectedItem="{Binding SelectedRow}" x:CompileBindings="False"
+                      IsReadOnly="True" AutoGenerateColumns="False" CanUserResizeColumns="True"
+                      GridLinesVisibility="Horizontal">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="#" Binding="{Binding Id}" />
+                    <DataGridTextColumn Header="Received" Binding="{Binding CreatedDate, StringFormat={}{0:g}}" />
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" />
+                    <DataGridTextColumn Header="Plan" Binding="{Binding PlanName}" />
+                    <DataGridTextColumn Header="PCs" Binding="{Binding Machines}" />
+                    <DataGridTextColumn Header="Name" Binding="{Binding FullName}" />
+                    <DataGridTextColumn Header="Company" Binding="{Binding CompanyName}" />
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="*" />
+                    <DataGridCheckBoxColumn Header="Account" Binding="{Binding HasAccount}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+
+        <!-- Right: details and actions -->
+        <ScrollViewer Grid.Row="2" Grid.Column="1" Width="380" Margin="16,0,0,0">
+            <StackPanel Spacing="12">
+                <Border Classes="card" IsVisible="{Binding !HasSelection}">
+                    <TextBlock Classes="caption" TextWrapping="Wrap"
+                               Text="Select a request to see the customer's details and approve or reject it." />
+                </Border>
+
+                <Border Classes="card" IsVisible="{Binding HasSelection}">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Request" Classes="section" />
+                        <TextBlock Text="{Binding SelectedSummary}" Classes="caption" TextWrapping="Wrap" />
+                        <Grid ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" Margin="0,4,0,0">
+                            <TextBlock Grid.Row="0" Text="Plan" Classes="caption" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedRow.PlanName}" />
+                            <TextBlock Grid.Row="1" Text="Computers" Classes="caption" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedRow.Machines}" />
+                            <TextBlock Grid.Row="2" Text="Name" Classes="caption" />
+                            <SelectableTextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedRow.FullName}" />
+                            <TextBlock Grid.Row="3" Text="Company" Classes="caption" />
+                            <SelectableTextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedRow.CompanyName}" />
+                            <TextBlock Grid.Row="4" Text="Email" Classes="caption" />
+                            <SelectableTextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedRow.Email}" />
+                            <TextBlock Grid.Row="5" Text="Phone" Classes="caption" />
+                            <SelectableTextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SelectedRow.Phone}" />
+                            <TextBlock Grid.Row="6" Text="Country" Classes="caption" />
+                            <TextBlock Grid.Row="6" Grid.Column="1" TextWrapping="Wrap">
+                                <Run Text="{Binding SelectedRow.Country}" />
+                                <Run Text="{Binding SelectedRow.StateProvince}" />
+                            </TextBlock>
+                            <TextBlock Grid.Row="7" Text="Message" Classes="caption" />
+                            <SelectableTextBlock Grid.Row="7" Grid.Column="1" Text="{Binding SelectedRow.Message}" TextWrapping="Wrap" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Approved -->
+                <Border Classes="card" IsVisible="{Binding IsSelectedApproved}">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Approved" Classes="section" />
+                        <TextBlock Text="Activation code" Classes="caption" />
+                        <SelectableTextBlock Text="{Binding SelectedRow.ActivationCode}" FontFamily="Consolas, monospace" FontSize="16" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Rejected -->
+                <Border Classes="card" IsVisible="{Binding IsSelectedRejected}">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Rejected" Classes="section" />
+                        <TextBlock Text="{Binding SelectedRow.StatusReason}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Open: approve / reject -->
+                <StackPanel Spacing="12" IsVisible="{Binding IsSelectedOpen}">
+                    <StackPanel IsVisible="{Binding CanManage}" Spacing="12">
+                        <Button Content="Mark as in progress" Command="{Binding MarkInProgressCommand}"
+                                ToolTip.Tip="Shows colleagues that someone is handling this request (e.g. waiting for payment)." />
+
+                        <Border Classes="card">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Approve (after payment is confirmed)" Classes="section" />
+                                <TextBlock Classes="caption" TextWrapping="Wrap"
+                                           Text="Pre-filled from the plan and the request. Adjust if needed, then Approve: the activation code is created and emailed to the customer." />
+
+                                <TextBlock Text="Edition" Classes="caption" />
+                                <ComboBox ItemsSource="{Binding Tiers}" SelectedItem="{Binding Tier}" HorizontalAlignment="Stretch" />
+
+                                <TextBlock Text="License type" Classes="caption" />
+                                <ComboBox ItemsSource="{Binding Types}" SelectedItem="{Binding Type}" HorizontalAlignment="Stretch" />
+
+                                <StackPanel Spacing="4" IsVisible="{Binding NeedsExpiry}">
+                                    <TextBlock Text="Expiry date" Classes="caption" />
+                                    <CalendarDatePicker SelectedDate="{Binding ExpiryDate}" HorizontalAlignment="Stretch" />
+                                </StackPanel>
+
+                                <CheckBox Content="Unlimited cards" IsChecked="{Binding UnlimitedCards}" />
+                                <Grid ColumnDefinitions="*,8,*" IsVisible="{Binding HasCardLimit}">
+                                    <NumericUpDown Value="{Binding MaxCardsPerPeriod}" Minimum="100" Maximum="10000000" Increment="100" FormatString="N0" />
+                                    <ComboBox Grid.Column="2" ItemsSource="{Binding LimitPeriods}" SelectedItem="{Binding LimitPeriod}" HorizontalAlignment="Stretch" />
+                                </Grid>
+
+                                <TextBlock Text="Computers" Classes="caption" />
+                                <NumericUpDown Value="{Binding MaxActivations}" Minimum="1" Maximum="100" Increment="1" FormatString="0" />
+
+                                <CheckBox Content="Allow offline activation (no internet)" IsChecked="{Binding AllowOfflineActivation}" />
+
+                                <TextBox Watermark="Internal notes (e.g. invoice number)" Text="{Binding Notes}" />
+
+                                <Button Content="Approve and send code" Classes="accent" HorizontalAlignment="Stretch"
+                                        Command="{Binding ApproveCommand}" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="card">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Reject" Classes="section" />
+                                <TextBox Watermark="Reason (the customer sees this)" Text="{Binding RejectReason}"
+                                         AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" />
+                                <Button Content="Reject request" HorizontalAlignment="Stretch" Command="{Binding RejectCommand}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

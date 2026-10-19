@@ -1,0 +1,237 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:InfoID.Desktop.Features.Database.ViewModels"
+    xmlns:services="using:InfoID.Desktop.Features.Database.Services"
+    x:Class="InfoID.Desktop.Features.Database.Views.GoogleSheetsConnectionDialogView"
+    x:DataType="vm:GoogleSheetsConnectionDialogViewModel">
+
+    <Border Padding="32" Width="640">
+
+        <StackPanel Spacing="18">
+
+            <TextBlock
+                Text="Google Sheets"
+                FontSize="20"
+                FontWeight="SemiBold"/>
+
+            <StackPanel Spacing="6">
+
+                <TextBlock
+                    Text="Paste a Google Sheets link"
+                    FontWeight="SemiBold"
+                    Opacity="0.6"/>
+
+                <Grid ColumnDefinitions="*,Auto">
+
+                    <TextBox
+                        Grid.Column="0"
+                        Text="{Binding SheetLink}"
+                        Watermark="https://docs.google.com/spreadsheets/d/..."/>
+
+                    <Button
+                        Grid.Column="1"
+                        Margin="8,0,0,0"
+                        Content="Load"
+                        IsEnabled="{Binding IsNotBusy}"
+                        Command="{Binding LoadLinkCommand}"/>
+
+                </Grid>
+
+                <TextBlock
+                    FontSize="12"
+                    Opacity="0.6"
+                    TextWrapping="Wrap"
+                    Text="Sheets shared as 'Anyone with the link can view' load without signing in. To load a specific tab, copy the link while that tab is open."/>
+
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*,Auto,*">
+
+                <Border
+                    Grid.Column="0"
+                    Height="1"
+                    VerticalAlignment="Center"
+                    Background="#DADCE0"/>
+
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="12,0"
+                    Text="or"
+                    Opacity="0.6"/>
+
+                <Border
+                    Grid.Column="2"
+                    Height="1"
+                    VerticalAlignment="Center"
+                    Background="#DADCE0"/>
+
+            </Grid>
+
+            <StackPanel
+                Spacing="8"
+                IsVisible="{Binding IsSignedOut}">
+
+                <TextBlock
+                    Text="Sign in with:"
+                    FontWeight="SemiBold"
+                    Opacity="0.6"/>
+
+                <Button
+                    HorizontalAlignment="Left"
+                    Padding="16,8"
+                    Background="White"
+                    Foreground="#3C4043"
+                    BorderBrush="#DADCE0"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    IsEnabled="{Binding IsNotBusy}"
+                    Command="{Binding SignInCommand}">
+
+                    <TextBlock
+                        Text="Sign in with Google"
+                        FontWeight="SemiBold"/>
+
+                </Button>
+
+            </StackPanel>
+
+            <Grid
+                ColumnDefinitions="*,Auto"
+                IsVisible="{Binding IsSignedIn}">
+
+                <StackPanel
+                    Grid.Column="0"
+                    Orientation="Horizontal"
+                    Spacing="4"
+                    VerticalAlignment="Center">
+
+                    <TextBlock
+                        Text="Signed in as"
+                        Opacity="0.6"/>
+
+                    <TextBlock
+                        Text="{Binding SignedInAs}"
+                        FontWeight="SemiBold"/>
+
+                </StackPanel>
+
+                <Button
+                    Grid.Column="1"
+                    Content="Sign out"
+                    IsEnabled="{Binding IsNotBusy}"
+                    Command="{Binding SignOutCommand}"/>
+
+            </Grid>
+
+            <StackPanel Spacing="6">
+
+                <TextBlock
+                    Text="Google Sheets"
+                    FontWeight="SemiBold"
+                    Opacity="0.6"/>
+
+                <ComboBox
+                    HorizontalAlignment="Stretch"
+                    PlaceholderText="Sign in to see your spreadsheets"
+                    IsEnabled="{Binding IsSignedIn}"
+                    ItemsSource="{Binding Spreadsheets}"
+                    SelectedItem="{Binding SelectedSpreadsheet, Mode=TwoWay}">
+
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="services:GoogleSpreadsheetItem">
+                            <TextBlock Text="{Binding Name}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+
+                </ComboBox>
+
+            </StackPanel>
+
+            <StackPanel
+                Spacing="6"
+                IsVisible="{Binding IsTabPickerVisible}">
+
+                <TextBlock
+                    Text="Sheet tab"
+                    FontWeight="SemiBold"
+                    Opacity="0.6"/>
+
+                <ComboBox
+                    HorizontalAlignment="Stretch"
+                    PlaceholderText="Choose a spreadsheet first"
+                    ItemsSource="{Binding SheetTabs}"
+                    SelectedItem="{Binding SelectedSheetTab, Mode=TwoWay}">
+
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="services:GoogleSheetTab">
+                            <TextBlock Text="{Binding Title}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+
+                </ComboBox>
+
+            </StackPanel>
+
+            <TextBlock
+                IsVisible="{Binding IsPublicLinkLoaded}"
+                Text="{Binding PublicLinkSummary}"
+                FontWeight="SemiBold"
+                TextWrapping="Wrap"/>
+
+            <StackPanel Spacing="2">
+
+                <TextBlock
+                    FontStyle="Italic"
+                    FontSize="12"
+                    TextWrapping="Wrap"
+                    Text="InfoID's use and transfer of information received from Google APIs to any other app will adhere to the Google API Services User Data Policy, including the Limited Use requirements."/>
+
+                <Button
+                    HorizontalAlignment="Left"
+                    Padding="0"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Command="{Binding OpenUserDataPolicyCommand}">
+
+                    <TextBlock
+                        Text="Google API Services User Data Policy"
+                        FontSize="12"
+                        FontStyle="Italic"
+                        Foreground="#0F9D58"
+                        TextDecorations="Underline"/>
+
+                </Button>
+
+            </StackPanel>
+
+            <TextBlock
+                Text="{Binding StatusMessage}"
+                TextWrapping="Wrap"/>
+
+            <StackPanel
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Spacing="10">
+
+                <Button
+                    Content="Previous"
+                    Command="{Binding PreviousCommand}"/>
+
+                <Button
+                    Content="Next"
+                    IsEnabled="{Binding IsNotBusy}"
+                    Command="{Binding NextCommand}"/>
+
+                <Button
+                    Content="Cancel"
+                    Command="{Binding CancelCommand}"/>
+
+            </StackPanel>
+
+        </StackPanel>
+
+    </Border>
+
+</UserControl>

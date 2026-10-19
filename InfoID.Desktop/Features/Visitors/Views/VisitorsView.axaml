@@ -1,0 +1,222 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Features.Visitors.ViewModels"
+             xmlns:components="using:InfoID.Desktop.Shell.Components"
+             xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="820"
+             x:Class="InfoID.Desktop.Features.Visitors.Views.VisitorsView"
+             x:DataType="vm:VisitorsViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.secondary">
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+        </Style>
+        <Style Selector="TextBlock.status">
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="12,0" />
+        </Style>
+        <Style Selector="TextBlock.status.printed">
+            <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}" />
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+        <Style Selector="Border.avatar">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="CornerRadius" Value="18" />
+            <Setter Property="ClipToBounds" Value="True" />
+            <Setter Property="Background" Value="{DynamicResource BrushSurfaceElevated}" />
+            <Setter Property="Margin" Value="8,4" />
+        </Style>
+        <Style Selector="TextBlock.message">
+            <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}" />
+        </Style>
+        <Style Selector="TextBlock.message.error">
+            <Setter Property="Foreground" Value="{DynamicResource BrushError}" />
+        </Style>
+        <Style Selector="Button.action">
+            <Setter Property="Padding" Value="14,8" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" Margin="40,28,40,24">
+
+        <components:PageHeaderView Grid.Row="0" Title="Visitors" BackCommand="{Binding GoHomeCommand}" />
+
+        <!-- Actions -->
+        <WrapPanel Grid.Row="1" Margin="0,16,0,0" Orientation="Horizontal">
+            <Button Classes="primary action" Command="{Binding PrintBadgesCommand}" Margin="0,0,8,8"
+                    HotKey="Ctrl+P" ToolTip.Tip="Print badges for the ticked visitors (or the selected one) with the badge design (Ctrl+P)">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <mi:MaterialIcon Kind="Printer" Width="18" Height="18" />
+                    <TextBlock Text="Print badges" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Classes="secondary action" Command="{Binding ImportFileCommand}" Margin="0,0,8,8"
+                    HotKey="Ctrl+I" ToolTip.Tip="Import visitors from an Excel, CSV or JSON file (Ctrl+I)">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <mi:MaterialIcon Kind="FileImportOutline" Width="18" Height="18" />
+                    <TextBlock Text="Import file" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Classes="secondary action" Command="{Binding AddVisitorCommand}" Margin="0,0,8,8"
+                    HotKey="Ctrl+N" ToolTip.Tip="Add one visitor by hand (Ctrl+N)">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <mi:MaterialIcon Kind="AccountPlusOutline" Width="18" Height="18" />
+                    <TextBlock Text="Add visitor" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Classes="secondary action" Command="{Binding EditVisitorCommand}" Margin="0,0,8,8"
+                    HotKey="F2" ToolTip.Tip="Edit the selected visitor (F2, or double-click a row)">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <mi:MaterialIcon Kind="PencilOutline" Width="18" Height="18" />
+                    <TextBlock Text="Edit" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Classes="secondary action" Command="{Binding DeleteVisitorsCommand}" Margin="0,0,24,8"
+                    ToolTip.Tip="Delete the ticked visitors (or the selected one) and their photos">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <mi:MaterialIcon Kind="DeleteOutline" Width="18" Height="18" />
+                    <TextBlock Text="Delete" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Classes="ghost action" Command="{Binding EditBadgeDesignCommand}" Margin="0,0,8,8"
+                    ToolTip.Tip="Open the badge design in the Card Designer with the listed visitors as sample data">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <mi:MaterialIcon Kind="PaletteOutline" Width="18" Height="18" />
+                    <TextBlock Text="Edit badge design" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Classes="ghost action" Command="{Binding ChooseBadgeDesignCommand}" Margin="0,0,8,8"
+                    ToolTip.Tip="Choose which saved design is used for visitor badges">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <mi:MaterialIcon Kind="CardAccountDetailsOutline" Width="18" Height="18" />
+                    <TextBlock Text="{Binding BadgeDesignText}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Classes="ghost action" Command="{Binding CreateStarterBadgeCommand}" Margin="0,0,8,8"
+                    ToolTip.Tip="Create a ready-made visitor badge (photo, name, company, person to meet, visit date, QR of the visitor ID) and use it for visitor badges">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <mi:MaterialIcon Kind="CardAccountDetailsStarOutline" Width="18" Height="18" />
+                    <TextBlock Text="New starter badge" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </WrapPanel>
+
+        <!-- Filters -->
+        <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,*,Auto" Margin="0,8,0,0">
+            <ComboBox Grid.Column="0" ItemsSource="{Binding Periods}" SelectedItem="{Binding SelectedPeriod}"
+                      MinWidth="190" AutomationProperties.Name="Visit date" ToolTip.Tip="Show visitors by visit date">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:VisitorPeriodOption">
+                        <TextBlock Text="{Binding Label}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ComboBox Grid.Column="1" ItemsSource="{Binding PrintFilters}" SelectedItem="{Binding SelectedPrintFilter}"
+                      MinWidth="200" Margin="12,0,0,0" AutomationProperties.Name="Print status" ToolTip.Tip="Show printed or not-printed visitors">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:VisitorPrintFilterOption">
+                        <TextBlock Text="{Binding Label}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBox Grid.Column="2" Margin="12,0" MaxWidth="460" MinWidth="280" HorizontalAlignment="Left"
+                     Text="{Binding SearchText}" PlaceholderText="Search name, visitor ID, phone, email, company, person to meet"
+                     AutomationProperties.Name="Search visitors">
+                <TextBox.InnerRightContent>
+                    <Button Classes="ghost" Command="{Binding ClearSearchCommand}" ToolTip.Tip="Clear search"
+                            IsVisible="{Binding SearchText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                            AutomationProperties.Name="Clear search" Content="✕" />
+                </TextBox.InnerRightContent>
+            </TextBox>
+            <Button Grid.Column="3" Classes="secondary" Content="Refresh" Command="{Binding RefreshCommand}"
+                    HotKey="F5" ToolTip.Tip="Reload the list and print status (F5)" />
+        </Grid>
+
+        <!-- Status line -->
+        <StackPanel Grid.Row="3" Spacing="4" Margin="0,12,0,0">
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoading}" Height="3" />
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <CheckBox IsThreeState="True" IsChecked="{Binding AllChecked}" Content="Tick all"
+                          ToolTip.Tip="Tick or untick every listed visitor" AutomationProperties.Name="Tick all visitors" />
+                <TextBlock Classes="caption" Text="{Binding CountText}" VerticalAlignment="Center" />
+                <TextBlock Classes="caption" VerticalAlignment="Center"
+                           Text="{Binding ActionTargetText, StringFormat='Actions apply to: {0}'}" />
+            </StackPanel>
+            <TextBlock Text="{Binding Message}" Classes="caption message" TextWrapping="Wrap"
+                       Classes.error="{Binding MessageIsError}"
+                       IsVisible="{Binding Message, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        </StackPanel>
+
+        <!-- Visitors -->
+        <Border Grid.Row="4" Classes="card" Padding="0" ClipToBounds="True" Margin="0,8,0,0">
+            <Panel>
+                <DataGrid x:Name="VisitorsGrid"
+                          ItemsSource="{Binding Visitors}" SelectedItem="{Binding SelectedVisitor, Mode=TwoWay}"
+                          AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True"
+                          CanUserResizeColumns="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                          SelectionMode="Single" RowHeight="46" AutomationProperties.Name="Visitors">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Width="48" CanUserSort="False" CanUserResize="False" Header="">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="vm:VisitorRowViewModel">
+                                    <CheckBox IsChecked="{Binding IsChecked}" HorizontalAlignment="Center"
+                                              AutomationProperties.Name="Tick visitor" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Width="56" CanUserSort="False" Header="Photo">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="vm:VisitorRowViewModel">
+                                    <Border Classes="avatar" ToolTip.Tip="{Binding FullName}">
+                                        <Panel>
+                                            <TextBlock Text="{Binding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                       FontWeight="SemiBold" Foreground="{DynamicResource BrushTextSecondary}" />
+                                            <Image Source="{Binding Thumbnail}" Stretch="UniformToFill"
+                                                   IsVisible="{Binding Thumbnail, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                        </Panel>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn x:DataType="vm:VisitorRowViewModel" Header="Visitor ID" Binding="{Binding VisitorCode}" Width="110" />
+                        <DataGridTextColumn x:DataType="vm:VisitorRowViewModel" Header="Name" Binding="{Binding FullName}" Width="2*" />
+                        <DataGridTextColumn x:DataType="vm:VisitorRowViewModel" Header="Company" Binding="{Binding Company}" Width="1.5*" />
+                        <DataGridTextColumn x:DataType="vm:VisitorRowViewModel" Header="Person to meet" Binding="{Binding PersonToMeet}" Width="1.5*" />
+                        <DataGridTextColumn x:DataType="vm:VisitorRowViewModel" Header="Purpose" Binding="{Binding Purpose}" Width="1.5*" />
+                        <DataGridTextColumn x:DataType="vm:VisitorRowViewModel" Header="Visit date" Binding="{Binding VisitDateText}"
+                                            SortMemberPath="SortDate" Width="120" />
+                        <DataGridTextColumn x:DataType="vm:VisitorRowViewModel" Header="Phone / email" Binding="{Binding ContactText}" Width="2*" />
+                        <DataGridTemplateColumn Header="Badge" Width="130" SortMemberPath="IsPrinted">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="vm:VisitorRowViewModel">
+                                    <TextBlock Classes="status" Classes.printed="{Binding IsPrinted}" Text="{Binding StatusText}"
+                                               ToolTip.Tip="{Binding StatusTip}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <StackPanel IsVisible="{Binding IsEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" MaxWidth="460">
+                    <mi:MaterialIcon Kind="BadgeAccountHorizontalOutline" Width="48" Height="48" HorizontalAlignment="Center"
+                                     Foreground="{DynamicResource BrushTextSecondary}" />
+                    <TextBlock Text="No visitors here" Classes="h3" HorizontalAlignment="Center" />
+                    <TextBlock Classes="caption" TextWrapping="Wrap" TextAlignment="Center"
+                               Text="Import visitors from an Excel, CSV or JSON file (for example a Google Form export), or add one by hand. Try another date filter to see earlier visitors." />
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                        <Button Classes="primary" Content="Import file" Command="{Binding ImportFileCommand}" />
+                        <Button Classes="secondary" Content="Add visitor" Command="{Binding AddVisitorCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </Panel>
+        </Border>
+
+        <TextBlock Grid.Row="5" Classes="caption" Margin="0,10,0,0" TextWrapping="Wrap"
+                   Text="Tick visitors and click Print badges: the badge design opens with those visitors and the Print dialog shows one badge per visitor. Printed badges are recorded in Print history under the visitor ID." />
+    </Grid>
+</UserControl>

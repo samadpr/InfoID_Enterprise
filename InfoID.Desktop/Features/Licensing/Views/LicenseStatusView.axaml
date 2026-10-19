@@ -1,0 +1,83 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.Desktop.Features.Licensing.ViewModels"
+             xmlns:components="using:InfoID.Desktop.Shell.Components"
+             x:Class="InfoID.Desktop.Features.Licensing.Views.LicenseStatusView"
+             x:DataType="vm:LicenseStatusViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <ScrollViewer>
+        <StackPanel Margin="40,28,40,40" Spacing="16" MaxWidth="820" HorizontalAlignment="Left">
+            <components:PageHeaderView Title="License" BackCommand="{Binding GoHomeCommand}" />
+
+            <Border Classes="card" Padding="20">
+                <Grid ColumnDefinitions="200,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                    <Grid.Styles>
+                        <Style Selector="TextBlock">
+                            <Setter Property="Margin" Value="0,6" />
+                            <Setter Property="TextWrapping" Value="Wrap" />
+                        </Style>
+                    </Grid.Styles>
+
+                    <TextBlock Grid.Row="0" Classes="label" Text="Status" />
+                    <StackPanel Grid.Row="0" Grid.Column="1">
+                        <TextBlock Text="{Binding StatusText}" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource BrushSuccess}" IsVisible="{Binding IsLicensed}" />
+                        <TextBlock Text="{Binding StatusText}" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource BrushError}" IsVisible="{Binding IsNotLicensed}" />
+                        <TextBlock Text="{Binding Status.Problem}" Classes="bodySecondary"
+                                   IsVisible="{Binding Status.Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="1" Classes="label" Text="Edition" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TierText}" />
+
+                    <TextBlock Grid.Row="2" Classes="label" Text="Expires" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ExpiryText}" />
+
+                    <TextBlock Grid.Row="3" Classes="label" Text="Cards" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CardsText}" />
+
+                    <TextBlock Grid.Row="4" Classes="label" Text="Organization" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Status.OrganizationName}" />
+
+                    <TextBlock Grid.Row="5" Classes="label" Text="Activation code" />
+                    <SelectableTextBlock Grid.Row="5" Grid.Column="1" Margin="0,6" Text="{Binding Status.ActivationCode}"
+                                         FontFamily="Consolas, Cascadia Mono, monospace" />
+
+                    <TextBlock Grid.Row="6" Classes="label" Text="This computer" />
+                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding Status.MachineIdMasked}" FontFamily="Consolas, monospace" />
+
+                    <TextBlock Grid.Row="7" Classes="label" Text="Activated" />
+                    <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding ActivatedText}" />
+
+                    <TextBlock Grid.Row="8" Classes="label" Text="Last confirmed online" />
+                    <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding ConfirmedText}" />
+                </Grid>
+            </Border>
+
+            <TextBlock Foreground="{DynamicResource BrushWarning}" TextWrapping="Wrap" IsVisible="{Binding IsWarning}"
+                       Text="Your license expires soon or has expired. Contact your vendor to renew, then click Renew / Activate to enter the new serial key." />
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Classes="primary" Content="Renew / Activate" Command="{Binding ActivateOrRenewCommand}" />
+                <Button Classes="secondary" Content="Deactivate / Transfer" Command="{Binding DeactivateCommand}"
+                        IsVisible="{Binding Status.HasLicense}" />
+                <Button Classes="secondary" Content="Check now" Command="{Binding CheckNowCommand}"
+                        IsVisible="{Binding IsOnline}" IsEnabled="{Binding !IsChecking}"
+                        ToolTip.Tip="Confirm the license with the license server now (picks up renewals immediately)." />
+                <Button Classes="ghost" Content="Refresh" Command="{Binding RefreshCommand}" />
+            </StackPanel>
+
+            <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
+                       Foreground="{DynamicResource BrushSuccess}"
+                       IsVisible="{Binding !MessageIsError}" />
+            <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
+                       Foreground="{DynamicResource BrushError}"
+                       IsVisible="{Binding MessageIsError}" />
+
+            <TextBlock Classes="caption" TextWrapping="Wrap"
+                       Text="Moving to a new computer? Click Deactivate / Transfer first (online licenses are released automatically), then activate on the new computer. Uninstalling InfoID alone does not free the license." />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

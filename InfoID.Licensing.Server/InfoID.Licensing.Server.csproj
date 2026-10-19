@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Vendor-side license database (Domain Model Module N) and business services.
+       Used by InfoID.AdminLicenseManager today and by the online License Server API
+       later, so both always apply exactly the same rules. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <!-- Versions written without live NuGet access: match your other projects
+       (EF Core 10.0.11 in InfoID.Desktop) and update Npgsql's EF provider to its
+       current 10.x release if restore complains. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.11" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\InfoID.Licensing.Core\InfoID.Licensing.Core.csproj" />
+    <!-- Shared file logger (InfoID.Shared.Logging), used by the License API and License Manager. -->
+    <ProjectReference Include="..\InfoID.Shared\InfoID.Shared.csproj" />
+  </ItemGroup>
+</Project>

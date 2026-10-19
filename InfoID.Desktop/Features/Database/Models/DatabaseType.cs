@@ -8,9 +8,18 @@ namespace InfoID.Desktop.Features.Database.Models
     {
         SQLite,
         MySQL,
+        SampleDatabase,
         PostgreSQL,
         SQLServer,
         ODBC,
-        Excel
+        Excel,
+        InternalDatabase,
+        CSV,
+        TXT,
+        Access,
+        API,
+        GoogleSheets,
+        /// <summary>Visitor registrations from the Visitors page (read-only in the designer).</summary>
+        Visitors
     }
 }

@@ -79,6 +79,7 @@ public class InfoIdDbContext : DbContext
         public DbSet<AccessControlSyncLog> AccessControlSyncLogs => Set<AccessControlSyncLog>();
 
         // --- Module K — Visitor Management (Phase 3) ---
+        public DbSet<Visitor> Visitors => Set<Visitor>();
         public DbSet<VisitorBadge> VisitorBadges => Set<VisitorBadge>();
         public DbSet<VisitorPreRegistration> VisitorPreRegistrations => Set<VisitorPreRegistration>();
         public DbSet<VisitorCheckInLog> VisitorCheckInLogs => Set<VisitorCheckInLog>();

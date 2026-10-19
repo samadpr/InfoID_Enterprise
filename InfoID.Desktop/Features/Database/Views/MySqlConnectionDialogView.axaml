@@ -1,0 +1,229 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:InfoID.Desktop.Features.Database.ViewModels"
+    x:Class="InfoID.Desktop.Features.Database.Views.MySqlConnectionDialogView"
+    x:DataType="vm:MySqlConnectionDialogViewModel">
+
+    <Border
+        Padding="24"
+        Width="900">
+
+        <StackPanel Spacing="16">
+
+            <!-- Title -->
+            <TextBlock
+                Text="MySQL"
+                FontSize="22"
+                FontWeight="SemiBold" />
+
+            <!-- SSL + Connection Method -->
+            <Grid
+                ColumnDefinitions="150,220"
+                ColumnSpacing="16">
+
+                <StackPanel Grid.Column="0" Spacing="6">
+                    <TextBlock Text="SSL Connection" />
+
+                    <ComboBox
+                        ItemsSource="{Binding SslConnectionOptions}"
+                        SelectedItem="{Binding SslConnection, Mode=TwoWay}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="6">
+                    <TextBlock Text="Connection Method" />
+
+                    <ComboBox
+                        ItemsSource="{Binding ConnectionMethodOptions}"
+                        SelectedItem="{Binding ConnectionMethod, Mode=TwoWay}" />
+                </StackPanel>
+
+            </Grid>
+
+
+            <!-- SSH Connection Parameters -->
+            <StackPanel  Spacing="12"  IsVisible="{Binding IsSshConnection}">
+
+                <TextBlock
+                    Text="Connection Parameters"
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Opacity="0.75" />
+
+                <Grid
+                    ColumnDefinitions="*,*,*,*"
+                    ColumnSpacing="10">
+
+                    <StackPanel Grid.Column="0" Spacing="6">
+                        <TextBlock Text="SSH Hostname" />
+
+                        <TextBox
+                            Text="{Binding SshHostname}"
+                            PlaceholderText="SSH Hostname" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Spacing="6">
+                        <TextBlock Text="SSH Username" />
+
+                        <TextBox
+                            Text="{Binding SshUsername}"
+                            PlaceholderText="SSH Username" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Spacing="6">
+
+                        <RadioButton
+                            Content="SSH Password"
+                            GroupName="SshAuthentication"
+                            IsChecked="{Binding UseSshPassword}" />
+
+                        <TextBox
+                            Text="{Binding SshPassword}"
+                            PasswordChar="●"
+                            IsEnabled="{Binding UseSshPassword}"
+                            PlaceholderText="SSH Password" />
+
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="3" Spacing="6">
+
+                        <RadioButton
+                            Content="SSH Key File"
+                            GroupName="SshAuthentication"
+                            IsChecked="{Binding UseSshKeyFile}" />
+
+                        <Grid ColumnDefinitions="*,Auto"
+                              ColumnSpacing="6">
+
+                            <TextBox
+                                Grid.Column="0"
+                                Text="{Binding SshKeyFile}"
+                                IsEnabled="{Binding UseSshKeyFile}"
+                                PlaceholderText="SSH Key File" />
+
+                            <Button
+                                Grid.Column="1"
+                                Content="..."
+                                Command="{Binding BrowseSshKeyFileCommand}"
+                                IsEnabled="{Binding UseSshKeyFile}" />
+
+                        </Grid>
+
+                    </StackPanel>
+
+                </Grid>
+
+            </StackPanel>
+
+
+            <!-- MySQL Connection Parameters -->
+            <Grid
+                ColumnDefinitions="*,120,*,*"
+                ColumnSpacing="10">
+
+                <StackPanel Grid.Column="0" Spacing="6">
+                    <TextBlock Text="Hostname" />
+
+                    <TextBox
+                        Text="{Binding Server}"
+                        PlaceholderText="localhost" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="6">
+                    <TextBlock Text="Port" />
+
+                    <TextBox
+                        Text="{Binding Port}"
+                        PlaceholderText="3306" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Spacing="6">
+                    <TextBlock Text="Username" />
+
+                    <TextBox
+                        Text="{Binding Username}"
+                        PlaceholderText="root" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="3" Spacing="6">
+                    <TextBlock Text="Password" />
+
+                    <TextBox
+                        Text="{Binding Password}"
+                        PasswordChar="●"
+                        PlaceholderText="Password" />
+                </StackPanel>
+
+            </Grid>
+
+
+            <!-- Keep Credentials -->
+            <CheckBox
+                Content="Keep credentials"
+                IsChecked="{Binding KeepCredentials}" />
+
+
+            <!-- Database -->
+            <Grid
+                ColumnDefinitions="160,*"
+                ColumnSpacing="16"
+                Margin="0,40,0,0">
+
+                <StackPanel Grid.Column="0" Spacing="6">
+
+                    <TextBlock
+                        Text="Database"
+                        FontSize="16"
+                        FontWeight="SemiBold"
+                        Opacity="0.75" />
+
+                    <ComboBox
+                        ItemsSource="{Binding Databases}"
+                        SelectedItem="{Binding SelectedDatabase, Mode=TwoWay}"
+                        PlaceholderText="Select database" />
+
+                </StackPanel>
+
+                <Button
+                    Grid.Column="1"
+                    Content="Test Database Connection"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Command="{Binding TestConnectionCommand}" />
+
+            </Grid>
+
+
+            <!-- Status -->
+            <TextBlock
+                Text="{Binding StatusMessage}"
+                TextWrapping="Wrap"
+                Opacity="0.8" />
+
+
+            <!-- Bottom buttons -->
+            <StackPanel
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Spacing="8"
+                Margin="0,30,0,0">
+
+                <!--<Button
+                    Content="Previous"
+                    Command="{Binding PreviousCommand}" />-->
+
+                <Button
+                    Content="Next"
+                    Command="{Binding NextCommand}" />
+
+                <Button
+                    Content="Cancel"
+                    Command="{Binding CancelCommand}" />
+
+            </StackPanel>
+
+        </StackPanel>
+
+    </Border>
+
+</UserControl>

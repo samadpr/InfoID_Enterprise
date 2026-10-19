@@ -25,6 +25,8 @@ public interface IFilePickerService
     /// export). Returns the chosen local path (with the extension applied), or null if
     /// cancelled.</summary>
     Task<string?> PickSaveFileAsync(string title, string filterName, IReadOnlyList<string> patterns, string suggestedFileName, string defaultExtension);
+    Task<string?> PickFolderAsync(string title);
+
 }
 
 public sealed class FilePickerService : IFilePickerService
@@ -47,6 +49,19 @@ public sealed class FilePickerService : IFilePickerService
         return result.Count > 0 ? result[0].TryGetLocalPath() : null;
     }
 
+    public async Task<string?> PickFolderAsync(string title)
+    {
+        var topLevel = GetOwnerWindow();
+        if (topLevel is null) return null;
+
+        var result = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = title,
+            AllowMultiple = false,
+        });
+
+        return result.Count > 0 ? result[0].TryGetLocalPath() : null;
+    }
     public async Task<string?> PickExcelFileAsync(string title)
     {
         var topLevel = GetOwnerWindow();

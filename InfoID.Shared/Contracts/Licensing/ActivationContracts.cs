@@ -1,45 +1,54 @@
 namespace InfoID.Shared.Contracts.Licensing;
 
 /// <summary>
-/// These DTOs are the ONLY thing InfoID.Desktop and the future
-/// InfoID.AdminPortal / License Server actually share -- the shape of the
-/// HTTPS messages between them (see the two-system architecture discussed
-/// earlier: separate solutions, separate databases, linked only by this
-/// contract). Neither side references the other's Domain entities.
-/// Not wired to a real HTTP call yet -- InfoID.Licensing (added in a later
-/// phase) will POST these to the License Server once it exists. Until then,
-/// keep licensing stubbed/local as already planned.
+/// The HTTPS messages between InfoID.Desktop and InfoID.LicenseApi -- the ONLY thing the
+/// two systems share besides InfoID.Licensing.Core. Neither side references the other's
+/// database entities. Plain classes (no dependencies) so both projects can use them.
+///
+/// Licenses travel as signed tokens (InfoID.Licensing.Core.SignedLicense), so every
+/// value that matters is inside the signature; these envelopes only carry it.
 /// </summary>
-public class ActivationRequest
+public class OnlineActivationRequest
 {
     public string ActivationCode { get; set; } = string.Empty;
+    /// <summary>80-bit machine fingerprint, hex.</summary>
     public string MachineFingerprint { get; set; } = string.Empty;
-    public string OrganizationName { get; set; } = string.Empty;
-    public string? ContactEmail { get; set; }
+    public string? AppVersion { get; set; }
 }
 
-public class ActivationResponse
+public class OnlineActivationResponse
 {
     public bool Success { get; set; }
-    public string? SerialKey { get; set; }
-    public string? LicenseTier { get; set; }
-    public string? LicenseType { get; set; }
-    public DateTime? ExpiryDate { get; set; }
-    public int? MaxCardsPerPeriod { get; set; }
+    /// <summary>Signed license token (IIDL1....) when Success.</summary>
+    public string? License { get; set; }
     public string? ErrorMessage { get; set; }
 }
 
-public class LicenseValidationRequest
+public class LicenseCheckInRequest
 {
-    public string SerialKey { get; set; } = string.Empty;
+    public string ActivationCode { get; set; } = string.Empty;
     public string MachineFingerprint { get; set; } = string.Empty;
     public int CardsIssuedThisPeriod { get; set; }
+    public string? AppVersion { get; set; }
 }
 
-public class LicenseValidationResponse
+public class LicenseCheckInResponse
 {
-    public bool IsValid { get; set; }
-    public string Status { get; set; } = string.Empty; // Active / Expired / GracePeriod / Deactivated
-    public DateTime? NewExpiryDate { get; set; }
+    /// <summary>Active / Revoked / Deactivated / Unknown / Error.</summary>
+    public string Status { get; set; } = string.Empty;
+    /// <summary>Fresh signed license when Status is Active (may carry a renewed expiry).</summary>
+    public string? License { get; set; }
     public string? Message { get; set; }
+}
+
+public class LicenseDeactivationRequest
+{
+    public string ActivationCode { get; set; } = string.Empty;
+    public string MachineFingerprint { get; set; } = string.Empty;
+}
+
+public class LicenseDeactivationResponse
+{
+    public bool Success { get; set; }
+    public string? ErrorMessage { get; set; }
 }

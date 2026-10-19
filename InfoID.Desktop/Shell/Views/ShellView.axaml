@@ -7,7 +7,7 @@
         mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="800"
         x:Class="InfoID.Desktop.Shell.Views.ShellView"
         x:DataType="vm:ShellViewModel"
-        Title="InfoID"
+        Title="{Binding LicenseBadge.WindowTitle}"
 		Icon="avares://InfoID.Desktop/Assets/Icons/InfoID.ico"
         MinWidth="1024" MinHeight="640"
         Width="1366" Height="800"

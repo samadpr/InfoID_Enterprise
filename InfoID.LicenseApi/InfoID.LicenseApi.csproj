@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <!-- Online License Server (SRS FR-LIC-5, FR-LIC-10, FR-LIC-13): activation, check-in,
+       deactivation, and the phone (QR) page for offline activation. Same database and
+       same rules as InfoID.AdminLicenseManager, through InfoID.Licensing.Server. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\InfoID.Licensing.Server\InfoID.Licensing.Server.csproj" />
+    <ProjectReference Include="..\InfoID.Shared\InfoID.Shared.csproj" />
+  </ItemGroup>
+</Project>

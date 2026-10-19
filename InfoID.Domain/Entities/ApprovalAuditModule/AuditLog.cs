@@ -19,4 +19,6 @@ public class AuditLog : BaseEntity
     public DateTime ActionDate { get; set; }
     public string? PreviousHash { get; set; }  // Hash of the prior AuditLog row
     public string RecordHash { get; set; } = string.Empty;  // Hash of this row's content + PreviousHash
+    public string? Description { get; set; }  // Human-readable summary, e.g. "Design 'Staff ID' saved (version 3)"
+    public string? MachineName { get; set; }  // Computer the action was performed on
 }

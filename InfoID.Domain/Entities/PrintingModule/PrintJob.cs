@@ -28,4 +28,10 @@ public class PrintJob : BaseEntity
     public int FailureCount { get; set; }  // Default 0
     public DateTime? StartedDate { get; set; }
     public DateTime? CompletedDate { get; set; }
+    /// <summary>Design name at print time (added in AddPrintHistory): shown in Print
+    /// History even when the design was never saved, or was renamed or deleted later.</summary>
+    public string? DesignName { get; set; }
+    /// <summary>Why the run failed (printer/driver message), for the print log report
+    /// (FR-PRN-6, FR-REP-2). Added in migration AddPrintJobFailureReason.</summary>
+    public string? FailureReason { get; set; }
 }

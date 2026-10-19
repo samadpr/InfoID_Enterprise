@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:InfoID.AdminLicenseManager.ViewModels"
+             x:Class="InfoID.AdminLicenseManager.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+    <StackPanel Spacing="16">
+        <DockPanel>
+            <Button DockPanel.Dock="Right" Content="Refresh" Command="{Binding LoadCommand}" />
+            <TextBlock Text="Dashboard" Classes="h1" />
+        </DockPanel>
+        <TextBlock Text="{Binding Error}" Classes="error" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+        <UniformGrid Columns="4">
+            <Border Classes="card" Margin="0,0,12,12">
+                <StackPanel><TextBlock Text="Activation codes" Classes="caption" /><TextBlock Text="{Binding Summary.TotalCodes}" FontSize="28" /></StackPanel>
+            </Border>
+            <Border Classes="card" Margin="0,0,12,12">
+                <StackPanel><TextBlock Text="Available (not activated)" Classes="caption" /><TextBlock Text="{Binding Summary.AvailableCodes}" FontSize="28" /></StackPanel>
+            </Border>
+            <Border Classes="card" Margin="0,0,12,12">
+                <StackPanel><TextBlock Text="Active codes" Classes="caption" /><TextBlock Text="{Binding Summary.ActiveCodes}" FontSize="28" /></StackPanel>
+            </Border>
+            <Border Classes="card" Margin="0,0,12,12">
+                <StackPanel><TextBlock Text="Revoked" Classes="caption" /><TextBlock Text="{Binding Summary.RevokedCodes}" FontSize="28" /></StackPanel>
+            </Border>
+            <Border Classes="card" Margin="0,0,12,12">
+                <StackPanel><TextBlock Text="Active machines" Classes="caption" /><TextBlock Text="{Binding Summary.ActiveMachines}" FontSize="28" /></StackPanel>
+            </Border>
+            <Border Classes="card" Margin="0,0,12,12">
+                <StackPanel><TextBlock Text="Activations, last 30 days" Classes="caption" /><TextBlock Text="{Binding Summary.ActivationsLast30Days}" FontSize="28" /></StackPanel>
+            </Border>
+            <Border Classes="card" Margin="0,0,12,12">
+                <StackPanel><TextBlock Text="Expiring in 30 days" Classes="caption" /><TextBlock Text="{Binding Summary.ExpiringIn30Days}" FontSize="28" /></StackPanel>
+            </Border>
+            <Border Classes="card" Margin="0,0,12,12">
+                <StackPanel>
+                    <TextBlock Text="Expiring in 60 / 90 days" Classes="caption" />
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="{Binding Summary.ExpiringIn60Days}" FontSize="28" />
+                        <TextBlock Text="/" FontSize="28" Opacity="0.5" />
+                        <TextBlock Text="{Binding Summary.ExpiringIn90Days}" FontSize="28" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+    </StackPanel>
+</UserControl>

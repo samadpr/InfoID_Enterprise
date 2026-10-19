@@ -1,0 +1,278 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Features.Audit.ViewModels"
+             xmlns:rep="using:InfoID.Application.Reporting"
+             xmlns:components="using:InfoID.Desktop.Shell.Components"
+             xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="820"
+             x:Class="InfoID.Desktop.Features.Audit.Views.AuditLogView"
+             x:DataType="vm:AuditLogViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <UserControl.Styles>
+        <Style Selector="Border.panel">
+            <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+            <Setter Property="CornerRadius" Value="{StaticResource Radius.MD}" />
+        </Style>
+        <Style Selector="TextBlock.filterLabel">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+        <Style Selector="StackPanel.filter">
+            <Setter Property="Margin" Value="0,0,12,10" />
+        </Style>
+        <Style Selector="TextBlock.secondary">
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+        </Style>
+        <Style Selector="TextBlock.fieldLabel">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+        </Style>
+        <Style Selector="Border.integrity">
+            <Setter Property="CornerRadius" Value="{StaticResource Radius.MD}" />
+            <Setter Property="Padding" Value="14,10" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}" />
+        </Style>
+        <Style Selector="Border.integrity.ok">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushSuccess}" />
+        </Style>
+        <Style Selector="Border.integrity.warning">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushWarning}" />
+        </Style>
+        <Style Selector="Border.integrity.broken">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushError}" />
+            <Setter Property="BorderThickness" Value="2" />
+        </Style>
+        <Style Selector="ListBox.audit ListBoxItem">
+            <Setter Property="Padding" Value="10,7" />
+            <Setter Property="CornerRadius" Value="4" />
+        </Style>
+        <Style Selector="TextBlock.message">
+            <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}" />
+        </Style>
+        <Style Selector="TextBlock.message.error">
+            <Setter Property="Foreground" Value="{DynamicResource BrushError}" />
+        </Style>
+        <Style Selector="Border.chip">
+            <Setter Property="Background" Value="{DynamicResource BrushBackground}" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="8,2" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="40,28,40,24">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <components:PageHeaderView Title="Audit log" BackCommand="{Binding GoHomeCommand}" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
+                <TextBlock Text="Export:" Classes="secondary" VerticalAlignment="Center" />
+                <Button Classes="secondary" Command="{Binding ExportExcelCommand}" ToolTip.Tip="Export the entries matching the filters to Excel">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <mi:MaterialIcon Kind="FileExcelOutline" Width="16" Height="16" />
+                        <TextBlock Text="Excel" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="secondary" Command="{Binding ExportPdfCommand}" ToolTip.Tip="Export the entries matching the filters to PDF">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <mi:MaterialIcon Kind="FilePdfBox" Width="16" Height="16" />
+                        <TextBlock Text="PDF" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="secondary" Command="{Binding ExportCsvCommand}" ToolTip.Tip="Export the entries matching the filters to CSV">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <mi:MaterialIcon Kind="FileDelimitedOutline" Width="16" Height="16" />
+                        <TextBlock Text="CSV" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Integrity (FR-REP-7) -->
+        <Border Grid.Row="1" Classes="integrity" Margin="0,14,0,0"
+                Classes.ok="{Binding IntegrityOk}" Classes.warning="{Binding IntegrityWarning}" Classes.broken="{Binding IntegrityBroken}">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <Panel Width="22" Height="22" Margin="0,0,12,0" VerticalAlignment="Center">
+                    <mi:MaterialIcon Kind="ShieldCheckOutline" Foreground="{DynamicResource BrushSuccess}" IsVisible="{Binding IntegrityOk}" />
+                    <mi:MaterialIcon Kind="ShieldSearch" Foreground="{DynamicResource BrushWarning}" IsVisible="{Binding IntegrityWarning}" />
+                    <mi:MaterialIcon Kind="ShieldAlertOutline" Foreground="{DynamicResource BrushError}" IsVisible="{Binding IntegrityBroken}" />
+                    <mi:MaterialIcon Kind="ShieldSearch" Foreground="{DynamicResource BrushTextSecondary}" IsVisible="{Binding IsVerifying}" />
+                </Panel>
+                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                    <TextBlock FontWeight="SemiBold" Text="Integrity" />
+                    <TextBlock Text="{Binding IntegrityText}" TextWrapping="Wrap" Classes="secondary" />
+                    <ProgressBar IsIndeterminate="True" Height="3" IsVisible="{Binding IsVerifying}" Margin="0,4,0,0" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="12,0,0,0" VerticalAlignment="Center">
+                    <Button Classes="ghost" Content="Show entry" Command="{Binding ShowProblemEntryCommand}" IsVisible="{Binding HasProblemEntry}"
+                            ToolTip.Tip="Show the entry where the problem was found" />
+                    <Button Classes="secondary" Command="{Binding VerifyNowCommand}" IsEnabled="{Binding !IsVerifying}"
+                            ToolTip.Tip="Check every entry and the chain between them. Any change, insertion or removal is detected.">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <mi:MaterialIcon Kind="ShieldSearch" Width="16" Height="16" />
+                            <TextBlock Text="Verify integrity" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Filters -->
+        <Border Grid.Row="2" Classes="panel" Padding="16,12,16,2" Margin="0,12,0,0">
+            <WrapPanel>
+                <StackPanel Classes="filter">
+                    <TextBlock Classes="filterLabel" Text="Period" />
+                    <ComboBox ItemsSource="{Binding Periods}" SelectedItem="{Binding SelectedPeriod}" MinWidth="150" AutomationProperties.Name="Period">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:AuditPeriodOption">
+                                <TextBlock Text="{Binding Label}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Classes="filter">
+                    <TextBlock Classes="filterLabel" Text="From" />
+                    <CalendarDatePicker SelectedDate="{Binding FromDate}" PlaceholderText="Any date" MinWidth="140" AutomationProperties.Name="From date" />
+                </StackPanel>
+                <StackPanel Classes="filter">
+                    <TextBlock Classes="filterLabel" Text="To" />
+                    <CalendarDatePicker SelectedDate="{Binding ToDate}" PlaceholderText="Any date" MinWidth="140" AutomationProperties.Name="To date" />
+                </StackPanel>
+                <StackPanel Classes="filter">
+                    <TextBlock Classes="filterLabel" Text="Area" />
+                    <ComboBox ItemsSource="{Binding Modules}" SelectedItem="{Binding SelectedModule}" MinWidth="150" AutomationProperties.Name="Area">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:AuditModuleOption">
+                                <TextBlock Text="{Binding Label}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Classes="filter">
+                    <TextBlock Classes="filterLabel" Text="Search" />
+                    <TextBox Text="{Binding SearchText}" PlaceholderText="Design, user, card number..." MinWidth="240"
+                             AutomationProperties.Name="Search the audit log" />
+                </StackPanel>
+                <StackPanel Classes="filter" VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="6">
+                    <Button Classes="secondary" Command="{Binding RefreshCommand}" HotKey="F5" ToolTip.Tip="Reload (F5)">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <mi:MaterialIcon Kind="Refresh" Width="16" Height="16" />
+                            <TextBlock Text="Refresh" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="ghost" Content="Clear filters" Command="{Binding ClearFiltersCommand}" />
+                </StackPanel>
+            </WrapPanel>
+        </Border>
+
+        <!-- Entries + details -->
+        <Grid Grid.Row="3" ColumnDefinitions="3*,16,2*" Margin="0,12,0,0">
+            <Border Grid.Column="0" Classes="panel" Padding="6">
+                <Grid RowDefinitions="Auto,Auto,*">
+                    <!-- column headers -->
+                    <Grid Grid.Row="0" ColumnDefinitions="28,120,100,*,180" Margin="10,6,10,6">
+                        <TextBlock Grid.Column="1" Classes="fieldLabel" Text="When" />
+                        <TextBlock Grid.Column="2" Classes="fieldLabel" Text="Area" />
+                        <TextBlock Grid.Column="3" Classes="fieldLabel" Text="What happened" />
+                        <TextBlock Grid.Column="4" Classes="fieldLabel" Text="User" />
+                    </Grid>
+                    <ProgressBar Grid.Row="1" IsIndeterminate="True" Height="3" IsVisible="{Binding IsLoading}" />
+                    <Panel Grid.Row="2">
+                        <ListBox Classes="audit" ItemsSource="{Binding Entries}" SelectedItem="{Binding SelectedEntry}"
+                                 Background="Transparent" AutomationProperties.Name="Audit entries">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:AuditRow">
+                                    <Grid ColumnDefinitions="28,120,100,*,180" ToolTip.Tip="{Binding When}">
+                                        <mi:MaterialIcon Kind="{Binding Icon}" Width="16" Height="16" HorizontalAlignment="Left"
+                                                         Foreground="{DynamicResource BrushTextSecondary}" />
+                                        <TextBlock Grid.Column="1" Text="{Binding WhenShort}" Classes="secondary" FontSize="12" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Module}" FontSize="12" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="3" Text="{Binding Description}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                                                   Margin="0,0,12,0" />
+                                        <TextBlock Grid.Column="4" Text="{Binding User}" Classes="secondary" FontSize="12" TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <StackPanel IsVisible="{Binding IsEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6" Margin="24">
+                            <mi:MaterialIcon Kind="ShieldCheckOutline" Width="36" Height="36" Foreground="{DynamicResource BrushTextSecondary}" />
+                            <TextBlock Text="No audit entries match these filters." Classes="secondary" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Panel>
+                </Grid>
+            </Border>
+
+            <!-- Details -->
+            <Border Grid.Column="2" Classes="panel" Padding="18">
+                <Panel>
+                    <TextBlock Text="Select an entry to see its details." Classes="secondary" IsVisible="{Binding !HasSelection}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <!-- IsVisible stays on the outer element: a binding on the same element as a
+                         DataContext binding is resolved against the NEW DataContext (AuditRow). -->
+                    <ScrollViewer IsVisible="{Binding HasSelection}" HorizontalScrollBarVisibility="Disabled">
+                      <Panel DataContext="{Binding SelectedEntry}">
+                        <StackPanel Spacing="12" x:DataType="vm:AuditRow">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <mi:MaterialIcon Kind="{Binding Icon}" Width="20" Height="20" Foreground="{DynamicResource BrushPrimary}" />
+                                <Border Classes="chip"><TextBlock Text="{Binding Module}" FontSize="12" /></Border>
+                                <TextBlock Text="{Binding Id, StringFormat='#{0}'}" Classes="secondary" FontSize="12" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding Description}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+
+                            <Grid ColumnDefinitions="90,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" >
+                                <TextBlock Grid.Row="0" Classes="fieldLabel" Text="When" Margin="0,2" />
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding When}" Margin="0,2" />
+                                <TextBlock Grid.Row="1" Classes="fieldLabel" Text="User" Margin="0,2" />
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding User}" TextWrapping="Wrap" Margin="0,2" />
+                                <TextBlock Grid.Row="2" Classes="fieldLabel" Text="Computer" Margin="0,2" />
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Machine}" Margin="0,2" />
+                                <TextBlock Grid.Row="3" Classes="fieldLabel" Text="Action" Margin="0,2" />
+                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Action}" Margin="0,2" />
+                                <TextBlock Grid.Row="4" Classes="fieldLabel" Text="Item" Margin="0,2" />
+                                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Item}" Margin="0,2" />
+                            </Grid>
+
+                            <StackPanel Spacing="6" IsVisible="{Binding HasChanges}">
+                                <TextBlock Text="Details" FontWeight="SemiBold" />
+                                <Grid ColumnDefinitions="120,*,*" Margin="0,0,0,2" IsVisible="{Binding HasBeforeValues}">
+                                    <TextBlock Grid.Column="0" Classes="fieldLabel" Text="Field" />
+                                    <TextBlock Grid.Column="1" Classes="fieldLabel" Text="Before" />
+                                    <TextBlock Grid.Column="2" Classes="fieldLabel" Text="After" />
+                                </Grid>
+                                <ItemsControl ItemsSource="{Binding Changes}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="rep:AuditChange">
+                                            <Grid ColumnDefinitions="120,*,*" Margin="0,3">
+                                                <TextBlock Grid.Column="0" Text="{Binding Field}" Classes="secondary" TextWrapping="Wrap" Margin="0,0,8,0" />
+                                                <TextBlock Grid.Column="1" Text="{Binding Before}" TextWrapping="Wrap" Margin="0,0,8,0"
+                                                           Foreground="{DynamicResource BrushTextSecondary}" />
+                                                <TextBlock Grid.Column="2" Text="{Binding After}" TextWrapping="Wrap" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </StackPanel>
+                      </Panel>
+                    </ScrollViewer>
+                </Panel>
+            </Border>
+        </Grid>
+
+        <!-- Footer: count, load more, messages -->
+        <Grid Grid.Row="4" ColumnDefinitions="Auto,Auto,*,Auto" Margin="0,10,0,0">
+            <TextBlock Text="{Binding CountText}" Classes="secondary" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Classes="ghost" Content="Load older entries" Command="{Binding LoadMoreCommand}" IsVisible="{Binding HasMore}"
+                    Margin="12,0,0,0" />
+            <TextBlock Grid.Column="2" Text="{Binding Message}" TextWrapping="Wrap" VerticalAlignment="Center" Margin="16,0"
+                       IsVisible="{Binding Message, Converter={x:Static ObjectConverters.IsNotNull}}"
+                       Classes="message" Classes.error="{Binding MessageIsError}" />
+            <Button Grid.Column="3" Classes="ghost" Content="Open exported file" Command="{Binding OpenLastExportCommand}"
+                    IsVisible="{Binding HasLastExport}" />
+        </Grid>
+    </Grid>
+</UserControl>
