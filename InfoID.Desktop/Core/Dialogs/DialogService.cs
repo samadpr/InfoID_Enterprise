@@ -29,33 +29,36 @@ public sealed class DialogService : IDialogService
             Content = content,
             CanResize = viewModel.CanResize,
             ShowInTaskbar = false,
-            WindowStartupLocation = owner is not null
-                ? WindowStartupLocation.CenterOwner
-                : WindowStartupLocation.CenterScreen,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
             Title = viewModel.Title,
         };
         window.Classes.Add("dialogWindow");
 
-        // Sizing. A dialog that asks for a PreferredSize gets exactly that size, with
-        // SizeToContent switched OFF. Bug fix: SizeToContent.WidthAndHeight used to be
-        // set together with Width/Height, and Avalonia then sized the window to the
-        // content's measured size (a ScrollViewer/TabControl measures small), which
-        // made the Print dialog open undersized. The requested size is clamped to the
-        // screen's working area so a dialog never opens larger than the display, and a
-        // minimum keeps it usable if the user resizes it down.
+        // Bug fix: SizeToContent.WidthAndHeight was left on unconditionally alongside
+        // the PreferredSize block below, so PreferredSize's Width/Height were dead --
+        // WidthAndHeight re-measures the Window from its content on every layout pass
+        // and simply overwrites whatever Width/Height had just been set. That produced
+        // two different symptoms depending on the dialog's content: the Print dialog
+        // visibly resized on every tab switch (Print/Preview/Advanced Print Operations
+        // each measure to a different content size), and the Image Editor's Window grew
+        // to match a wide source image's own intrinsic size during the infinite-space
+        // measure pass -- pushing its fixed-width side panel off the right edge of the
+        // screen entirely for a landscape image, which is the actual bug report this
+        // was fixed for. A dialog that declares PreferredSize now gets a real fixed-size
+        // Window (SizeToContent.Manual) instead of an auto-measuring one; MinWidth/
+        // MinHeight match it too so a resizable dialog (CanResize) can be grown but
+        // never shrunk back down to the point its own controls get clipped again. A
+        // dialog with no PreferredSize keeps the previous auto-fit-to-content behavior.
         if (viewModel.PreferredSize is { } size)
         {
-            var (width, height) = ClampToOwner(size.Width, size.Height, owner);
-
             window.SizeToContent = SizeToContent.Manual;
-            window.Width = width;
-            window.Height = height;
-            window.MinWidth = Math.Min(width, Math.Max(480, width * 0.6));
-            window.MinHeight = Math.Min(height, Math.Max(360, height * 0.6));
+            window.Width = size.Width;
+            window.Height = size.Height;
+            window.MinWidth = size.Width;
+            window.MinHeight = size.Height;
         }
         else
         {
-            // Small message-style dialogs keep their existing fit-to-content behavior.
             window.SizeToContent = SizeToContent.WidthAndHeight;
         }
 
