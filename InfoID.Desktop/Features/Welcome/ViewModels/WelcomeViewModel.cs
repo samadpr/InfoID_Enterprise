@@ -29,10 +29,41 @@ public sealed partial class WelcomeViewModel : RecentCardListViewModelBase
     private const int FetchCount = 50;
     private const int PreviewCount = 5;
 
-    public WelcomeViewModel(INavigationService navigationService, IRecentCardService recentCardService, IDialogService dialogService)
+    public WelcomeViewModel(INavigationService navigationService, IRecentCardService recentCardService, IDialogService dialogService,
+        InfoID.Desktop.Features.Licensing.Services.LicenseBadgeState license,
+        InfoID.Desktop.Features.Account.Services.AccountSession account)
         : base(navigationService, recentCardService, dialogService)
     {
+        License = license;
+        _account = account;
     }
+
+    private readonly InfoID.Desktop.Features.Account.Services.AccountSession _account;
+
+    /// <summary>Hero title: "Welcome back, Samad" when signed in, otherwise "Welcome to InfoID".</summary>
+    public string Greeting
+    {
+        get
+        {
+            var first = (_account.Profile?.FullName ?? "").Trim()
+                .Split(' ', System.StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            return _account.IsSignedIn && !string.IsNullOrEmpty(first) ? $"Welcome back, {first}" : "Welcome to InfoID";
+        }
+    }
+
+    /// <summary>License state for the banner at the top of the page: shown only when the
+    /// license needs action (not activated, expiring within 30 days, expired, not valid).</summary>
+    public InfoID.Desktop.Features.Licensing.Services.LicenseBadgeState License { get; }
+
+    /// <summary>Banner "Activate" / "Renew": Account &amp; license opens in the right state
+    /// (sign in when signed out, My licenses when signed in).</summary>
+    [RelayCommand]
+    private void OpenAccountLicense() =>
+        NavigationService.NavigateTo<InfoID.Desktop.Features.Account.ViewModels.AccountLicenseViewModel>();
+
+    /// <summary>Banner close button: hidden until InfoID starts again.</summary>
+    [RelayCommand]
+    private void DismissLicenseBanner() => License.IsBannerDismissed = true;
 
     /// <summary>First PreviewCount of Items, refreshed whenever the base class reloads
     /// (initial load, or after a Delete/Pin action). Home's WrapPanel binds to this, not
@@ -49,6 +80,10 @@ public sealed partial class WelcomeViewModel : RecentCardListViewModelBase
 
     public override void OnNavigatedTo(object? parameter)
     {
+        // Signing in or out happens on the Account page, so coming back here is when the
+        // greeting can change. (Not subscribed to AccountSession: that singleton would
+        // keep every transient Welcome page alive.)
+        OnPropertyChanged(nameof(Greeting));
         _ = ReloadAsync(FetchCount);
     }
 

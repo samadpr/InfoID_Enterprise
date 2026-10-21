@@ -55,7 +55,13 @@ public sealed partial class ShellViewModel : ObservableObject
             {
                 OnPropertyChanged(nameof(AccountInitials));
                 OnPropertyChanged(nameof(AccountFirstName));
+                OnPropertyChanged(nameof(AccountToolTip));
             }
+        };
+        LicenseBadge.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(LicenseBadgeState.StatusSummary))
+                OnPropertyChanged(nameof(AccountToolTip));
         };
         _navigationService = navigationService;
         _themeService = themeService;
@@ -78,9 +84,10 @@ public sealed partial class ShellViewModel : ObservableObject
         _ = CheckLicenseAtStartupAsync();
     }
 
-    /// <summary>FR-LIC-1: with no valid license on this computer (first launch, copied
-    /// from another PC, deactivated), open the Activation screen. It can be skipped --
-    /// licensing never blocks opening the app or viewing data (FR-SEC-7).</summary>
+    /// <summary>Start-up license check. InfoID always opens on the Welcome page (Oct 2026
+    /// redesign); with no valid license on this computer (FR-LIC-1) the Welcome banner and
+    /// the header account icon's status dot point the user to Account &amp; license instead
+    /// of forcing that page open. Licensing never blocks opening the app (FR-SEC-7).</summary>
     private async Task CheckLicenseAtStartupAsync()
     {
         try
@@ -96,8 +103,6 @@ public sealed partial class ShellViewModel : ObservableObject
             var status = await license.GetCurrentStatusAsync();
             LicenseBadge.Apply(status);
             await Trial.RefreshAsync();
-            if (!status.IsValid)
-                _navigationService.NavigateTo<InfoID.Desktop.Features.Account.ViewModels.AccountLicenseViewModel>();
         }
         catch (Exception ex)
         {
@@ -134,6 +139,13 @@ public sealed partial class ShellViewModel : ObservableObject
             };
         }
     }
+
+    /// <summary>Header account icon tooltip: who is signed in and the license status,
+    /// e.g. "Account &amp; license · Not activated (Ctrl+Shift+L)".</summary>
+    public string AccountToolTip =>
+        "Account & license" +
+        (Account.IsSignedIn && !string.IsNullOrWhiteSpace(Account.Profile?.Email) ? $" · {Account.Profile!.Email}" : " · Signed out") +
+        $" · {LicenseBadge.StatusSummary} (Ctrl+Shift+L)";
 
     /// <summary>Header "Log in": the Account page, straight on the Log in form.</summary>
     [RelayCommand]
