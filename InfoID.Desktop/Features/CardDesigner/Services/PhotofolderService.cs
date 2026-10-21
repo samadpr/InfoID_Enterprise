@@ -58,7 +58,19 @@ public interface IPhotoFolderService
     /// <summary>Picks the column most likely to identify employees
     /// (EmployeeID, Employee ID, EmpID, ... then ID), for the default pattern.</summary>
     string? SuggestKeyColumn(IEnumerable<string> columnNames);
+
+    /// <summary>Finds the data column whose values match the photo file names in the
+    /// (prepared) folder -- e.g. photos named 1001.jpg, 1002.jpg match the EmployeeID
+    /// column. Null when no column matches any photo.</summary>
+    PhotoColumnMatch? DetectKeyColumn(
+        string folderPath,
+        IReadOnlyList<string> columnNames,
+        IReadOnlyList<IReadOnlyDictionary<string, string>> records);
 }
+
+/// <summary>Result of <see cref="IPhotoFolderService.DetectKeyColumn"/>: the best column
+/// and how many of the checked records have a photo by it.</summary>
+public sealed record PhotoColumnMatch(string Column, int MatchedRecords, int CheckedRecords);
 
 public sealed class PhotoFolderService : IPhotoFolderService, IDisposable
 {
@@ -153,6 +165,35 @@ public sealed class PhotoFolderService : IPhotoFolderService, IDisposable
         });
 
         return missingField || string.IsNullOrWhiteSpace(key) ? null : key.Trim();
+    }
+
+    /// <summary>Records checked per column when detecting; enough to tell columns apart
+    /// without slowing down on very large tables.</summary>
+    private const int DetectSampleSize = 500;
+
+    public PhotoColumnMatch? DetectKeyColumn(
+        string folderPath,
+        IReadOnlyList<string> columnNames,
+        IReadOnlyList<IReadOnlyDictionary<string, string>> records)
+    {
+        if (records.Count == 0 || columnNames.Count == 0) return null;
+        var sample = records.Take(DetectSampleSize).ToList();
+
+        PhotoColumnMatch? best = null;
+        foreach (var column in columnNames)
+        {
+            if (string.IsNullOrWhiteSpace(column)) continue;
+            var report = CheckRecords(folderPath, "{" + column + "}", sample);
+            if (report.MatchedRecords == 0) continue;
+
+            // Most matches wins; on a tie, the column that looks like an ID.
+            if (best is null || report.MatchedRecords > best.MatchedRecords ||
+                (report.MatchedRecords == best.MatchedRecords && SuggestKeyColumn(new[] { column }) is not null))
+            {
+                best = new PhotoColumnMatch(column, report.MatchedRecords, report.TotalRecords);
+            }
+        }
+        return best;
     }
 
     public string? SuggestKeyColumn(IEnumerable<string> columnNames)

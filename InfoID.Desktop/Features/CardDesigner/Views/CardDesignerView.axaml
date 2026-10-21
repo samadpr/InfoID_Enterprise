@@ -1351,12 +1351,42 @@
                                             CommandParameter="{Binding}" />
                                 </Grid>
 
-                                <TextBlock Text="File name pattern" Classes="caption" />
-                                <TextBox Text="{Binding PhotoFileNamePattern, Mode=TwoWay}"
-                                         Watermark="{}{EmployeeID}" />
+                                <TextBlock Text="Match photos by column" Classes="caption" />
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <ComboBox Grid.Column="0"
+                                              ItemsSource="{Binding $parent[UserControl].DataContext.ActiveTab.DatabaseFields}"
+                                              SelectedValue="{Binding PhotoKeyColumn, Mode=TwoWay}"
+                                              SelectedValueBinding="{Binding ColumnName}"
+                                              PlaceholderText="Connect data to choose a column"
+                                              HorizontalAlignment="Stretch"
+                                              AutomationProperties.Name="Match photos by column"
+                                              ToolTip.Tip="The column whose values are the photo file names, e.g. EmployeeID for 1001.jpg">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding ColumnName}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <Button Grid.Column="1" Margin="6,0,0,0"
+                                            Classes="secondary" Content="Detect"
+                                            ToolTip.Tip="Find the column whose values match the photo file names in the folder"
+                                            Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.DetectPhotoColumnCommand}"
+                                            CommandParameter="{Binding}" />
+                                </Grid>
                                 <TextBlock Classes="caption" TextWrapping="Wrap"
                                            Foreground="{DynamicResource BrushTextSecondary}"
-                                           Text="{}Column names in braces, e.g. {EmployeeID} matches 1001.jpg. Extensions are found automatically." />
+                                           Text="Each photo is named by this column's value, e.g. 1001.jpg for EmployeeID 1001. Extensions are found automatically." />
+
+                                <Expander Header="Advanced: file name pattern" HorizontalAlignment="Stretch">
+                                    <StackPanel Spacing="6">
+                                        <TextBox Text="{Binding PhotoFileNamePattern, Mode=TwoWay}"
+                                                 Watermark="{}{EmployeeID}"
+                                                 AutomationProperties.Name="Photo file name pattern" />
+                                        <TextBlock Classes="caption" TextWrapping="Wrap"
+                                                   Foreground="{DynamicResource BrushTextSecondary}"
+                                                   Text="{}Combine columns and text when photos are named that way, e.g. {Department}_{EmployeeID} matches HR_1001.jpg." />
+                                    </StackPanel>
+                                </Expander>
 
                                 <TextBlock Text="If no photo is found" Classes="caption" />
                                 <StackPanel Orientation="Horizontal" Spacing="4">

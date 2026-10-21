@@ -1,4 +1,4 @@
-﻿using Avalonia.Media;
+using Avalonia.Media;
 
 namespace InfoID.Desktop.Features.CardDesigner.Views.Icons;
 
@@ -127,8 +127,8 @@ public static class DesignerIcons
         "M4,14 L6,14 L6,18 L10,18 L10,20 L4,20 Z M18,14 L20,14 L20,20 L14,20 L14,18 L18,18 Z");
 
     // --- Left rail insert tools ---------------------------------------------------
-    public static readonly Geometry Text = G("M4,4 L20,4 L20,7 L13,7 L13,20 L11,20 L11,7 L4,7 Z");
-    public static readonly Geometry Shapes = G("M3,13 L11,13 L11,21 L3,21 Z M13,3 A5,5 0 1 0 13.01,3 Z");
+   // public static readonly Geometry Text = G("M4,4 L20,4 L20,7 L13,7 L13,20 L11,20 L11,7 L4,7 Z");
+    //public static readonly Geometry Shapes = G("M3,13 L11,13 L11,21 L3,21 Z M13,3 A5,5 0 1 0 13.01,3 Z");
     public static readonly Geometry Rectangle = G("F0 M3,6 L21,6 L21,18 L3,18 Z M5.5,8.5 L18.5,8.5 L18.5,15.5 L5.5,15.5 Z");
     public static readonly Geometry Ellipse = G("F0 M12,3 A9,9 0 1 0 12.01,3 Z M12,6 A6,6 0 1 0 12.01,6 Z");
     public static readonly Geometry Line = G("M3,19 L19,3 L21,5 L5,21 Z");
@@ -158,28 +158,65 @@ public static class DesignerIcons
         "M12,2 L13.6,6.6 L17.5,3.8 L16.8,8.6 L21.6,8 L18.7,11.9 L23,14 L18.2,15.2 L20.8,19.4 " +
         "L16,18.3 L16.3,23.1 L12.6,19.9 L10.3,24 L9.1,19.3 L5.2,22.1 L5.9,17.3 L1.1,17.9 L4,14 " +
         "L-0.3,11.9 L4.5,10.7 L1.9,6.5 L6.7,7.6 L6.4,2.8 L10.1,6 Z");
+    //public static readonly Geometry Image = G(
+    //    "F0 M3,4 L21,4 L21,20 L3,20 Z M5,6 L19,6 L19,18 L5,18 Z " +
+    //    "M7,15 L10,11 L13,14 L15,12 L18,16 L7,16 Z M8.5,8 A1.5,1.5 0 1 0 8.51,8 Z");
+    //public static readonly Geometry Photo = G(
+    //    "F0 M3,4 L21,4 L21,20 L3,20 Z M5,6 L19,6 L19,18 L5,18 Z " +
+    //    "M12,8 A3,3 0 1 0 12.01,8 Z M7,17 A5,4.5 0 0 1 17,17 Z");
+    //public static readonly Geometry Signature = G(
+    //    "M2,20 C6,14 8,9 6,7 C4,5 3,9 5,12 C8,17 16,17 20,10 L18.3,9 C15,15 9,15.5 6.5,12 " +
+    //    "M19,4 L22,7 L14,15 L11,15 L11,12 Z");
+    //public static readonly Geometry Barcode = G(
+    //  "M3,4 L4.4,4 L4.4,20 L3,20 Z M5.6,4 L7,4 L7,20 L5.6,20 Z " +
+    //"M8.6,4 L9.3,4 L9.3,20 L8.6,20 Z M10.6,4 L12.6,4 L12.6,20 L10.6,20 Z " +
+    //"M14,4 L14.7,4 L14.7,20 L14,20 Z M16,4 L17.4,4 L17.4,20 L16,20 Z " +
+    //"M18.6,4 L19.3,4 L19.3,20 L18.6,20 Z M20.3,4 L21.7,4 L21.7,20 L20.3,20 Z");
+    //public static readonly Geometry QrCode = G(
+    //  "M3,3 L10,3 L10,10 L3,10 Z M5,5 L8,5 L8,8 L5,8 Z " +
+    //"M14,3 L21,3 L21,10 L14,10 Z M16,5 L19,5 L19,8 L16,8 Z " Calendar 
+    //"M3,14 L10,14 L10,21 L3,21 Z M5,16 L8,16 L8,19 L5,19 Z " +
+    //"M14,14 L17,14 L17,17 L14,17 Z M18,14 L21,14 L21,17 L18,17 Z M14,18 L17,18 L17,21 L14,21 Z M18,18 L21,18 L21,21 L18,21 Z");
+    //public static readonly Geometry DataField = G(
+    //  "F0 M2,7 L22,7 L22,17 L2,17 Z M5,10 L19,10 L19,14 L5,14 Z");
+
+    // --- Left rail insert tools (redesign) ---
+    public static readonly Geometry Text = G(
+        "M5,4 L19,4 L19,8 L17,8 L17,6 L13,6 L13,18 L15,18 L15,20 L9,20 L9,18 L11,18 L11,6 L7,6 L7,8 L5,8 Z");
+
+    public static readonly Geometry Shapes = G(
+        "F0 M3,12 L12,12 L12,21 L3,21 Z M5,14 L10,14 L10,19 L5,19 Z " +
+        "M16.5,3 A4.5,4.5 0 1 0 16.51,3 Z M16.5,5 A2.5,2.5 0 1 0 16.51,5 Z");
+
     public static readonly Geometry Image = G(
         "F0 M3,4 L21,4 L21,20 L3,20 Z M5,6 L19,6 L19,18 L5,18 Z " +
-        "M7,15 L10,11 L13,14 L15,12 L18,16 L7,16 Z M8.5,8 A1.5,1.5 0 1 0 8.51,8 Z");
+        "M5,18 L9.5,12.5 L13,16.5 L15,14 L19,18 Z " +
+        "M8.5,7.5 A1.5,1.5 0 1 0 8.51,7.5 Z");
+
     public static readonly Geometry Photo = G(
         "F0 M3,4 L21,4 L21,20 L3,20 Z M5,6 L19,6 L19,18 L5,18 Z " +
-        "M12,8 A3,3 0 1 0 12.01,8 Z M7,17 A5,4.5 0 0 1 17,17 Z");
-    public static readonly Geometry Signature = G(
-        "M2,20 C6,14 8,9 6,7 C4,5 3,9 5,12 C8,17 16,17 20,10 L18.3,9 C15,15 9,15.5 6.5,12 " +
-        "M19,4 L22,7 L14,15 L11,15 L11,12 Z");
-    public static readonly Geometry Barcode = G(
-        "M3,4 L4.4,4 L4.4,20 L3,20 Z M5.6,4 L7,4 L7,20 L5.6,20 Z " +
-        "M8.6,4 L9.3,4 L9.3,20 L8.6,20 Z M10.6,4 L12.6,4 L12.6,20 L10.6,20 Z " +
-        "M14,4 L14.7,4 L14.7,20 L14,20 Z M16,4 L17.4,4 L17.4,20 L16,20 Z " +
-        "M18.6,4 L19.3,4 L19.3,20 L18.6,20 Z M20.3,4 L21.7,4 L21.7,20 L20.3,20 Z");
-    public static readonly Geometry QrCode = G(
-        "M3,3 L10,3 L10,10 L3,10 Z M5,5 L8,5 L8,8 L5,8 Z " +
-        "M14,3 L21,3 L21,10 L14,10 Z M16,5 L19,5 L19,8 L16,8 Z " +
-        "M3,14 L10,14 L10,21 L3,21 Z M5,16 L8,16 L8,19 L5,19 Z " +
-        "M14,14 L17,14 L17,17 L14,17 Z M18,14 L21,14 L21,17 L18,17 Z M14,18 L17,18 L17,21 L14,21 Z M18,18 L21,18 L21,21 L18,21 Z");
-    public static readonly Geometry DataField = G(
-        "F0 M2,7 L22,7 L22,17 L2,17 Z M5,10 L19,10 L19,14 L5,14 Z");
+        "M12,7.5 A2.5,2.5 0 1 0 12.01,7.5 Z " +
+        "M7,18 A5,4 0 0 1 17,18 Z");
 
+    public static readonly Geometry Signature = G(
+        "M16.5,3.5 L20.5,7.5 L9.5,18.5 L4.5,19.5 L5.5,14.5 Z " +
+        "M12,20.5 L21,20.5 L21,22 L12,22 Z");
+
+    public static readonly Geometry Barcode = G(
+        "M3,4 L4.5,4 L4.5,20 L3,20 Z M6,4 L7.5,4 L7.5,20 L6,20 Z " +
+        "M9,4 L11.5,4 L11.5,20 L9,20 Z M13,4 L14.5,4 L14.5,20 L13,20 Z " +
+        "M16,4 L18,4 L18,20 L16,20 Z M19.5,4 L21,4 L21,20 L19.5,20 Z");
+
+    public static readonly Geometry QrCode = G(
+        "F0 M3,3 L10,3 L10,10 L3,10 Z M4.5,4.5 L8.5,4.5 L8.5,8.5 L4.5,8.5 Z M5.5,5.5 L7.5,5.5 L7.5,7.5 L5.5,7.5 Z " +
+        "M14,3 L21,3 L21,10 L14,10 Z M15.5,4.5 L19.5,4.5 L19.5,8.5 L15.5,8.5 Z M16.5,5.5 L18.5,5.5 L18.5,7.5 L16.5,7.5 Z " +
+        "M3,14 L10,14 L10,21 L3,21 Z M4.5,15.5 L8.5,15.5 L8.5,19.5 L4.5,19.5 Z M5.5,16.5 L7.5,16.5 L7.5,18.5 L5.5,18.5 Z " +
+        "M14,14 L16.5,14 L16.5,16.5 L14,16.5 Z M18.5,14 L21,14 L21,16.5 L18.5,16.5 Z " +
+        "M14,18.5 L16.5,18.5 L16.5,21 L14,21 Z M18.5,18.5 L21,18.5 L21,21 L18.5,21 Z");
+
+    public static readonly Geometry DataField = G(
+        "F0 M2,6 L22,6 L22,18 L2,18 Z M4,8 L20,8 L20,16 L4,16 Z " +
+        "M6.5,9.5 L8,9.5 L8,14.5 L6.5,14.5 Z M10.5,11.25 L17.5,11.25 L17.5,12.75 L10.5,12.75 Z");
     // --- Layers panel state icons -----------------------------------------------
     public static readonly Geometry Eye = G(
         "F0 M12,5 C6,5 2,12 2,12 C2,12 6,19 12,19 C18,19 22,12 22,12 C22,12 18,5 12,5 Z " +
@@ -232,12 +269,18 @@ public static class DesignerIcons
         "F0 M9,4 L15,4 L16.5,6.5 L21,6.5 A1,1 0 0 1 22,7.5 L22,19 A1,1 0 0 1 21,20 " +
         "L3,20 A1,1 0 0 1 2,19 L2,7.5 A1,1 0 0 1 3,6.5 L7.5,6.5 Z " +
         "M12,9.5 A4.5,4.5 0 1 0 12.01,9.5 Z M12,11.7 A2.3,2.3 0 1 1 11.99,11.7 Z");
-    public static Geometry Calendar =>
-       Geometry.Parse(
-           "F0 M3,6 L21,6 L21,21 L3,21 Z M4.5,10 L19.5,10 L19.5,19.5 L4.5,19.5 Z " +
-           "M6,2 L7.5,2 L7.5,6 L6,6 Z M16.5,2 L18,2 L18,6 L16.5,6 Z " +
-           "M6,11.5 L8.5,11.5 L8.5,14 L6,14 Z M10.75,11.5 L13.25,11.5 L13.25,14 L10.75,14 Z M15.5,11.5 L18,11.5 L18,14 L15.5,14 Z " +
-           "M6,15.5 L8.5,15.5 L8.5,18 L6,18 Z M10.75,15.5 L13.25,15.5 L13.25,18 L10.75,18 Z");
+    //public static Geometry Calendar =>
+    //   Geometry.Parse(
+    //       "F0 M3,6 L21,6 L21,21 L3,21 Z M4.5,10 L19.5,10 L19.5,19.5 L4.5,19.5 Z " +
+    //       "M6,2 L7.5,2 L7.5,6 L6,6 Z M16.5,2 L18,2 L18,6 L16.5,6 Z " +
+    //       "M6,11.5 L8.5,11.5 L8.5,14 L6,14 Z M10.75,11.5 L13.25,11.5 L13.25,14 L10.75,14 Z M15.5,11.5 L18,11.5 L18,14 L15.5,14 Z " +
+    //       "M6,15.5 L8.5,15.5 L8.5,18 L6,18 Z M10.75,15.5 L13.25,15.5 L13.25,18 L10.75,18 Z");
+    public static readonly Geometry Calendar = G(
+    "F0 M4,5 L20,5 L20,21 L4,21 Z M6,10 L18,10 L18,19 L6,19 Z " +
+    "M7,2.5 L8.5,2.5 L8.5,5 L7,5 Z M15.5,2.5 L17,2.5 L17,5 L15.5,5 Z " +
+    "M7.5,12.5 L9.5,12.5 L9.5,14.5 L7.5,14.5 Z M11,12.5 L13,12.5 L13,14.5 L11,14.5 Z M14.5,12.5 L16.5,12.5 L16.5,14.5 L14.5,14.5 Z " +
+    "M7.5,16 L9.5,16 L9.5,18 L7.5,18 Z M11,16 L13,16 L13,18 L11,18 Z");
+
     public static readonly Geometry Clock = G(
        "F0 M12,2 A10,10 0 1 0 12.01,2 Z M12,4.4 A7.6,7.6 0 1 1 11.99,4.4 Z " +
        "M11.2,6.8 L12.8,6.8 L12.8,12.8 L11.2,12.8 Z " +
@@ -247,4 +290,6 @@ public static class DesignerIcons
        "M2,9 L14,9 L14,10.5 L2,10.5 Z " +
        "M17,11.5 A5,5 0 1 0 17.01,11.5 Z M17,13 A3.5,3.5 0 1 1 16.99,13 Z " +
        "M16.3,13 L17.7,13 L17.7,15.8 L16.3,15.8 Z M17,15 L19,15 L19,16.3 L17,16.3 Z");
+
+
 }

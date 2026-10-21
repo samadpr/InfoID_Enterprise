@@ -15,8 +15,8 @@ public sealed partial class AddColumnDialogViewModel
     public ObservableCollection<string> DataTypes { get; } =
         new()
         {
-            "VARCHAR",
-            "INTEGER",
+            "ALPHANUMERIC",
+            "NUMBER",
             "DECIMAL",
             "DATE",
             "DATETIME",
@@ -27,7 +27,7 @@ public sealed partial class AddColumnDialogViewModel
     private string _columnName = string.Empty;
 
     [ObservableProperty]
-    private string _selectedDataType = "VARCHAR";
+    private string _selectedDataType = "ALPHANUMERIC";
 
     [ObservableProperty]
     private bool _isPrimaryKey;

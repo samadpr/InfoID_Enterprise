@@ -49,5 +49,25 @@ public sealed partial class ImageElement : DesignerElement
     [ObservableProperty] private bool _usePhotoFolder;
     [ObservableProperty] private string? _photoFolderPath;
     [ObservableProperty] private string _photoFileNamePattern = "{EmployeeID}";
+
+    /// <summary>The data column photos are matched by, for the "Match photos by column"
+    /// dropdown: the column of a single-column pattern ("{EmployeeID}" -> EmployeeID), or
+    /// null when the pattern combines columns or text (e.g. "{Dept}_{ID}"). Setting it
+    /// sets the pattern. Not stored -- the pattern is the saved value.</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? PhotoKeyColumn
+    {
+        get
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(PhotoFileNamePattern ?? string.Empty, @"^\s*\{([^{}]+)\}\s*$");
+            return match.Success ? match.Groups[1].Value.Trim() : null;
+        }
+        set
+        {
+            if (!string.IsNullOrWhiteSpace(value)) PhotoFileNamePattern = "{" + value.Trim() + "}";
+        }
+    }
+
+    partial void OnPhotoFileNamePatternChanged(string value) => OnPropertyChanged(nameof(PhotoKeyColumn));
     [ObservableProperty] private MissingPhotoBehavior _missingPhotoBehavior = MissingPhotoBehavior.Placeholder;
 }

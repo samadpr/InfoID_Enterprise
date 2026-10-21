@@ -21,7 +21,12 @@
     </Application.Resources>
 
     <Application.Styles>
-        <FluentTheme />
+        <FluentTheme>
+            <FluentTheme.Palettes>
+                <ColorPaletteResources x:Key="Light" Accent="#0D9488" />
+                <ColorPaletteResources x:Key="Dark"  Accent="#14B8A6" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
         <materialIcons:MaterialIconStyles />
         <StyleInclude Source="avares://InfoID.Desktop/Resources/Styles/Typography.axaml" />
         <StyleInclude Source="avares://InfoID.Desktop/Resources/Controls/Buttons.axaml" />

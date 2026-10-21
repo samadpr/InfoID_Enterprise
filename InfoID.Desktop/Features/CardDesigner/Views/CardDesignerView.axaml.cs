@@ -1,19 +1,20 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using InfoID.Desktop.Features.CardDesigner.Models.Document;
 using InfoID.Desktop.Features.CardDesigner.ViewModels;
 using InfoID.Desktop.Features.CardDesigner.Views.Controls;
+using InfoID.Desktop.Features.CardDesigner.Views.Icons;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using Avalonia.Controls.Primitives;
-using Avalonia.VisualTree;
-using Avalonia.Data;
 
 namespace InfoID.Desktop.Features.CardDesigner.Views;
 
@@ -554,12 +555,79 @@ public partial class CardDesignerView : UserControl
 
     /// <summary>Image column: shows a thumbnail, or "Choose..." when empty.
     /// Clicking opens the file picker for that row.</summary>
+    //private static DataGridTemplateColumn CreateImageColumn(CardDesignTabViewModel tab, string columnName)
+    //{
+    //    return new DataGridTemplateColumn
+    //    {
+    //        Header = columnName,
+    //        Width = new DataGridLength(90),
+
+    //        CellTemplate = new FuncDataTemplate<object>(
+    //            (_, _) =>
+    //            {
+    //                var image = new Image
+    //                {
+    //                    Width = 32,
+    //                    Height = 32,
+    //                    Stretch = Avalonia.Media.Stretch.Uniform
+    //                };
+
+    //                var placeholder = new TextBlock
+    //                {
+    //                    Text = "Choose...",
+    //                    FontSize = 12,
+    //                    Opacity = 0.6,
+    //                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+    //                };
+
+    //                var content = new Panel();
+    //                content.Children.Add(image);
+    //                content.Children.Add(placeholder);
+
+    //                var button = new Button
+    //                {
+    //                    Content = content,
+    //                    Padding = new Thickness(4, 2),
+    //                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+    //                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+    //                    Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand)
+    //                };
+    //                button.Classes.Add("ghost");
+    //                ToolTip.SetTip(button, "Click to choose an image");
+
+    //                void Refresh()
+    //                {
+    //                    var bitmap = button.DataContext is DataRowView row
+    //                        ? tab.GetDatabaseImage(GetCellValue(row, columnName))
+    //                        : null;
+
+    //                    image.Source = bitmap;
+    //                    image.IsVisible = bitmap is not null;
+    //                    placeholder.IsVisible = bitmap is null;
+    //                }
+
+    //                // Recycled cells get a new row: show that row's image.
+    //                button.DataContextChanged += (_, _) => Refresh();
+
+    //                button.Click += async (_, _) =>
+    //                {
+    //                    if (button.DataContext is DataRowView row)
+    //                        await tab.PickDatabaseImageAsync(row, columnName);
+    //                };
+
+    //                return button;
+    //            },
+    //            supportsRecycling: false)
+    //    };
+    //}
+
+
     private static DataGridTemplateColumn CreateImageColumn(CardDesignTabViewModel tab, string columnName)
     {
         return new DataGridTemplateColumn
         {
             Header = columnName,
-            Width = new DataGridLength(90),
+            Width = new DataGridLength(120), // wider: thumbnail + two icon buttons
 
             CellTemplate = new FuncDataTemplate<object>(
                 (_, _) =>
@@ -568,58 +636,68 @@ public partial class CardDesignerView : UserControl
                     {
                         Width = 32,
                         Height = 32,
-                        Stretch = Avalonia.Media.Stretch.Uniform
+                        Stretch = Avalonia.Media.Stretch.Uniform,
+                        IsVisible = false
                     };
 
-                    var placeholder = new TextBlock
+                    var browseButton = CreateIconButton(DesignerIcons.Image, "Choose image from file");
+                    var cameraButton = CreateIconButton(DesignerIcons.Camera, "Take photo with camera");
+
+                    var panel = new StackPanel
                     {
-                        Text = "Choose...",
-                        FontSize = 12,
-                        Opacity = 0.6,
+                        Orientation = Avalonia.Layout.Orientation.Horizontal,
+                        Spacing = 4,
                         VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
                     };
-
-                    var content = new Panel();
-                    content.Children.Add(image);
-                    content.Children.Add(placeholder);
-
-                    var button = new Button
-                    {
-                        Content = content,
-                        Padding = new Thickness(4, 2),
-                        HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-                        VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                        Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand)
-                    };
-                    button.Classes.Add("ghost");
-                    ToolTip.SetTip(button, "Click to choose an image");
+                    panel.Children.Add(image);
+                    panel.Children.Add(browseButton);
+                    panel.Children.Add(cameraButton);
 
                     void Refresh()
                     {
-                        var bitmap = button.DataContext is DataRowView row
+                        var bitmap = panel.DataContext is DataRowView row
                             ? tab.GetDatabaseImage(GetCellValue(row, columnName))
                             : null;
 
                         image.Source = bitmap;
                         image.IsVisible = bitmap is not null;
-                        placeholder.IsVisible = bitmap is null;
                     }
 
                     // Recycled cells get a new row: show that row's image.
-                    button.DataContextChanged += (_, _) => Refresh();
+                    panel.DataContextChanged += (_, _) => Refresh();
 
-                    button.Click += async (_, _) =>
+                    browseButton.Click += async (_, _) =>
                     {
-                        if (button.DataContext is DataRowView row)
+                        if (panel.DataContext is DataRowView row)
                             await tab.PickDatabaseImageAsync(row, columnName);
                     };
 
-                    return button;
+                    cameraButton.Click += async (_, _) =>
+                    {
+                        if (panel.DataContext is DataRowView row)
+                            await tab.CaptureDatabaseImageAsync(row, columnName);
+                    };
+
+                    return panel;
                 },
                 supportsRecycling: false)
         };
     }
 
+    private static Button CreateIconButton(Avalonia.Media.Geometry icon, string tip)
+    {
+        var button = new Button
+        {
+            Content = new PathIcon { Data = icon, Width = 16, Height = 16 },
+            Padding = new Thickness(4, 2),
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand)
+        };
+        button.Classes.Add("ghost");
+        ToolTip.SetTip(button, tip);
+        Avalonia.Automation.AutomationProperties.SetName(button, tip);
+        return button;
+    }
     private static object? GetCellValue(DataRowView row, string columnName)
     {
         if (row.Row.RowState == DataRowState.Detached ||

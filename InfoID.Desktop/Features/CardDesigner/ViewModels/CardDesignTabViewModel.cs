@@ -222,6 +222,17 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         NotifyDocumentChanged();
         MarkDirty();
 
+        // Picking another "Match photos by column" (or editing the pattern) makes the last
+        // photo check stale: re-check for a single column, otherwise clear the result.
+        if (e.PropertyName == nameof(ImageElement.PhotoFileNamePattern) && sender is ImageElement image &&
+            image.UsePhotoFolder && !_applyingDetectedPhotoColumn)
+        {
+            if (image.PhotoKeyColumn is not null && DatabaseData is not null)
+                _ = CheckPhotoFolderSafeAsync(image);
+            else
+                PhotoCheckSummary = string.Empty;
+        }
+
         // Rebuilding the whole Layers tree on every property change would mean doing it
         // on every pixel of a canvas drag (X/Y churn constantly) -- only rebuild for the
         // properties that can actually change what the panel shows.
@@ -3252,33 +3263,115 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     /// column. Text columns get an InfoID asset reference (the file is copied into
     /// the assets folder, same as images placed on the card); BLOB columns get the
     /// image bytes.</summary>
+    //public async Task PickDatabaseImageAsync(DataRowView rowView, string columnName)
+    //{
+    //    if (DatabaseData is null) return;
+
+    //    var row = rowView.Row;
+    //    if (row.Table != DatabaseData ||
+    //        row.RowState == DataRowState.Detached ||
+    //        !DatabaseData.Columns.Contains(columnName))
+    //        return;
+
+    //    var path = await _filePicker.PickImageFileAsync("Choose Image");
+    //    if (path is null) return;
+
+    //    var column = DatabaseData.Columns[columnName]!;
+
+    //    try
+    //    {
+    //        column.ReadOnly = false;
+
+    //        if (column.DataType == typeof(byte[]))
+    //            row[column] = await File.ReadAllBytesAsync(path);
+    //        else
+    //            row[column] = await _assetService.ImportAsync(path);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Log.Error("Database image pick error", ex);
+    //        return;
+    //    }
+
+    //    // Rebuild the grid so the new thumbnail shows, keeping this row selected.
+    //    var rowIndex = DatabaseData.Rows.IndexOf(row);
+
+    //    ReplaceDatabaseTable(DatabaseData, DatabaseData.DefaultView.RowFilter);
+
+    //    if (rowIndex >= 0 && rowIndex < DatabaseData.Rows.Count)
+    //    {
+    //        var updatedRow = DatabaseData.Rows[rowIndex];
+    //        SelectedDatabaseRow = DatabaseData.DefaultView
+    //            .Cast<DataRowView>()
+    //            .FirstOrDefault(v => v.Row == updatedRow);
+    //    }
+
+    //    NotifyDocumentChanged();
+    //}
+
     public async Task PickDatabaseImageAsync(DataRowView rowView, string columnName)
     {
-        if (DatabaseData is null) return;
-
-        var row = rowView.Row;
-        if (row.Table != DatabaseData ||
-            row.RowState == DataRowState.Detached ||
-            !DatabaseData.Columns.Contains(columnName))
-            return;
+        if (!TryGetDatabaseImageTarget(rowView, columnName, out var row, out var column)) return;
 
         var path = await _filePicker.PickImageFileAsync("Choose Image");
         if (path is null) return;
 
-        var column = DatabaseData.Columns[columnName]!;
+        await StoreDatabaseImageAsync(row, column, path, bytes: null);
+    }
+
+    private bool TryGetDatabaseImageTarget(
+        DataRowView rowView, string columnName, out DataRow row, out DataColumn column)
+    {
+        row = rowView.Row;
+        column = null!;
+
+        if (DatabaseData is null ||
+            row.Table != DatabaseData ||
+            row.RowState == DataRowState.Detached ||
+            !DatabaseData.Columns.Contains(columnName))
+            return false;
+
+        column = DatabaseData.Columns[columnName]!;
+        return true;
+    }
+
+    /// <summary>Stores an image into a grid cell from either a file path or raw bytes
+    /// (camera), then rebuilds the grid so the thumbnail shows. Shared by pick and capture.</summary>
+    private async Task StoreDatabaseImageAsync(DataRow row, DataColumn column, string? path, byte[]? bytes)
+    {
+        if (DatabaseData is null) return;
 
         try
         {
             column.ReadOnly = false;
 
             if (column.DataType == typeof(byte[]))
-                row[column] = await File.ReadAllBytesAsync(path);
-            else
+            {
+                row[column] = bytes ?? await File.ReadAllBytesAsync(path!);
+            }
+            else if (path is not null)
+            {
                 row[column] = await _assetService.ImportAsync(path);
+            }
+            else
+            {
+                // Text column + camera bytes: import goes through the asset service,
+                // which takes a file, so write a temporary file first.
+                var temp = Path.Combine(Path.GetTempPath(), $"infoid-capture-{Guid.NewGuid():N}.png");
+                try
+                {
+                    await File.WriteAllBytesAsync(temp, bytes!);
+                    row[column] = await _assetService.ImportAsync(temp);
+                }
+                finally
+                {
+                    try { File.Delete(temp); } catch { /* temp cleanup only */ }
+                }
+            }
         }
         catch (Exception ex)
         {
-            Log.Error("Database image pick error", ex);
+            Log.Error("Database image store error", ex);
             return;
         }
 
@@ -3298,7 +3391,42 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         NotifyDocumentChanged();
     }
 
+    public async Task CaptureDatabaseImageAsync(DataRowView rowView, string columnName)
+    {
+        // Don't open the camera for a row/column that can't take an image.
+        if (!TryGetDatabaseImageTarget(rowView, columnName, out _, out _)) return;
 
+        var cameraViewModel = new CameraCaptureDialogViewModel(_cameraService);
+        var result = await _dialogService.ShowDialogAsync<CameraCaptureDialogViewModel, CameraCaptureResult>(cameraViewModel);
+        if (result is null) return; // dialog cancelled outright
+
+        // No camera / user chose "browse instead": same behavior as the canvas workflow.
+        if (result.FallThroughToBrowse)
+        {
+            await PickDatabaseImageAsync(rowView, columnName);
+            return;
+        }
+
+        if (result.CapturedBitmap is not { } capturedBitmap) return;
+
+        // The grid may have been rebuilt while the dialog was open; re-check before writing.
+        if (!TryGetDatabaseImageTarget(rowView, columnName, out var row, out var column)) return;
+
+        byte[] pngBytes;
+        try
+        {
+            using var stream = new MemoryStream();
+            capturedBitmap.Save(stream); // Avalonia's Bitmap.Save writes PNG
+            pngBytes = stream.ToArray();
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Database image capture encode error", ex);
+            return;
+        }
+
+        await StoreDatabaseImageAsync(row, column, path: null, bytes: pngBytes);
+    }
     // ------------------------------------------------------------ photo folder ----
 
     private readonly HashSet<string> _preparedPhotoFolders = new(StringComparer.OrdinalIgnoreCase);
@@ -3396,8 +3524,12 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         }
     }
 
-    /// <summary>Parameters tab "Browse...": choose the photos folder, pick a sensible
-    /// file name pattern from the connected data, and check which records match.</summary>
+    /// <summary>True while detection writes the pattern, so the change handler doesn't
+    /// start a second check that would overwrite the detection message.</summary>
+    private bool _applyingDetectedPhotoColumn;
+
+    /// <summary>Parameters tab "Browse...": choose the photos folder, find the data column
+    /// whose values are the photo file names, and check which records match.</summary>
     [RelayCommand]
     private async Task BrowsePhotoFolder(ImageElement? image)
     {
@@ -3409,15 +3541,120 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         image.PhotoFolderPath = folder;
         image.UsePhotoFolder = true;
 
-        // Default pattern: use the data's ID column if it isn't literally "EmployeeID".
-        if (DatabaseData is not null && image.PhotoFileNamePattern == "{EmployeeID}")
+        await RescanPhotoFolderAsync(folder);
+
+        if (DatabaseData is null)
         {
-            var columns = DatabaseData.Columns.Cast<DataColumn>().Select(c => c.ColumnName);
-            if (PhotoFolderService.Shared.SuggestKeyColumn(columns) is { } keyColumn)
-                image.PhotoFileNamePattern = "{" + keyColumn + "}";
+            PhotoCheckSummary = "Folder set. Connect data, then choose the column the photos are named by.";
+            NotifyDocumentChanged();
+            return;
         }
 
-        await RefreshPhotoFolder(image);
+        var detected = DetectPhotoColumnFor(image);
+        var current = CountPhotoMatches(image, image.PhotoFileNamePattern);
+
+        string? prefix = null;
+        if (detected is not null && detected.MatchedRecords > current)
+        {
+            ApplyPhotoPattern(image, "{" + detected.Column + "}");
+            prefix = $"Photos matched by \"{detected.Column}\". ";
+        }
+        else if (current == 0 && image.PhotoFileNamePattern == "{EmployeeID}")
+        {
+            // Nothing matches yet (e.g. an empty folder): default to the ID-like column.
+            var columns = DatabaseData.Columns.Cast<DataColumn>().Select(c => c.ColumnName);
+            if (PhotoFolderService.Shared.SuggestKeyColumn(columns) is { } keyColumn)
+                ApplyPhotoPattern(image, "{" + keyColumn + "}");
+        }
+
+        await CheckPhotoFolder(image);
+        if (prefix is not null) PhotoCheckSummary = prefix + PhotoCheckSummary;
+        NotifyDocumentChanged();
+    }
+
+    /// <summary>Parameters tab "Detect": find the column whose values match the photo
+    /// file names (e.g. EmployeeID for 1001.jpg) and select it in the dropdown.</summary>
+    [RelayCommand]
+    private async Task DetectPhotoColumn(ImageElement? image)
+    {
+        if (image is null) return;
+
+        if (string.IsNullOrWhiteSpace(image.PhotoFolderPath) || !Directory.Exists(image.PhotoFolderPath))
+        {
+            PhotoCheckSummary = "Choose a photo folder first (Browse).";
+            return;
+        }
+
+        if (DatabaseData is null || DatabaseData.Rows.Count == 0)
+        {
+            PhotoCheckSummary = "Connect data with at least one record to detect the column.";
+            return;
+        }
+
+        try
+        {
+            await RescanPhotoFolderAsync(image.PhotoFolderPath);
+
+            var detected = DetectPhotoColumnFor(image);
+            if (detected is null)
+            {
+                PhotoCheckSummary =
+                    "No column matches the photo file names. Name each photo after a column's value, " +
+                    "e.g. 1001.jpg for EmployeeID 1001, or set a pattern under Advanced.";
+                return;
+            }
+
+            ApplyPhotoPattern(image, "{" + detected.Column + "}");
+            await CheckPhotoFolder(image);
+            PhotoCheckSummary = $"Photos matched by \"{detected.Column}\". " + PhotoCheckSummary;
+            NotifyDocumentChanged();
+        }
+        catch (Exception ex)
+        {
+            Log.Warn("Photo column detection error", ex);
+            PhotoCheckSummary = "Couldn't read the photo folder. Check it exists and you can open it.";
+        }
+    }
+
+    private PhotoColumnMatch? DetectPhotoColumnFor(ImageElement image)
+    {
+        if (DatabaseData is null || string.IsNullOrWhiteSpace(image.PhotoFolderPath)) return null;
+
+        var columns = DatabaseData.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList();
+        var records = DatabaseData.Rows.Cast<DataRow>()
+            .Take(500)
+            .Select(r => (IReadOnlyDictionary<string, string>)RowToRecord(r))
+            .ToList();
+
+        return PhotoFolderService.Shared.DetectKeyColumn(image.PhotoFolderPath, columns, records);
+    }
+
+    private int CountPhotoMatches(ImageElement image, string pattern)
+    {
+        if (DatabaseData is null || string.IsNullOrWhiteSpace(image.PhotoFolderPath)) return 0;
+
+        var records = DatabaseData.Rows.Cast<DataRow>().Take(500).Select(RowToRecord);
+        return PhotoFolderService.Shared.CheckRecords(image.PhotoFolderPath, pattern, records).MatchedRecords;
+    }
+
+    private void ApplyPhotoPattern(ImageElement image, string pattern)
+    {
+        _applyingDetectedPhotoColumn = true;
+        try { image.PhotoFileNamePattern = pattern; }
+        finally { _applyingDetectedPhotoColumn = false; }
+    }
+
+    private async Task RescanPhotoFolderAsync(string folder)
+    {
+        _preparedPhotoFolders.Remove(folder);
+        await PhotoFolderService.Shared.RefreshFolderAsync(folder);
+        _preparedPhotoFolders.Add(folder);
+    }
+
+    private async Task CheckPhotoFolderSafeAsync(ImageElement image)
+    {
+        try { await CheckPhotoFolder(image); }
+        catch (Exception ex) { Log.Warn("Photo check error", ex); }
     }
 
     /// <summary>Parameters tab "Refresh": rescan the folder (new or renamed photos)

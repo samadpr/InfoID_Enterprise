@@ -1,232 +1,520 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:InfoID.Desktop.Features.Account.ViewModels"
+             xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="InfoID.Desktop.Features.Account.Views.AccountLicenseView"
              x:DataType="vm:AccountLicenseViewModel"
+             x:Name="Root"
              Background="{DynamicResource BrushBackground}">
 
-    <Grid ColumnDefinitions="*,420">
-        <!-- Left: everything the user does -->
-        <ScrollViewer Grid.Column="0">
-            <StackPanel Margin="40,24,40,40" Spacing="16" MaxWidth="640" HorizontalAlignment="Left">
-                <Button Classes="ghost" Content="&lt; Back" Padding="0" HorizontalAlignment="Left" Command="{Binding GoHomeCommand}" />
-                <TextBlock Classes="h1" Text="Account and license" />
+    <!-- Account & license (Oct 2026 redesign). Signed out: sign in / create account only
+         (plus editions and offline activation). Signed in: this computer's status with the
+         one main action, My licenses, the account and My requests. -->
 
-                <!-- This computer's license -->
-                <Border Classes="card" Padding="16,12">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel Spacing="2" VerticalAlignment="Center">
-                            <TextBlock Classes="caption" Text="This computer" />
-                            <TextBlock Text="{Binding LicenseText}" FontWeight="SemiBold" />
+    <UserControl.Styles>
+        <!-- Status pills: soft tint behind colored text, readable in light and dark themes -->
+        <Style Selector="Border.pill">
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Padding" Value="9,2" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="Background" Value="#26808080" />
+        </Style>
+        <Style Selector="Border.pill > TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+        </Style>
+        <Style Selector="Border.pill.ok">
+            <Setter Property="Background" Value="#2638B27A" />
+        </Style>
+        <Style Selector="Border.pill.ok > TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource BrushSuccess}" />
+        </Style>
+        <Style Selector="Border.pill.warn">
+            <Setter Property="Background" Value="#2EF2B544" />
+        </Style>
+        <Style Selector="Border.pill.warn > TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource BrushWarning}" />
+        </Style>
+        <Style Selector="Border.pill.bad">
+            <Setter Property="Background" Value="#26DA3025" />
+        </Style>
+        <Style Selector="Border.pill.bad > TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource BrushError}" />
+        </Style>
+        <Style Selector="Border.pill.info">
+            <Setter Property="Background" Value="#263B82F6" />
+        </Style>
+        <Style Selector="Border.pill.info > TextBlock">
+            <Setter Property="Foreground" Value="#5B9BFF" />
+        </Style>
+
+        <!-- Status card border follows the state -->
+        <Style Selector="Border.status">
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="Padding" Value="24" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource BrushCardBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushWarning}" />
+        </Style>
+        <Style Selector="Border.status.ok">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushSuccess}" />
+        </Style>
+        <Style Selector="Border.status.bad">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushError}" />
+        </Style>
+
+        <!-- Sign in | Create account switch -->
+        <Style Selector="Button.tab">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="18,7" />
+            <Setter Property="CornerRadius" Value="7" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+        </Style>
+        <Style Selector="Button.tab.selected">
+            <Setter Property="Background" Value="{DynamicResource BrushSurfaceElevated}" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style Selector="TextBlock.sectionLabel">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="LetterSpacing" Value="0.6" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Panel>
+        <!-- ============================================================ signed out ==== -->
+        <Grid ColumnDefinitions="5*,6*" IsVisible="{Binding IsSignedOut}" MaxWidth="1180" Margin="32,24,32,24">
+
+            <!-- Brand panel -->
+            <Border Grid.Column="0" CornerRadius="16" ClipToBounds="True" Margin="0,0,24,0" Padding="40">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                        <GradientStop Color="#DA3025" Offset="0" />
+                        <GradientStop Color="#7A1710" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid RowDefinitions="Auto,*,Auto">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Image Source="avares://InfoID.Desktop/Assets/Images/InfoID.png" Width="40" Height="40" Stretch="Uniform" />
+                        <TextBlock Text="InfoID" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="14">
+                        <TextBlock Text="Print every ID card you need" Foreground="White" FontSize="32" FontWeight="Bold" TextWrapping="Wrap" />
+                        <TextBlock Text="Design, issue and print professional ID cards. One account for all your licenses."
+                                   Foreground="#F2FFFFFF" FontSize="15" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <mi:MaterialIcon Kind="Check" Width="16" Height="16" Foreground="White" />
+                            <TextBlock Text="Sign in to see and activate your licenses" Foreground="#F2FFFFFF" />
                         </StackPanel>
-                        <Button Grid.Column="1" Classes="secondary" Content="License details" Command="{Binding OpenLicenseDetailsCommand}" />
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <mi:MaterialIcon Kind="Check" Width="16" Height="16" Foreground="White" />
+                            <TextBlock Text="Request a plan and follow its approval" Foreground="#F2FFFFFF" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <ScrollViewer Grid.Column="1">
+                <StackPanel Spacing="20" Margin="0,0,4,0">
+                    <Button Classes="ghost" Padding="4,2" HorizontalAlignment="Left" Command="{Binding GoHomeCommand}"
+                            ToolTip.Tip="Back to the Welcome page">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <mi:MaterialIcon Kind="ArrowLeft" Width="16" Height="16" />
+                            <TextBlock Text="Home" />
+                        </StackPanel>
+                    </Button>
+
+                    <Border Classes="card" Padding="28">
+                        <StackPanel Spacing="16">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Classes="h1" Text="Welcome to InfoID" VerticalAlignment="Center" />
+                                <Border Grid.Column="1" Classes="pill warn" IsVisible="{Binding !IsStatusActive}">
+                                    <TextBlock Text="This computer: not activated" />
+                                </Border>
+                                <Border Grid.Column="1" Classes="pill ok" IsVisible="{Binding IsStatusActive}">
+                                    <TextBlock Text="{Binding LicenseText, StringFormat='This computer: {0}'}" />
+                                </Border>
+                            </Grid>
+
+                            <!-- Sign in | Create account -->
+                            <Border IsVisible="{Binding ShowSignInTabs}" HorizontalAlignment="Left" Padding="4" CornerRadius="10"
+                                    BorderThickness="1" BorderBrush="{DynamicResource BrushBorder}"
+                                    Background="{DynamicResource BrushInputBackground}">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <Button Classes="tab" Classes.selected="{Binding IsLogIn}" Content="Sign in"
+                                            Command="{Binding ShowLogInCommand}" />
+                                    <Button Classes="tab" Classes.selected="{Binding IsSignUp}" Content="Create account"
+                                            Command="{Binding ShowSignUpCommand}" />
+                                </StackPanel>
+                            </Border>
+
+                            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+                            <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource BrushError}" TextWrapping="Wrap"
+                                       IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                            <TextBlock Text="{Binding InfoMessage}" Foreground="{DynamicResource BrushSuccess}" TextWrapping="Wrap"
+                                       IsVisible="{Binding InfoMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                            <!-- Sign in -->
+                            <StackPanel Spacing="10" IsVisible="{Binding IsLogIn}">
+                                <TextBlock Classes="label" Text="Email" />
+                                <TextBox Text="{Binding Email}" Watermark="you@company.com" AutomationProperties.Name="Email" />
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Classes="label" Text="Password" VerticalAlignment="Bottom" />
+                                    <Button Grid.Column="1" Classes="ghost" Padding="0" Content="Forgot password?" Command="{Binding ShowForgotCommand}" />
+                                </Grid>
+                                <TextBox Text="{Binding Password}" PasswordChar="●" Classes="revealPasswordButton" AutomationProperties.Name="Password">
+                                    <TextBox.KeyBindings>
+                                        <KeyBinding Gesture="Enter" Command="{Binding LogInCommand}" />
+                                    </TextBox.KeyBindings>
+                                </TextBox>
+                                <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,6,0,0"
+                                        Content="Sign in" Command="{Binding LogInCommand}" IsEnabled="{Binding !IsBusy}" />
+                                <TextBlock Classes="caption" TextWrapping="Wrap" HorizontalAlignment="Center"
+                                           Text="Your session is remembered on this computer until you sign out." />
+                            </StackPanel>
+
+                            <!-- Create account -->
+                            <StackPanel Spacing="10" IsVisible="{Binding IsSignUp}">
+                                <Grid ColumnDefinitions="*,16,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Classes="label" Text="Full name *" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding FullName}" />
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Classes="label" Text="Company" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding CompanyName}" />
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Classes="label" Text="Email *" Margin="0,10,0,4" />
+                                    <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Email}" Watermark="you@company.com" />
+                                    <TextBlock Grid.Row="2" Grid.Column="2" Classes="label" Text="Phone" Margin="0,10,0,4" />
+                                    <TextBox Grid.Row="3" Grid.Column="2" Text="{Binding Phone}" />
+
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Classes="label" Text="Country" Margin="0,10,0,4" />
+                                    <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Country}" />
+
+                                    <TextBlock Grid.Row="6" Grid.Column="0" Classes="label" Text="Password *" Margin="0,10,0,4" />
+                                    <TextBox Grid.Row="7" Grid.Column="0" Text="{Binding Password}" PasswordChar="●"
+                                             Watermark="8+ characters, letters and numbers" />
+                                    <TextBlock Grid.Row="6" Grid.Column="2" Classes="label" Text="Confirm password *" Margin="0,10,0,4" />
+                                    <TextBox Grid.Row="7" Grid.Column="2" Text="{Binding ConfirmPassword}" PasswordChar="●" />
+                                </Grid>
+                                <CheckBox IsChecked="{Binding AcceptTerms}">
+                                    <TextBlock TextWrapping="Wrap" Text="I agree to the Terms of Use and the Privacy Policy, and to receive emails about my account and licenses." />
+                                </CheckBox>
+                                <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                        Content="Create account" Command="{Binding SignUpCommand}" IsEnabled="{Binding !IsBusy}" />
+                                <TextBlock Classes="caption" TextWrapping="Wrap" HorizontalAlignment="Center"
+                                           Text="We'll email you a 6-digit code to verify your address." />
+                            </StackPanel>
+
+                            <!-- Verify email -->
+                            <StackPanel Spacing="10" IsVisible="{Binding IsVerify}">
+                                <TextBlock Classes="h3" Text="Verify your email" />
+                                <TextBlock Classes="bodySecondary" TextWrapping="Wrap">
+                                    <Run Text="Enter the 6-digit code we sent to" />
+                                    <Run Text="{Binding Email}" FontWeight="SemiBold" />
+                                </TextBlock>
+                                <TextBox Text="{Binding Code}" Watermark="000000" FontSize="22" MaxLength="6" Width="180" HorizontalAlignment="Left"
+                                         FontFamily="Consolas, Cascadia Mono, monospace" AutomationProperties.Name="Verification code">
+                                    <TextBox.KeyBindings>
+                                        <KeyBinding Gesture="Enter" Command="{Binding VerifyCommand}" />
+                                    </TextBox.KeyBindings>
+                                </TextBox>
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Button Classes="primary" Content="Verify" Command="{Binding VerifyCommand}" IsEnabled="{Binding !IsBusy}" />
+                                    <Button Classes="ghost" Content="Resend code" Command="{Binding ResendCodeCommand}" />
+                                    <Button Classes="ghost" Content="Cancel" Command="{Binding ShowLogInCommand}" />
+                                </StackPanel>
+                                <TextBlock Classes="caption" TextWrapping="Wrap" Text="The code expires after 15 minutes. Check your spam folder if you don't see it." />
+                            </StackPanel>
+
+                            <!-- Forgot password -->
+                            <StackPanel Spacing="10" IsVisible="{Binding IsForgot}">
+                                <TextBlock Classes="h3" Text="Reset your password" />
+                                <TextBlock Classes="label" Text="Email" />
+                                <TextBox Text="{Binding Email}" Watermark="you@company.com" />
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Button Classes="primary" Content="Send code" Command="{Binding SendResetCodeCommand}" IsEnabled="{Binding !IsBusy}" />
+                                    <Button Classes="ghost" Content="Back to sign in" Command="{Binding ShowLogInCommand}" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Reset password -->
+                            <StackPanel Spacing="10" IsVisible="{Binding IsReset}">
+                                <TextBlock Classes="h3" Text="Choose a new password" />
+                                <TextBlock Classes="label" Text="Code from the email" />
+                                <TextBox Text="{Binding Code}" Watermark="000000" FontSize="22" MaxLength="6" Width="180" HorizontalAlignment="Left"
+                                         FontFamily="Consolas, Cascadia Mono, monospace" />
+                                <TextBlock Classes="label" Text="New password" />
+                                <TextBox Text="{Binding Password}" PasswordChar="●" Watermark="8+ characters, letters and numbers" />
+                                <TextBlock Classes="label" Text="Confirm new password" />
+                                <TextBox Text="{Binding ConfirmPassword}" PasswordChar="●" />
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Button Classes="primary" Content="Save password" Command="{Binding ResetPasswordCommand}" IsEnabled="{Binding !IsBusy}" />
+                                    <Button Classes="ghost" Content="Back to sign in" Command="{Binding ShowLogInCommand}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Need a license? -->
+                    <Border Classes="card" Padding="24">
+                        <StackPanel Spacing="14">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Spacing="2">
+                                    <TextBlock Classes="h3" Text="Need a license?" />
+                                    <TextBlock Classes="caption" TextWrapping="Wrap" Text="Compare the editions, then sign in to request one." />
+                                </StackPanel>
+                                <Button Grid.Column="1" Classes="secondary" Content="See editions" VerticalAlignment="Center"
+                                        Command="{Binding OpenEditionsCommand}" />
+                            </Grid>
+                            <UniformGrid Columns="3">
+                                <Button Classes="ghost" Margin="0,0,8,0" Padding="12" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                        BorderThickness="1" BorderBrush="{DynamicResource BrushBorder}" Command="{Binding OpenEditionsCommand}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Standard" FontWeight="SemiBold" />
+                                        <TextBlock Classes="caption" Text="Design and print" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Classes="ghost" Margin="4,0" Padding="12" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                        BorderThickness="1" BorderBrush="{DynamicResource BrushBorder}" Command="{Binding OpenEditionsCommand}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Professional" FontWeight="SemiBold" />
+                                        <TextBlock Classes="caption" Text="+ QR, barcodes, databases" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Classes="ghost" Margin="8,0,0,0" Padding="12" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                        BorderThickness="1" BorderBrush="{DynamicResource BrushBorder}" Command="{Binding OpenEditionsCommand}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Enterprise" FontWeight="SemiBold" />
+                                        <TextBlock Classes="caption" Text="+ access control, reports" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Button>
+                            </UniformGrid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Offline computers can't sign in: keep a way to activate -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
+                        <TextBlock Classes="caption" Text="This computer has no internet?" VerticalAlignment="Center" />
+                        <Button Classes="ghost" Padding="2,0" Content="Activate offline" Command="{Binding ActivateOfflineCommand}"
+                                Foreground="{DynamicResource BrushPrimary}" />
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- ============================================================ signed in ==== -->
+        <ScrollViewer IsVisible="{Binding IsSignedIn}">
+            <StackPanel MaxWidth="1120" Margin="32,24,32,40" Spacing="24">
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Spacing="2">
+                        <Button Classes="ghost" Padding="4,2" HorizontalAlignment="Left" Command="{Binding GoHomeCommand}"
+                                ToolTip.Tip="Back to the Welcome page">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="ArrowLeft" Width="16" Height="16" />
+                                <TextBlock Text="Home" />
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Classes="h1" Text="Account &amp; license" />
+                        <TextBlock Classes="bodySecondary" Text="Your InfoID licenses and this computer's activation." />
+                    </StackPanel>
+                    <Button Grid.Column="1" Classes="ghost" VerticalAlignment="Bottom" Command="{Binding OpenLicenseDetailsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <mi:MaterialIcon Kind="InformationOutline" Width="16" Height="16" />
+                            <TextBlock Text="License details" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <!-- This computer -->
+                <Border Classes="status" Classes.ok="{Binding IsStatusActive}" Classes.bad="{Binding IsStatusCritical}"
+                        AutomationProperties.Name="This computer">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="20">
+                        <Panel Width="52" Height="52" VerticalAlignment="Top">
+                            <mi:MaterialIcon Kind="ShieldCheckOutline" Width="34" Height="34" Foreground="{DynamicResource BrushSuccess}"
+                                             IsVisible="{Binding IsStatusActive}" />
+                            <mi:MaterialIcon Kind="MonitorLock" Width="34" Height="34" Foreground="{DynamicResource BrushWarning}"
+                                             IsVisible="{Binding IsStatusWarning}" />
+                            <mi:MaterialIcon Kind="AlertOctagonOutline" Width="34" Height="34" Foreground="{DynamicResource BrushError}"
+                                             IsVisible="{Binding IsStatusCritical}" />
+                        </Panel>
+
+                        <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center">
+                            <WrapPanel>
+                                <TextBlock Text="{Binding StatusTitle}" FontSize="19" FontWeight="SemiBold" TextWrapping="Wrap"
+                                           VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <Border Classes="pill ok" IsVisible="{Binding IsStatusActive}">
+                                    <TextBlock Text="{Binding StatusBadgeText}" />
+                                </Border>
+                                <Border Classes="pill warn" IsVisible="{Binding IsStatusWarning}">
+                                    <TextBlock Text="{Binding StatusBadgeText}" />
+                                </Border>
+                                <Border Classes="pill bad" IsVisible="{Binding IsStatusCritical}">
+                                    <TextBlock Text="{Binding StatusBadgeText}" />
+                                </Border>
+                            </WrapPanel>
+                            <TextBlock Text="{Binding StatusText}" Classes="bodySecondary" TextWrapping="Wrap" />
+
+                            <!-- Activation code: only after sign-in -->
+                            <StackPanel Spacing="8" Margin="0,8,0,0" IsVisible="{Binding IsCodeEntryVisible}">
+                                <TextBlock Classes="label" Text="Activation code" />
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" MaxWidth="560" HorizontalAlignment="Left">
+                                    <TextBox Text="{Binding ActivationCode}" Watermark="XXXX-XXXX-XXXX-XXXX" FontSize="18"
+                                             FontFamily="Consolas, Cascadia Mono, monospace" AutomationProperties.Name="Activation code">
+                                        <TextBox.KeyBindings>
+                                            <KeyBinding Gesture="Enter" Command="{Binding ActivateCodeCommand}" />
+                                        </TextBox.KeyBindings>
+                                    </TextBox>
+                                    <Button Grid.Column="1" Classes="primary" Content="Activate" Command="{Binding ActivateCodeCommand}"
+                                            IsEnabled="{Binding !IsBusy}" />
+                                </Grid>
+                            </StackPanel>
+
+                            <WrapPanel Margin="0,4,0,0" IsVisible="{Binding !IsStatusActive}">
+                                <Button Classes="ghost" Padding="0" Margin="0,0,16,0" Command="{Binding ToggleCodeEntryCommand}"
+                                        IsVisible="{Binding HasLicenses}" Foreground="{DynamicResource BrushPrimary}"
+                                        Content="Enter an activation code" />
+                                <Button Classes="ghost" Padding="0" Command="{Binding ActivateOfflineCommand}"
+                                        Foreground="{DynamicResource BrushPrimary}" Content="No internet? Activate offline" />
+                            </WrapPanel>
+
+                            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" Margin="0,6,0,0" />
+                            <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource BrushError}" TextWrapping="Wrap"
+                                       IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                            <TextBlock Text="{Binding InfoMessage}" Foreground="{DynamicResource BrushSuccess}" TextWrapping="Wrap"
+                                       IsVisible="{Binding InfoMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Spacing="8" VerticalAlignment="Center">
+                            <Button Classes="primary" Command="{Binding ActivateSuggestedCommand}" IsVisible="{Binding ShowActivateSuggested}"
+                                    IsEnabled="{Binding !IsBusy}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <mi:MaterialIcon Kind="Check" Width="18" Height="18" />
+                                    <TextBlock Text="Activate on this computer" />
+                                </StackPanel>
+                            </Button>
+                            <Button Classes="primary" Content="Request a plan" Command="{Binding RequestPlanCommand}"
+                                    IsVisible="{Binding ShowRequestPlanAction}" />
+                            <Button Classes="primary" Content="Start designing" Command="{Binding GoHomeCommand}"
+                                    IsVisible="{Binding IsStatusActive}" ToolTip.Tip="Back to the Welcome page" />
+                        </StackPanel>
                     </Grid>
                 </Border>
 
-                <!-- Activation code: never needs an account -->
-                <Border Classes="card" Padding="20">
-                    <StackPanel Spacing="10">
-                        <TextBlock Classes="h3" Text="License information" />
-                        <TextBlock Classes="label" Text="Enter your activation code" />
-                        <TextBox Text="{Binding ActivationCode}" Watermark="XXXX-XXXX-XXXX-XXXX" FontSize="18"
-                                 FontFamily="Consolas, Cascadia Mono, monospace" AutomationProperties.Name="Activation code">
-                            <TextBox.KeyBindings>
-                                <KeyBinding Gesture="Enter" Command="{Binding ActivateCodeCommand}" />
-                            </TextBox.KeyBindings>
-                        </TextBox>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Button Classes="primary" Content="Activate" Command="{Binding ActivateCodeCommand}" IsEnabled="{Binding !IsBusy}" />
-                            <Button Classes="ghost" Content="No internet? Activate offline" Command="{Binding ActivateOfflineCommand}" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
-                <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource BrushError}" TextWrapping="Wrap"
-                           IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                <TextBlock Text="{Binding InfoMessage}" Foreground="{DynamicResource BrushSuccess}" TextWrapping="Wrap"
-                           IsVisible="{Binding InfoMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
-
-                <!-- Signed out: account cards -->
-                <StackPanel Spacing="12" IsVisible="{Binding ShowAccountCards}">
-                    <Border Classes="card" Padding="20">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <StackPanel Spacing="4" VerticalAlignment="Center">
-                                <TextBlock Classes="h3" Text="Already have an account?" />
-                                <TextBlock Classes="bodySecondary" TextWrapping="Wrap" Text="Log in to see and activate your licenses." />
+                <!-- Two columns; below 900px wide the right column moves under My licenses
+                     (code-behind: UpdateColumns). -->
+                <Grid x:Name="ColumnsGrid" ColumnDefinitions="2*,24,*" RowDefinitions="Auto,Auto">
+                    <!-- My licenses -->
+                    <Border Grid.Column="0" Classes="card" Padding="24" VerticalAlignment="Top">
+                        <StackPanel Spacing="16">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <mi:MaterialIcon Kind="KeyVariant" Width="20" Height="20" Foreground="{DynamicResource BrushTextSecondary}" />
+                                <TextBlock Classes="h3" Text="My licenses" VerticalAlignment="Center" />
+                                <Border Classes="pill" IsVisible="{Binding HasLicenses}">
+                                    <TextBlock Text="{Binding LicenseCountText}" />
+                                </Border>
                             </StackPanel>
-                            <Button Grid.Column="1" Classes="primary" Content="Log in" Command="{Binding ShowLogInCommand}" />
-                        </Grid>
-                    </Border>
-                    <Border Classes="card" Padding="20">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <StackPanel Spacing="4" VerticalAlignment="Center">
-                                <TextBlock Classes="h3" Text="Create an account" />
-                                <TextBlock Classes="bodySecondary" TextWrapping="Wrap" Text="Keep your licenses online and request plans easily." />
-                            </StackPanel>
-                            <Button Grid.Column="1" Classes="secondary" Content="Create an account" Command="{Binding ShowSignUpCommand}" />
-                        </Grid>
-                    </Border>
-                    <Border Classes="card" Padding="20">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <StackPanel Spacing="4" VerticalAlignment="Center">
-                                <TextBlock Classes="h3" Text="Need a license?" />
-                                <TextBlock Classes="bodySecondary" TextWrapping="Wrap" Text="Compare the editions and send us a request." />
-                            </StackPanel>
-                            <Button Grid.Column="1" Classes="secondary" Content="See editions" Command="{Binding OpenEditionsCommand}" />
-                        </Grid>
-                    </Border>
-                </StackPanel>
 
-                <!-- Log in -->
-                <Border Classes="card" Padding="20" IsVisible="{Binding IsLogIn}">
-                    <StackPanel Spacing="10">
-                        <TextBlock Classes="h3" Text="Log in" />
-                        <TextBlock Classes="label" Text="Email" />
-                        <TextBox Text="{Binding Email}" Watermark="you@company.com" />
-                        <TextBlock Classes="label" Text="Password" />
-                        <TextBox Text="{Binding Password}" PasswordChar="●">
-                            <TextBox.KeyBindings>
-                                <KeyBinding Gesture="Enter" Command="{Binding LogInCommand}" />
-                            </TextBox.KeyBindings>
-                        </TextBox>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Button Classes="primary" Content="Log in" Command="{Binding LogInCommand}" IsEnabled="{Binding !IsBusy}" />
-                            <Button Classes="ghost" Content="Forgot password?" Command="{Binding ShowForgotCommand}" />
-                            <Button Classes="ghost" Content="Cancel" Command="{Binding ShowStartCommand}" />
-                        </StackPanel>
-                        <Button Classes="ghost" Padding="0" HorizontalAlignment="Left" Content="No account yet? Create one"
-                                Command="{Binding ShowSignUpCommand}" />
-                    </StackPanel>
-                </Border>
+                            <!-- Empty state -->
+                            <Border IsVisible="{Binding HasNoLicenses}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1"
+                                    CornerRadius="12" Padding="24,32">
+                                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                    <mi:MaterialIcon Kind="KeyVariant" Width="32" Height="32" Foreground="{DynamicResource BrushTextSecondary}" />
+                                    <TextBlock Text="No licenses yet" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                    <TextBlock Classes="caption" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="380"
+                                               Text="Request a plan. Once it's approved, the license appears here, ready to activate with one click." />
+                                    <Button Classes="secondary" Content="Request a plan" HorizontalAlignment="Center" Margin="0,6,0,0"
+                                            Command="{Binding RequestPlanCommand}" />
+                                </StackPanel>
+                            </Border>
 
-                <!-- Sign up -->
-                <Border Classes="card" Padding="20" IsVisible="{Binding IsSignUp}">
-                    <StackPanel Spacing="10">
-                        <TextBlock Classes="h3" Text="Create an account" />
-                        <Grid ColumnDefinitions="*,16,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Classes="label" Text="Full name *" Margin="0,0,0,4" />
-                            <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding FullName}" />
-                            <TextBlock Grid.Row="0" Grid.Column="2" Classes="label" Text="Company" Margin="0,0,0,4" />
-                            <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding CompanyName}" />
-
-                            <TextBlock Grid.Row="2" Grid.Column="0" Classes="label" Text="Email *" Margin="0,10,0,4" />
-                            <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Email}" Watermark="you@company.com" />
-                            <TextBlock Grid.Row="2" Grid.Column="2" Classes="label" Text="Phone" Margin="0,10,0,4" />
-                            <TextBox Grid.Row="3" Grid.Column="2" Text="{Binding Phone}" />
-
-                            <TextBlock Grid.Row="4" Grid.Column="0" Classes="label" Text="Country" Margin="0,10,0,4" />
-                            <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Country}" />
-
-                            <TextBlock Grid.Row="6" Grid.Column="0" Classes="label" Text="Password *" Margin="0,10,0,4" />
-                            <TextBox Grid.Row="7" Grid.Column="0" Text="{Binding Password}" PasswordChar="●"
-                                     Watermark="8+ characters, letters and numbers" />
-                            <TextBlock Grid.Row="6" Grid.Column="2" Classes="label" Text="Confirm password *" Margin="0,10,0,4" />
-                            <TextBox Grid.Row="7" Grid.Column="2" Text="{Binding ConfirmPassword}" PasswordChar="●" />
-                        </Grid>
-                        <CheckBox IsChecked="{Binding AcceptTerms}">
-                            <TextBlock TextWrapping="Wrap" Text="I agree to the Terms of Use and the Privacy Policy, and to receive emails about my account and licenses." />
-                        </CheckBox>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Button Classes="primary" Content="Create account" Command="{Binding SignUpCommand}" IsEnabled="{Binding !IsBusy}" />
-                            <Button Classes="ghost" Content="Cancel" Command="{Binding ShowStartCommand}" />
-                        </StackPanel>
-                        <TextBlock Classes="caption" TextWrapping="Wrap"
-                                   Text="We'll email you a 6-digit code to verify your address." />
-                    </StackPanel>
-                </Border>
-
-                <!-- Verify email -->
-                <Border Classes="card" Padding="20" IsVisible="{Binding IsVerify}">
-                    <StackPanel Spacing="10">
-                        <TextBlock Classes="h3" Text="Verify your email" />
-                        <TextBlock Classes="bodySecondary" TextWrapping="Wrap">
-                            <Run Text="Enter the 6-digit code we sent to" />
-                            <Run Text="{Binding Email}" FontWeight="SemiBold" />
-                        </TextBlock>
-                        <TextBox Text="{Binding Code}" Watermark="000000" FontSize="22" MaxLength="6" Width="180" HorizontalAlignment="Left"
-                                 FontFamily="Consolas, Cascadia Mono, monospace" AutomationProperties.Name="Verification code">
-                            <TextBox.KeyBindings>
-                                <KeyBinding Gesture="Enter" Command="{Binding VerifyCommand}" />
-                            </TextBox.KeyBindings>
-                        </TextBox>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Button Classes="primary" Content="Verify" Command="{Binding VerifyCommand}" IsEnabled="{Binding !IsBusy}" />
-                            <Button Classes="ghost" Content="Resend code" Command="{Binding ResendCodeCommand}" />
-                            <Button Classes="ghost" Content="Cancel" Command="{Binding ShowStartCommand}" />
-                        </StackPanel>
-                        <TextBlock Classes="caption" TextWrapping="Wrap" Text="The code expires after 15 minutes. Check your spam folder if you don't see it." />
-                    </StackPanel>
-                </Border>
-
-                <!-- Forgot password -->
-                <Border Classes="card" Padding="20" IsVisible="{Binding IsForgot}">
-                    <StackPanel Spacing="10">
-                        <TextBlock Classes="h3" Text="Reset your password" />
-                        <TextBlock Classes="label" Text="Email" />
-                        <TextBox Text="{Binding Email}" Watermark="you@company.com" />
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Button Classes="primary" Content="Send code" Command="{Binding SendResetCodeCommand}" IsEnabled="{Binding !IsBusy}" />
-                            <Button Classes="ghost" Content="Cancel" Command="{Binding ShowLogInCommand}" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Reset password -->
-                <Border Classes="card" Padding="20" IsVisible="{Binding IsReset}">
-                    <StackPanel Spacing="10">
-                        <TextBlock Classes="h3" Text="Choose a new password" />
-                        <TextBlock Classes="label" Text="Code from the email" />
-                        <TextBox Text="{Binding Code}" Watermark="000000" FontSize="22" MaxLength="6" Width="180" HorizontalAlignment="Left"
-                                 FontFamily="Consolas, Cascadia Mono, monospace" />
-                        <TextBlock Classes="label" Text="New password" />
-                        <TextBox Text="{Binding Password}" PasswordChar="●" Watermark="8+ characters, letters and numbers" />
-                        <TextBlock Classes="label" Text="Confirm new password" />
-                        <TextBox Text="{Binding ConfirmPassword}" PasswordChar="●" />
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Button Classes="primary" Content="Save password" Command="{Binding ResetPasswordCommand}" IsEnabled="{Binding !IsBusy}" />
-                            <Button Classes="ghost" Content="Cancel" Command="{Binding ShowLogInCommand}" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Signed in -->
-                <StackPanel Spacing="12" IsVisible="{Binding IsSignedIn}">
-                    <Border Classes="card" Padding="20">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <StackPanel Spacing="2" VerticalAlignment="Center">
-                                <TextBlock Classes="caption" Text="Signed in as" />
-                                <TextBlock Text="{Binding AccountName}" FontWeight="SemiBold" />
-                                <TextBlock Classes="caption" Text="{Binding AccountEmail}" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                <Button Classes="ghost" Content="Refresh" Command="{Binding RefreshAccountCommand}" />
-                                <Button Classes="secondary" Content="Sign out" Command="{Binding SignOutCommand}" />
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <Border Classes="card" Padding="20">
-                        <StackPanel Spacing="10">
-                            <TextBlock Classes="h3" Text="My licenses" />
-                            <TextBlock Classes="bodySecondary" TextWrapping="Wrap" IsVisible="{Binding HasNoLicenses}"
-                                       Text="No licenses yet. Request a plan, and once it's approved your license appears here." />
                             <ItemsControl ItemsSource="{Binding Licenses}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="12" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="vm:AccountLicenseItem">
-                                        <Border BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,0,0,1" Padding="0,8">
-                                            <Grid ColumnDefinitions="*,Auto">
-                                                <StackPanel Spacing="2">
-                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
-                                                    <SelectableTextBlock Text="{Binding ActivationCode}" FontFamily="Consolas, Cascadia Mono, monospace" />
-                                                    <TextBlock Classes="caption" Text="{Binding Details}" TextWrapping="Wrap" />
-                                                </StackPanel>
-                                                <Button Grid.Column="1" Classes="primary" VerticalAlignment="Center"
-                                                        Content="Activate on this computer"
-                                                        IsVisible="{Binding CanActivate}"
-                                                        Command="{Binding $parent[ItemsControl].((vm:AccountLicenseViewModel)DataContext).ActivateLicenseCommand}"
-                                                        CommandParameter="{Binding}" />
-                                            </Grid>
+                                        <Border BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="12" Padding="20"
+                                                Background="{DynamicResource BrushSurface}">
+                                            <StackPanel Spacing="16">
+                                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                                    <Border Width="40" Height="40" CornerRadius="10" Background="#26DA3025">
+                                                        <TextBlock Text="{Binding TierMark}" FontWeight="Bold" FontSize="12"
+                                                                   Foreground="{DynamicResource BrushPrimary}"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                                    <Panel Grid.Column="2">
+                                                        <Border Classes="pill ok" IsVisible="{Binding IsBadgeOk}">
+                                                            <TextBlock Text="{Binding BadgeText}" />
+                                                        </Border>
+                                                        <Border Classes="pill bad" IsVisible="{Binding IsBadgeBad}">
+                                                            <TextBlock Text="{Binding BadgeText}" />
+                                                        </Border>
+                                                        <Border Classes="pill" IsVisible="{Binding IsBadgeNeutral}">
+                                                            <TextBlock Text="{Binding BadgeText}" />
+                                                        </Border>
+                                                    </Panel>
+                                                </Grid>
+
+                                                <!-- Key: hidden until "Show" -->
+                                                <Border CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource BrushBorder}"
+                                                        Background="{DynamicResource BrushInputBackground}" Padding="14,4,4,4">
+                                                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+                                                        <TextBlock Classes="caption" Text="Key" VerticalAlignment="Center" />
+                                                        <SelectableTextBlock Grid.Column="1" Text="{Binding DisplayCode}" VerticalAlignment="Center"
+                                                                             FontFamily="Consolas, Cascadia Mono, monospace" FontSize="15" />
+                                                        <Button Grid.Column="2" Classes="ghost" Padding="8" Command="{Binding ToggleRevealCommand}"
+                                                                ToolTip.Tip="{Binding RevealToolTip}" AutomationProperties.Name="{Binding RevealToolTip}">
+                                                            <Panel>
+                                                                <mi:MaterialIcon Kind="EyeOutline" Width="18" Height="18" IsVisible="{Binding !IsKeyRevealed}" />
+                                                                <mi:MaterialIcon Kind="EyeOffOutline" Width="18" Height="18" IsVisible="{Binding IsKeyRevealed}" />
+                                                            </Panel>
+                                                        </Button>
+                                                        <Button Grid.Column="3" Classes="ghost" Padding="8" Tag="{Binding ActivationCode}"
+                                                                Click="OnCopyKeyClick"
+                                                                ToolTip.Tip="Copy license key" AutomationProperties.Name="Copy license key">
+                                                            <mi:MaterialIcon Kind="ContentCopy" Width="18" Height="18" />
+                                                        </Button>
+                                                    </Grid>
+                                                </Border>
+
+                                                <Grid ColumnDefinitions="*,24,*">
+                                                    <StackPanel Spacing="4">
+                                                        <TextBlock Classes="sectionLabel" Text="COMPUTERS" />
+                                                        <TextBlock Text="{Binding ComputersText}" FontWeight="SemiBold" />
+                                                        <ProgressBar Minimum="0" Maximum="100" Value="{Binding ComputersPercent}" Height="6" MinHeight="6"
+                                                                     AutomationProperties.Name="Computers in use" />
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="2" Spacing="4">
+                                                        <TextBlock Classes="sectionLabel" Text="EXPIRES" />
+                                                        <TextBlock Text="{Binding ExpiryText}" FontWeight="SemiBold" />
+                                                        <Panel>
+                                                            <TextBlock Classes="caption" Text="{Binding DaysLeftText}" Foreground="{DynamicResource BrushSuccess}"
+                                                                       IsVisible="{Binding IsDaysLeftOk}" />
+                                                            <TextBlock Classes="caption" Text="{Binding DaysLeftText}" Foreground="{DynamicResource BrushWarning}"
+                                                                       IsVisible="{Binding IsDaysLeftWarning}" />
+                                                            <TextBlock Classes="caption" Text="{Binding DaysLeftText}" Foreground="{DynamicResource BrushError}"
+                                                                       IsVisible="{Binding IsExpired}" />
+                                                        </Panel>
+                                                    </StackPanel>
+                                                </Grid>
+
+                                                <Border BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,1,0,0" Padding="0,14,0,0"
+                                                        IsVisible="{Binding CanActivate}">
+                                                    <Button Classes="secondary" HorizontalAlignment="Right" Content="Activate on this computer"
+                                                            Command="{Binding #Root.((vm:AccountLicenseViewModel)DataContext).ActivateLicenseCommand}"
+                                                            CommandParameter="{Binding}" />
+                                                </Border>
+                                            </StackPanel>
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -234,52 +522,88 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="card" Padding="20">
-                        <StackPanel Spacing="10">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Classes="h3" Text="My requests" VerticalAlignment="Center" />
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                    <Button Classes="ghost" Content="See editions" Command="{Binding OpenEditionsCommand}" />
-                                    <Button Classes="primary" Content="Request a plan" Command="{Binding RequestPlanCommand}" />
+                    <StackPanel x:Name="SideColumn" Grid.Column="2" Spacing="24">
+                        <!-- Account -->
+                        <Border Classes="card" Padding="20" AutomationProperties.Name="Signed-in account">
+                            <StackPanel Spacing="16">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                    <Border Width="44" Height="44" CornerRadius="22" Background="{DynamicResource BrushPrimary}">
+                                        <TextBlock Text="{Binding AccountInitials}" Foreground="White" FontWeight="Bold" FontSize="16"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding AccountName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Classes="caption" Text="{Binding AccountEmail}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                    <TextBlock Classes="caption" Text="{Binding SyncedText}" VerticalAlignment="Center" />
+                                    <Button Grid.Column="1" Classes="ghost" Command="{Binding RefreshAccountCommand}" ToolTip.Tip="Reload licenses and requests">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <mi:MaterialIcon Kind="Refresh" Width="16" Height="16" />
+                                            <TextBlock Text="Refresh" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Grid.Column="2" Classes="secondary" Content="Sign out" Command="{Binding SignOutCommand}"
+                                            ToolTip.Tip="Sign out. InfoID stays activated on this computer." />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- My requests -->
+                        <Border Classes="card" Padding="20">
+                            <StackPanel Spacing="14">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <mi:MaterialIcon Kind="FileDocumentOutline" Width="20" Height="20" Foreground="{DynamicResource BrushTextSecondary}" />
+                                    <TextBlock Classes="h3" Text="My requests" VerticalAlignment="Center" />
                                 </StackPanel>
-                            </Grid>
-                            <TextBlock Classes="bodySecondary" IsVisible="{Binding HasNoRequests}" Text="No requests yet." />
-                            <ItemsControl ItemsSource="{Binding Requests}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:AccountRequestItem">
-                                        <Border BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,0,0,1" Padding="0,8">
-                                            <Grid ColumnDefinitions="*,Auto">
-                                                <StackPanel Spacing="2">
-                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
-                                                    <TextBlock Classes="caption" Text="{Binding StatusText}" TextWrapping="Wrap" />
+                                <TextBlock Classes="bodySecondary" IsVisible="{Binding HasNoRequests}" Text="No requests yet." />
+                                <ItemsControl ItemsSource="{Binding Requests}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="10" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:AccountRequestItem">
+                                            <Border BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" CornerRadius="10" Padding="14"
+                                                    Background="{DynamicResource BrushSurface}">
+                                                <StackPanel Spacing="6">
+                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                                        <Panel Grid.Column="1">
+                                                            <Border Classes="pill ok" IsVisible="{Binding IsBadgeOk}">
+                                                                <TextBlock Text="{Binding BadgeText}" />
+                                                            </Border>
+                                                            <Border Classes="pill bad" IsVisible="{Binding IsBadgeBad}">
+                                                                <TextBlock Text="{Binding BadgeText}" />
+                                                            </Border>
+                                                            <Border Classes="pill info" IsVisible="{Binding IsBadgeInfo}">
+                                                                <TextBlock Text="{Binding BadgeText}" />
+                                                            </Border>
+                                                        </Panel>
+                                                    </Grid>
+                                                    <TextBlock Classes="caption" Text="{Binding DetailText}" TextWrapping="Wrap" />
                                                 </StackPanel>
-                                                <TextBlock Grid.Column="1" Classes="caption" Text="{Binding DateText}" VerticalAlignment="Center" />
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Button Classes="ghost" Padding="0" Content="Compare editions" Command="{Binding OpenEditionsCommand}"
+                                            Foreground="{DynamicResource BrushPrimary}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                                    <Button Grid.Column="1" Classes="secondary" Command="{Binding RequestPlanCommand}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <mi:MaterialIcon Kind="Plus" Width="16" Height="16" />
+                                            <TextBlock Text="Request a plan" />
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
             </StackPanel>
         </ScrollViewer>
-
-        <!-- Right: brand panel -->
-        <Border Grid.Column="1" Margin="0,24,24,24" CornerRadius="16" ClipToBounds="True">
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
-                    <GradientStop Color="#DA3025" Offset="0" />
-                    <GradientStop Color="#7A1710" Offset="1" />
-                </LinearGradientBrush>
-            </Border.Background>
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="24" Margin="32">
-                <Image Source="avares://InfoID.Desktop/Assets/Images/InfoID.png" Width="120" Height="120" Stretch="Uniform" />
-                <TextBlock Text="Print every ID card you need" Foreground="White" FontSize="30" FontWeight="Bold"
-                           TextAlignment="Center" TextWrapping="Wrap" />
-                <TextBlock Text="Design, issue and print professional ID cards. One account for all your licenses."
-                           Foreground="#F2FFFFFF" FontSize="15" TextAlignment="Center" TextWrapping="Wrap" />
-            </StackPanel>
-        </Border>
-    </Grid>
+    </Panel>
 </UserControl>

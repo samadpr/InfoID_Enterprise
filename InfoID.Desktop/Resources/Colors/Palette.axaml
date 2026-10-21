@@ -2,9 +2,9 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
   <!-- Brand colors are identical in both themes - InfoID red stays InfoID red. -->
-  <Color x:Key="ColorPrimary">#DA3025</Color>
-  <Color x:Key="ColorPrimaryHover">#C22A21</Color>
-  <Color x:Key="ColorPrimaryPressed">#A8241C</Color>
+  <Color x:Key="ColorPrimary">#0D9488</Color>
+  <Color x:Key="ColorPrimaryHover">#0F766E</Color>
+  <Color x:Key="ColorPrimaryPressed">#115E59</Color>
   <Color x:Key="ColorPrimaryForeground">#FFFFFF</Color>
   <Color x:Key="ColorSuccess">#2E8B57</Color>
   <Color x:Key="ColorWarning">#B8860B</Color>
@@ -33,7 +33,7 @@
       <SolidColorBrush x:Key="BrushTextDisabled" Color="#A6AAB2" />
       <SolidColorBrush x:Key="BrushDisabled" Color="#E9EAED" />
       <SolidColorBrush x:Key="BrushCardBackground" Color="#FFFFFF" />
-      <SolidColorBrush x:Key="BrushSelectionBackground" Color="#FCEBEA" />
+      <SolidColorBrush x:Key="BrushSelectionBackground" Color="#CCFBF1" />
       <SolidColorBrush x:Key="BrushInputBackground" Color="#FFFFFF" />
       <SolidColorBrush x:Key="BrushHoverOverlay" Color="#0A1B1D22" />
       <SolidColorBrush x:Key="BrushScrollThumb" Color="#C7CAD1" />
@@ -59,7 +59,7 @@
       <SolidColorBrush x:Key="BrushTextDisabled" Color="#6B6E76" />
       <SolidColorBrush x:Key="BrushDisabled" Color="#2A2C32" />
       <SolidColorBrush x:Key="BrushCardBackground" Color="#25272D" />
-      <SolidColorBrush x:Key="BrushSelectionBackground" Color="#3A2422" />
+      <SolidColorBrush x:Key="BrushSelectionBackground" Color="#134E4A" />
       <SolidColorBrush x:Key="BrushInputBackground" Color="#1B1C21" />
       <SolidColorBrush x:Key="BrushHoverOverlay" Color="#14FFFFFF" />
       <SolidColorBrush x:Key="BrushScrollThumb" Color="#44474F" />

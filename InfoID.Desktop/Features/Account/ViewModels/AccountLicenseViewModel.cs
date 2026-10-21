@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,6 +12,7 @@ using InfoID.Desktop.Features.Licensing.Services;
 using InfoID.Desktop.Features.Licensing.ViewModels;
 using InfoID.Desktop.Features.Welcome.ViewModels;
 using InfoID.Desktop.ViewModels.Base;
+using InfoID.Domain.Common.Enums;
 using InfoID.Shared.Contracts.Accounts;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,6 +21,7 @@ namespace InfoID.Desktop.Features.Account.ViewModels;
 /// <summary>Which panel of the Account &amp; License page is showing.</summary>
 public enum AccountPanel
 {
+    /// <summary>Kept for callers that pass it; signed out it now shows the Sign in form.</summary>
     Start,
     LogIn,
     SignUp,
@@ -28,19 +31,91 @@ public enum AccountPanel
     SignedIn,
 }
 
-/// <summary>One license in "My licenses".</summary>
-public sealed class AccountLicenseItem
+/// <summary>Dates on this page read "3 Aug 2027": unambiguous in every regional format.</summary>
+internal static class AccountDates
 {
-    public AccountLicenseItem(AccountLicenseDto dto) => Dto = dto;
+    public static string Format(DateTime date) => date.ToString("d MMM yyyy", CultureInfo.CurrentCulture);
+    public static string Format(DateOnly date) => date.ToString("d MMM yyyy", CultureInfo.CurrentCulture);
+}
+
+/// <summary>One license in "My licenses".</summary>
+public sealed partial class AccountLicenseItem : ObservableObject
+{
+    /// <param name="thisComputerCode">Activation code of the license active on this
+    /// computer (null when none), to mark "Active on this computer".</param>
+    public AccountLicenseItem(AccountLicenseDto dto, string? thisComputerCode = null)
+    {
+        Dto = dto;
+        IsOnThisComputer = thisComputerCode is not null && Normalize(thisComputerCode) == Normalize(dto.ActivationCode);
+    }
 
     public AccountLicenseDto Dto { get; }
     public string ActivationCode => Dto.ActivationCode;
     public string Title => $"InfoID {Dto.Tier}";
-    public string Details =>
-        (Dto.ExpiryDate is { } e ? $"Valid until {e:d}" : "Perpetual") +
-        $"  ·  {Dto.ActiveMachines} of {Dto.MaxActivations} computer(s) in use" +
-        (Dto.Status == "Revoked" ? "  ·  Revoked" : "");
-    public bool CanActivate => Dto.Status != "Revoked";
+
+    /// <summary>Short edition mark for the tile: STD, PRO, ENT.</summary>
+    public string TierMark => Dto.Tier.Length >= 3 ? Dto.Tier[..3].ToUpperInvariant() : Dto.Tier.ToUpperInvariant();
+
+    public bool IsOnThisComputer { get; }
+    public bool IsRevoked => Dto.Status == "Revoked";
+    public int? DaysLeft => Dto.ExpiryDate is { } e ? e.DayNumber - DateOnly.FromDateTime(DateTime.Today).DayNumber : null;
+    public bool IsExpired => DaysLeft is < 0;
+    public bool AllComputersInUse => Dto.MaxActivations > 0 && Dto.ActiveMachines >= Dto.MaxActivations;
+
+    // ---- key: hidden by default, "Show" reveals it ----
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayCode), nameof(RevealToolTip))]
+    private bool _isKeyRevealed;
+
+    /// <summary>"FXAW-••••-••••-XEZD" until revealed.</summary>
+    public string DisplayCode => IsKeyRevealed ? ActivationCode : Mask(ActivationCode);
+    public string RevealToolTip => IsKeyRevealed ? "Hide license key" : "Show license key";
+
+    [RelayCommand]
+    private void ToggleReveal() => IsKeyRevealed = !IsKeyRevealed;
+
+    // ---- usage and expiry ----
+
+    public string ComputersText => $"{Dto.ActiveMachines} of {Dto.MaxActivations} in use";
+    public double ComputersPercent => Dto.MaxActivations <= 0 ? 0 : Math.Clamp(100.0 * Dto.ActiveMachines / Dto.MaxActivations, 0, 100);
+    public string ExpiryText => Dto.ExpiryDate is { } e ? AccountDates.Format(e) : "Never (perpetual)";
+    public string DaysLeftText => DaysLeft switch
+    {
+        null => "No expiry date",
+        < 0 => "Expired",
+        0 => "Expires today",
+        1 => "1 day left",
+        { } d => $"{d} days left",
+    };
+    public bool IsDaysLeftWarning => DaysLeft is >= 0 and <= LicenseBadgeState.ExpiringSoonDays;
+    public bool IsDaysLeftOk => DaysLeft is null or > LicenseBadgeState.ExpiringSoonDays;
+
+    // ---- status badge ----
+
+    public string BadgeText =>
+        IsRevoked ? "Revoked"
+        : IsExpired ? "Expired"
+        : IsOnThisComputer ? "Active on this computer"
+        : AllComputersInUse ? "All computers in use"
+        : "Not used on this computer";
+    public bool IsBadgeOk => !IsRevoked && !IsExpired && IsOnThisComputer;
+    public bool IsBadgeBad => IsRevoked || IsExpired;
+    public bool IsBadgeNeutral => !IsBadgeOk && !IsBadgeBad;
+
+    /// <summary>"Activate on this computer" is offered when the server can accept it. A
+    /// full license is still offered: the server explains and the user can free a slot.</summary>
+    public bool CanActivate => !IsRevoked && !IsExpired && !IsOnThisComputer;
+
+    private static string Normalize(string code) => code.Replace("-", "").Replace(" ", "").ToUpperInvariant();
+
+    private static string Mask(string code)
+    {
+        var parts = code.Split('-');
+        if (parts.Length < 3) return new string('•', Math.Max(4, code.Length));
+        for (var i = 1; i < parts.Length - 1; i++) parts[i] = new string('•', parts[i].Length);
+        return string.Join("-", parts);
+    }
 }
 
 /// <summary>One request in "My requests".</summary>
@@ -49,24 +124,43 @@ public sealed class AccountRequestItem
     public AccountRequestItem(AccountRequestDto dto) => Dto = dto;
 
     public AccountRequestDto Dto { get; }
-    public string Title => $"#{Dto.Id}  {Dto.PlanName}  ·  {Dto.Machines} computer(s)";
-    public string StatusText => Dto.Status switch
+    public string Title => $"#{Dto.Id} · {Dto.PlanName} · {Dto.Machines} computer{(Dto.Machines == 1 ? "" : "s")}";
+
+    public string BadgeText => Dto.Status switch
     {
-        "New" => "Received - our team will contact you",
+        "New" => "Received",
         "InProgress" => "In progress",
-        "Approved" => "Approved" + (Dto.ActivationCode is { } c ? $" - code {c}" : ""),
-        "Rejected" => "Not approved" + (Dto.StatusReason is { } r ? $": {r}" : ""),
+        "Approved" => "Approved",
+        "Rejected" => "Not approved",
         _ => Dto.Status,
     };
-    public string DateText => Dto.CreatedDate.ToLocalTime().ToString("d");
+    public bool IsBadgeOk => Dto.Status == "Approved";
+    public bool IsBadgeBad => Dto.Status == "Rejected";
+    public bool IsBadgeInfo => !IsBadgeOk && !IsBadgeBad;
+
+    /// <summary>"16 Oct 2026 · Key added to My licenses".</summary>
+    public string DetailText => DateText + " · " + Dto.Status switch
+    {
+        "New" => "Our team will contact you",
+        "InProgress" => "Being prepared",
+        "Approved" => Dto.ActivationCode is null ? "Approved" : "Key added to My licenses",
+        "Rejected" => Dto.StatusReason ?? "Contact us for details",
+        _ => Dto.Status,
+    };
+
+    public string DateText => AccountDates.Format(Dto.CreatedDate.ToLocalTime());
 }
 
 /// <summary>
-/// Account &amp; License page (like the reference app's "Account and license"):
-///   - Activation code box: works WITHOUT an account (FR-SEC-4: login is never required).
-///   - Log in / Create account (email verified with a 6-digit code) / Forgot password.
-///   - Signed in: My licenses (one-click "Activate on this computer") and My requests.
-///   - Editions and Request a plan.
+/// Account &amp; License page (Oct 2026 redesign):
+///   - Signed out: Sign in / Create account (email verified with a 6-digit code), Forgot
+///     password, editions, and "Activate offline" for computers without internet (the
+///     offline screen takes a code without an account).
+///   - Signed in: a status card for THIS computer (green active, amber needs action, red
+///     expired / not valid) with the one main action, My licenses (one-click "Activate on
+///     this computer", hidden key, computers in use, days left), the account, and My
+///     requests. The activation code box is shown after sign-in: open when there are no
+///     licenses, otherwise behind "Enter an activation code".
 /// Accounts live on the License API server (one account for all products); the session
 /// is remembered (AccountSession, DPAPI-protected).
 /// </summary>
@@ -85,17 +179,25 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
         _portal = portal;
         _license = license;
         Session = session;
+    }
 
-        // Signing out from the header menu while this page is open.
-        Session.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName != nameof(AccountSession.IsSignedIn) || Session.IsSignedIn) return;
-            Licenses.Clear();
-            Requests.Clear();
-            LicenseCount = 0;
-            RequestCount = 0;
-            if (Panel == AccountPanel.SignedIn) Panel = AccountPanel.Start;
-        };
+    /// <summary>Signing out elsewhere while this page is open (e.g. the session expired).
+    /// Subscribed only while the page is showing: AccountSession is a singleton and this
+    /// view model is transient, so a constructor subscription would keep every visit alive.</summary>
+    private void OnSessionChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(AccountSession.IsSignedIn) || Session.IsSignedIn) return;
+        Licenses.Clear();
+        Requests.Clear();
+        LicenseCount = 0;
+        RequestCount = 0;
+        if (Panel == AccountPanel.SignedIn) Panel = AccountPanel.LogIn;
+    }
+
+    public override void OnNavigatedFrom()
+    {
+        Session.PropertyChanged -= OnSessionChanged;
+        base.OnNavigatedFrom();
     }
 
     public AccountSession Session { get; }
@@ -103,18 +205,19 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
     // ---------------------------------------------------------------- panel state ----
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsStart), nameof(IsLogIn), nameof(IsSignUp), nameof(IsVerify), nameof(IsForgot), nameof(IsReset), nameof(IsSignedIn), nameof(ShowAccountCards))]
-    private AccountPanel _panel = AccountPanel.Start;
+    [NotifyPropertyChangedFor(nameof(IsLogIn), nameof(IsSignUp), nameof(IsVerify), nameof(IsForgot), nameof(IsReset),
+        nameof(IsSignedIn), nameof(IsSignedOut), nameof(ShowSignInTabs), nameof(IsCodeEntryVisible))]
+    private AccountPanel _panel = AccountPanel.LogIn;
 
-    public bool IsStart => Panel == AccountPanel.Start;
-    public bool IsLogIn => Panel == AccountPanel.LogIn;
+    public bool IsLogIn => Panel is AccountPanel.LogIn or AccountPanel.Start;
     public bool IsSignUp => Panel == AccountPanel.SignUp;
     public bool IsVerify => Panel == AccountPanel.Verify;
     public bool IsForgot => Panel == AccountPanel.Forgot;
     public bool IsReset => Panel == AccountPanel.Reset;
     public bool IsSignedIn => Panel == AccountPanel.SignedIn;
-    /// <summary>"Already have an account? / Create an account" cards: only signed out.</summary>
-    public bool ShowAccountCards => Panel == AccountPanel.Start;
+    public bool IsSignedOut => !IsSignedIn;
+    /// <summary>The "Sign in | Create account" switch (hidden on verify / password reset).</summary>
+    public bool ShowSignInTabs => IsLogIn || IsSignUp;
 
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _errorMessage;
@@ -123,9 +226,93 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
     /// <summary>This computer's license, e.g. "InfoID Professional" or "Not activated".</summary>
     public string LicenseText => _license.WindowTitle;
 
+    // ---------------------------------------------------------------- this computer (status card) ----
+
+    private bool IsThisComputerActive =>
+        _license.Status is { IsValid: true, Status: LicenseStatus.Active or LicenseStatus.GracePeriod };
+
+    /// <summary>Green card: InfoID is active here.</summary>
+    public bool IsStatusActive => IsThisComputerActive && !_license.IsCritical;
+    public bool IsStatusWarning => !IsStatusActive && !_license.IsCritical;
+    public bool IsStatusCritical => !IsStatusActive && _license.IsCritical;
+
+    public string StatusBadgeText => IsStatusActive ? "Active" : _license.StatusSummary;
+
+    public string StatusTitle
+    {
+        get
+        {
+            if (IsStatusActive) return $"{LicenseText} is active on this computer";
+            if (_license.IsCritical) return _license.BannerTitle;
+            if (SuggestedLicense is not null) return "This computer isn't activated";
+            return HasNoLicenses ? "Activate InfoID on this computer" : _license.BannerTitle;
+        }
+    }
+
+    public string StatusText
+    {
+        get
+        {
+            var status = _license.Status;
+            if (IsStatusActive && status is not null)
+            {
+                var parts = new System.Collections.Generic.List<string>();
+                parts.Add(status.ExpiryDate is { } e ? $"Valid until {LicenseBadgeState.FormatDate(e)}" : "Perpetual license");
+                if (status.DaysUntilExpiry is { } d and >= 0) parts.Add(d == 1 ? "1 day left" : $"{d} days left");
+                if (status.ActivationDate is { } a) parts.Add($"Activated {LicenseBadgeState.FormatDate(a)}");
+                return string.Join(" · ", parts);
+            }
+            if (!_license.IsCritical && SuggestedLicense is { } suggested)
+                return $"You own {suggested.Title}" +
+                       (suggested.Dto.ExpiryDate is { } exp ? $", valid until {AccountDates.Format(exp)}" : "") +
+                       ". Activate it here to start designing and printing.";
+            if (HasNoLicenses && !_license.IsCritical)
+                return "Enter the activation code from your purchase, or request a plan. Approved licenses appear below, ready to activate.";
+            return _license.BannerText;
+        }
+    }
+
+    /// <summary>The license the main button activates: the first one that can be used here.</summary>
+    public AccountLicenseItem? SuggestedLicense =>
+        IsThisComputerActive ? null : Licenses.FirstOrDefault(l => l.CanActivate && !l.AllComputersInUse) ?? Licenses.FirstOrDefault(l => l.CanActivate);
+
+    public bool ShowActivateSuggested => IsSignedIn && SuggestedLicense is not null;
+    /// <summary>Nothing to activate and InfoID isn't active: point to Request a plan.</summary>
+    public bool ShowRequestPlanAction => IsSignedIn && !IsStatusActive && SuggestedLicense is null && !HasNoLicenses;
+
+    /// <summary>Set after a successful activation: the green card offers "Start designing".</summary>
+    [ObservableProperty] private bool _justActivated;
+
+    private void RaiseStatusChanged()
+    {
+        OnPropertyChanged(nameof(LicenseText));
+        OnPropertyChanged(nameof(IsStatusActive));
+        OnPropertyChanged(nameof(IsStatusWarning));
+        OnPropertyChanged(nameof(IsStatusCritical));
+        OnPropertyChanged(nameof(StatusBadgeText));
+        OnPropertyChanged(nameof(StatusTitle));
+        OnPropertyChanged(nameof(StatusText));
+        OnPropertyChanged(nameof(SuggestedLicense));
+        OnPropertyChanged(nameof(ShowActivateSuggested));
+        OnPropertyChanged(nameof(ShowRequestPlanAction));
+        OnPropertyChanged(nameof(IsCodeEntryVisible));
+    }
+
     // ---------------------------------------------------------------- activation code ----
 
     [ObservableProperty] private string _activationCode = "";
+
+    /// <summary>"Enter an activation code" link: opens the code box.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCodeEntryVisible))]
+    private bool _showCodeEntry;
+
+    /// <summary>The code box appears only after sign-in: always when there are no
+    /// licenses yet, otherwise when the user asks for it.</summary>
+    public bool IsCodeEntryVisible => IsSignedIn && !IsStatusActive && (ShowCodeEntry || HasNoLicenses);
+
+    [RelayCommand]
+    private void ToggleCodeEntry() => ShowCodeEntry = !ShowCodeEntry;
 
     // ---------------------------------------------------------------- forms ----
 
@@ -145,7 +332,7 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
     public ObservableCollection<AccountRequestItem> Requests { get; } = new();
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasNoLicenses))]
+    [NotifyPropertyChangedFor(nameof(HasNoLicenses), nameof(HasLicenses), nameof(LicenseCountText))]
     private int _licenseCount;
 
     [ObservableProperty]
@@ -153,17 +340,38 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
     private int _requestCount;
 
     public bool HasNoLicenses => LicenseCount == 0;
+    public bool HasLicenses => LicenseCount > 0;
     public bool HasNoRequests => RequestCount == 0;
+    public string LicenseCountText => LicenseCount.ToString(CultureInfo.CurrentCulture);
 
     public string AccountName => Session.Profile?.FullName ?? "";
     public string AccountEmail => Session.Profile?.Email ?? "";
+
+    public string AccountInitials
+    {
+        get
+        {
+            var parts = AccountName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length switch
+            {
+                0 => "?",
+                1 => parts[0][..1].ToUpperInvariant(),
+                _ => (parts[0][..1] + parts[^1][..1]).ToUpperInvariant(),
+            };
+        }
+    }
+
+    /// <summary>"Synced 10:42" after the licenses were loaded from the server.</summary>
+    [ObservableProperty] private string _syncedText = "";
 
     // ---------------------------------------------------------------- lifecycle ----
 
     public override void OnNavigatedTo(object? parameter)
     {
-        _ = _license.RefreshAsync().ContinueWith(_ => OnPropertyChanged(nameof(LicenseText)),
-            TaskScheduler.FromCurrentSynchronizationContext());
+        Session.PropertyChanged -= OnSessionChanged;
+        Session.PropertyChanged += OnSessionChanged;
+        JustActivated = false;
+        _ = RefreshLicenseStatusAsync();
 
         if (Session.IsSignedIn)
         {
@@ -172,10 +380,18 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
         }
         else
         {
-            // e.g. the header's "Log in" button opens the Log in form directly.
+            // e.g. a "Create account" link can open the Sign up form directly.
             Clear();
-            Panel = parameter is AccountPanel requested && requested != AccountPanel.SignedIn ? requested : AccountPanel.Start;
+            Panel = parameter is AccountPanel requested && requested is not (AccountPanel.SignedIn or AccountPanel.Start)
+                ? requested
+                : AccountPanel.LogIn;
         }
+    }
+
+    private async Task RefreshLicenseStatusAsync()
+    {
+        await _license.RefreshAsync();
+        RaiseStatusChanged();
     }
 
     private void Clear()
@@ -186,7 +402,7 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
 
     // ---------------------------------------------------------------- navigation between panels ----
 
-    [RelayCommand] private void ShowStart() { Clear(); Panel = Session.IsSignedIn ? AccountPanel.SignedIn : AccountPanel.Start; }
+    [RelayCommand] private void ShowStart() { Clear(); Panel = Session.IsSignedIn ? AccountPanel.SignedIn : AccountPanel.LogIn; }
     [RelayCommand] private void ShowLogIn() { Clear(); Password = ""; Panel = AccountPanel.LogIn; }
     [RelayCommand] private void ShowSignUp() { Clear(); Password = ""; ConfirmPassword = ""; Panel = AccountPanel.SignUp; }
     [RelayCommand] private void ShowForgot() { Clear(); Panel = AccountPanel.Forgot; }
@@ -196,7 +412,7 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
     [RelayCommand] private void OpenLicenseDetails() => _navigation.NavigateTo<LicenseStatusViewModel>();
     [RelayCommand] private void GoHome() => _navigation.NavigateToRoot<WelcomeViewModel>();
 
-    // ---------------------------------------------------------------- activation (no account needed) ----
+    // ---------------------------------------------------------------- activation ----
 
     [RelayCommand]
     private Task ActivateCode() => ActivateAsync(ActivationCode);
@@ -204,7 +420,12 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
     [RelayCommand]
     private Task ActivateLicense(AccountLicenseItem? item) => item is null ? Task.CompletedTask : ActivateAsync(item.ActivationCode);
 
-    /// <summary>No internet: the existing offline screen (QR/phone or request code).</summary>
+    /// <summary>Status card main button: activates the suggested license.</summary>
+    [RelayCommand]
+    private Task ActivateSuggested() => ActivateLicense(SuggestedLicense);
+
+    /// <summary>No internet: the existing offline screen (QR/phone or request code). It
+    /// accepts a code without an account, so offline customers are never locked out.</summary>
     [RelayCommand]
     private void ActivateOffline() =>
         _navigation.NavigateTo<LicenseActivationViewModel>(new LicenseActivationRequest(ActivationCode, ShowOffline: true));
@@ -231,7 +452,15 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
                 return;
             }
 
-            _navigation.NavigateToRoot<LicenseStatusViewModel>();
+            // Stay here: the status card turns green and offers "Start designing".
+            ActivationCode = "";
+            ShowCodeEntry = false;
+            await _license.RefreshAsync();
+            _license.IsBannerDismissed = false;
+            JustActivated = true;
+            await LoadAccountAsync();
+            RaiseStatusChanged();
+            InfoMessage = $"{LicenseText} is now active on this computer.";
         }
         catch (Exception ex)
         {
@@ -241,6 +470,13 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
         {
             IsBusy = false;
         }
+    }
+
+    /// <summary>The view copied a license key to the clipboard.</summary>
+    public void NotifyKeyCopied()
+    {
+        ErrorMessage = null;
+        InfoMessage = "License key copied.";
     }
 
     // ---------------------------------------------------------------- account ----
@@ -332,8 +568,10 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
         Requests.Clear();
         LicenseCount = 0;
         RequestCount = 0;
+        ShowCodeEntry = false;
         Clear();
-        Panel = AccountPanel.Start;
+        Panel = AccountPanel.LogIn;
+        RaiseStatusChanged();
     }
 
     [RelayCommand]
@@ -362,8 +600,6 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
             Password = "";
             ConfirmPassword = "";
             Code = "";
-            OnPropertyChanged(nameof(AccountName));
-            OnPropertyChanged(nameof(AccountEmail));
             Panel = AccountPanel.SignedIn;
             await LoadAccountAsync();
         }
@@ -374,17 +610,24 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
         if (Session.Token is not { } token) return;
         OnPropertyChanged(nameof(AccountName));
         OnPropertyChanged(nameof(AccountEmail));
+        OnPropertyChanged(nameof(AccountInitials));
         try
         {
             var licenses = await _portal.GetLicensesAsync(token);
             var requests = await _portal.GetRequestsAsync(token);
 
+            // Which license is active here, to mark it "Active on this computer".
+            var thisCode = _license.Status is { HasLicense: true, IsValid: true } s && s.Status != LicenseStatus.Deactivated
+                ? s.ActivationCode
+                : null;
+
             Licenses.Clear();
-            foreach (var license in licenses.Where(l => l.ProductCode == "INFOID")) Licenses.Add(new AccountLicenseItem(license));
+            foreach (var license in licenses.Where(l => l.ProductCode == "INFOID")) Licenses.Add(new AccountLicenseItem(license, thisCode));
             Requests.Clear();
-            foreach (var request in requests) Requests.Add(new AccountRequestItem(request));
+            foreach (var request in requests.OrderByDescending(r => r.CreatedDate)) Requests.Add(new AccountRequestItem(request));
             LicenseCount = Licenses.Count;
             RequestCount = Requests.Count;
+            SyncedText = "Synced " + DateTime.Now.ToString("t", CultureInfo.CurrentCulture);
         }
         catch (SessionExpiredException ex)
         {
@@ -395,6 +638,10 @@ public sealed partial class AccountLicenseViewModel : ViewModelBase
         catch (LicenseServerUnavailableException ex)
         {
             ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            RaiseStatusChanged();
         }
     }
 
