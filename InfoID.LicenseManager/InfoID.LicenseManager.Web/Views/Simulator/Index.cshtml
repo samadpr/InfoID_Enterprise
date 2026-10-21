@@ -1,0 +1,82 @@
+@using InfoID.LicenseManager.Web.ViewModels.Simulator
+@model SimulatorViewModel
+@{
+    ViewData["Title"] = "Customer simulator";
+}
+<div class="page-head">
+    <div class="titles">
+        <h1>Customer simulator @Html.StatusBadge("Available", "Test tool")</h1>
+        <p class="lead">Plays the customer's side of offline activation with the same code InfoID uses. Change the machine name to simulate a different computer. Nothing is written to the database.</p>
+    </div>
+</div>
+
+@if (!Model.SecretConfigured)
+{
+    <div class="alert warn">@Html.Icon("alert", "sm") <span>No license secret is configured on the server, so serial keys cannot be checked here.</span></div>
+}
+@if (Model.Error is not null)
+{
+    <div class="alert error">@Html.Icon("alert", "sm") <span>@Model.Error</span></div>
+}
+
+<form method="post" novalidate class="stack">
+    <div asp-validation-summary="ModelOnly" class="alert error"></div>
+
+    <section class="card">
+        <div class="card-head"><div><h2>Simulated customer</h2><p>The activation code and the computer both steps below use.</p></div></div>
+        <div class="grid">
+            <div>
+                <label asp-for="ActivationCode"></label>
+                <input asp-for="ActivationCode" class="mono" autocomplete="off" />
+                <span asp-validation-for="ActivationCode" class="field-error"></span>
+            </div>
+            <div>
+                <label asp-for="MachineName"></label>
+                <input asp-for="MachineName" autocomplete="off" />
+                <span asp-validation-for="MachineName" class="field-error"></span>
+            </div>
+        </div>
+    </section>
+
+    <div class="sim-grid">
+        <section class="card" aria-labelledby="sim-step1">
+            <div class="card-head"><div><h2 id="sim-step1">1. Request code</h2><p>What InfoID shows the customer on the Activation screen.</p></div></div>
+            <button type="submit" class="btn primary" asp-action="RequestCode">@Html.Icon("play", "sm") Create request code</button>
+            @if (Model.Request is { } request)
+            {
+                <div class="response ok">
+                    <div class="response-head">
+                        <span class="badge approved">Request code created</span>
+                        <button type="button" class="copy-btn" data-copy-target="#sim-request-code">@Html.Icon("copy", "sm") <span class="label">Copy</span></button>
+                    </div>
+                    <div class="key" id="sim-request-code">@request.RequestCode</div>
+                    <dl class="facts mt">
+                        <dt>Machine</dt><dd>@Model.MachineName.Trim()</dd>
+                        <dt>Machine fingerprint</dt><dd class="mono cell-wrap">@request.FingerprintHex</dd>
+                    </dl>
+                    <p class="hint">Paste this into <a asp-controller="Activations" asp-action="Generate">Generate serial key</a>.</p>
+                </div>
+            }
+        </section>
+
+        <section class="card" aria-labelledby="sim-step2">
+            <div class="card-head"><div><h2 id="sim-step2">2. Check a serial key</h2><p>Does InfoID accept this key on this computer?</p></div></div>
+            <label asp-for="SerialKey"></label>
+            <input asp-for="SerialKey" class="mono" autocomplete="off" />
+            <button type="submit" class="btn primary mt" asp-action="Verify">@Html.Icon("shield", "sm") Check key</button>
+            @if (Model.Verification is { } v)
+            {
+                <div class="response ok">
+                    <div class="response-head"><span class="badge approved">InfoID would UNLOCK on @Model.MachineName.Trim()</span></div>
+                    <dl class="facts">
+                        <dt>Computer</dt><dd>@Model.MachineName.Trim()</dd>
+                        <dt>Edition</dt><dd>@v.Tier</dd>
+                        <dt>License type</dt><dd>@v.Type</dd>
+                        <dt>Expires</dt><dd>@(v.ExpiryDate is { } e ? e.ToString("yyyy-MM-dd") : "Never")</dd>
+                        <dt>Cards</dt><dd>@(v.MaxCardsPerPeriod is { } m ? $"{m:N0} per {v.LimitPeriod.ToString().ToLowerInvariant()[..^2]}" : "Unlimited")</dd>
+                    </dl>
+                </div>
+            }
+        </section>
+    </div>
+</form>

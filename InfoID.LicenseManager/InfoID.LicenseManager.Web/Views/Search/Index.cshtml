@@ -1,0 +1,134 @@
+@using InfoID.LicenseManager.Web.ViewModels.Search
+@model SearchViewModel
+@{
+    ViewData["Title"] = "Search";
+    var r = Model.Result;
+}
+<div class="page-head">
+    <div class="titles">
+        <h1>Search</h1>
+        <p class="lead">Finds activation codes, customers, license requests and plans. Type at least two characters.</p>
+    </div>
+</div>
+
+<form asp-action="Index" method="get" class="filters card" role="search">
+    <div class="search-field">
+        @Html.Icon("search", "sm")
+        <input type="search" name="q" value="@Model.Query" placeholder="Code, name, company, e-mail, plan..." aria-label="Search" maxlength="100" autofocus />
+    </div>
+    <button type="submit" class="btn primary">Search</button>
+</form>
+
+@if (Model.TooShort)
+{
+    <div class="card mt">
+        @await Html.PartialAsync("_Empty", new EmptyState("search", "Start typing to search", "Search by activation code, customer name, company, e-mail address, request or plan name."))
+    </div>
+}
+else if (r.Total == 0)
+{
+    <div class="card">
+        @await Html.PartialAsync("_Empty", new EmptyState("search", $"No results for \"{Model.Query}\"", "Check the spelling, or try a shorter part of the name, e-mail address or code."))
+    </div>
+}
+else
+{
+    <p class="muted">@r.Total result@(r.Total == 1 ? "" : "s") for <strong>@Model.Query</strong></p>
+
+    @if (r.Licenses.Count > 0)
+    {
+        <section class="result-group" aria-labelledby="res-codes">
+            <h2 id="res-codes">@Html.Icon("key") Activation codes <span class="chip">@r.Licenses.Count</span></h2>
+            <div class="table-card"><div class="table-wrap">
+                <table>
+                    <thead><tr><th>Code</th><th>Edition</th><th>Status</th><th>Machines</th><th>Customer</th></tr></thead>
+                    <tbody>
+                    @foreach (var l in r.Licenses)
+                    {
+                        <tr>
+                            <td><a asp-controller="Licenses" asp-action="Details" asp-route-id="@l.Id" class="cell-code">@l.ActivationCode</a></td>
+                            <td>@l.Tier</td>
+                            <td>@Html.StatusBadge(l.Status)</td>
+                            <td>@l.ActiveMachines / @l.MaxActivations</td>
+                            <td>@(l.Customer ?? "-")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div></div>
+            <p class="hint"><a asp-controller="Licenses" asp-action="Index" asp-route-text="@Model.Query">Show every matching activation code</a></p>
+        </section>
+    }
+
+    @if (r.Customers.Count > 0)
+    {
+        <section class="result-group" aria-labelledby="res-customers">
+            <h2 id="res-customers">@Html.Icon("users") Customers <span class="chip">@r.Customers.Count</span></h2>
+            <div class="table-card"><div class="table-wrap">
+                <table>
+                    <thead><tr><th>Name</th><th>Company</th><th>E-mail</th><th>Status</th></tr></thead>
+                    <tbody>
+                    @foreach (var c in r.Customers)
+                    {
+                        <tr>
+                            <td><a asp-controller="Customers" asp-action="Details" asp-route-id="@c.Id">@c.FullName</a></td>
+                            <td>@(c.CompanyName ?? "-")</td>
+                            <td>@c.Email</td>
+                            <td>@Html.StatusBadge(c.Status.ToString(), InfoID.LicenseManager.Web.ViewModels.Customers.CustomerListViewModel.StatusText(c.Status))</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div></div>
+            <p class="hint"><a asp-controller="Customers" asp-action="Index" asp-route-text="@Model.Query">Show every matching customer</a></p>
+        </section>
+    }
+
+    @if (r.Requests.Count > 0)
+    {
+        <section class="result-group" aria-labelledby="res-requests">
+            <h2 id="res-requests">@Html.Icon("inbox") License requests <span class="chip">@r.Requests.Count</span></h2>
+            <div class="table-card"><div class="table-wrap">
+                <table>
+                    <thead><tr><th>#</th><th>Customer</th><th>Plan</th><th>Status</th><th>Received</th></tr></thead>
+                    <tbody>
+                    @foreach (var q in r.Requests)
+                    {
+                        <tr>
+                            <td><a asp-controller="Requests" asp-action="Details" asp-route-id="@q.Id">#@q.Id</a></td>
+                            <td>@q.FullName@(string.IsNullOrWhiteSpace(q.CompanyName) ? "" : " - " + q.CompanyName)<span class="sub">@q.Email</span></td>
+                            <td>@q.PlanName</td>
+                            <td>@Html.StatusBadge(q.Status)</td>
+                            <td class="nowrap">@UiHtml.Date(q.CreatedDate)</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div></div>
+            <p class="hint"><a asp-controller="Requests" asp-action="Index" asp-route-status="All" asp-route-text="@Model.Query">Show every matching request</a></p>
+        </section>
+    }
+
+    @if (r.Plans.Count > 0)
+    {
+        <section class="result-group" aria-labelledby="res-plans">
+            <h2 id="res-plans">@Html.Icon("layers") Plans <span class="chip">@r.Plans.Count</span></h2>
+            <div class="table-card"><div class="table-wrap">
+                <table>
+                    <thead><tr><th>Plan</th><th>Edition</th><th>Price</th><th>Active</th></tr></thead>
+                    <tbody>
+                    @foreach (var p in r.Plans)
+                    {
+                        <tr>
+                            <td><a asp-controller="Plans" asp-action="Index">@p.Name</a><span class="sub">@p.Tagline</span></td>
+                            <td>@p.Tier</td>
+                            <td>@(p.PriceText ?? "-")</td>
+                            <td>@Html.StatusBadge(p.IsActive ? "Active" : "Disabled", p.IsActive ? "Active" : "Inactive")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div></div>
+        </section>
+    }
+}

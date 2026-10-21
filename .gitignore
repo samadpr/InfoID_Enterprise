@@ -44,3 +44,7 @@
 # OS files
 Thumbs.db
 .DS_Store
+
+# Secrets and local data must never be committed
+*.pem
+mail-outbox/

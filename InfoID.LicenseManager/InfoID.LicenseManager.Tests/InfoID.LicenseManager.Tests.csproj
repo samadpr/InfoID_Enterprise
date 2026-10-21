@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="Xunit.SkippableFact" Version="1.5.85" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.11" />
+    <PackageReference Include="Testcontainers.PostgreSql" Version="4.6.0" />
+    <!-- Testcontainers pulls SSH.NET 2024.2.0 (known high-severity advisory); pin the patched version. -->
+    <PackageReference Include="SSH.NET" Version="2026.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\InfoID.LicenseManager.Web\InfoID.LicenseManager.Web.csproj" />
+    <ProjectReference Include="..\InfoID.LicenseManager.Application\InfoID.LicenseManager.Application.csproj" />
+    <ProjectReference Include="..\InfoID.LicenseManager.Domain\InfoID.LicenseManager.Domain.csproj" />
+    <ProjectReference Include="..\InfoID.LicenseManager.Infrastructure\InfoID.LicenseManager.Infrastructure.csproj" />
+    <!-- Legacy server: used only by the schema-compatibility test; remove with the legacy projects. -->
+    <ProjectReference Include="..\..\InfoID.Licensing.Server\InfoID.Licensing.Server.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>

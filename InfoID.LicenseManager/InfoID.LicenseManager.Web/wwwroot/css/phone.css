@@ -1,0 +1,13 @@
+/* Phone (QR) activation page: a standalone, mobile-first page that follows the phone's light/dark setting. */
+:root { color-scheme: light dark; --bg: #f5f6f8; --card: #ffffff; --text: #151922; --muted: #667085; --border: #e4e7ec; --key-bg: #f8f9fb; --ok: #067647; --err: #b42318; --brand: #da3025; }
+@media (prefers-color-scheme: dark) { :root { --bg: #0e1015; --card: #161a21; --text: #eef0f4; --muted: #98a2b3; --border: #272d38; --key-bg: #1b2029; --ok: #4ade9a; --err: #ff8a80; } }
+* { box-sizing: border-box; }
+body { font-family: Inter, "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; margin: 0; padding: 20px; min-height: 100vh; background: var(--bg); color: var(--text); }
+.card { max-width: 520px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: 0 8px 28px rgba(16, 24, 40, .12); border-top: 4px solid var(--brand); }
+.brand { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.brand img { width: 40px; height: 40px; border-radius: 50%; }
+h1 { font-size: 20px; margin: 0; }
+.key { font-family: ui-monospace, Consolas, Menlo, monospace; font-size: 24px; letter-spacing: 2px; background: var(--key-bg); border: 1px dashed var(--border); border-radius: 10px; padding: 16px; text-align: center; word-break: break-all; user-select: all; font-weight: 600; }
+.ok { color: var(--ok); font-weight: 600; }
+.err { color: var(--err); font-weight: 600; }
+.small { font-size: 13px; color: var(--muted); }
