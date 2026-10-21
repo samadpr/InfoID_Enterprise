@@ -1,0 +1,102 @@
+@using InfoID.LicenseManager.Web.Security
+@using InfoID.LicenseManager.Web.ViewModels.Licenses
+@model LicenseListViewModel
+@{
+    ViewData["Title"] = "Activation codes";
+    var rows = Model.Rows;
+    var filtered = !string.IsNullOrWhiteSpace(Model.Query.Text) || !string.IsNullOrWhiteSpace(Model.Query.Status) || Model.Query.BatchId is not null;
+    var cutoff = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(30);
+}
+<div class="page-head">
+    <div class="titles">
+        <h1>Activation codes</h1>
+        <p class="lead">Codes customers enter in InfoID to activate a license. Search by code, customer, e-mail, serial key or machine.</p>
+    </div>
+    <div class="page-actions">
+        @if (User.CanManageLicenses())
+        {
+            <a asp-action="Create" class="btn primary">@Html.Icon("plus") Create codes</a>
+        }
+    </div>
+</div>
+
+<div class="kpis compact mb" aria-label="Summary of the codes in this list">
+    <div class="kpi"><span class="ico">@Html.Icon("key", "lg")</span><span class="meta"><span class="value">@rows.Count.ToString("N0")</span><span class="label">@(filtered ? "Codes matching" : "Codes listed")</span></span></div>
+    <div class="kpi"><span class="ico info">@Html.Icon("package", "lg")</span><span class="meta"><span class="value">@rows.Count(r => r.Status == "Available")</span><span class="label">Available</span></span></div>
+    <div class="kpi"><span class="ico ok">@Html.Icon("shield", "lg")</span><span class="meta"><span class="value">@rows.Count(r => r.Status == "Active")</span><span class="label">Active</span></span></div>
+    <div class="kpi"><span class="ico neutral">@Html.Icon("cpu", "lg")</span><span class="meta"><span class="value">@rows.Sum(r => r.ActiveMachines).ToString("N0")</span><span class="label">Machines in use</span></span></div>
+    <div class="kpi"><span class="ico warn">@Html.Icon("clock", "lg")</span><span class="meta"><span class="value">@rows.Count(r => r.Status != "Revoked" && r.ExpiryDate is { } e && e <= cutoff)</span><span class="label">Expire within 30 days</span></span></div>
+</div>
+
+@if (Model.Query.BatchId is not null)
+{
+    <section class="card mb">
+        <div class="card-head">
+            <div><h2>Codes of this batch</h2><p>One per line, ready to copy or e-mail to the customer.</p></div>
+            <div class="actions">
+                <button type="button" class="copy-btn" data-copy-target="#batch-codes">@Html.Icon("copy", "sm") <span class="label">Copy all</span></button>
+                <button type="button" class="copy-btn" data-download-target="#batch-codes" data-download-name="infoid-activation-codes.txt">@Html.Icon("download", "sm") Download .txt</button>
+            </div>
+        </div>
+        <textarea id="batch-codes" readonly rows="@Math.Clamp(rows.Count, 2, 12)" class="codes" aria-label="Codes of this batch">@Model.BatchCodesText</textarea>
+        <p class="mt"><a asp-action="Index">Show all codes</a></p>
+    </section>
+}
+
+<form asp-action="Index" method="get" class="filters card mb">
+    <input type="hidden" name="batchId" value="@Model.Query.BatchId" disabled="@(Model.Query.BatchId is null)" />
+    <div class="search-field">
+        @Html.Icon("search", "sm")
+        <input name="text" value="@Model.Query.Text" placeholder="Search code, customer, e-mail, serial key or machine" aria-label="Search" />
+    </div>
+    <select name="status" aria-label="Status">
+        @foreach (var option in LicenseListViewModel.StatusOptions)
+        {
+            <option value="@option.Value" selected="@(option.Value == (Model.Query.Status ?? ""))">@option.Text</option>
+        }
+    </select>
+    <button type="submit" class="btn primary">Search</button>
+    @if (filtered)
+    {
+        <a asp-action="Index" class="btn ghost">Clear</a>
+    }
+</form>
+<div asp-validation-summary="All" class="alert error"></div>
+
+<div class="table-card">
+    @if (rows.Count == 0)
+    {
+        @await Html.PartialAsync("_Empty", filtered
+            ? new EmptyState("search", "No codes match", "Try a different search or clear the filters.", "Clear filters", Url.Action("Index"))
+            : new EmptyState("key", "No activation codes yet", "Create the first codes to start licensing customers.", User.CanManageLicenses() ? "Create codes" : null, User.CanManageLicenses() ? Url.Action("Create") : null))
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table data-table data-page-size="25">
+                <thead>
+                    <tr>
+                        <th data-sort="text">Code</th><th data-sort="text">Edition</th><th data-sort="text">Type</th><th data-sort="date">Expires</th>
+                        <th data-sort="number">Cards</th><th data-sort="text">Status</th><th data-sort="number">Machines</th><th data-sort="text">Customer</th><th data-sort="date">Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var row in rows)
+                {
+                    <tr>
+                        <td class="nowrap"><a asp-action="Details" asp-route-id="@row.Id" class="cell-code">@row.ActivationCode</a></td>
+                        <td>@row.Tier</td>
+                        <td>@row.LicenseType@if (row.AllowOfflineActivation) { <span class="sub">offline allowed</span> }</td>
+                        <td class="nowrap" data-sort-value="@(row.ExpiryDate?.ToString("yyyy-MM-dd") ?? "9999-12-31")">@UiHtml.Date(row.ExpiryDate)</td>
+                        <td data-sort-value="@(row.MaxCardsPerPeriod ?? int.MaxValue)">@(row.MaxCardsPerPeriod?.ToString("N0") ?? "Unlimited")</td>
+                        <td>@Html.StatusBadge(row.Status)</td>
+                        <td data-sort-value="@row.ActiveMachines">@row.ActiveMachines / @row.MaxActivations</td>
+                        <td class="cell-wrap">@(row.Customer ?? "-")</td>
+                        <td class="nowrap" data-sort-value="@row.CreatedDate.ToString("yyyy-MM-ddTHH:mm:ss")">@UiHtml.Date(row.CreatedDate)</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

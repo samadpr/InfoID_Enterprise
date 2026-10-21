@@ -1,0 +1,77 @@
+@using InfoID.LicenseManager.Web.ViewModels.Requests
+@model RequestListViewModel
+@{
+    ViewData["Title"] = "License requests";
+    var rows = Model.Rows;
+    var filtered = !string.IsNullOrWhiteSpace(Model.Query.Text) || (Model.Query.Status ?? "Open") != "Open";
+}
+<div class="page-head">
+    <div class="titles">
+        <h1>License requests</h1>
+        <p class="lead">Plan requests sent from the app. Confirm payment outside the system, then approve a request (this creates the activation code and e-mails it) or reject it.</p>
+    </div>
+</div>
+
+<div class="kpis compact mb" aria-label="Summary of the requests in this list">
+    <div class="kpi"><span class="ico">@Html.Icon("inbox", "lg")</span><span class="meta"><span class="value">@rows.Count.ToString("N0")</span><span class="label">Requests listed</span></span></div>
+    <div class="kpi"><span class="ico warn">@Html.Icon("bell", "lg")</span><span class="meta"><span class="value">@rows.Count(r => r.Status == "New")</span><span class="label">New</span></span></div>
+    <div class="kpi"><span class="ico info">@Html.Icon("clock", "lg")</span><span class="meta"><span class="value">@rows.Count(r => r.Status == "InProgress")</span><span class="label">In progress</span></span></div>
+    <div class="kpi"><span class="ico ok">@Html.Icon("check", "lg")</span><span class="meta"><span class="value">@rows.Count(r => r.Status == "Approved")</span><span class="label">Approved</span></span></div>
+</div>
+
+<form asp-action="Index" method="get" class="filters card mb">
+    <div class="search-field">
+        @Html.Icon("search", "sm")
+        <input name="text" value="@Model.Query.Text" placeholder="Search name, company, e-mail or phone" aria-label="Search" />
+    </div>
+    <select name="status" aria-label="Status">
+        @foreach (var option in RequestListViewModel.StatusOptions)
+        {
+            <option value="@option.Value" selected="@(option.Value == (Model.Query.Status ?? "Open"))">@option.Text</option>
+        }
+    </select>
+    <button type="submit" class="btn primary">Search</button>
+    @if (filtered)
+    {
+        <a asp-action="Index" class="btn ghost">Clear</a>
+    }
+</form>
+<div asp-validation-summary="All" class="alert error"></div>
+
+<div class="table-card">
+    @if (rows.Count == 0)
+    {
+        @await Html.PartialAsync("_Empty", filtered
+            ? new EmptyState("search", "No requests match", "Try a different search, or show all statuses.", "Show open requests", Url.Action("Index"))
+            : new EmptyState("check", "All caught up", "There are no open license requests. New ones from the app appear here."))
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table data-table data-page-size="25">
+                <thead>
+                    <tr>
+                        <th data-sort="number">#</th><th data-sort="date">Received</th><th data-sort="text">Status</th><th data-sort="text">Plan</th><th data-sort="number">Computers</th>
+                        <th data-sort="text">Customer</th><th data-sort="text">E-mail</th><th data-sort="text">Country</th><th data-sort="text">Handled by</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var r in rows)
+                {
+                    <tr>
+                        <td><a asp-action="Details" asp-route-id="@r.Id">#@r.Id</a></td>
+                        <td class="nowrap" data-sort-value="@r.CreatedDate.ToString("yyyy-MM-ddTHH:mm:ss")">@r.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@Html.StatusBadge(r.Status)</td>
+                        <td>@r.PlanName</td>
+                        <td>@r.Machines</td>
+                        <td class="cell-wrap">@r.FullName@(string.IsNullOrWhiteSpace(r.CompanyName) ? "" : " - " + r.CompanyName)</td>
+                        <td class="cell-wrap">@r.Email</td>
+                        <td>@(r.Country ?? "-")</td>
+                        <td>@(r.HandledBy ?? "-")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

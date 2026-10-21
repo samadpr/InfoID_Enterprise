@@ -1,0 +1,81 @@
+@using InfoID.LicenseManager.Web.ViewModels.Licenses
+@model CreateLicenseViewModel
+@{
+    ViewData["Title"] = "Create activation codes";
+}
+<a asp-action="Index" class="back-link">@Html.Icon("arrow-left", "sm") All activation codes</a>
+<div class="page-head">
+    <div class="titles">
+        <h1>Create activation codes</h1>
+        <p class="lead">Set the license terms once and create up to 1,000 codes at a time. Each code activates on up to the number of computers you choose.</p>
+    </div>
+</div>
+
+<form asp-action="Create" method="post" class="stack" novalidate>
+    <div asp-validation-summary="All" class="alert error"></div>
+
+    <section class="card">
+        <div class="card-head"><div><h2>License terms</h2><p>What the customer is entitled to.</p></div></div>
+        <div class="grid">
+            <div>
+                <label asp-for="Quantity"></label>
+                <input asp-for="Quantity" type="number" min="1" max="1000" />
+                <span asp-validation-for="Quantity" class="field-error"></span>
+            </div>
+            <div>
+                <label asp-for="Tier">Edition</label>
+                <select asp-for="Tier" asp-items="CreateLicenseViewModel.TierOptions"></select>
+            </div>
+            <div>
+                <label asp-for="Type">License type</label>
+                <select asp-for="Type" asp-items="CreateLicenseViewModel.TypeOptions"></select>
+            </div>
+            <div>
+                <label asp-for="ExpiryDate"></label>
+                <input asp-for="ExpiryDate" type="date" />
+                <p class="hint">Ignored for perpetual licenses.</p>
+                <span asp-validation-for="ExpiryDate" class="field-error"></span>
+            </div>
+            <div>
+                <label asp-for="MaxActivations"></label>
+                <input asp-for="MaxActivations" type="number" min="1" max="100" />
+                <p class="hint">How many computers may use one code at the same time.</p>
+                <span asp-validation-for="MaxActivations" class="field-error"></span>
+            </div>
+            <div>
+                <label asp-for="LimitPeriod"></label>
+                <select asp-for="LimitPeriod" asp-items="CreateLicenseViewModel.LimitPeriodOptions"></select>
+            </div>
+            <div>
+                <label asp-for="MaxCardsPerPeriod"></label>
+                <input asp-for="MaxCardsPerPeriod" type="number" min="100" step="100" />
+                <p class="hint">A multiple of 100. Ignored when unlimited.</p>
+                <span asp-validation-for="MaxCardsPerPeriod" class="field-error"></span>
+            </div>
+            <div class="checks">
+                <label class="check"><input asp-for="UnlimitedCards" data-disables="#MaxCardsPerPeriod" /> Unlimited cards</label>
+                <label class="check"><input asp-for="AllowOfflineActivation" /> Allow offline activation (phone / QR)</label>
+            </div>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="card-head"><div><h2>Customer</h2><p>Optional. Stored with the codes so you can find them by organization.</p></div></div>
+        <div class="grid">
+            <div><label asp-for="OrganizationName"></label><input asp-for="OrganizationName" /></div>
+            <div><label asp-for="OrganizationType"></label><input asp-for="OrganizationType" /></div>
+            <div><label asp-for="Country"></label><input asp-for="Country" /></div>
+            <div><label asp-for="ContactEmail"></label><input asp-for="ContactEmail" type="email" /><span asp-validation-for="ContactEmail" class="field-error"></span></div>
+            <div><label asp-for="ContactPhone"></label><input asp-for="ContactPhone" /></div>
+        </div>
+        <div class="mt">
+            <label asp-for="Notes"></label>
+            <textarea asp-for="Notes" rows="3"></textarea>
+        </div>
+    </section>
+
+    <div class="form-foot">
+        <button type="submit" class="btn primary">Create</button>
+        <a asp-action="Index" class="btn ghost">Cancel</a>
+    </div>
+</form>

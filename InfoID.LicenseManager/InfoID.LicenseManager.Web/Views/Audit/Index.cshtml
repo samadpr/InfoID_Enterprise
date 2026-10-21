@@ -1,0 +1,86 @@
+@model AuditLogViewModel
+@{
+    ViewData["Title"] = "Audit log";
+    var q = Model.Query;
+}
+<div class="page-head">
+    <div class="titles">
+        <h1>Audit log</h1>
+        <p class="lead">Every staff action, newest first. Entries cannot be edited or deleted; each one is hash-linked to the one before it.</p>
+    </div>
+    <div class="page-actions">
+        <form asp-action="Verify" method="post">
+            <button type="submit" class="btn primary">@Html.Icon("shield", "sm") Verify chain</button>
+        </form>
+    </div>
+</div>
+
+@if (Model.ChainMessage is not null)
+{
+    <div class="alert @(Model.ChainIsIntact ? "ok" : "error")" role="status">@Html.Icon(Model.ChainIsIntact ? "shield" : "alert", "sm") <span>@Model.ChainMessage</span></div>
+}
+
+<form asp-action="Index" method="get" class="filters card mb">
+    <div class="search-field">
+        @Html.Icon("search", "sm")
+        <input name="event" value="@q.Event" placeholder="Action, e.g. Revoked or LicenseCode" aria-label="Action contains" maxlength="100" />
+    </div>
+    <input name="who" value="@q.Who" placeholder="Staff name or e-mail" aria-label="Staff member" maxlength="100" />
+    <label class="sr-only" for="audit-from">From date</label>
+    <input id="audit-from" type="date" name="from" value="@q.From?.ToString("yyyy-MM-dd")" />
+    <span class="muted">to</span>
+    <label class="sr-only" for="audit-to">To date</label>
+    <input id="audit-to" type="date" name="to" value="@q.To?.ToString("yyyy-MM-dd")" />
+    <button type="submit" class="btn primary">Filter</button>
+    @if (q.IsFiltered)
+    {
+        <a asp-action="Index" class="btn ghost">Clear</a>
+    }
+</form>
+<div asp-validation-summary="All" class="alert error"></div>
+
+<div class="table-card">
+    @if (Model.Rows.Count == 0)
+    {
+        @await Html.PartialAsync("_Empty", q.IsFiltered
+            ? new EmptyState("search", "No entries match", "Try a wider date range or remove a filter.", "Clear filters", Url.Action("Index"))
+            : new EmptyState("history", "No entries yet", "Staff actions are recorded here as they happen."))
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table data-table data-page-size="25">
+                <thead>
+                    <tr><th data-sort="number">#</th><th data-sort="date">When</th><th data-sort="text">Who</th><th data-sort="text">Action</th><th data-sort="text">Address</th><th>Details</th></tr>
+                </thead>
+                <tbody>
+                @foreach (var row in Model.Rows)
+                {
+                    <tr>
+                        <td>@row.Id</td>
+                        <td class="nowrap" data-sort-value="@row.WhenSort">@row.When</td>
+                        <td class="cell-wrap">@row.Who</td>
+                        <td><span title="@row.Action">@UiHtml.ActionLabel(row.Action)</span><span class="sub mono">@row.Action</span></td>
+                        <td>@row.Address</td>
+                        <td class="details">
+                            @if (row.Details.Length > 0)
+                            {
+                                <span class="cell-wrap">@(row.Details.Length > 90 ? row.Details[..90] + "..." : row.Details)</span>
+                                <button type="button" class="copy-btn" data-detail-open data-detail-json="@row.Details" data-detail-title="@UiHtml.ActionLabel(row.Action)" data-detail-meta="Entry #@row.Id, @row.When, @row.Who">@Html.Icon("eye", "sm") View</button>
+                            }
+                            else
+                            {
+                                <span class="muted">-</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+@if (Model.MayBeTruncated)
+{
+    <p class="hint mt">Showing the newest @AuditLogViewModel.PageLimit matching entries. Narrow the dates to see older ones.</p>
+}

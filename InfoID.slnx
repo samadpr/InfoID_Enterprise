@@ -6,10 +6,12 @@
     <Project Path="InfoID.Infrastructure/InfoID.Infrastructure.csproj" />
     <Project Path="InfoID.Shared/InfoID.Shared.csproj" />
   </Folder>
-  <Folder Name="/src/AdminPortal/">
-    <Project Path="InfoID.AdminLicenseManager/InfoID.AdminLicenseManager.csproj" />
-    <Project Path="InfoID.LicenseApi/InfoID.LicenseApi.csproj" />
+  <Folder Name="/src/LicenseManager/">
+    <Project Path="InfoID.LicenseManager/InfoID.LicenseManager.Application/InfoID.LicenseManager.Application.csproj" />
+    <Project Path="InfoID.LicenseManager/InfoID.LicenseManager.Domain/InfoID.LicenseManager.Domain.csproj" />
+    <Project Path="InfoID.LicenseManager/InfoID.LicenseManager.Infrastructure/InfoID.LicenseManager.Infrastructure.csproj" />
+    <Project Path="InfoID.LicenseManager/InfoID.LicenseManager.Tests/InfoID.LicenseManager.Tests.csproj" />
+    <Project Path="InfoID.LicenseManager/InfoID.LicenseManager.Web/InfoID.LicenseManager.Web.csproj" />
     <Project Path="InfoID.Licensing.Core/InfoID.Licensing.Core.csproj" Id="f905d833-92f5-441f-9dfe-74306511aa38" />
-    <Project Path="InfoID.Licensing.Server/InfoID.Licensing.Server.csproj" Id="6ef0c744-dab9-485b-8488-b77f67d0af34" />
   </Folder>
 </Solution>

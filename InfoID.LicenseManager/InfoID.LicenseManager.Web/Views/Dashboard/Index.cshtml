@@ -1,0 +1,250 @@
+@using InfoID.LicenseManager.Web.ViewModels.Dashboard
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var o = Model.Overview;
+    var s = o.Summary;
+    var attention = new List<string>();
+    if (o.PendingRequests > 0) { attention.Add($"{o.PendingRequests} license request{(o.PendingRequests == 1 ? "" : "s")} waiting"); }
+    if (s.ExpiringIn30Days > 0) { attention.Add($"{s.ExpiringIn30Days} license{(s.ExpiringIn30Days == 1 ? "" : "s")} expiring within 30 days"); }
+    var summary = attention.Count > 0
+        ? string.Join(" and ", attention) + "."
+        : "Nothing needs attention right now: no open requests and no licenses expiring this month.";
+}
+
+<section class="hero" aria-labelledby="greeting">
+    <div>
+        <div class="date" data-today>@DateTime.UtcNow.ToString("dddd, d MMMM yyyy")</div>
+        <h1 id="greeting" data-greeting="@Model.FirstName">Welcome back@(Model.FirstName.Length > 0 ? ", " + Model.FirstName : "")</h1>
+        <p class="summary">@summary</p>
+    </div>
+    <div class="page-actions">
+        <a asp-controller="Activations" asp-action="Generate" class="btn primary">@Html.Icon("lock") Generate serial key</a>
+        @if (Model.CanManage)
+        {
+            <a asp-controller="Licenses" asp-action="Create" class="btn">@Html.Icon("plus") Create activation codes</a>
+        }
+        <a asp-controller="Requests" asp-action="Index" class="btn">@Html.Icon("inbox") Pending requests@(o.PendingRequests > 0 ? " (" + o.PendingRequests + ")" : "")</a>
+    </div>
+</section>
+
+<section aria-label="Key figures">
+    <div class="kpis">
+        <a class="kpi" asp-controller="Licenses" asp-action="Index">
+            <span class="ico">@Html.Icon("key", "lg")</span>
+            <span class="meta"><span class="value">@s.TotalCodes.ToString("N0")</span><span class="label">Total activation codes</span></span>
+            <span class="go">@Html.Icon("arrow-right", "sm")</span>
+        </a>
+        <a class="kpi" asp-controller="Licenses" asp-action="Index" asp-route-status="Available">
+            <span class="ico info">@Html.Icon("package", "lg")</span>
+            <span class="meta"><span class="value">@s.AvailableCodes.ToString("N0")</span><span class="label">Available codes</span></span>
+            <span class="go">@Html.Icon("arrow-right", "sm")</span>
+        </a>
+        <a class="kpi" asp-controller="Licenses" asp-action="Index" asp-route-status="Active">
+            <span class="ico ok">@Html.Icon("shield", "lg")</span>
+            <span class="meta"><span class="value">@s.ActiveCodes.ToString("N0")</span><span class="label">Active codes</span></span>
+            <span class="go">@Html.Icon("arrow-right", "sm")</span>
+        </a>
+        <a class="kpi" asp-controller="Licenses" asp-action="Index" asp-route-status="Revoked">
+            <span class="ico danger">@Html.Icon("ban", "lg")</span>
+            <span class="meta"><span class="value">@s.RevokedCodes.ToString("N0")</span><span class="label">Revoked codes</span></span>
+            <span class="go">@Html.Icon("arrow-right", "sm")</span>
+        </a>
+        <div class="kpi">
+            <span class="ico neutral">@Html.Icon("cpu", "lg")</span>
+            <span class="meta"><span class="value">@s.ActiveMachines.ToString("N0")</span><span class="label">Active machines</span></span>
+        </div>
+        <a class="kpi" asp-controller="Requests" asp-action="Index">
+            <span class="ico warn">@Html.Icon("inbox", "lg")</span>
+            <span class="meta"><span class="value">@o.PendingRequests.ToString("N0")</span><span class="label">Pending license requests</span></span>
+            <span class="go">@Html.Icon("arrow-right", "sm")</span>
+        </a>
+        <a class="kpi" asp-controller="Customers" asp-action="Index">
+            <span class="ico info">@Html.Icon("users", "lg")</span>
+            <span class="meta"><span class="value">@o.TotalCustomers.ToString("N0")</span><span class="label">Customers</span></span>
+            <span class="go">@Html.Icon("arrow-right", "sm")</span>
+        </a>
+        <a class="kpi" asp-controller="Plans" asp-action="Index">
+            <span class="ico">@Html.Icon("layers", "lg")</span>
+            <span class="meta"><span class="value">@o.ActivePlans.ToString("N0")</span><span class="label">Active plans</span></span>
+            <span class="go">@Html.Icon("arrow-right", "sm")</span>
+        </a>
+        <div class="kpi">
+            <span class="ico warn">@Html.Icon("clock", "lg")</span>
+            <span class="meta"><span class="value">@s.ExpiringIn30Days.ToString("N0")</span><span class="label">Expiring within 30 days</span></span>
+        </div>
+        <div class="kpi">
+            <span class="ico warn">@Html.Icon("clock", "lg")</span>
+            <span class="meta"><span class="value">@s.ExpiringIn60Days.ToString("N0")</span><span class="label">Expiring within 60 days</span></span>
+        </div>
+        <div class="kpi">
+            <span class="ico neutral">@Html.Icon("clock", "lg")</span>
+            <span class="meta"><span class="value">@s.ExpiringIn90Days.ToString("N0")</span><span class="label">Expiring within 90 days</span></span>
+        </div>
+        <div class="kpi">
+            <span class="ico ok">@Html.Icon("activity", "lg")</span>
+            <span class="meta">
+                <span class="value">@o.ActivationsInRange.ToString("N0")</span>
+                <span class="label">Activations, @Model.RangeLabel</span>
+                @if (Model.ActivationChangePercent is { } change)
+                {
+                    <span class="delta @(change > 0 ? "up" : change < 0 ? "down" : "flat")" title="Compared with the previous period of the same length">
+                        @Html.Icon(change > 0 ? "trending-up" : change < 0 ? "trending-down" : "minus", "sm")
+                        @(change > 0 ? "+" : "")@change%
+                    </span>
+                }
+            </span>
+        </div>
+    </div>
+</section>
+
+<div class="section-title">
+    <h2>Analytics</h2>
+    <div class="range-bar">
+        <div class="segmented" role="group" aria-label="Period">
+            <a class="seg-btn @(Model.RangeKey == "7" ? "is-active" : "")" asp-action="Index" asp-route-range="7" aria-current="@(Model.RangeKey == "7" ? "true" : null)">7 days</a>
+            <a class="seg-btn @(Model.RangeKey == "30" ? "is-active" : "")" asp-action="Index" asp-route-range="30" aria-current="@(Model.RangeKey == "30" ? "true" : null)">30 days</a>
+            <a class="seg-btn @(Model.RangeKey == "90" ? "is-active" : "")" asp-action="Index" asp-route-range="90" aria-current="@(Model.RangeKey == "90" ? "true" : null)">90 days</a>
+        </div>
+        <form asp-action="Index" method="get">
+            <input type="hidden" name="range" value="custom" />
+            <label class="sr-only" for="range-from">From</label>
+            <input id="range-from" type="date" name="from" value="@o.From.ToString("yyyy-MM-dd")" max="@o.To.ToString("yyyy-MM-dd")" required />
+            <span class="muted">to</span>
+            <label class="sr-only" for="range-to">To</label>
+            <input id="range-to" type="date" name="to" value="@o.To.ToString("yyyy-MM-dd")" required />
+            <button type="submit" class="btn sm">Apply</button>
+        </form>
+    </div>
+</div>
+
+<div class="dash-grid">
+    <section class="card span-8" aria-labelledby="trend-title">
+        <div class="card-head">
+            <div><h2 id="trend-title">Activation trend</h2><p>Machines activated per day, @Model.RangeLabel</p></div>
+            <span class="chip">@o.ActivationsInRange.ToString("N0") in total</span>
+        </div>
+        <div class="chart" data-chart="area" data-chart-data="@Model.TrendChartJson"></div>
+    </section>
+
+    <section class="card span-4" aria-labelledby="status-title">
+        <div class="card-head"><div><h2 id="status-title">License status</h2><p>Every activation code, once</p></div></div>
+        <div class="donut-wrap">
+            <div class="chart" data-chart="donut" data-chart-data="@Model.LifecycleChartJson"></div>
+            <ul class="legend">
+                @foreach (var slice in Model.LifecycleSlices)
+                {
+                    <li><span class="swatch s@(slice.Series)"></span>@slice.Label<span class="val">@slice.Value.ToString("N0")</span></li>
+                }
+            </ul>
+        </div>
+    </section>
+
+    <section class="card span-4" aria-labelledby="expiry-title">
+        <div class="card-head"><div><h2 id="expiry-title">Expiry overview</h2><p>Non-revoked licenses by time left</p></div></div>
+        <div class="chart" data-chart="bars" data-chart-data="@Model.ExpiryChartJson"></div>
+    </section>
+
+    <section class="card span-4" aria-labelledby="requests-title">
+        <div class="card-head">
+            <div><h2 id="requests-title">License requests</h2><p>@Model.RequestsTotal.ToString("N0") in total</p></div>
+            <a asp-controller="Requests" asp-action="Index" asp-route-status="All" class="btn sm ghost">View all</a>
+        </div>
+        @if (Model.RequestsTotal == 0)
+        {
+            @await Html.PartialAsync("_Empty", new EmptyState("inbox", "No requests yet", "Requests sent from the app appear here."))
+        }
+        else
+        {
+            <div class="hbars">
+                @{ var seriesByStatus = new[] { 4, 5, 3, 1 }; }
+                @for (var i = 0; i < o.RequestsByStatus.Count; i++)
+                {
+                    var r = o.RequestsByStatus[i];
+                    <div class="hbar">
+                        <div class="row"><span>@r.Label</span><strong>@r.Count.ToString("N0")</strong></div>
+                        @Html.HBar(r.Count, Model.RequestsMax, seriesByStatus[i])
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    <section class="card span-4" aria-labelledby="top-title">
+        <div class="card-head"><div><h2 id="top-title">Top customers</h2><p>By number of activation codes</p></div></div>
+        @if (o.TopCustomers.Count == 0)
+        {
+            @await Html.PartialAsync("_Empty", new EmptyState("users", "No customers with codes yet", "Customers appear here once activation codes are created for them."))
+        }
+        else
+        {
+            <ol class="mini-list">
+                @for (var i = 0; i < o.TopCustomers.Count; i++)
+                {
+                    var c = o.TopCustomers[i];
+                    <li>
+                        <span class="rank">@(i + 1)</span>
+                        <span class="grow">
+                            <strong title="@c.Name">@c.Name</strong>
+                            <span>@c.ActiveMachines active machine@(c.ActiveMachines == 1 ? "" : "s")</span>
+                        </span>
+                        <span class="badge plain no-dot">@c.Licenses code@(c.Licenses == 1 ? "" : "s")</span>
+                    </li>
+                }
+            </ol>
+        }
+    </section>
+
+    <section class="card span-7" aria-labelledby="pending-title">
+        <div class="card-head">
+            <div><h2 id="pending-title">Needs your attention</h2><p>Latest open license requests</p></div>
+            <a asp-controller="Requests" asp-action="Index" class="btn sm ghost">Open inbox</a>
+        </div>
+        @if (Model.PendingRequests.Count == 0)
+        {
+            @await Html.PartialAsync("_Empty", new EmptyState("check", "All caught up", "There are no open license requests."))
+        }
+        else
+        {
+            <ul class="mini-list">
+                @foreach (var r in Model.PendingRequests)
+                {
+                    <li>
+                        <span class="grow">
+                            <strong><a asp-controller="Requests" asp-action="Details" asp-route-id="@r.Id">@r.FullName@(string.IsNullOrWhiteSpace(r.CompanyName) ? "" : " - " + r.CompanyName)</a></strong>
+                            <span>@r.PlanName, @r.Machines computer@(r.Machines == 1 ? "" : "s") &middot; @UiHtml.Date(r.CreatedDate)</span>
+                        </span>
+                        @Html.StatusBadge(r.Status)
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    <section class="card span-5" aria-labelledby="activity-title">
+        <div class="card-head">
+            <div><h2 id="activity-title">Recent activity</h2><p>From the audit log</p></div>
+            <a asp-controller="Audit" asp-action="Index" class="btn sm ghost">Audit log</a>
+        </div>
+        @if (o.RecentActivity.Count == 0)
+        {
+            @await Html.PartialAsync("_Empty", new EmptyState("history", "No activity recorded", "Staff actions are listed here as they happen."))
+        }
+        else
+        {
+            <ul class="timeline">
+                @foreach (var e in o.RecentActivity)
+                {
+                    <li>
+                        <span class="what" title="@e.Action">@UiHtml.ActionLabel(e.Action)</span>
+                        <span class="when">@(e.AdminName ?? "System") &middot; @UiHtml.DateTimeUtc(e.ActionDateUtc)</span>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/js/charts.js" asp-append-version="true" defer></script>
+}

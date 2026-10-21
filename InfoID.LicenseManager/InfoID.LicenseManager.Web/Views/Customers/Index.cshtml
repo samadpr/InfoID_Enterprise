@@ -1,0 +1,78 @@
+@using InfoID.LicenseManager.Application.DTOs.Customers
+@using InfoID.LicenseManager.Web.ViewModels.Customers
+@model CustomerListViewModel
+@{
+    ViewData["Title"] = "Customers";
+    var rows = Model.Rows;
+    var filtered = !string.IsNullOrWhiteSpace(Model.Query.Text) || Model.Query.Filter != CustomerFilter.All;
+}
+<div class="page-head">
+    <div class="titles">
+        <h1>Customers</h1>
+        <p class="lead">Accounts created in the app. A lead has verified an e-mail but has not requested or been given a license yet.</p>
+    </div>
+</div>
+
+<div class="kpis compact mb" aria-label="Summary of the customers in this list">
+    <div class="kpi"><span class="ico info">@Html.Icon("users", "lg")</span><span class="meta"><span class="value">@rows.Count.ToString("N0")</span><span class="label">Accounts listed</span></span></div>
+    <div class="kpi"><span class="ico ok">@Html.Icon("shield", "lg")</span><span class="meta"><span class="value">@rows.Count(c => c.Status == CustomerStatus.Customer)</span><span class="label">Customers</span></span></div>
+    <div class="kpi"><span class="ico">@Html.Icon("user", "lg")</span><span class="meta"><span class="value">@rows.Count(c => c.Status == CustomerStatus.Lead)</span><span class="label">Leads</span></span></div>
+    <div class="kpi"><span class="ico danger">@Html.Icon("ban", "lg")</span><span class="meta"><span class="value">@rows.Count(c => c.Status == CustomerStatus.Disabled)</span><span class="label">Disabled</span></span></div>
+</div>
+
+<form asp-action="Index" method="get" class="filters card mb">
+    <div class="search-field">
+        @Html.Icon("search", "sm")
+        <input name="text" value="@Model.Query.Text" placeholder="Search name, company, e-mail or phone" aria-label="Search" />
+    </div>
+    <select name="filter" aria-label="Filter">
+        @foreach (var option in CustomerListViewModel.FilterOptions)
+        {
+            <option value="@option.Value" selected="@(option.Value == Model.Query.Filter.ToString())">@option.Text</option>
+        }
+    </select>
+    <button type="submit" class="btn primary">Search</button>
+    @if (filtered)
+    {
+        <a asp-action="Index" class="btn ghost">Clear</a>
+    }
+</form>
+<div asp-validation-summary="All" class="alert error"></div>
+
+<div class="table-card">
+    @if (rows.Count == 0)
+    {
+        @await Html.PartialAsync("_Empty", filtered
+            ? new EmptyState("search", "No customers match", "Try a different search or filter.", "Clear filters", Url.Action("Index"))
+            : new EmptyState("users", "No customers yet", "Accounts appear here when people sign up in the InfoID app."))
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table data-table data-page-size="25">
+                <thead>
+                    <tr>
+                        <th data-sort="text">Name</th><th data-sort="text">Company</th><th data-sort="text">E-mail</th><th data-sort="text">Country</th><th data-sort="text">Status</th>
+                        <th data-sort="number">Requests</th><th data-sort="number">Licenses</th><th data-sort="date">Signed up</th><th data-sort="date">Last login</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var c in rows)
+                {
+                    <tr>
+                        <td class="cell-wrap"><a asp-action="Details" asp-route-id="@c.Id">@c.FullName</a></td>
+                        <td class="cell-wrap">@(c.CompanyName ?? "-")</td>
+                        <td class="cell-wrap">@c.Email</td>
+                        <td>@(c.Country ?? "-")</td>
+                        <td>@Html.StatusBadge(c.Status.ToString(), CustomerListViewModel.StatusText(c.Status))</td>
+                        <td>@c.RequestCount</td>
+                        <td>@c.LicenseCount</td>
+                        <td class="nowrap" data-sort-value="@c.CreatedDate.ToString("yyyy-MM-dd")">@UiHtml.Date(c.CreatedDate)</td>
+                        <td class="nowrap" data-sort-value="@(c.LastLoginDate?.ToString("yyyy-MM-dd") ?? "")">@UiHtml.Date(c.LastLoginDate)</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

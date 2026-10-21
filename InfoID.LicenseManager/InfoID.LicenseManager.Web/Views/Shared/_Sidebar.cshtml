@@ -1,0 +1,44 @@
+@using InfoID.LicenseManager.Web.Ui
+@model SidebarModel
+<aside class="sidebar" id="sidebar" aria-label="Main navigation">
+    <a class="sidebar-brand" asp-controller="Dashboard" asp-action="Index" aria-label="InfoID License Manager - dashboard">
+        <img src="~/img/infoid-logo.png" alt="" width="34" height="34" />
+        <span class="brand-text"><strong>InfoID</strong><span>License Manager</span></span>
+    </a>
+    <nav class="nav">
+        @foreach (var group in NavCatalog.Groups)
+        {
+            var items = group.Items.Where(i => !i.SuperAdminOnly || Model.IsSuperAdmin).ToList();
+            if (items.Count == 0) { continue; }
+            <div class="nav-group" data-group="@group.Key">
+                <button type="button" class="nav-group-toggle" aria-expanded="true">
+                    <span>@group.Title</span>
+                    @Html.Icon("chevron-down", "sm")
+                </button>
+                <ul class="nav-list">
+                    @foreach (var item in items)
+                    {
+                        var active = string.Equals(Model.ActiveController, item.Controller, StringComparison.OrdinalIgnoreCase);
+                        <li>
+                            <a asp-controller="@item.Controller" asp-action="@item.Action" class="nav-link@(active ? " is-active" : "")"
+                               data-tooltip="@item.Label" aria-current="@(active ? "page" : null)">
+                                @Html.Icon(item.Icon)
+                                <span class="label">@item.Label</span>
+                                @if (item.Controller == "Requests" && Model.PendingRequests > 0)
+                                {
+                                    <span class="nav-badge" title="@Model.PendingRequests open request(s)">@Model.PendingRequests</span>
+                                }
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </nav>
+    <div class="sidebar-foot">
+        <button type="button" class="collapse-btn" data-sidebar-toggle aria-expanded="true" aria-controls="sidebar" aria-label="Collapse sidebar" data-tooltip="Expand sidebar">
+            @Html.Icon("chevrons-left")
+            <span class="label">Collapse</span>
+        </button>
+    </div>
+</aside>

@@ -1,0 +1,26 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    var signedIn = User.Identity?.IsAuthenticated == true;
+}
+@if (signedIn)
+{
+    <div class="card">
+        <div class="empty">
+            <span class="icon-wrap">@Html.Icon(Model.StatusCode == 404 ? "search" : Model.StatusCode == 403 ? "lock" : "alert", "lg")</span>
+            <h1>@Model.Title</h1>
+            <p>@Model.Message</p>
+            <p class="muted">Reference: <span class="mono">@Model.TraceId</span></p>
+            <div class="actions">
+                <a asp-controller="Dashboard" asp-action="Index" class="btn primary">Back to the dashboard</a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <h1>@Model.Title</h1>
+    <p>@Model.Message</p>
+    <p class="muted">Reference: <span class="mono">@Model.TraceId</span></p>
+    <a asp-controller="Dashboard" asp-action="Index" class="btn primary">Back to the dashboard</a>
+}

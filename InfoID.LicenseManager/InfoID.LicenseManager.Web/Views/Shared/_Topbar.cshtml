@@ -1,0 +1,69 @@
+@using InfoID.LicenseManager.Web.Ui
+@model TopbarModel
+<header class="topbar">
+    <div class="topbar-start">
+        <button type="button" class="icon-btn menu-btn" data-drawer-toggle aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar">@Html.Icon("menu", "lg")</button>
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+            <ol>
+                @for (var i = 0; i < Model.Crumbs.Count; i++)
+                {
+                    var crumb = Model.Crumbs[i];
+                    <li>
+                        @if (crumb.Url is not null)
+                        {
+                            <a href="@crumb.Url">@crumb.Label</a>
+                        }
+                        else
+                        {
+                            <span aria-current="@(i == Model.Crumbs.Count - 1 ? "page" : null)">@crumb.Label</span>
+                        }
+                    </li>
+                }
+            </ol>
+        </nav>
+    </div>
+
+    <form asp-controller="Search" asp-action="Index" method="get" class="search" role="search">
+        @Html.Icon("search", "sm")
+        <input type="search" name="q" value="@Model.SearchText" placeholder="Search codes, customers, requests, plans" aria-label="Search codes, customers, requests and plans" autocomplete="off" maxlength="100" data-global-search />
+        <kbd aria-hidden="true">/</kbd>
+    </form>
+
+    <div class="topbar-end">
+        <button type="button" class="icon-btn search-toggle" data-search-toggle aria-label="Search">@Html.Icon("search")</button>
+
+        <a asp-controller="Requests" asp-action="Index" class="icon-btn" aria-label="@(Model.PendingRequests > 0 ? Model.PendingRequests + " open license request(s)" : "No open license requests")" title="@(Model.PendingRequests > 0 ? Model.PendingRequests + " open license request(s)" : "No open license requests")">
+            @Html.Icon("bell", "lg")
+            @if (Model.PendingRequests > 0)
+            {
+                <span class="dot">@Model.PendingRequests</span>
+            }
+        </a>
+
+        <div class="menu-wrap">
+            <button type="button" class="icon-btn" data-menu-toggle aria-controls="theme-menu" aria-expanded="false" aria-haspopup="menu" aria-label="Change theme" title="Theme">
+                <span class="theme-ico-light">@Html.Icon("sun", "lg")</span><span class="theme-ico-dark">@Html.Icon("moon", "lg")</span>
+            </button>
+            <div class="menu" id="theme-menu" role="menu" aria-label="Theme" data-menu hidden>
+                <div class="menu-label" data-theme-label>Theme</div>
+                <button type="button" class="menu-item" role="menuitemradio" aria-checked="false" data-theme-choice="light">@Html.Icon("sun") Light <span class="check">@Html.Icon("check", "sm")</span></button>
+                <button type="button" class="menu-item" role="menuitemradio" aria-checked="false" data-theme-choice="dark">@Html.Icon("moon") Dark <span class="check">@Html.Icon("check", "sm")</span></button>
+                <button type="button" class="menu-item" role="menuitemradio" aria-checked="false" data-theme-choice="system">@Html.Icon("monitor") System <span class="check">@Html.Icon("check", "sm")</span></button>
+            </div>
+        </div>
+
+        <div class="menu-wrap">
+            <button type="button" class="user-btn" data-menu-toggle aria-controls="user-menu" aria-expanded="false" aria-haspopup="menu" aria-label="Account menu for @Model.DisplayName">
+                <span class="avatar" aria-hidden="true">@UiHtml.Initials(Model.DisplayName)</span>
+                <span class="who"><strong>@Model.DisplayName</strong><span>@UiHtml.RoleLabel(Model.Role)</span></span>
+                @Html.Icon("chevron-down", "sm")
+            </button>
+            <div class="menu" id="user-menu" role="menu" aria-label="Account" data-menu hidden>
+                <div class="menu-head"><strong>@Model.DisplayName</strong><span>@UiHtml.RoleLabel(Model.Role)</span></div>
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="menu-item" role="menuitem">@Html.Icon("log-out") Sign out</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</header>

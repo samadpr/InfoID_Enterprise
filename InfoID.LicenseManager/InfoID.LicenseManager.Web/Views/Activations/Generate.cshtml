@@ -1,0 +1,99 @@
+@using InfoID.LicenseManager.Web.Security
+@using InfoID.LicenseManager.Web.ViewModels.Activations
+@model GenerateSerialKeyViewModel
+@{
+    ViewData["Title"] = "Generate serial key";
+    var preview = Model.Preview;
+    var step = Model.Issued is not null ? 3 : preview is not null ? 2 : 1;
+}
+<div class="page-head">
+    <div class="titles">
+        <h1>Generate serial key</h1>
+        <p class="lead">Paste the request code the customer sent from InfoID. It is decoded and checked before a key is issued.</p>
+    </div>
+</div>
+
+<ol class="steps" aria-label="Progress">
+    <li class="step @(step > 1 ? "is-done" : "is-current")"><span class="n">@(step > 1 ? "✓" : "1")</span> Paste request code</li>
+    <li class="step @(step > 2 ? "is-done" : step == 2 ? "is-current" : "")"><span class="n">@(step > 2 ? "✓" : "2")</span> Review and issue</li>
+    <li class="step @(step == 3 ? "is-current" : "")"><span class="n">3</span> Give the key to the customer</li>
+</ol>
+
+<form asp-action="Decode" method="post" class="card" novalidate>
+    <div asp-validation-summary="ModelOnly" class="alert error"></div>
+    <label asp-for="SoftCode"></label>
+    <textarea asp-for="SoftCode" rows="3" class="mono" spellcheck="false" autocomplete="off" placeholder="Paste the request code here"></textarea>
+    <span asp-validation-for="SoftCode" class="field-error"></span>
+    <div class="form-foot">
+        <button type="submit" class="btn primary">Decode</button>
+    </div>
+</form>
+
+@if (preview is not null)
+{
+    <section class="card mt" aria-labelledby="preview-title">
+        <div class="card-head"><div><h2 id="preview-title">What this request is for</h2><p>Decoded from the request code.</p></div></div>
+        <dl class="facts">
+            <dt>Activation code</dt><dd class="mono">@preview.ActivationCode</dd>
+            <dt>Machine fingerprint</dt><dd class="mono cell-wrap">@preview.FingerprintHex</dd>
+            <dt>Request date</dt><dd>@preview.RequestDate.ToString("yyyy-MM-dd")</dd>
+            @if (preview.LicenseId is not null)
+            {
+                <dt>License</dt>
+                <dd>
+                    <a asp-controller="Licenses" asp-action="Details" asp-route-id="@preview.LicenseId">@preview.Tier, @preview.LicenseType</a>
+                    - @preview.CodeStatus, expires @(preview.ExpiryDate?.ToString("yyyy-MM-dd") ?? "never")
+                </dd>
+                <dt>Customer</dt><dd>@(preview.Customer ?? "-")</dd>
+                <dt>Machines</dt><dd>@preview.ActiveMachines of @preview.MaxActivations in use@(preview.IsReactivationOfSameMachine ? " (this machine is already activated; it will be re-issued, not use a new slot)" : "")</dd>
+            }
+        </dl>
+        @foreach (var problem in preview.Problems)
+        {
+            <div class="alert @(problem.IsBlocking ? "error" : "warn") mt">@Html.Icon("alert", "sm") <span>@problem.Message</span></div>
+        }
+    </section>
+}
+
+@if (preview is { CanIssue: true } && Model.Issued is null)
+{
+    <form asp-action="Issue" method="post" class="card mt" novalidate>
+        <input type="hidden" asp-for="SoftCode" />
+        @if (User.CanManageLicenses())
+        {
+            <div class="card-head"><div><h2>Overrides</h2><p>Optional. Change the edition or expiry for this one key only.</p></div></div>
+            <div class="grid">
+                <div>
+                    <label class="check"><input asp-for="OverrideTier" /> Override edition</label>
+                    <select asp-for="OverrideTierValue" asp-items="GenerateSerialKeyViewModel.TierOptions"></select>
+                </div>
+                <div>
+                    <label class="check"><input asp-for="OverrideExpiry" /> Override expiry</label>
+                    <input asp-for="OverrideExpiryDate" type="date" />
+                </div>
+            </div>
+        }
+        <div class="form-foot"><button type="submit" class="btn primary">@Html.Icon("lock", "sm") Generate serial key</button></div>
+    </form>
+}
+
+@if (Model.Issued is { } issued)
+{
+    <section class="card mt" aria-labelledby="key-title">
+        <div class="card-head"><div><h2 id="key-title">Serial key</h2><p>Works only for that activation code on that computer.</p></div></div>
+        <div class="key-row">
+            <div class="key" id="issued-key">@issued.SerialKey</div>
+            <div class="actions">
+                <button type="button" class="copy-btn" data-copy-target="#issued-key">@Html.Icon("copy", "sm") <span class="label">Copy key</span></button>
+                <button type="button" class="copy-btn" data-download-target="#issued-key" data-download-name="infoid-serial-key.txt">@Html.Icon("download", "sm") Download</button>
+            </div>
+        </div>
+        <p class="mt">Give this key to the customer to type into InfoID, then click <strong>Activate</strong>.</p>
+        <div class="actions">
+            <span class="chip">@issued.Tier</span>
+            <span class="chip">@issued.Type</span>
+            <span class="chip">@(issued.ExpiryDate is { } e ? $"expires {e:yyyy-MM-dd}" : "no expiry")</span>
+            <span class="chip">@(issued.MaxCardsPerPeriod is { } m ? $"{m:N0} cards per {issued.LimitPeriod.ToString().ToLowerInvariant()[..^2]}" : "unlimited cards")</span>
+        </div>
+    </section>
+}

@@ -1,0 +1,19 @@
+@using InfoID.LicenseManager.Web.ViewModels.Plans
+@model PlanFormViewModel
+@{
+    ViewData["Title"] = "New plan";
+}
+<a asp-action="Index" class="back-link">@Html.Icon("arrow-left", "sm") All plans</a>
+<div class="page-head">
+    <div class="titles">
+        <h1>New plan</h1>
+        <p class="lead">Customers see the plan the next time they open the Editions page in the app.</p>
+    </div>
+</div>
+<form asp-action="Create" method="post" class="stack" novalidate>
+    <partial name="_PlanFields" model="Model" />
+    <div class="form-foot">
+        <button type="submit" class="btn primary">Create plan</button>
+        <a asp-action="Index" class="btn ghost">Cancel</a>
+    </div>
+</form>
