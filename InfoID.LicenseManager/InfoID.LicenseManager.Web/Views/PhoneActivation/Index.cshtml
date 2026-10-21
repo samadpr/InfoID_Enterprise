@@ -1,0 +1,36 @@
+@using InfoID.LicenseManager.Web.ViewModels.Phone
+@model PhoneActivationViewModel
+@{
+    Layout = null;
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>InfoID activation</title>
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="stylesheet" href="~/css/phone.css" asp-append-version="true" />
+</head>
+<body>
+<div class="card">
+    <div class="brand"><img src="~/img/infoid-logo.png" alt="" width="40" height="40" /><h1>InfoID activation</h1></div>
+    @if (Model.SerialKey is not null)
+    {
+        <p class="ok">Your InfoID serial key</p>
+        <div class="key">@Model.SerialKey</div>
+        <p>Type this key into InfoID on your computer and click <b>Activate</b>.</p>
+        <p class="small">@Model.Description</p>
+        <p class="small">This key works only on the computer that showed the QR code.</p>
+    }
+    else
+    {
+        <p class="err">Activation not possible</p>
+        <p>@Model.Error</p>
+        <p class="small">If you need help, contact your InfoID vendor.</p>
+    }
+</div>
+</body>
+</html>

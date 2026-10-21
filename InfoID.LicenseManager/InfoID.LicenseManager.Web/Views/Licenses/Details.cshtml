@@ -1,0 +1,131 @@
+@using InfoID.LicenseManager.Web.Security
+@using InfoID.LicenseManager.Web.ViewModels.Licenses
+@model LicenseDetailsViewModel
+@{
+    var l = Model.License;
+    ViewData["Title"] = l.ActivationCode;
+    var canManage = User.CanManageLicenses();
+}
+<a asp-action="Index" class="back-link">@Html.Icon("arrow-left", "sm") All activation codes</a>
+<div class="page-head">
+    <div class="titles">
+        <h1><span class="mono" id="license-code">@l.ActivationCode</span> @Html.StatusBadge(l.Status)</h1>
+        <p class="lead">@l.Tier edition, @l.LicenseType.ToLowerInvariant() license@(l.Customer is null ? "" : " for " + l.Customer).</p>
+    </div>
+    <div class="page-actions">
+        <button type="button" class="copy-btn" data-copy-target="#license-code">@Html.Icon("copy", "sm") <span class="label">Copy code</span></button>
+    </div>
+</div>
+
+<div class="kpis compact mb">
+    <div class="kpi"><span class="ico neutral">@Html.Icon("cpu", "lg")</span><span class="meta"><span class="value">@l.ActiveMachines / @l.MaxActivations</span><span class="label">Machines in use</span></span></div>
+    <div class="kpi"><span class="ico warn">@Html.Icon("calendar", "lg")</span><span class="meta"><span class="value">@(l.ExpiryDate?.ToString("yyyy-MM-dd") ?? "Never")</span><span class="label">Expires</span></span></div>
+    <div class="kpi"><span class="ico">@Html.Icon("file", "lg")</span><span class="meta"><span class="value">@(l.MaxCardsPerPeriod is { } cards ? cards.ToString("N0") : "Unlimited")</span><span class="label">@(l.MaxCardsPerPeriod is null ? "Cards" : "Cards per " + l.CardLimitPeriod.ToLowerInvariant())</span></span></div>
+    <div class="kpi"><span class="ico @(l.AllowOfflineActivation ? "ok" : "info")">@Html.Icon("shield", "lg")</span><span class="meta"><span class="value">@(l.AllowOfflineActivation ? "Allowed" : "Online only")</span><span class="label">Offline activation</span></span></div>
+</div>
+
+<div class="cols detail">
+    <div class="stack">
+        <section class="card">
+            <div class="card-head"><div><h2>License details</h2></div></div>
+            <dl class="facts">
+                <dt>Edition</dt><dd>@l.Tier</dd>
+                <dt>License type</dt><dd>@l.LicenseType</dd>
+                <dt>Expires</dt><dd>@(l.ExpiryDate?.ToString("yyyy-MM-dd") ?? "Never")</dd>
+                <dt>Cards</dt><dd>@(l.MaxCardsPerPeriod is { } m ? $"{m:N0} per {l.CardLimitPeriod.ToLowerInvariant()}" : "Unlimited")</dd>
+                <dt>Machines</dt><dd>@l.ActiveMachines of @l.MaxActivations in use</dd>
+                <dt>Offline activation</dt><dd>@(l.AllowOfflineActivation ? "Allowed (phone / QR)" : "Online only")</dd>
+                <dt>Customer</dt><dd>@(l.Customer ?? "-")</dd>
+                <dt>Created</dt><dd>@l.CreatedDate.ToString("yyyy-MM-dd HH:mm") UTC</dd>
+                @if (l.RevokedDate is { } revoked)
+                {
+                    <dt>Revoked</dt><dd>@revoked.ToString("yyyy-MM-dd HH:mm") UTC</dd>
+                }
+                @if (!string.IsNullOrWhiteSpace(l.Notes))
+                {
+                    <dt>Notes</dt><dd class="pre">@l.Notes</dd>
+                }
+            </dl>
+        </section>
+
+        <section aria-labelledby="machines-title">
+            <div class="section-title"><h2 id="machines-title">Machines and activation history</h2></div>
+            <div class="table-card">
+                @if (l.Activations.Count == 0)
+                {
+                    @await Html.PartialAsync("_Empty", new EmptyState("cpu", "Never activated", "No machine has used this code yet."))
+                }
+                else
+                {
+                    <div class="table-wrap">
+                        <table data-table="plain" data-page-size="10">
+                            <thead>
+                                <tr><th>Machine fingerprint</th><th>Mode</th><th data-sort="text">Status</th><th data-sort="date">Activated</th><th data-sort="date">Deactivated</th><th data-sort="date">Last check-in</th><th>Edition</th><th>Expires</th><th>App</th></tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var a in l.Activations)
+                            {
+                                <tr>
+                                    <td class="mono cell-wrap">@a.MachineFingerprint</td>
+                                    <td>@a.Mode</td>
+                                    <td>@Html.StatusBadge(a.Status)</td>
+                                    <td class="nowrap">@a.ActivationDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td class="nowrap">@(a.DeactivatedDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+                                    <td class="nowrap">@(a.LastValidationDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+                                    <td>@a.IssuedTier</td>
+                                    <td class="nowrap">@(a.IssuedExpiryDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                                    <td>@(a.AppVersion ?? "-")</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </section>
+    </div>
+
+    @if (canManage)
+    {
+        <div class="stack" aria-label="Actions">
+            @if (!Model.IsPerpetual)
+            {
+                <form asp-action="Extend" asp-route-id="@l.Id" method="post" class="action-card">
+                    <h3>@Html.Icon("calendar", "sm") Extend</h3>
+                    <p>Machines activated online pick this up automatically.</p>
+                    <label asp-for="Extend.NewExpiryDate"></label>
+                    <input asp-for="Extend.NewExpiryDate" type="date" required />
+                    <button type="submit" class="btn">Extend</button>
+                </form>
+            }
+            @if (l.ActiveMachines > 0)
+            {
+                <form asp-action="FreeSlots" asp-route-id="@l.Id" method="post" class="action-card"
+                      data-confirm="This removes @l.ActiveMachines machine(s) from the code so the customer can activate on other computers. Offline machines keep their key." data-confirm-title="Free machine slots?" data-confirm-button="Free slots">
+                    <h3>@Html.Icon("cpu", "sm") Free machine slots</h3>
+                    <p>Use when the customer moved to a new PC. Offline machines keep their key.</p>
+                    <label asp-for="FreeSlots.Reason">Reason</label>
+                    <input asp-for="FreeSlots.Reason" maxlength="300" required />
+                    <button type="submit" class="btn">Free @l.ActiveMachines slot(s)</button>
+                </form>
+            }
+            <form asp-action="SetOffline" asp-route-id="@l.Id" method="post" class="action-card">
+                <h3>@Html.Icon("shield", "sm") Offline activation</h3>
+                <p>@(l.AllowOfflineActivation ? "Currently allowed." : "Currently online only.")</p>
+                <input type="hidden" name="allow" value="@((!l.AllowOfflineActivation).ToString().ToLowerInvariant())" />
+                <button type="submit" class="btn">@(l.AllowOfflineActivation ? "Require online activation" : "Allow offline activation")</button>
+            </form>
+            @if (!Model.IsRevoked)
+            {
+                <form asp-action="Revoke" asp-route-id="@l.Id" method="post" class="action-card danger-zone"
+                      data-confirm="Revoking ends every machine's activation. The license stops working at the next online re-validation and cannot be reactivated." data-confirm-title="Revoke this license?" data-confirm-button="Revoke license" data-confirm-tone="danger">
+                    <h3>@Html.Icon("ban", "sm") Revoke</h3>
+                    <p>Ends every machine's activation. Stops working at the next online re-validation.</p>
+                    <label asp-for="Revoke.Reason">Reason</label>
+                    <input asp-for="Revoke.Reason" maxlength="300" required />
+                    <button type="submit" class="btn danger">Revoke license</button>
+                </form>
+            }
+        </div>
+    }
+</div>

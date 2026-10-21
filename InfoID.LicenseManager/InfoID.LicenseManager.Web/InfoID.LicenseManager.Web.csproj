@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <!-- Presentation layer (MVC) and composition root. Hosts the staff portal and the
+       client-facing /api/v1 endpoints InfoID.Desktop already uses. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Dev secrets (connection string with password) live outside the repo: dotnet user-secrets. -->
+    <UserSecretsId>infoid-licensemanager-web</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\InfoID.LicenseManager.Application\InfoID.LicenseManager.Application.csproj" />
+    <ProjectReference Include="..\InfoID.LicenseManager.Infrastructure\InfoID.LicenseManager.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

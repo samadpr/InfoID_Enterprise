@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "https": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "https://localhost:7143;http://0.0.0.0:5143",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Database__MigrateOnStartup": "true"
+      }
+    }
+  }
+}

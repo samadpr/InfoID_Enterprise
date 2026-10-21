@@ -1,0 +1,68 @@
+@using InfoID.LicenseManager.Web.ViewModels.Plans
+@model PlanFormViewModel
+<div asp-validation-summary="All" class="alert error"></div>
+
+<section class="card">
+    <div class="card-head"><div><h2>Plan</h2><p>How the plan appears on the Editions page.</p></div></div>
+    <div class="grid">
+        <div>
+            <label asp-for="Name"></label>
+            <input asp-for="Name" />
+            <span asp-validation-for="Name" class="field-error"></span>
+        </div>
+        <div>
+            <label asp-for="Tier">Edition</label>
+            <select asp-for="Tier" asp-items="PlanFormViewModel.TierOptions"></select>
+        </div>
+        <div>
+            <label asp-for="PriceText"></label>
+            <input asp-for="PriceText" />
+        </div>
+        <div>
+            <label asp-for="SortOrder"></label>
+            <input asp-for="SortOrder" type="number" />
+        </div>
+        <div class="checks">
+            <label class="check"><input asp-for="IsActive" /> Active (offered to customers)</label>
+        </div>
+    </div>
+    <div class="mt">
+        <label asp-for="Tagline"></label>
+        <input asp-for="Tagline" />
+    </div>
+    <div class="mt">
+        <label asp-for="FeaturesText"></label>
+        <textarea asp-for="FeaturesText" rows="8"></textarea>
+    </div>
+</section>
+
+<section class="card">
+    <div class="card-head"><div><h2>Entitlements</h2><p>The license terms a customer gets when a request for this plan is approved.</p></div></div>
+    <div class="grid">
+        <div>
+            <label asp-for="DurationMonths"></label>
+            <input asp-for="DurationMonths" type="number" min="1" max="120" />
+            <p class="hint">Ignored when perpetual.</p>
+            <span asp-validation-for="DurationMonths" class="field-error"></span>
+        </div>
+        <div>
+            <label asp-for="DefaultMachines"></label>
+            <input asp-for="DefaultMachines" type="number" min="1" max="100" />
+            <span asp-validation-for="DefaultMachines" class="field-error"></span>
+        </div>
+        <div>
+            <label asp-for="LimitPeriod"></label>
+            <select asp-for="LimitPeriod" asp-items="PlanFormViewModel.LimitPeriodOptions"></select>
+        </div>
+        <div>
+            <label asp-for="MaxCardsPerPeriod"></label>
+            <input asp-for="MaxCardsPerPeriod" type="number" min="100" step="100" />
+            <p class="hint">A multiple of 100. Ignored when unlimited.</p>
+            <span asp-validation-for="MaxCardsPerPeriod" class="field-error"></span>
+        </div>
+        <div class="checks">
+            <label class="check"><input asp-for="Perpetual" data-disables="#DurationMonths" /> Perpetual (no expiry)</label>
+            <label class="check"><input asp-for="UnlimitedCards" data-disables="#MaxCardsPerPeriod" /> Unlimited cards</label>
+        </div>
+    </div>
+</section>

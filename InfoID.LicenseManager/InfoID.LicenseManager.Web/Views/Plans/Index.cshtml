@@ -1,0 +1,71 @@
+@using InfoID.LicenseManager.Web.Security
+@using InfoID.LicenseManager.Web.ViewModels.Plans
+@model PlanListViewModel
+@{
+    ViewData["Title"] = "Plans";
+    var canManage = User.CanManageLicenses();
+    var plans = Model.Plans;
+}
+<div class="page-head">
+    <div class="titles">
+        <h1>Plans</h1>
+        <p class="lead">Plans shown on the app Editions page. A change reaches every customer the next time they open it; no new app release is needed.</p>
+    </div>
+    <div class="page-actions">
+        @if (canManage)
+        {
+            <a asp-action="Create" class="btn primary">@Html.Icon("plus") New plan</a>
+        }
+    </div>
+</div>
+
+<div class="kpis compact mb">
+    <div class="kpi"><span class="ico">@Html.Icon("layers", "lg")</span><span class="meta"><span class="value">@plans.Count</span><span class="label">Plans</span></span></div>
+    <div class="kpi"><span class="ico ok">@Html.Icon("check", "lg")</span><span class="meta"><span class="value">@plans.Count(p => p.IsActive)</span><span class="label">Offered to customers</span></span></div>
+    <div class="kpi"><span class="ico neutral">@Html.Icon("ban", "lg")</span><span class="meta"><span class="value">@plans.Count(p => !p.IsActive)</span><span class="label">Hidden</span></span></div>
+</div>
+
+@if (plans.Count == 0)
+{
+    <div class="card">
+        @await Html.PartialAsync("_Empty", new EmptyState("layers", "No plans yet", "Create a plan so customers can request it from the app.", canManage ? "New plan" : null, canManage ? Url.Action("Create") : null))
+    </div>
+}
+else
+{
+    <div class="plan-grid">
+        @foreach (var p in plans)
+        {
+            var features = (p.FeaturesText ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            <article class="plan-card@(p.IsActive ? "" : " is-off")" aria-labelledby="plan-@p.Id">
+                <header>
+                    <div>
+                        <h2 id="plan-@p.Id">@p.Name</h2>
+                        <span class="muted">@p.Tier edition</span>
+                    </div>
+                    @Html.StatusBadge(p.IsActive ? "Active" : "Disabled", p.IsActive ? "Active" : "Hidden")
+                </header>
+                <p class="plan-price">@(p.PriceText ?? "-")</p>
+                @if (!string.IsNullOrWhiteSpace(p.Tagline)) { <p class="muted">@p.Tagline</p> }
+                <dl class="plan-limits">
+                    <div><dt>Duration</dt><dd>@(p.DurationMonths is { } m ? $"{m} months" : "Perpetual")</dd></div>
+                    <div><dt>Machines</dt><dd>@p.DefaultMachines</dd></div>
+                    <div><dt>Cards</dt><dd>@(p.MaxCardsPerPeriod is { } c ? $"{c:N0} per {p.CardLimitPeriod.ToLowerInvariant()}" : "Unlimited")</dd></div>
+                    <div><dt>Order</dt><dd>@p.SortOrder</dd></div>
+                </dl>
+                @if (features.Length > 0)
+                {
+                    <ul class="plan-features">
+                        @foreach (var f in features) { <li>@Html.Icon("check", "sm") @f</li> }
+                    </ul>
+                }
+                <footer>
+                    @if (canManage)
+                    {
+                        <a asp-action="Edit" asp-route-id="@p.Id" class="btn sm">@Html.Icon("edit", "sm") Edit</a>
+                    }
+                </footer>
+            </article>
+        }
+    </div>
+}

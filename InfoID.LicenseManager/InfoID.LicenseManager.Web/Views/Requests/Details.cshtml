@@ -1,0 +1,136 @@
+@using InfoID.LicenseManager.Web.Security
+@using InfoID.LicenseManager.Web.ViewModels.Requests
+@model RequestDetailsViewModel
+@{
+    var r = Model.Request;
+    ViewData["Title"] = "Request #" + r.Id;
+    var canManage = User.CanManageLicenses();
+}
+<a asp-action="Index" class="back-link">@Html.Icon("arrow-left", "sm") All requests</a>
+<div class="page-head">
+    <div class="titles">
+        <h1>Request #@r.Id @Html.StatusBadge(r.Status)</h1>
+        <p class="lead">@r.FullName@(string.IsNullOrWhiteSpace(r.CompanyName) ? "" : ", " + r.CompanyName) asked for the <strong>@r.PlanName</strong> plan.</p>
+    </div>
+</div>
+
+<div class="cols detail">
+    <div class="stack">
+        <section class="card">
+            <div class="card-head"><div><h2>Request details</h2></div></div>
+            <dl class="facts">
+                <dt>Received</dt><dd>@r.CreatedDate.ToString("yyyy-MM-dd HH:mm") UTC</dd>
+                <dt>Plan</dt><dd>@r.PlanName (@r.PlanTier, @(r.PlanDurationMonths is { } m ? $"{m} months" : "perpetual"))</dd>
+                <dt>Computers</dt><dd>@r.Machines</dd>
+                <dt>Name</dt><dd>@r.FullName</dd>
+                <dt>Company</dt><dd>@(r.CompanyName ?? "-")</dd>
+                <dt>E-mail</dt><dd>@r.Email</dd>
+                <dt>Phone</dt><dd>@(r.Phone ?? "-")</dd>
+                <dt>Country</dt><dd>@(r.Country ?? "-")@(string.IsNullOrWhiteSpace(r.StateProvince) ? "" : ", " + r.StateProvince)</dd>
+                <dt>Customer account</dt><dd>@(r.HasAccount ? "Yes - the code will appear under \"My licenses\" in the app" : "No (requested without signing in)")</dd>
+                @if (!string.IsNullOrWhiteSpace(r.Message))
+                {
+                    <dt>Message</dt><dd class="pre">@r.Message</dd>
+                }
+                @if (r.HandledBy is not null)
+                {
+                    <dt>Handled by</dt><dd>@r.HandledBy@(r.HandledDate is { } handled ? " on " + handled.ToString("yyyy-MM-dd HH:mm") + " UTC" : "")</dd>
+                }
+                @if (!string.IsNullOrWhiteSpace(r.StatusReason))
+                {
+                    <dt>Reason</dt><dd class="pre">@r.StatusReason</dd>
+                }
+                @if (r.ActivationCode is not null)
+                {
+                    <dt>Activation code</dt><dd><a asp-controller="Licenses" asp-action="Index" asp-route-text="@r.ActivationCode" class="cell-code">@r.ActivationCode</a></dd>
+                }
+            </dl>
+        </section>
+
+        @if (r.IsOpen && canManage)
+        {
+            <form asp-action="Approve" asp-route-id="@r.Id" method="post" class="card" novalidate
+                  data-confirm="This creates the activation code and e-mails it to @r.Email. Only approve after payment is confirmed." data-confirm-title="Approve this request?" data-confirm-button="Approve and send code">
+                <div class="card-head"><div><h2>Approve</h2><p>Pre-filled from the plan and the request. Approving creates the activation code and e-mails it to @r.Email.</p></div></div>
+                <div class="grid">
+                    <div>
+                        <label asp-for="Approve.Tier">Edition</label>
+                        <select asp-for="Approve.Tier" asp-items="ApproveFormViewModel.TierOptions"></select>
+                    </div>
+                    <div>
+                        <label asp-for="Approve.Type">License type</label>
+                        <select asp-for="Approve.Type" asp-items="ApproveFormViewModel.TypeOptions"></select>
+                    </div>
+                    <div>
+                        <label asp-for="Approve.ExpiryDate"></label>
+                        <input asp-for="Approve.ExpiryDate" type="date" />
+                        <p class="hint">Ignored for perpetual licenses.</p>
+                    </div>
+                    <div>
+                        <label asp-for="Approve.MaxActivations"></label>
+                        <input asp-for="Approve.MaxActivations" type="number" min="1" max="100" />
+                    </div>
+                    <div>
+                        <label asp-for="Approve.LimitPeriod"></label>
+                        <select asp-for="Approve.LimitPeriod" asp-items="ApproveFormViewModel.LimitPeriodOptions"></select>
+                    </div>
+                    <div>
+                        <label asp-for="Approve.MaxCardsPerPeriod"></label>
+                        <input asp-for="Approve.MaxCardsPerPeriod" type="number" min="100" step="100" />
+                        <p class="hint">A multiple of 100. Ignored when unlimited.</p>
+                    </div>
+                    <div class="checks">
+                        <label class="check"><input asp-for="Approve.UnlimitedCards" data-disables="#Approve_MaxCardsPerPeriod" /> Unlimited cards</label>
+                        <label class="check"><input asp-for="Approve.AllowOfflineActivation" /> Allow offline activation (phone / QR)</label>
+                    </div>
+                </div>
+                <div class="mt">
+                    <label asp-for="Approve.Notes">Notes (internal)</label>
+                    <textarea asp-for="Approve.Notes" rows="2"></textarea>
+                </div>
+                <div class="form-foot"><button type="submit" class="btn primary">@Html.Icon("check", "sm") Approve and send code</button></div>
+            </form>
+        }
+    </div>
+
+    <div class="stack">
+        <section class="card">
+            <div class="card-head"><div><h2>History</h2></div></div>
+            <ul class="timeline">
+                <li><span class="what">Request received</span><span class="when">@r.CreatedDate.ToString("yyyy-MM-dd HH:mm") UTC</span></li>
+                @if (r.HandledBy is not null || r.Status is "Approved" or "Rejected" or "InProgress")
+                {
+                    <li>
+                        <span class="what">@(r.Status == "InProgress" ? "Marked as in progress" : r.Status)</span>
+                        <span class="when">@(r.HandledBy ?? "Staff")@(r.HandledDate is { } when ? " - " + when.ToString("yyyy-MM-dd HH:mm") + " UTC" : "")</span>
+                    </li>
+                }
+            </ul>
+        </section>
+
+        @if (r.IsOpen && canManage)
+        {
+            @if (r.Status == "New")
+            {
+                <form asp-action="MarkInProgress" asp-route-id="@r.Id" method="post" class="action-card">
+                    <h3>@Html.Icon("clock", "sm") In progress</h3>
+                    <p>Tell your team you are handling this request.</p>
+                    <button type="submit" class="btn">Mark as in progress</button>
+                </form>
+            }
+
+            <form asp-action="Reject" asp-route-id="@r.Id" method="post" class="action-card danger-zone"
+                  data-confirm="The customer is e-mailed the reason you enter and the request is closed." data-confirm-title="Reject this request?" data-confirm-button="Reject request" data-confirm-tone="danger">
+                <h3>@Html.Icon("ban", "sm") Reject</h3>
+                <p>The customer is e-mailed this reason.</p>
+                <label asp-for="Reject.Reason">Reason</label>
+                <input asp-for="Reject.Reason" maxlength="300" required />
+                <button type="submit" class="btn danger">Reject request</button>
+            </form>
+        }
+        else if (r.IsOpen)
+        {
+            <div class="alert info">@Html.Icon("info", "sm") <span>Your role can look at requests but not process them.</span></div>
+        }
+    </div>
+</div>

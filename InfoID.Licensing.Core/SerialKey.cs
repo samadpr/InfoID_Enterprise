@@ -23,7 +23,7 @@ public sealed record SerialKeyTerms(
         if (ExpiryDate is { } expiry && expiry <= LicenseDates.Epoch)
             return "The expiry date is too early.";
         if (MaxCardsPerPeriod is { } max && (max <= 0 || max % 100 != 0 || max > SerialKey.MaxCardLimit))
-            return $"The card limit must be a multiple of 100 between 100 and {SerialKey.MaxCardLimit:N0}, or unlimited.";
+            return $"The card limit must be a multiple of 100 between 100 and {SerialKey.MaxCardLimit.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)}, or unlimited.";
         return null;
     }
 }

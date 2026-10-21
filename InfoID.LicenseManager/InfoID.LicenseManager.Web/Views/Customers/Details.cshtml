@@ -1,0 +1,136 @@
+@using InfoID.LicenseManager.Web.Security
+@using InfoID.LicenseManager.Web.ViewModels.Customers
+@model CustomerDetailsViewModel
+@{
+    var c = Model.Details.Customer;
+    ViewData["Title"] = c.FullName;
+    var canManage = User.CanManageLicenses();
+    var canResend = !c.EmailVerified && !c.Disabled;
+}
+<a asp-action="Index" class="back-link">@Html.Icon("arrow-left", "sm") All customers</a>
+<div class="page-head">
+    <div class="titles">
+        <h1>@c.FullName @Html.StatusBadge(c.Status.ToString(), CustomerListViewModel.StatusText(c.Status))</h1>
+        <p class="lead">@c.Email@(c.CompanyName is null ? "" : " - " + c.CompanyName)</p>
+    </div>
+</div>
+
+<div class="kpis compact mb">
+    <div class="kpi"><span class="ico">@Html.Icon("key", "lg")</span><span class="meta"><span class="value">@Model.Details.Licenses.Count</span><span class="label">Licenses</span></span></div>
+    <div class="kpi"><span class="ico neutral">@Html.Icon("cpu", "lg")</span><span class="meta"><span class="value">@Model.Details.Licenses.Sum(l => l.ActiveMachines)</span><span class="label">Active machines</span></span></div>
+    <div class="kpi"><span class="ico warn">@Html.Icon("inbox", "lg")</span><span class="meta"><span class="value">@Model.Details.Requests.Count</span><span class="label">Requests</span></span></div>
+    <div class="kpi"><span class="ico @(c.EmailVerified ? "ok" : "warn")">@Html.Icon("mail", "lg")</span><span class="meta"><span class="value">@(c.EmailVerified ? "Verified" : "Not verified")</span><span class="label">E-mail</span></span></div>
+</div>
+
+<div class="cols detail">
+    <div class="stack">
+        <section class="card">
+            <div class="card-head"><div><h2>Account</h2></div></div>
+            <dl class="facts">
+                <dt>Company</dt><dd>@(c.CompanyName ?? "-")</dd>
+                <dt>E-mail</dt><dd>@c.Email @(c.EmailVerified ? "(verified)" : "(not verified)")</dd>
+                <dt>Phone</dt><dd>@(c.Phone ?? "-")</dd>
+                <dt>Country</dt><dd>@(c.Country ?? "-")</dd>
+                <dt>Signed up</dt><dd>@c.CreatedDate.ToString("yyyy-MM-dd HH:mm") UTC</dd>
+                <dt>Last login</dt><dd>@(c.LastLoginDate is { } lastLogin ? lastLogin.ToString("yyyy-MM-dd HH:mm") + " UTC" : "-")</dd>
+            </dl>
+        </section>
+
+        <section aria-labelledby="licenses-title">
+            <div class="section-title"><h2 id="licenses-title">Licenses</h2></div>
+            <div class="table-card">
+                @if (Model.Details.Licenses.Count == 0)
+                {
+                    @await Html.PartialAsync("_Empty", new EmptyState("key", "No licenses", "No activation code is linked to this account yet."))
+                }
+                else
+                {
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Code</th><th>Edition</th><th>Type</th><th>Expires</th><th>Status</th><th>Machines</th></tr></thead>
+                            <tbody>
+                            @foreach (var l in Model.Details.Licenses)
+                            {
+                                <tr>
+                                    <td><a asp-controller="Licenses" asp-action="Index" asp-route-text="@l.ActivationCode" class="cell-code">@l.ActivationCode</a></td>
+                                    <td>@l.Tier</td>
+                                    <td>@l.LicenseType</td>
+                                    <td class="nowrap">@UiHtml.Date(l.ExpiryDate)</td>
+                                    <td>@Html.StatusBadge(l.Status)</td>
+                                    <td>@l.ActiveMachines / @l.MaxActivations</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section aria-labelledby="requests-title">
+            <div class="section-title"><h2 id="requests-title">Requests</h2></div>
+            <div class="table-card">
+                @if (Model.Details.Requests.Count == 0)
+                {
+                    @await Html.PartialAsync("_Empty", new EmptyState("inbox", "No requests", "This customer has not asked for a plan yet."))
+                }
+                else
+                {
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>#</th><th>Plan</th><th>Computers</th><th>Status</th><th>Reason</th><th>Received</th><th>Code</th></tr></thead>
+                            <tbody>
+                            @foreach (var r in Model.Details.Requests)
+                            {
+                                <tr>
+                                    <td><a asp-controller="Requests" asp-action="Details" asp-route-id="@r.Id">#@r.Id</a></td>
+                                    <td>@r.PlanName</td>
+                                    <td>@r.Machines</td>
+                                    <td>@Html.StatusBadge(r.Status)</td>
+                                    <td class="cell-wrap">@(r.StatusReason ?? "-")</td>
+                                    <td class="nowrap">@UiHtml.Date(r.CreatedDate)</td>
+                                    <td class="cell-code">@(r.ActivationCode ?? "-")</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </section>
+    </div>
+
+    <div class="stack" aria-label="Actions">
+        @if (canResend)
+        {
+            <form asp-action="ResendVerification" asp-route-id="@c.Id" method="post" class="action-card">
+                <h3>@Html.Icon("mail", "sm") Verification</h3>
+                <p>Sends a new 6-digit code to the customer (at most one a minute).</p>
+                <button type="submit" class="btn">Resend verification code</button>
+            </form>
+        }
+        @if (canManage && !c.Disabled)
+        {
+            <form asp-action="Disable" asp-route-id="@c.Id" method="post" class="action-card danger-zone"
+                  data-confirm="The customer is signed out everywhere and cannot sign in until you enable the account again. Their e-mail stays reserved." data-confirm-title="Disable this account?" data-confirm-button="Disable account" data-confirm-tone="danger">
+                <h3>@Html.Icon("ban", "sm") Disable account</h3>
+                <p>Signs the customer out everywhere. Their e-mail stays reserved; you can enable the account again.</p>
+                <label asp-for="Disable.Reason">Reason</label>
+                <input asp-for="Disable.Reason" maxlength="300" required />
+                <button type="submit" class="btn danger">Disable account</button>
+            </form>
+        }
+        @if (canManage && c.Disabled)
+        {
+            <form asp-action="Enable" asp-route-id="@c.Id" method="post" class="action-card">
+                <h3>@Html.Icon("shield", "sm") Enable account</h3>
+                <p>Lets the customer sign in again.</p>
+                <button type="submit" class="btn primary">Enable account</button>
+            </form>
+        }
+        @if (!canResend && !(canManage))
+        {
+            <div class="alert info">@Html.Icon("info", "sm") <span>Your role can look at customers but not change their accounts.</span></div>
+        }
+    </div>
+</div>

@@ -1,0 +1,31 @@
+@model SetupViewModel
+@{
+    ViewData["Title"] = "First-time setup";
+}
+<h1>Create the first administrator</h1>
+<p class="lead muted">No staff account exists yet. This account becomes the Super Admin; this page disappears once it exists.</p>
+<form asp-action="Setup" method="post" novalidate>
+    <div asp-validation-summary="ModelOnly" class="alert error"></div>
+    <div class="mb">
+        <label asp-for="FullName"></label>
+        <input asp-for="FullName" autocomplete="name" autofocus />
+        <span asp-validation-for="FullName" class="field-error"></span>
+    </div>
+    <div class="mb">
+        <label asp-for="Email">Email</label>
+        <input asp-for="Email" type="email" autocomplete="username" />
+        <span asp-validation-for="Email" class="field-error"></span>
+    </div>
+    <div class="mb">
+        <label asp-for="Password">Password</label>
+        <input asp-for="Password" autocomplete="new-password" />
+        <span asp-validation-for="Password" class="field-error"></span>
+        <p class="hint">At least 10 characters with upper-case, lower-case and a digit.</p>
+    </div>
+    <div class="mb">
+        <label asp-for="ConfirmPassword"></label>
+        <input asp-for="ConfirmPassword" autocomplete="new-password" />
+        <span asp-validation-for="ConfirmPassword" class="field-error"></span>
+    </div>
+    <button type="submit" class="btn primary block">Create administrator</button>
+</form>

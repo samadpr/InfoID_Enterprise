@@ -1,0 +1,110 @@
+@using InfoID.LicenseManager.Web.Security
+@using InfoID.LicenseManager.Web.Ui
+@inject IPendingWorkProvider PendingWork
+@{
+    var signedIn = User.Identity?.IsAuthenticated == true;
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var title = ViewData["Title"] as string ?? "";
+    var pending = signedIn ? await PendingWork.GetPendingRequestsAsync(Context.RequestAborted) : 0;
+
+    // Breadcrumbs follow the route: Dashboard / section / (page). Details, Create and Edit are sub-pages of their section.
+    var sidebar = new SidebarModel(controller, pending, User.IsSuperAdmin());
+    var nav = NavCatalog.ForController(controller);
+    var crumbs = new List<Crumb>();
+    if (controller == "Dashboard")
+    {
+        crumbs.Add(new Crumb("Dashboard", null));
+    }
+    else
+    {
+        crumbs.Add(new Crumb("Dashboard", Url.Action("Index", "Dashboard")));
+        var subPage = action is "Details" or "Create" or "Edit";
+        if (nav is not null)
+        {
+            crumbs.Add(new Crumb(nav.Label, subPage ? Url.Action(nav.Action, nav.Controller) : null));
+            if (subPage && title.Length > 0) crumbs.Add(new Crumb(title, null));
+        }
+        else if (title.Length > 0)
+        {
+            crumbs.Add(new Crumb(title, null));
+        }
+    }
+}
+@{
+    var topbar = new TopbarModel(crumbs, User.Identity?.Name ?? "", User.Role() ?? "", pending, signedIn ? Context.Request.Query["q"].ToString() : "");
+}
+<!DOCTYPE html>
+<html lang="en" data-theme="system">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="color-scheme" content="light dark" />
+    <title>@(title.Length > 0 ? title + " - " : "")InfoID License Manager</title>
+    <link rel="icon" href="~/favicon.ico" />
+    <script src="~/js/theme-init.js" asp-append-version="true"></script>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+<partial name="_IconSprite" />
+<a class="skip-link" href="#main">Skip to content</a>
+@if (signedIn)
+{
+    <div class="app">
+        <partial name="_Sidebar" model="sidebar" />
+        <div class="drawer-backdrop" aria-hidden="true"></div>
+        <div class="app-main">
+            <partial name="_Topbar" model="topbar" />
+            <main id="main" class="content" tabindex="-1">
+                @if (TempData["Flash"] is string flash)
+                {
+                    <div class="alert @(TempData["FlashIsError"] is true ? "error" : "ok")" role="status" data-toast>@flash</div>
+                }
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <dialog id="confirm-dialog" aria-labelledby="confirm-title">
+        <div class="dialog-head">
+            <span class="badge-icon">@Html.Icon("alert", "lg")</span>
+            <h2 id="confirm-title" data-confirm-title>Are you sure?</h2>
+        </div>
+        <div class="dialog-body"><p data-confirm-message></p></div>
+        <div class="dialog-foot">
+            <button type="button" class="btn" data-confirm-cancel>Cancel</button>
+            <button type="button" class="btn primary" data-confirm-ok>Confirm</button>
+        </div>
+    </dialog>
+    <dialog id="detail-dialog" class="wide" aria-labelledby="detail-title">
+        <div class="dialog-head">
+            <span class="badge-icon">@Html.Icon("file", "lg")</span>
+            <div><h2 id="detail-title" data-detail-title>Details</h2><small data-detail-meta></small></div>
+        </div>
+        <div class="dialog-body"><pre data-detail-body></pre></div>
+        <div class="dialog-foot"><button type="button" class="btn" data-dialog-close>Close</button></div>
+    </dialog>
+}
+else
+{
+    <main id="main" class="auth">
+        <div class="auth-card">
+            <div class="auth-brand">
+                <img src="~/img/infoid-logo.png" alt="" width="44" height="44" />
+                <div><strong>InfoID License Manager</strong><span>Licensing administration</span></div>
+            </div>
+            @if (TempData["Flash"] is string flash)
+            {
+                <div class="alert @(TempData["FlashIsError"] is true ? "error" : "ok")" role="status">@flash</div>
+            }
+            @RenderBody()
+            <div class="auth-foot"><span>&copy; InfoID</span><span>Staff access only</span></div>
+        </div>
+    </main>
+}
+<div class="toasts" aria-live="polite" aria-atomic="false"></div>
+<script src="~/js/site.js" asp-append-version="true" defer></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -14,7 +14,7 @@ namespace InfoID.Desktop.Features.Licensing.Services;
 ///
 /// Set <see cref="ProductionUrl"/> to the real server (e.g. "https://license.yourcompany.com")
 /// before building a release for customers. DEBUG builds default to the API running on
-/// this PC (InfoID.LicenseApi's launch profile), and any build can be pointed elsewhere
+/// this PC (InfoID.LicenseManager.Web's launch profile, port 7143), and any build can be pointed elsewhere
 /// with the INFOID_LICENSE_SERVER_URL environment variable (useful for testing).
 /// </summary>
 public static class LicenseServerSettings
@@ -22,7 +22,7 @@ public static class LicenseServerSettings
     public const string ProductionUrl = "";
 
 #if DEBUG
-    private const string DefaultUrl = "https://localhost:7043";
+    private const string DefaultUrl = "https://localhost:7143";
 #else
     private const string DefaultUrl = ProductionUrl;
 #endif
