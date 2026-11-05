@@ -70,10 +70,13 @@ public sealed partial class TrialModeState : ObservableObject
     [ObservableProperty] private string? _trialError;
 
     /// <summary>Signed in without a valid license: trial watermark and limit apply.</summary>
-    public bool IsTrialMode => IsSignedIn && !IsActivated;
+   // public bool IsTrialMode => IsSignedIn && !IsActivated;
 
     /// <summary>Not activated and not signed in: printing needs a login first.</summary>
-    public bool NeedsSignIn => !IsActivated && !IsSignedIn;
+   // public bool NeedsSignIn => !IsActivated && !IsSignedIn;
+
+    public bool NeedsSignIn => !IsActivated && !IsSignedIn && !TrialPolicy.OfflineWatermarkTrial;
+    public bool IsTrialMode => !IsActivated && (IsSignedIn || TrialPolicy.OfflineWatermarkTrial);
 
     /// <summary>The trial is used up (all cards printed).</summary>
     public bool TrialUsedUp => IsTrialMode && HasTrialStatus && CardsRemaining <= 0 && CardsReserved == 0;
@@ -123,7 +126,8 @@ public sealed partial class TrialModeState : ObservableObject
                 var signedIn = _session.IsSignedIn;
                 TrialStatusDto? trial = null;
                 string? error = null;
-                if (signedIn && !activated && _session.Token is { } token && _portal.IsConfigured)
+                // if (signedIn && !activated && _session.Token is { } token && _portal.IsConfigured)
+                if (!TrialPolicy.OfflineWatermarkTrial && signedIn && !activated && _session.Token is { } token && _portal.IsConfigured)
                 {
                     try
                     {

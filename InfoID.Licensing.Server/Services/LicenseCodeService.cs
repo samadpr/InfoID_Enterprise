@@ -239,26 +239,79 @@ public sealed class LicenseCodeService
         return active.Count;
     }
 
+    //private static async Task<CustomerRecord?> FindOrCreateCustomerAsync(LicenseDbContext db, CreateLicenseCodesRequest request)
+    //{
+    //    if (string.IsNullOrWhiteSpace(request.OrganizationName)) return null;
+
+    //    var name = request.OrganizationName.Trim();
+    //    var email = string.IsNullOrWhiteSpace(request.ContactEmail) ? null : request.ContactEmail.Trim().ToLowerInvariant();
+
+    //    var existing = await db.CustomerRecords.FirstOrDefaultAsync(c => !c.Cancelled &&
+    //        (email != null ? c.ContactEmail == email : c.OrganizationName == name));
+    //    if (existing is not null) return existing;
+
+    //    var customer = new CustomerRecord
+    //    {
+    //        OrganizationName = name,
+    //        OrganizationType = request.OrganizationType,
+    //        Country = request.Country,
+    //        ContactEmail = email,
+    //        ContactPhone = request.ContactPhone,
+    //    };
+    //    db.CustomerRecords.Add(customer);
+    //    return customer;
+    //}
+
     private static async Task<CustomerRecord?> FindOrCreateCustomerAsync(LicenseDbContext db, CreateLicenseCodesRequest request)
     {
+        // 1) Code for a signed-in customer's request: use THAT account's own customer record.
+        //    Never borrow another company's record just because the e-mail matches.
+        if (request.CustomerAccountId is { } accountId)
+        {
+            var account = await db.CustomerAccounts
+                .Include(a => a.CustomerRecord)
+                .FirstOrDefaultAsync(a => a.Id == accountId && !a.Cancelled);
+
+            if (account?.CustomerRecord is { Cancelled: false } own)
+                return own;
+
+            if (account is not null)
+            {
+                // First licence for this account: always a new record, linked to the account.
+                var fromAccount = NewCustomer(
+                    string.IsNullOrWhiteSpace(request.OrganizationName) ? account.CompanyName ?? account.FullName : request.OrganizationName,
+                    account.Email);
+                account.CustomerRecord = fromAccount;
+                return fromAccount;
+            }
+        }
+
+        // 2) Manual codes (no account): reuse a record only when BOTH company name and e-mail match.
         if (string.IsNullOrWhiteSpace(request.OrganizationName)) return null;
 
         var name = request.OrganizationName.Trim();
         var email = string.IsNullOrWhiteSpace(request.ContactEmail) ? null : request.ContactEmail.Trim().ToLowerInvariant();
+        var nameLower = name.ToLower();
 
         var existing = await db.CustomerRecords.FirstOrDefaultAsync(c => !c.Cancelled &&
-            (email != null ? c.ContactEmail == email : c.OrganizationName == name));
+            c.OrganizationName.ToLower() == nameLower &&
+            (email == null ? c.ContactEmail == null : c.ContactEmail == email));
         if (existing is not null) return existing;
 
-        var customer = new CustomerRecord
+        return NewCustomer(name, email);
+
+        CustomerRecord NewCustomer(string orgName, string? contactEmail)
         {
-            OrganizationName = name,
-            OrganizationType = request.OrganizationType,
-            Country = request.Country,
-            ContactEmail = email,
-            ContactPhone = request.ContactPhone,
-        };
-        db.CustomerRecords.Add(customer);
-        return customer;
+            var customer = new CustomerRecord
+            {
+                OrganizationName = orgName.Trim(),
+                OrganizationType = request.OrganizationType,
+                Country = request.Country,
+                ContactEmail = contactEmail?.Trim().ToLowerInvariant(),
+                ContactPhone = request.ContactPhone,
+            };
+            db.CustomerRecords.Add(customer);
+            return customer;
+        }
     }
 }

@@ -373,9 +373,9 @@ public sealed class CardCanvasView : Control
             // Trial mode (signed in, not activated): the "INFOID TRIAL VERSION" mark the
             // printed card will carry shows only when previewing (Preview mode here, Print
             // Preview, the Print window) -- never while editing, where it gets in the way.
-            if (tab.PreviewModeEnabled &&
-                InfoID.Desktop.Features.Trial.Services.TrialModeState.Current?.IsTrialMode == true)
-                InfoID.Desktop.Features.Trial.Services.TrialWatermark.Draw(context, cardRect);
+            //if (tab.PreviewModeEnabled &&
+              //  InfoID.Desktop.Features.Trial.Services.TrialModeState.Current?.IsTrialMode == true)
+                //InfoID.Desktop.Features.Trial.Services.TrialWatermark.Draw(context, cardRect);
         }
 
         // Selection handles (including the rotation handle, which sits above the
@@ -649,6 +649,8 @@ public sealed class CardCanvasView : Control
             : string.IsNullOrEmpty(text.DataBindingExpression)
                 ? text.Text
                 : tab.ResolveDisplayText(text.DataBindingExpression, text.DataBindingExpression);
+        displayText = text.WithAffixes(displayText);
+
 
         CardTextRenderer.Draw(context, rect, displayText, text.FontFamily,
             text.FontSize * tab.Zoom, text.MinFontSize * tab.Zoom, ParseBrush(text.ColorHex),

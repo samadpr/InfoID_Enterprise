@@ -133,7 +133,7 @@ public static class ThumbnailRenderer
         switch (element)
         {
             case TextElement text:
-                var textValue = options?.ResolveText?.Invoke(text) ?? text.Text;
+                var textValue = text.WithAffixes(options?.ResolveText?.Invoke(text) ?? text.Text);
                 CardTextRenderer.Draw(context, rect, textValue, text.FontFamily,
                     FontPx(text.FontSize, scale), FontPx(text.MinFontSize, scale), ParseBrush(text.ColorHex),
                     text.Bold, text.Italic, text.Underline, text.HorizontalAlignment, text.VerticalAlignment);

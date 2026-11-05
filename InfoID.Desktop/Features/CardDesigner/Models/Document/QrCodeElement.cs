@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace InfoID.Desktop.Features.CardDesigner.Models.Document;
 
@@ -17,6 +17,22 @@ public sealed partial class QrCodeElement : DesignerElement
     public override ElementType ElementType => ElementType.QrCode;
 
     [ObservableProperty] private string _value = "https://";
+    /// <summary>Fixed value or a database field (see CodeValueBinding).</summary>
+    [ObservableProperty] private CodeValueSource _sourceType = CodeValueSource.Fixed;
+
+    /// <summary>The database column encoded when SourceType is Database.</summary>
+    [ObservableProperty] private string _databaseColumn = string.Empty;
+
+    /// <summary>Text added before / after the field value, e.g. "EMP-" + "1001".</summary>
+    [ObservableProperty] private string _prefix = string.Empty;
+    [ObservableProperty] private string _suffix = string.Empty;
+
+    /// <summary>Choosing Fixed drops a "combine fields" expression, so the typed Value is
+    /// what gets encoded. (Loading a design never triggers this: Fixed is the default.)</summary>
+    partial void OnSourceTypeChanged(CodeValueSource value)
+    {
+        if (value == CodeValueSource.Fixed) DataBindingExpression = null;
+    }
     [ObservableProperty] private QrErrorCorrection _errorCorrection = QrErrorCorrection.Medium;
     [ObservableProperty] private string _foregroundColorHex = "#000000";
     [ObservableProperty] private string _backgroundColorHex = "#FFFFFF";

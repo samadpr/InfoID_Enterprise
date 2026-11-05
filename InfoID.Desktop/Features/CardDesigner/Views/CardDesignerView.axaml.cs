@@ -772,6 +772,52 @@ public partial class CardDesignerView : UserControl
         }
     }
 
+    // ---------------------------------------------------------- data panel splitter ----
+
+    /// <summary>Releasing the splitter with the data panel shorter than this hides it
+    /// completely (only the splitter handle stays visible).</summary>
+    private const double DataPanelCollapseBelow = 60;
+
+    /// <summary>The smallest open size: the panel's toolbar plus a row or two.</summary>
+    private const double DataPanelMinOpen = 120;
+
+    /// <summary>Size to restore when the hidden panel is double-clicked open again.</summary>
+    private double _dataPanelLastHeight = 180;
+
+    /// <summary>Snap after a drag: below 60px the panel hides; 60-120px snaps to 120px.</summary>
+    private void OnDataSplitterDragCompleted(object? sender, Avalonia.Input.VectorEventArgs e)
+    {
+        var row = CanvasArea.RowDefinitions[2];
+        var height = row.ActualHeight;
+
+        if (height < DataPanelCollapseBelow)
+        {
+            row.Height = new GridLength(0);
+        }
+        else
+        {
+            var open = Math.Max(height, DataPanelMinOpen);
+            row.Height = new GridLength(open);
+            _dataPanelLastHeight = open;
+        }
+    }
+
+    /// <summary>Double-click the splitter: hide the data panel, or bring it back at its last size.</summary>
+    private void OnDataSplitterDoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
+    {
+        var row = CanvasArea.RowDefinitions[2];
+        if (row.ActualHeight < 1)
+        {
+            row.Height = new GridLength(_dataPanelLastHeight);
+        }
+        else
+        {
+            _dataPanelLastHeight = Math.Max(row.ActualHeight, DataPanelMinOpen);
+            row.Height = new GridLength(0);
+        }
+        e.Handled = true;
+    }
+
     private void OnDatabaseRowsSaved(object? sender, EventArgs e)
     {
         if (ReferenceEquals(sender, ViewModel?.ActiveTab))

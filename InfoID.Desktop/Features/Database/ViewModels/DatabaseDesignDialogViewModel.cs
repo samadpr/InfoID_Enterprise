@@ -119,6 +119,12 @@ public sealed partial class DatabaseDesignDialogViewModel
         }
     }
     public override string Title => "Connect to database...";
+
+    /// <summary>
+    /// The built-in Sample database is a read-only demo: no schema editing
+    /// (add column / add table / delete column) and no filter.
+    /// </summary>
+    public bool CanEditSchema => _connectionType != DatabaseType.SampleDatabase;
     private bool _isNewTable;
     public ObservableCollection<string> Tables { get; } = new();
 

@@ -37,23 +37,75 @@ public static class TrialWatermark
         }
     }
 
+    //private static void DrawDiagonal(DrawingContext context, Rect card)
+    //{
+    //    var diagonal = Math.Sqrt(card.Width * card.Width + card.Height * card.Height);
+    //    // Measure at a reference size, then scale so the text spans ~78% of the diagonal.
+    //    var probe = Format(100);
+    //    var size = Math.Max(4, 100 * (diagonal * 0.78) / Math.Max(1, probe.Width));
+    //    var text = Format(size);
+    //    var geometry = text.BuildGeometry(new Point(-text.Width / 2, -text.Height / 2));
+    //    if (geometry is null) return;
+
+    //    var angle = -Math.Atan2(card.Height, card.Width);
+    //    var transform = Matrix.CreateRotation(angle) * Matrix.CreateTranslation(card.Center.X, card.Center.Y);
+    //    using (context.PushTransform(transform))
+    //    {
+    //        context.DrawGeometry(DiagonalFill, new Pen(DiagonalOutline, Math.Max(0.5, size * 0.035)), geometry);
+    //    }
+    //}
+
     private static void DrawDiagonal(DrawingContext context, Rect card)
     {
-        var diagonal = Math.Sqrt(card.Width * card.Width + card.Height * card.Height);
-        // Measure at a reference size, then scale so the text spans ~78% of the diagonal.
-        var probe = Format(100);
-        var size = Math.Max(4, 100 * (diagonal * 0.78) / Math.Max(1, probe.Width));
-        var text = Format(size);
-        var geometry = text.BuildGeometry(new Point(-text.Width / 2, -text.Height / 2));
-        if (geometry is null) return;
+        var size = Math.Max(8, card.Height * 0.11);
+
+        var text = new FormattedText(
+            "INFOID",
+            CultureInfo.InvariantCulture,
+            FlowDirection.LeftToRight,
+            Bold,
+            size,
+            DiagonalFill);
+
+        var geometryWidth = text.Width;
+        var geometryHeight = text.Height;
+
+        var diagonal = Math.Sqrt(
+            card.Width * card.Width +
+            card.Height * card.Height);
+
+        var stepX = geometryWidth * 0.75;
+        var stepY = geometryHeight * 1.2;
 
         var angle = -Math.Atan2(card.Height, card.Width);
-        var transform = Matrix.CreateRotation(angle) * Matrix.CreateTranslation(card.Center.X, card.Center.Y);
+
+        var transform =
+            Matrix.CreateRotation(angle) *
+            Matrix.CreateTranslation(card.Center.X, card.Center.Y);
+
         using (context.PushTransform(transform))
         {
-            context.DrawGeometry(DiagonalFill, new Pen(DiagonalOutline, Math.Max(0.5, size * 0.035)), geometry);
+            for (double y = -diagonal; y <= diagonal; y += stepY)
+            {
+                for (double x = -diagonal; x <= diagonal; x += stepX)
+                {
+                    var geometry = text.BuildGeometry(new Point(x, y));
+
+                    if (geometry is null)
+                        continue;
+
+                    context.DrawGeometry(
+                        DiagonalFill,
+                        new Pen(
+                            DiagonalOutline,
+                            Math.Max(0.5, size * 0.025)),
+                        geometry);
+                }
+            }
         }
     }
+
+
 
     private static void DrawStrip(DrawingContext context, Rect card)
     {

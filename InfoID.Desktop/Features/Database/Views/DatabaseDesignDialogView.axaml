@@ -43,7 +43,8 @@
                 <Button Content="+"
                         Command="{Binding AddTableCommand}"
                         Width="45"
-                        Height="40" />
+                        Height="40"
+                        IsVisible="{Binding CanEditSchema}"/>
 
 
             </StackPanel>
@@ -82,7 +83,7 @@
                                                   VerticalAlignment="Center" />
 
                                         <Button Grid.Column="3" Content="🗑" Command="{Binding $parent[UserControl].DataContext.DeleteColumnCommand}"
-                                            CommandParameter="{Binding}" Padding="8,5" VerticalAlignment="Center"  ToolTip.Tip="Delete column" />
+                                            CommandParameter="{Binding}" Padding="8,5" VerticalAlignment="Center"  ToolTip.Tip="Delete column"   IsVisible="{Binding $parent[UserControl].((vm:DatabaseDesignDialogViewModel)DataContext).CanEditSchema}"/>
 
                                     </Grid>
                                 </DataTemplate>
@@ -96,9 +97,11 @@
 
 
             <!-- Actions -->
+            <!-- Actions (hidden for the read-only Sample database) -->
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Right"
-                        Spacing="12">
+                        Spacing="12"
+                        IsVisible="{Binding CanEditSchema}">
 
                 <Button Content="+  Add column"
                         Command="{Binding AddColumnCommand}"
