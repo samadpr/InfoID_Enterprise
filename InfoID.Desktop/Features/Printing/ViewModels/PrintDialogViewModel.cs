@@ -455,9 +455,17 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
 
         SelectedOrientationOption = document.Orientation == CardOrientation.Portrait ? "Portrait" : "Landscape";
 
-        var records = databaseRecords is { Count: > 0 }
+        //var records = databaseRecords is { Count: > 0 }
+        //  ? databaseRecords
+        //  : previewDataProvider.GetSampleRecords();
+        IReadOnlyList<PreviewRecord> records = databaseRecords is { Count: > 0 }
           ? databaseRecords
-          : previewDataProvider.GetSampleRecords();
+          : new[]
+            {
+                new PreviewRecord(
+                    string.IsNullOrWhiteSpace(document.Name) ? "This design" : document.Name,
+                    new Dictionary<string, string>())
+            };
         foreach (var key in records.SelectMany(r => r.Fields.Keys).Distinct())
         {
             AvailableFieldKeys.Add(key);

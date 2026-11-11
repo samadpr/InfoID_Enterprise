@@ -23,6 +23,16 @@
     <!-- ===================== LIGHT ===================== -->
     <ResourceDictionary x:Key="Light">
       <SolidColorBrush x:Key="BrushBackground" Color="#F4F5F7" />
+        <RadialGradientBrush x:Key="BrushPageGlowWarm">
+            <GradientStop Color="#260D9488" Offset="0" />
+            <GradientStop Color="#000D9488" Offset="1" />
+        </RadialGradientBrush>
+        <RadialGradientBrush x:Key="BrushPageGlowCool">
+            <GradientStop Color="#1A0E7490" Offset="0" />
+            <GradientStop Color="#000E7490" Offset="1" />
+        </RadialGradientBrush>
+        <SolidColorBrush x:Key="BrushPageLine" Color="#1A0D9488" />
+        <SolidColorBrush x:Key="BrushPageDots" Color="#260D9488" />
       <SolidColorBrush x:Key="BrushSurface" Color="#FFFFFF" />
       <SolidColorBrush x:Key="BrushSurfaceElevated" Color="#FFFFFF" />
       <SolidColorBrush x:Key="BrushHeaderBackground" Color="#FFFFFF" />
@@ -49,6 +59,16 @@
     <!-- ===================== DARK ===================== -->
     <ResourceDictionary x:Key="Dark">
       <SolidColorBrush x:Key="BrushBackground" Color="#16171B" />
+        <RadialGradientBrush x:Key="BrushPageGlowWarm">
+            <GradientStop Color="#330D9488" Offset="0" />
+            <GradientStop Color="#000D9488" Offset="1" />
+        </RadialGradientBrush>
+        <RadialGradientBrush x:Key="BrushPageGlowCool">
+            <GradientStop Color="#260E7490" Offset="0" />
+            <GradientStop Color="#000E7490" Offset="1" />
+        </RadialGradientBrush>
+        <SolidColorBrush x:Key="BrushPageLine" Color="#0DFFFFFF" />
+        <SolidColorBrush x:Key="BrushPageDots" Color="#14FFFFFF" />
       <SolidColorBrush x:Key="BrushSurface" Color="#1E2025" />
       <SolidColorBrush x:Key="BrushSurfaceElevated" Color="#25272D" />
       <SolidColorBrush x:Key="BrushHeaderBackground" Color="#1B1C21" />

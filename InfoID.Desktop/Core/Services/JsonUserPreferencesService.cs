@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
@@ -28,12 +28,42 @@ public sealed class JsonUserPreferencesService : IUserPreferencesService
         Current = LoadFromDisk();
     }
 
-    public async Task SetAutosaveEnabledAsync(bool enabled)
+    //public async Task SetAutosaveEnabledAsync(bool enabled)
+    //{
+    //    await _lock.WaitAsync();
+    //    try
+    //    {
+    //        Current = new UserPreferences { AutosaveEnabled = enabled };
+    //        await WriteAllAsync(Current);
+    //    }
+    //    finally
+    //    {
+    //        _lock.Release();
+    //    }
+
+    //    PreferencesChanged?.Invoke(this, EventArgs.Empty);
+    //}
+
+    public Task SetAutosaveEnabledAsync(bool enabled) =>
+    UpdateAsync(p => p.AutosaveEnabled = enabled);
+
+    public Task SetThemeAsync(string theme) =>
+        UpdateAsync(p => p.Theme = theme);
+
+    /// <summary>Changes one setting while keeping every other saved setting (the old
+    /// code created a fresh object, which would have reset the rest to defaults).</summary>
+    private async Task UpdateAsync(Action<UserPreferences> change)
     {
         await _lock.WaitAsync();
         try
         {
-            Current = new UserPreferences { AutosaveEnabled = enabled };
+            var updated = new UserPreferences
+            {
+                AutosaveEnabled = Current.AutosaveEnabled,
+                Theme = Current.Theme,
+            };
+            change(updated);
+            Current = updated;
             await WriteAllAsync(Current);
         }
         finally

@@ -21,6 +21,8 @@ public static class DependencyInjection
         services.AddScoped<ITemplateService, TemplateService>();
         services.AddScoped<ICardholderService, CardholderService>();
         services.AddScoped<IPrintHistoryService, PrintHistoryService>();
+        services.AddScoped<ICardEncodingAccess, CardEncodingAccess>();
+        services.AddScoped<INfcEncodingService, NfcEncodingService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<IVisitorService, VisitorService>();

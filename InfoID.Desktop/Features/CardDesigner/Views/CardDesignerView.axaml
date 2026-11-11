@@ -3161,6 +3161,136 @@
                                     <Button Classes="ghost" Content="Remove" Command="{Binding ActiveTab.RemoveBackgroundImageCommand}"
                                             IsEnabled="{Binding ActiveTab.HasBackgroundImage}" />
                                 </StackPanel>
+
+                                <!-- ===== CARD ENCODING (NFC): saved with the design; previews the selected record ===== -->
+                                <Border Height="1" Background="{DynamicResource BrushBorder}" Margin="0,8,0,4" />
+                                <TextBlock Text="CARD ENCODING" Classes="propSection" />
+
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                    <mi:MaterialIcon Kind="Nfc" Width="18" Height="18" VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource BrushPrimary}" />
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                        <TextBlock Text="NFC chip" FontWeight="SemiBold" />
+                                        <TextBlock Text="Write each card's own data to its NFC tag." Classes="caption"
+                                                   Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <ToggleSwitch Grid.Column="2" VerticalAlignment="Center" OnContent="On" OffContent="Off"
+                                                  IsChecked="{Binding ActiveTab.NfcEncoding.Enabled, Mode=TwoWay}"
+                                                  AutomationProperties.Name="NFC encoding" />
+                                </Grid>
+
+                                <StackPanel Spacing="10" IsVisible="{Binding ActiveTab.NfcEncoding.Enabled}">
+
+                                    <!-- Content -->
+                                    <TextBlock Text="CONTENT" Classes="propSection" Margin="0,4,0,0" />
+                                    <Border Classes="segment" HorizontalAlignment="Stretch">
+                                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="2">
+                                            <ToggleButton Grid.Column="0" Classes="toolbtn-wide" HorizontalAlignment="Stretch" Content="Link"
+                                                          ToolTip.Tip="A link phones open when the card is tapped"
+                                                          IsChecked="{Binding ActiveTab.NfcEncoding.Mode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Url}" />
+                                            <ToggleButton Grid.Column="1" Classes="toolbtn-wide" HorizontalAlignment="Stretch" Content="Text"
+                                                          ToolTip.Tip="Plain text, e.g. an employee ID"
+                                                          IsChecked="{Binding ActiveTab.NfcEncoding.Mode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Text}" />
+                                            <ToggleButton Grid.Column="2" Classes="toolbtn-wide" HorizontalAlignment="Stretch" Content="Link + Text"
+                                                          ToolTip.Tip="Both: phones open the link; systems can read the text"
+                                                          IsChecked="{Binding ActiveTab.NfcEncoding.Mode, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=UrlAndText}" />
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Link -->
+                                    <StackPanel Spacing="6" IsVisible="{Binding ActiveTab.NfcEncoding.ShowUrl}">
+                                        <TextBlock Text="LINK" Classes="propSection" />
+                                        <TextBox Text="{Binding ActiveTab.NfcEncoding.UrlTemplate, Mode=TwoWay}" CornerRadius="8"
+                                                 TextWrapping="Wrap" Watermark="https://infoidz.com/card/{{CardId}}"
+                                                 AutomationProperties.Name="NFC link template" />
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                            <ComboBox ItemsSource="{Binding ActiveTab.NfcEncoding.Columns}"
+                                                      SelectedItem="{Binding ActiveTab.NfcEncoding.UrlFieldToInsert, Mode=TwoWay}"
+                                                      PlaceholderText="Insert field" HorizontalAlignment="Stretch" Height="32" CornerRadius="8"
+                                                      ToolTip.Tip="Adds {{Field}} at the end of the link"
+                                                      AutomationProperties.Name="Insert field into link" />
+                                            <Button Grid.Column="1" Classes="ghost" Content="Reset"
+                                                    Command="{Binding ActiveTab.NfcEncoding.ResetUrlTemplateCommand}"
+                                                    ToolTip.Tip="Back to https://infoidz.com/card/{{CardId}}" />
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <!-- Text -->
+                                    <StackPanel Spacing="6" IsVisible="{Binding ActiveTab.NfcEncoding.ShowText}">
+                                        <TextBlock Text="TEXT" Classes="propSection" />
+                                        <TextBox Text="{Binding ActiveTab.NfcEncoding.TextTemplate, Mode=TwoWay}" CornerRadius="8"
+                                                 AcceptsReturn="True" TextWrapping="Wrap" MinHeight="56" MaxHeight="120"
+                                                 Watermark="e.g. {{CardId}}" AutomationProperties.Name="NFC text template" />
+                                        <ComboBox ItemsSource="{Binding ActiveTab.NfcEncoding.Columns}"
+                                                  SelectedItem="{Binding ActiveTab.NfcEncoding.TextFieldToInsert, Mode=TwoWay}"
+                                                  PlaceholderText="Insert field" HorizontalAlignment="Stretch" Height="32" CornerRadius="8"
+                                                  ToolTip.Tip="Adds {{Field}} at the end of the text"
+                                                  AutomationProperties.Name="Insert field into text" />
+                                    </StackPanel>
+
+                                    <!-- Preview -->
+                                    <Border Background="{DynamicResource BrushSurfaceElevated}" CornerRadius="8" Padding="12,10">
+                                        <StackPanel Spacing="6">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="PREVIEW ·" Classes="propSection" />
+                                                <TextBlock Text="{Binding ActiveTab.NfcEncoding.PreviewLabel}" Classes="propSection" />
+                                            </StackPanel>
+                                            <SelectableTextBlock TextWrapping="Wrap" IsVisible="{Binding ActiveTab.NfcEncoding.HasPreviewUrl}"
+                                                                 Text="{Binding ActiveTab.NfcEncoding.PreviewUrl, StringFormat='Link: {0}'}" />
+                                            <SelectableTextBlock TextWrapping="Wrap" IsVisible="{Binding ActiveTab.NfcEncoding.HasPreviewText}"
+                                                                 Text="{Binding ActiveTab.NfcEncoding.PreviewText, StringFormat='Text: {0}'}" />
+                                            <ProgressBar Minimum="0" Maximum="100" Height="6" CornerRadius="3"
+                                                         Value="{Binding ActiveTab.NfcEncoding.SizePercent}" />
+                                            <TextBlock Text="{Binding ActiveTab.NfcEncoding.SizeText}" Classes="caption" />
+                                            <TextBlock Text="{Binding ActiveTab.NfcEncoding.TagFitText}" Classes="caption"
+                                                       Foreground="{DynamicResource BrushTextSecondary}" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Issues -->
+                                    <ItemsControl ItemsSource="{Binding ActiveTab.NfcEncoding.Issues}"
+                                                  IsVisible="{Binding ActiveTab.NfcEncoding.HasIssues}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:NfcIssueLine">
+                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" Margin="0,2">
+                                                    <Panel Width="16" VerticalAlignment="Top" Margin="0,1,0,0">
+                                                        <mi:MaterialIcon Kind="AlertCircleOutline" Width="15" Height="15" IsVisible="{Binding IsError}"
+                                                                         Foreground="{DynamicResource BrushError}" />
+                                                        <mi:MaterialIcon Kind="AlertOutline" Width="15" Height="15" IsVisible="{Binding IsWarning}"
+                                                                         Foreground="{DynamicResource BrushWarning}" />
+                                                        <mi:MaterialIcon Kind="InformationOutline" Width="15" Height="15" IsVisible="{Binding IsInfo}"
+                                                                         Foreground="{DynamicResource BrushTextSecondary}" />
+                                                    </Panel>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Message}" Classes="caption" TextWrapping="Wrap" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <Button Classes="primary" HorizontalAlignment="Stretch" Margin="0,10,0,0"
+                                            Command="{Binding ActiveTab.WriteNfcCardsCommand}"
+                                            IsEnabled="{Binding ActiveTab.NfcEncoding.Enabled}"
+                                            ToolTip.Tip="Write this content to NFC tags on the card reader, one record at a time. Uses ticked rows, otherwise all visible rows. Needs a Professional license.">
+                                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                            <mi:MaterialIcon Kind="Nfc" Width="16" Height="16" />
+                                            <TextBlock Text="Write NFC tags..." />
+                                        </StackPanel>
+                                    </Button>
+
+                                    
+                                    <!-- Size check -->
+                                    <TextBlock Text="TAG SIZE CHECK" Classes="propSection" Margin="0,4,0,0" />
+                                    <ComboBox ItemsSource="{Binding ActiveTab.NfcEncoding.TagChoices}"
+                                              SelectedItem="{Binding ActiveTab.NfcEncoding.SelectedTagChoice, Mode=TwoWay}"
+                                              HorizontalAlignment="Stretch" Height="32" CornerRadius="8"
+                                              ToolTip.Tip="Checks the content against this tag's memory. Writing always checks the actual tag."
+                                              AutomationProperties.Name="Tag size check">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:NfcTagChoice">
+                                                <TextBlock Text="{Binding Label}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>

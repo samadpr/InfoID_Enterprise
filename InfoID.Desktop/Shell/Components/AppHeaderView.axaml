@@ -65,6 +65,8 @@
                         <MenuItem Header="Reports..." Command="{Binding OpenReportsCommand}" />
                         <MenuItem Header="Audit Log..." Command="{Binding OpenAuditLogCommand}" />
                         <MenuItem Header="Backup &amp; Restore..." Command="{Binding OpenBackupCommand}" />
+                        <MenuItem Header="Card Encoding (RFID / NFC)..." Command="{Binding OpenCardEncodingCommand}"
+                                  ToolTip.Tip="Choose the card reader and test NFC / RFID cards" />
                         <Separator />
                         <MenuItem Header="Recent Cards" IsEnabled="False"
                                   ToolTip.Tip="See the Recent Cards list on the Home screen." />

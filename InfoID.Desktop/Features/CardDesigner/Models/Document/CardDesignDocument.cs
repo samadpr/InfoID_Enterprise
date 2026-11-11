@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using InfoID.Desktop.Features.BlankCard.Models;
 
@@ -61,5 +61,9 @@ public sealed class CardDesignDocument
 
     public Dictionary<string, string> Metadata { get; set; } = new();
 
+
+    /// <summary>Card encoding (NFC chip now, magnetic stripe later): what is written to each
+    /// card per record. Saved with the design. Older designs have none, so NFC is off.</summary>
+    public CardEncodingSettings Encoding { get; set; } = new();
     public CardDesignSide GetSide(CardSide side) => side == CardSide.Front ? Front : Back;
 }

@@ -105,16 +105,39 @@ public partial class App : Avalonia.Application
 
             // Created before any window so the designer canvas can read the trial mode.
             Services.GetRequiredService<InfoID.Desktop.Features.Trial.Services.TrialModeState>();
+            //var shell = Services.GetRequiredService<ShellView>();
+            //shell.DataContext = Services.GetRequiredService<ShellViewModel>();
+            //desktop.MainWindow = shell;
+
             var shell = Services.GetRequiredService<ShellView>();
             shell.DataContext = Services.GetRequiredService<ShellViewModel>();
             desktop.MainWindow = shell;
+
+            if (restore.Attempted)
+                shell.Opened += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() => _ = ShowRestoreOutcomeAsync(restore));
+
+            // Not activated: show Account & license as a dialog over the Home page.
+            if (!IsThisComputerActivated())
+            {
+                shell.Opened += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                    _ = InfoID.Desktop.Features.Account.Views.AccountDialogWindow.ShowAsync(shell));
+            }
+
+
 
             var scheduler = Services.GetRequiredService<AutoBackupScheduler>();
             scheduler.Start();
             desktop.Exit += (_, _) => scheduler.Dispose();
 
-            if (restore.Attempted)
-                shell.Opened += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() => _ = ShowRestoreOutcomeAsync(restore));
+
+            // Watch the saved card reader again (background; no-op when none is set or plugged in).
+            var cardReaders = Services.GetRequiredService<InfoID.CardEncoding.Contactless.IContactlessReaderService>();
+            _ = InfoID.Desktop.Features.Rfid.Services.RfidSettingsStore.SelectSavedReaderAsync(
+                cardReaders, Services.GetRequiredService<InfoID.Desktop.Features.Rfid.Services.RfidSettingsStore>());
+            desktop.Exit += (_, _) => cardReaders.Dispose();
+
+            //if (restore.Attempted)
+            //    shell.Opened += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() => _ = ShowRestoreOutcomeAsync(restore));
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -131,6 +154,31 @@ public partial class App : Avalonia.Application
         try { LogProvider?.Dispose(); } catch { /* never throw on exit */ }
     }
 
+    /// <summary>True when a valid license is active on this computer (grace period counts).
+    /// Local database read only -- no internet needed. On any problem: false, so the
+    /// sign-in window shows (it never blocks: "Continue without activating").</summary>
+    private static bool IsThisComputerActivated()
+    {
+        try
+        {
+            var status = System.Threading.Tasks.Task.Run(async () =>
+            {
+                using var scope = Services.CreateScope();
+                return await scope.ServiceProvider
+                    .GetRequiredService<InfoID.Application.Interfaces.ILicenseService>()
+                    .GetCurrentStatusAsync();
+            }).GetAwaiter().GetResult();
+
+            return status is { IsValid: true } &&
+                   status.Status is InfoID.Domain.Common.Enums.LicenseStatus.Active
+                                 or InfoID.Domain.Common.Enums.LicenseStatus.GracePeriod;
+        }
+        catch (Exception ex)
+        {
+            Log.Warn("Start-up license check failed; showing the sign-in window", ex);
+            return false;
+        }
+    }
     private static void LogStartup()
     {
         var assembly = typeof(App).Assembly.GetName();
@@ -410,6 +458,14 @@ public partial class App : Avalonia.Application
         services.AddSingleton<BackupSettingsStore>();
         services.AddSingleton<AutoBackupScheduler>();
         services.AddSingleton<InfoID.Desktop.Features.Backup.ViewModels.BackupViewModel>();
+
+        // Card encoding (RFID / NFC): one shared reader service (it watches the reader for
+        // cards), this PC's reader choice, and the setup page.
+        services.AddSingleton<InfoID.CardEncoding.Contactless.IContactlessReaderService,
+                              InfoID.CardEncoding.Contactless.PcscReaderService>();
+        services.AddSingleton<InfoID.Desktop.Features.Rfid.Services.NfcCardWriter>();
+        services.AddSingleton<InfoID.Desktop.Features.Rfid.Services.RfidSettingsStore>();
+        services.AddTransient<InfoID.Desktop.Features.Rfid.ViewModels.CardEncodingSettingsViewModel>();
         // Audit log page (singleton so filters are kept between visits).
         services.AddSingleton<InfoID.Desktop.Features.Audit.ViewModels.AuditLogViewModel>();
         // Visitor Management (badge workflow): singleton so filters and ticks are kept between visits.

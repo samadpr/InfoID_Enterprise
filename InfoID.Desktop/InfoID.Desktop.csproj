@@ -67,6 +67,7 @@
     <ProjectReference Include="..\InfoID.Domain\InfoID.Domain.csproj" />
     <ProjectReference Include="..\InfoID.Infrastructure\InfoID.Infrastructure.csproj" />
     <ProjectReference Include="..\InfoID.Shared\InfoID.Shared.csproj" />
+    <ProjectReference Include="..\InfoID.CardEncoding\InfoID.CardEncoding.csproj" />
   </ItemGroup>
 
   <ItemGroup>

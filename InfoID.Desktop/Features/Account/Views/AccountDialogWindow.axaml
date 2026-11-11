@@ -1,0 +1,30 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="InfoID.Desktop.Features.Account.Views.AccountDialogWindow"
+        Title="InfoID – Account and license"
+        Icon="avares://InfoID.Desktop/Assets/Icons/InfoID.ico"
+        Width="1120" Height="740" MinWidth="900" MinHeight="600"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{DynamicResource BrushBackground}">
+
+    <Grid RowDefinitions="*,Auto">
+        <!-- The existing Account & license page -->
+        <ContentControl x:Name="PageHost" Grid.Row="0" />
+
+        <Border Grid.Row="1" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,1,0,0"
+                Background="{DynamicResource BrushSurface}" Padding="32,12">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <mi:MaterialIcon Kind="InformationOutline" Width="18" Height="18"
+                                     Foreground="{DynamicResource BrushTextSecondary}" />
+                    <TextBlock Text="You can close this and keep using InfoID. Open it again any time from the account button."
+                               Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                </StackPanel>
+                <Button Grid.Column="1" Classes="secondary" Content="Close" Margin="16,0,0,0" MinWidth="100"
+                        Click="OnCloseClick" IsCancel="True" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

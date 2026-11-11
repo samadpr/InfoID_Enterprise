@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 
 namespace InfoID.Desktop.Core.Services;
@@ -20,4 +20,6 @@ public interface IUserPreferencesService
     event EventHandler? PreferencesChanged;
 
     Task SetAutosaveEnabledAsync(bool enabled);
+
+    Task SetThemeAsync(string theme);
 }

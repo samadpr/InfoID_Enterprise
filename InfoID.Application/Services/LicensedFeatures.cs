@@ -21,6 +21,7 @@ public static class LicensedFeatures
     public const string DatabaseImport = "DatabaseImport";
     public const string RfidMifare = "RfidMifare";
     public const string PrintQueue = "PrintQueue";
+    public const string NfcEncoding = "NfcEncoding";
 
     // Enterprise
     public const string RfidAdvanced = "RfidAdvanced";
@@ -34,7 +35,7 @@ public static class LicensedFeatures
 
     public static LicenseTier MinimumTier(string feature) => feature switch
     {
-        QrBarcode or DatabaseImport or RfidMifare or PrintQueue => LicenseTier.Professional,
+        QrBarcode or DatabaseImport or RfidMifare or PrintQueue or NfcEncoding  => LicenseTier.Professional,
         RfidAdvanced or AccessControl or AdvancedReports or RestApi or CloudBackup => LicenseTier.Enterprise,
         _ => LicenseTier.Standard,
     };

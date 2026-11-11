@@ -78,7 +78,14 @@ public sealed partial class ShellViewModel : ObservableObject
         _themeService.ThemeChanged += (_, theme) => IsDarkTheme = theme == AppTheme.Dark;
         IsDarkTheme = _themeService.CurrentTheme == AppTheme.Dark;
 
-        _navigationService.NavigateToRoot<WelcomeViewModel>();
+        //_navigationService.NavigateToRoot<WelcomeViewModel>();
+        //CurrentPage = _navigationService.CurrentViewModel;
+
+
+        // Opening from the start-up sign-in window: show the page the user picked there
+        // (Welcome, Editions, offline activation...). Otherwise start on Welcome as before.
+        if (_navigationService.CurrentViewModel is null)
+            _navigationService.NavigateToRoot<WelcomeViewModel>();
         CurrentPage = _navigationService.CurrentViewModel;
 
         _ = CheckLicenseAtStartupAsync();
@@ -269,6 +276,12 @@ public sealed partial class ShellViewModel : ObservableObject
     [RelayCommand]
     private void OpenBackup() =>
         _navigationService.NavigateTo<InfoID.Desktop.Features.Backup.ViewModels.BackupViewModel>();
+
+
+    /// <summary>File > Card Encoding (RFID / NFC): choose the card reader and test cards.</summary>
+    [RelayCommand]
+    private void OpenCardEncoding() =>
+        _navigationService.NavigateTo<InfoID.Desktop.Features.Rfid.ViewModels.CardEncodingSettingsViewModel>();
 
     /// <summary>File > Print History (FR-PRN-6).</summary>
     [RelayCommand]

@@ -1,7 +1,9 @@
-using System;
 using Avalonia;
 using Avalonia.Platform;
 using Avalonia.Styling;
+using System;
+using System.Threading.Tasks;
+
 
 namespace InfoID.Desktop.Core.Services;
 
@@ -18,12 +20,25 @@ public sealed class ThemeService : IThemeService
 
     public event EventHandler<AppTheme>? ThemeChanged;
 
+    private readonly IUserPreferencesService _preferences;
+
+    public ThemeService(IUserPreferencesService preferences) => _preferences = preferences;
+
+    //public void InitializeFromSystem()
+    //{
+    //    var detected = DetectSystemTheme();
+    //    ApplyTheme(detected);
+    //}
+
     public void InitializeFromSystem()
     {
-        var detected = DetectSystemTheme();
-        ApplyTheme(detected);
+        // The user's last choice wins; Windows' theme is only used before they ever chose.
+        var saved = _preferences.Current.Theme;
+        var theme = Enum.TryParse<AppTheme>(saved, ignoreCase: true, out var chosen)
+            ? chosen
+            : DetectSystemTheme();
+        ApplyTheme(theme);
     }
-
     public void ApplyTheme(AppTheme theme)
     {
         CurrentTheme = theme;
@@ -38,9 +53,28 @@ public sealed class ThemeService : IThemeService
         ThemeChanged?.Invoke(this, theme);
     }
 
+    //public void Toggle()
+    //{
+    //    ApplyTheme(CurrentTheme == AppTheme.Light ? AppTheme.Dark : AppTheme.Light);
+    //}
+
     public void Toggle()
     {
-        ApplyTheme(CurrentTheme == AppTheme.Light ? AppTheme.Dark : AppTheme.Light);
+        var next = CurrentTheme == AppTheme.Light ? AppTheme.Dark : AppTheme.Light;
+        ApplyTheme(next);
+        _ = SaveAsync(next);
+    }
+
+    private async Task SaveAsync(AppTheme theme)
+    {
+        try
+        {
+            await _preferences.SetThemeAsync(theme.ToString());
+        }
+        catch (Exception)
+        {
+            // Not critical: the theme still changes now, it just won't be remembered.
+        }
     }
 
     private static AppTheme DetectSystemTheme()

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -266,6 +266,7 @@ public sealed class CardDesignRepository : ICardDesignRepository
         document.SnapToGrid,
         document.GridSizeMm,
         document.Metadata,
+        document.Encoding,
     };
 
     private static CardDesignDocument MapToDocument(Template entity)
@@ -293,6 +294,8 @@ public sealed class CardDesignRepository : ICardDesignRepository
             if (root.TryGetProperty("ShowGrid", out var sg)) document.ShowGrid = sg.GetBoolean();
             if (root.TryGetProperty("SnapToGrid", out var stg)) document.SnapToGrid = stg.GetBoolean();
             if (root.TryGetProperty("GridSizeMm", out var gs)) document.GridSizeMm = gs.GetDouble();
+            if (root.TryGetProperty("Encoding", out var encoding) && encoding.ValueKind == JsonValueKind.Object)
+                document.Encoding = JsonSerializer.Deserialize<CardEncodingSettings>(encoding.GetRawText()) ?? new CardEncodingSettings();
         }
 
         if (!string.IsNullOrEmpty(entity.FrontDesignJson))

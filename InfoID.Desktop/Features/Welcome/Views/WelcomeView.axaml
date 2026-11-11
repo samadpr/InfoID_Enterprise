@@ -11,7 +11,64 @@
              x:DataType="vm:WelcomeViewModel"
              x:Name="Root"
              Background="{DynamicResource BrushBackground}">
+    <UserControl.Styles>
+        <!-- Border tiles -->
+        <Style Selector="Border.tile">
+            <Setter Property="RenderTransform" Value="translateY(0px)" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.12" />
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.tile:pointerover">
+            <Setter Property="RenderTransform" Value="translateY(-3px)" />
+            <Setter Property="BoxShadow" Value="0 8 20 0 #1F000000" />
+        </Style>
 
+        <!-- Button tiles (recent cards, View More) -->
+        <Style Selector="Button.tile">
+            <Setter Property="RenderTransform" Value="translateY(0px)" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.12" />
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.tile:pointerover">
+            <Setter Property="RenderTransform" Value="translateY(-3px)" />
+        </Style>
+    </UserControl.Styles>
+    <Panel>
+        <!-- Page decoration: stays still behind the scrolling content -->
+        <Panel IsHitTestVisible="False" ClipToBounds="True">
+            <Ellipse Width="1000" Height="760" HorizontalAlignment="Left" VerticalAlignment="Top"
+                     Margin="-280,-380,0,0" Fill="{DynamicResource BrushPageGlowWarm}" />
+            <Ellipse Width="700" Height="520" HorizontalAlignment="Right" VerticalAlignment="Top"
+                     Margin="0,-220,-200,0" Fill="{DynamicResource BrushPageGlowWarm}" Opacity="0.6" />
+            <Ellipse Width="900" Height="700" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                     Margin="0,0,-300,-320" Fill="{DynamicResource BrushPageGlowCool}" />
+            <Viewbox Stretch="UniformToFill">
+                <Canvas Width="1600" Height="1000">
+                    <!-- rings, top right -->
+                    <Ellipse Canvas.Left="1180" Canvas.Top="-260" Width="680" Height="680"
+                             Stroke="{DynamicResource BrushPageLine}" StrokeThickness="1.5" />
+                    <Ellipse Canvas.Left="1260" Canvas.Top="-180" Width="520" Height="520"
+                             Stroke="{DynamicResource BrushPageLine}" StrokeThickness="1" />
+                    <!-- waves, bottom -->
+                    <Path Data="M0,900 C300,840 560,960 860,900 S1340,820 1600,880"
+                          Stroke="{DynamicResource BrushPageLine}" StrokeThickness="2" />
+                    <Path Data="M0,940 C340,880 600,990 900,940 S1360,860 1600,920"
+                          Stroke="{DynamicResource BrushPageLine}" StrokeThickness="1.5" />
+                    <!-- dot grid, bottom left -->
+                    <Path Fill="{DynamicResource BrushPageDots}"
+                          Data="M60,760 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M82,760 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M104,760 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M126,760 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M148,760 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M170,760 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M192,760 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M214,760 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M236,760 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M258,760 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M60,782 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M82,782 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M104,782 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M126,782 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M148,782 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M170,782 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M192,782 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M214,782 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M236,782 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M258,782 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M60,804 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M82,804 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M104,804 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M126,804 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M148,804 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M170,804 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M192,804 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M214,804 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M236,804 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M258,804 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M60,826 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M82,826 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M104,826 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M126,826 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M148,826 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M170,826 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M192,826 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M214,826 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M236,826 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M258,826 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M60,848 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M82,848 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M104,848 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M126,848 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M148,848 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M170,848 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M192,848 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M214,848 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M236,848 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M258,848 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M60,870 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M82,870 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M104,870 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M126,870 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M148,870 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M170,870 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M192,870 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M214,870 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M236,870 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0 M258,870 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0" />
+                </Canvas>
+            </Viewbox>
+        </Panel>
+    
     <ScrollViewer>
         <StackPanel MaxWidth="1180" HorizontalAlignment="Stretch" Margin="40,32,40,48" Spacing="40">
 
@@ -53,43 +110,237 @@
                 </Grid>
             </Border>
 
-            <!-- Hero -->
-            <Border Classes="heroSurface" MinHeight="220">
+           
+
+            <!-- Hero (sliding) -->
+            <Border x:Name="HeroBorder" Classes="heroSurface" BorderBrush="#26FFFFFF" BorderThickness="1" Height="240" ClipToBounds="True"
+                    PointerEntered="OnHeroPointerEntered" PointerExited="OnHeroPointerExited">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
-                        <GradientStop Color="#DA3025" Offset="0" />
-                        <GradientStop Color="#7A1710" Offset="1" />
+                        <GradientStop Color="#14B8A6" Offset="0" />
+                        <GradientStop Color="#0D9488" Offset="0.5" />
+                        <GradientStop Color="#134E4A" Offset="1" />
                     </LinearGradientBrush>
                 </Border.Background>
-                <Grid Margin="48,0" ColumnDefinitions="260,*" ColumnSpacing="36">
-					<Border Grid.Column="0"
-                            Width="220"
-                            Height="220"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            CornerRadius="24"
-                            Padding="25">
 
-						<Image Source="avares://InfoID.Desktop/Assets/Images/InfoIDLogo.png"
-							   Stretch="Uniform"
-							   HorizontalAlignment="Center"
-							   VerticalAlignment="Center" />
-					</Border>
+                <Border.Styles>
+                    <Style Selector="Button.heroNav">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Foreground" Value="White" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Padding" Value="6" />
+                        <Setter Property="CornerRadius" Value="16" />
+                    </Style>
+                    <Style Selector="Button.heroNav:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                        <Setter Property="Background" Value="#26FFFFFF" />
+                        <Setter Property="Foreground" Value="White" />
+                    </Style>
+                    <Style Selector="Button.heroDot">
+                        <Setter Property="Width" Value="8" />
+                        <Setter Property="Height" Value="8" />
+                        <Setter Property="MinWidth" Value="0" />
+                        <Setter Property="MinHeight" Value="0" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="CornerRadius" Value="4" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Background" Value="#66FFFFFF" />
+                        <Setter Property="VerticalAlignment" Value="Center" />
+                        <Setter Property="Transitions">
+                            <Transitions>
+                                <DoubleTransition Property="Width" Duration="0:0:0.25" />
+                            </Transitions>
+                        </Setter>
+                    </Style>
+                    <Style Selector="Button.heroDot:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                        <Setter Property="Background" Value="#B3FFFFFF" />
+                    </Style>
+                    <Style Selector="Button.heroDot.active">
+                        <Setter Property="Width" Value="24" />
+                        <Setter Property="Background" Value="White" />
+                    </Style>
+                </Border.Styles>
 
-					<StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="12" MaxWidth="640">
-                        <TextBlock Text="{Binding Greeting}" Classes="display" Foreground="White" TextWrapping="Wrap" />
-                        <TextBlock Text="Design, manage and print professional ID cards for your organization -- fully offline, enterprise-ready."
-                                   Foreground="#F3E7E6" FontSize="15" TextWrapping="Wrap" />
-                        <Button Classes="secondary" Content="Create New Card" Margin="0,12,0,0"
-                                Command="{Binding CreateBlankCardCommand}"
-                                Foreground="White" BorderBrush="White" HorizontalAlignment="Left" />
+                <Panel>
+                    <!-- Decorative background (stays still while slides move) -->
+                    <Viewbox Stretch="UniformToFill" IsHitTestVisible="False">
+                        <Canvas Width="1200" Height="240">
+                            <!-- light glow, top right -->
+                            <Ellipse Canvas.Left="760" Canvas.Top="-220" Width="560" Height="420">
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="#40FFFFFF" Offset="0" />
+                                        <GradientStop Color="#00FFFFFF" Offset="1" />
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <!-- shadow glow, bottom left -->
+                            <Ellipse Canvas.Left="-200" Canvas.Top="80" Width="620" Height="420">
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="#40000000" Offset="0" />
+                                        <GradientStop Color="#00000000" Offset="1" />
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <!-- rings behind the illustration -->
+                            <Ellipse Canvas.Left="40" Canvas.Top="-30" Width="300" Height="300" Stroke="#1AFFFFFF" StrokeThickness="1.5" />
+                            <Ellipse Canvas.Left="80" Canvas.Top="10" Width="220" Height="220" Stroke="#12FFFFFF" StrokeThickness="1" />
+                            <!-- diagonal light beams -->
+                            <Path Data="M880,0 L980,0 L760,240 L660,240 Z" Fill="#0FFFFFFF" />
+                            <Path Data="M1010,0 L1050,0 L830,240 L790,240 Z" Fill="#0AFFFFFF" />
+                            <!-- flowing waves, bottom -->
+                            <Path Data="M0,240 L0,205 C240,175 470,245 720,215 S1040,170 1200,200 L1200,240 Z" Fill="#14000000" />
+                            <Path Data="M0,190 C220,140 420,240 640,190 S1000,130 1200,170" Stroke="#26FFFFFF" StrokeThickness="2" />
+                            <Path Data="M0,215 C260,170 460,250 700,212 S1020,160 1200,196" Stroke="#14FFFFFF" StrokeThickness="1.5" />
+                            <!-- dot grid, top right -->
+                            <Path Fill="#33FFFFFF"
+                                  Data="M1060,30 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1076,30 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1092,30 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1108,30 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1124,30 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1140,30 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1156,30 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1172,30 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1060,46 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1076,46 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1092,46 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1108,46 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1124,46 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1140,46 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1156,46 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1172,46 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1060,62 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1076,62 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1092,62 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1108,62 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1124,62 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1140,62 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1156,62 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1172,62 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1060,78 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1076,78 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1092,78 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1108,78 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1124,78 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1140,78 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1156,78 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0 M1172,78 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0" />
+                        </Canvas>
+                    </Viewbox>
+                    <Carousel x:Name="HeroCarousel">
+                        <Carousel.PageTransition>
+                            <PageSlide Duration="0:0:0.45" Orientation="Horizontal" />
+                        </Carousel.PageTransition>
+
+                        <!-- Slide 1: welcome -->
+                        <Grid Margin="48,0" ColumnDefinitions="260,*" ColumnSpacing="36">
+                            <Viewbox Grid.Column="0" Width="240" Height="185" Stretch="Uniform" VerticalAlignment="Center">
+                                <Canvas Width="260" Height="200">
+                                    <Ellipse Canvas.Left="6" Canvas.Top="8" Width="70" Height="70" Fill="#1FFFFFFF" />
+                                    <Ellipse Canvas.Left="206" Canvas.Top="150" Width="40" Height="40" Fill="#1FFFFFFF" />
+                                    <Rectangle Canvas.Left="34" Canvas.Top="34" Width="176" Height="110" RadiusX="12" RadiusY="12"
+                                               Fill="#40FFFFFF" RenderTransformOrigin="50%,50%">
+                                        <Rectangle.RenderTransform>
+                                            <RotateTransform Angle="-9" />
+                                        </Rectangle.RenderTransform>
+                                    </Rectangle>
+                                    <Rectangle Canvas.Left="60" Canvas.Top="64" Width="180" Height="114" RadiusX="12" RadiusY="12" Fill="White" />
+                                    <Path Data="M72,64 H228 A12,12 0 0 1 240,76 V90 H60 V76 A12,12 0 0 1 72,64 Z" Fill="#DA3025" />
+                                    <Rectangle Canvas.Left="72" Canvas.Top="73" Width="40" Height="6" RadiusX="3" RadiusY="3" Fill="#80FFFFFF" />
+                                    <Rectangle Canvas.Left="72" Canvas.Top="100" Width="46" Height="58" RadiusX="8" RadiusY="8" Fill="#F6DCD9" />
+                                    <Ellipse Canvas.Left="85" Canvas.Top="108" Width="20" Height="20" Fill="#B9302A" />
+                                    <Path Data="M78,158 C78,138 112,138 112,158 Z" Fill="#B9302A" />
+                                    <Rectangle Canvas.Left="130" Canvas.Top="102" Width="70" Height="9" RadiusX="4.5" RadiusY="4.5" Fill="#7A1710" />
+                                    <Rectangle Canvas.Left="130" Canvas.Top="118" Width="58" Height="6" RadiusX="3" RadiusY="3" Fill="#E2C3C0" />
+                                    <Rectangle Canvas.Left="130" Canvas.Top="130" Width="66" Height="6" RadiusX="3" RadiusY="3" Fill="#E2C3C0" />
+                                    <Path Fill="#2B2B2B"
+                                          Data="M130,146h2v16h-2z M134,146h1v16h-1z M137,146h3v16h-3z M142,146h1v16h-1z M145,146h2v16h-2z M149,146h1v16h-1z M152,146h3v16h-3z M157,146h1v16h-1z M160,146h2v16h-2z M164,146h1v16h-1z M167,146h3v16h-3z M172,146h1v16h-1z M175,146h2v16h-2z M179,146h1v16h-1z M182,146h3v16h-3z M187,146h1v16h-1z M190,146h2v16h-2z M194,146h1v16h-1z M197,146h3v16h-3z M202,146h1v16h-1z M205,146h2v16h-2z" />
+                                    <Path Data="M212,104 A8,8 0 0 1 212,120 M217,99 A14,14 0 0 1 217,125 M222,94 A20,20 0 0 1 222,130"
+                                          Stroke="#DA3025" StrokeThickness="2.5" StrokeLineCap="Round" />
+                                </Canvas>
+                            </Viewbox>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="12" MaxWidth="640">
+                                <TextBlock Text="{Binding Greeting}" Classes="display" Foreground="White" TextWrapping="Wrap" />
+                                <TextBlock Text="Design, manage and print professional ID cards for your organization, fully offline."
+                                           Foreground="#F3E7E6" FontSize="15" TextWrapping="Wrap" />
+                                <Button Classes="secondary" Content="Create New Card" Margin="0,12,0,0"
+                                        Command="{Binding CreateBlankCardCommand}"
+                                        Foreground="White" BorderBrush="White" HorizontalAlignment="Left" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Slide 2: templates -->
+                        <Grid Margin="48,0" ColumnDefinitions="260,*" ColumnSpacing="36">
+                            <Viewbox Grid.Column="0" Width="240" Height="185" Stretch="Uniform" VerticalAlignment="Center">
+                                <Canvas Width="260" Height="200">
+                                    <Ellipse Canvas.Left="190" Canvas.Top="2" Width="60" Height="60" Fill="#1FFFFFFF" />
+                                    <Rectangle Canvas.Left="24" Canvas.Top="30" Width="100" Height="64" RadiusX="8" RadiusY="8" Fill="White" />
+                                    <Path Data="M32,30 H116 A8,8 0 0 1 124,38 V46 H24 V38 A8,8 0 0 1 32,30 Z" Fill="#DA3025" />
+                                    <Ellipse Canvas.Left="34" Canvas.Top="54" Width="24" Height="24" Fill="#F6DCD9" />
+                                    <Rectangle Canvas.Left="66" Canvas.Top="58" Width="48" Height="6" RadiusX="3" RadiusY="3" Fill="#7A1710" />
+                                    <Rectangle Canvas.Left="66" Canvas.Top="70" Width="36" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#E2C3C0" />
+
+                                    <Rectangle Canvas.Left="136" Canvas.Top="30" Width="100" Height="64" RadiusX="8" RadiusY="8" Fill="White" />
+                                    <Path Data="M144,30 H164 V94 H144 A8,8 0 0 1 136,86 V38 A8,8 0 0 1 144,30 Z" Fill="#7A1710" />
+                                    <Rectangle Canvas.Left="174" Canvas.Top="42" Width="50" Height="7" RadiusX="3.5" RadiusY="3.5" Fill="#2B2B2B" />
+                                    <Rectangle Canvas.Left="174" Canvas.Top="56" Width="38" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#D6D6D6" />
+                                    <Rectangle Canvas.Left="202" Canvas.Top="66" Width="22" Height="22" Stroke="#2B2B2B" StrokeThickness="2" />
+                                    <Rectangle Canvas.Left="207" Canvas.Top="71" Width="6" Height="6" Fill="#2B2B2B" />
+                                    <Rectangle Canvas.Left="214" Canvas.Top="78" Width="6" Height="6" Fill="#2B2B2B" />
+
+                                    <Rectangle Canvas.Left="24" Canvas.Top="108" Width="100" Height="64" RadiusX="8" RadiusY="8" Fill="White" />
+                                    <Path Data="M24,150 C50,138 90,162 124,146 V164 A8,8 0 0 1 116,172 H32 A8,8 0 0 1 24,164 Z" Fill="#DA3025" />
+                                    <Rectangle Canvas.Left="34" Canvas.Top="116" Width="28" Height="30" RadiusX="6" RadiusY="6" Fill="#F6DCD9" />
+                                    <Rectangle Canvas.Left="70" Canvas.Top="120" Width="44" Height="6" RadiusX="3" RadiusY="3" Fill="#7A1710" />
+                                    <Rectangle Canvas.Left="70" Canvas.Top="132" Width="30" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#E2C3C0" />
+
+                                    <Rectangle Canvas.Left="136" Canvas.Top="108" Width="100" Height="64" RadiusX="8" RadiusY="8"
+                                               Fill="#26FFFFFF" Stroke="#B3FFFFFF" StrokeThickness="1.5" StrokeDashArray="4,3" />
+                                    <Path Data="M186,128 V152 M174,140 H198" Stroke="White" StrokeThickness="3" StrokeLineCap="Round" />
+                                    <Path Data="M236,166 L239,174 L247,177 L239,180 L236,188 L233,180 L225,177 L233,174 Z" Fill="White" />
+                                </Canvas>
+                            </Viewbox>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="12" MaxWidth="640">
+                                <TextBlock Text="Start from a ready-made design" Classes="display" Foreground="White" TextWrapping="Wrap" />
+                                <TextBlock Text="Templates for schools, companies, hospitals and events. Pick one, connect your data and print."
+                                           Foreground="#F3E7E6" FontSize="15" TextWrapping="Wrap" />
+                                <Button Classes="secondary" Content="Use a template" Margin="0,12,0,0"
+                                        Command="{Binding UseTemplateCommand}"
+                                        Foreground="White" BorderBrush="White" HorizontalAlignment="Left" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Slide 3: print history -->
+                        <Grid Margin="48,0" ColumnDefinitions="260,*" ColumnSpacing="36">
+                            <Viewbox Grid.Column="0" Width="240" Height="185" Stretch="Uniform" VerticalAlignment="Center">
+                                <Canvas Width="260" Height="200">
+                                    <Ellipse Canvas.Left="8" Canvas.Top="122" Width="60" Height="60" Fill="#1FFFFFFF" />
+                                    <Rectangle Canvas.Left="70" Canvas.Top="24" Width="120" Height="30" RadiusX="6" RadiusY="6" Fill="#40FFFFFF" />
+                                    <Rectangle Canvas.Left="44" Canvas.Top="48" Width="172" Height="78" RadiusX="14" RadiusY="14" Fill="White" />
+                                    <Rectangle Canvas.Left="60" Canvas.Top="64" Width="50" Height="6" RadiusX="3" RadiusY="3" Fill="#E2C3C0" />
+                                    <Rectangle Canvas.Left="60" Canvas.Top="76" Width="34" Height="6" RadiusX="3" RadiusY="3" Fill="#E2C3C0" />
+                                    <Ellipse Canvas.Left="188" Canvas.Top="62" Width="10" Height="10" Fill="#3CC47C" />
+                                    <Rectangle Canvas.Left="72" Canvas.Top="104" Width="116" Height="8" RadiusX="4" RadiusY="4" Fill="#7A1710" />
+                                    <Rectangle Canvas.Left="82" Canvas.Top="108" Width="96" Height="60" RadiusX="8" RadiusY="8"
+                                               Fill="White" Stroke="#E9D2CF" StrokeThickness="1" />
+                                    <Path Data="M90,108 H170 A8,8 0 0 1 178,116 V122 H82 V116 A8,8 0 0 1 90,108 Z" Fill="#DA3025" />
+                                    <Rectangle Canvas.Left="90" Canvas.Top="128" Width="22" Height="28" RadiusX="4" RadiusY="4" Fill="#F6DCD9" />
+                                    <Rectangle Canvas.Left="118" Canvas.Top="132" Width="48" Height="6" RadiusX="3" RadiusY="3" Fill="#7A1710" />
+                                    <Rectangle Canvas.Left="118" Canvas.Top="144" Width="34" Height="5" RadiusX="2.5" RadiusY="2.5" Fill="#E2C3C0" />
+                                    <Rectangle Canvas.Left="164" Canvas.Top="152" Width="72" Height="22" RadiusX="11" RadiusY="11" Fill="#7A1710" />
+                                    <TextBlock Canvas.Left="174" Canvas.Top="155" Text="C-000045" FontSize="11" FontWeight="SemiBold" Foreground="White" />
+                                    <Ellipse Canvas.Left="196" Canvas.Top="14" Width="40" Height="40" Fill="White" />
+                                    <Path Data="M206,34 L213,41 L227,26" Stroke="#0D9488" StrokeThickness="3.5" StrokeLineCap="Round" StrokeJoin="Round" />
+                                </Canvas>
+                            </Viewbox>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="12" MaxWidth="640">
+                                <TextBlock Text="Every card, tracked" Classes="display" Foreground="White" TextWrapping="Wrap" />
+                                <TextBlock Text="Card numbers, reprint reasons and a full print history for every person."
+                                           Foreground="#F3E7E6" FontSize="15" TextWrapping="Wrap" />
+                                <Button Classes="secondary" Content="View print history" Margin="0,12,0,0"
+                                        Command="{Binding OpenPrintHistoryCommand}"
+                                        Foreground="White" BorderBrush="White" HorizontalAlignment="Left" />
+                            </StackPanel>
+                        </Grid>
+                    </Carousel>
+
+                    <!-- Arrows and dots -->
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                Margin="0,0,24,16">
+                        <Button Classes="heroNav" Click="OnHeroPrevious" ToolTip.Tip="Previous"
+                                AutomationProperties.Name="Previous slide">
+                            <mi:MaterialIcon Kind="ChevronLeft" Width="20" Height="20" />
+                        </Button>
+                        <Button x:Name="HeroDot0" Classes="heroDot active" Tag="0" Click="OnHeroDotClick"
+                                AutomationProperties.Name="Slide 1" />
+                        <Button x:Name="HeroDot1" Classes="heroDot" Tag="1" Click="OnHeroDotClick"
+                                AutomationProperties.Name="Slide 2" />
+                        <Button x:Name="HeroDot2" Classes="heroDot" Tag="2" Click="OnHeroDotClick"
+                                AutomationProperties.Name="Slide 3" />
+                        <Button Classes="heroNav" Click="OnHeroNext" ToolTip.Tip="Next"
+                                AutomationProperties.Name="Next slide">
+                            <mi:MaterialIcon Kind="ChevronRight" Width="20" Height="20" />
+                        </Button>
                     </StackPanel>
-                </Grid>
+                </Panel>
             </Border>
-
+            
             <!-- Recent cards -->
             <StackPanel Spacing="16">
-                <TextBlock Text="Recent cards" Classes="h2" />
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Border Width="4" Height="22" CornerRadius="2" Background="#DA3025" VerticalAlignment="Center" />
+                    <TextBlock Text="Recent cards" Classes="h2" VerticalAlignment="Center" />
+                </StackPanel>
 
                 <WrapPanel>
 
@@ -198,7 +449,11 @@
 
             <!-- Go further -->
             <StackPanel Spacing="16">
-                <TextBlock Text="Go further" Classes="h2" />
+               
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Border Width="4" Height="22" CornerRadius="2" Background="#DA3025" VerticalAlignment="Center" />
+                    <TextBlock Text="Go further" Classes="h2" VerticalAlignment="Center" />
+                </StackPanel>
 
                 <WrapPanel>
                     <Button Classes="ghost" Padding="0" Margin="0,0,16,16" Command="{Binding OpenEditionsCommand}"
@@ -269,4 +524,5 @@
 
         </StackPanel>
     </ScrollViewer>
+    </Panel>
 </UserControl>

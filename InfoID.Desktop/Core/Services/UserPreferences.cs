@@ -1,4 +1,4 @@
-﻿namespace InfoID.Desktop.Core.Services;
+namespace InfoID.Desktop.Core.Services;
 
 /// <summary>
 /// Small, flat bag of user-level app preferences that must survive an app restart
@@ -12,4 +12,8 @@ public sealed class UserPreferences
     /// <summary>Default matches the existing intended behaviour before this setting
     /// existed: the Card Designer always autosaved. Off is an explicit opt-out.</summary>
     public bool AutosaveEnabled { get; set; } = true;
+
+    /// <summary>"Light" or "Dark" as last chosen with the header toggle. Null until the
+    /// user picks one, so the very first run follows the Windows theme.</summary>
+    public string? Theme { get; set; }
 }

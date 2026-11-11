@@ -1,0 +1,166 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:InfoID.Desktop.Features.Rfid.ViewModels"
+             xmlns:components="using:InfoID.Desktop.Shell.Components"
+             xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="900"
+             x:Class="InfoID.Desktop.Features.Rfid.Views.CardEncodingSettingsView"
+             x:DataType="vm:CardEncodingSettingsViewModel"
+             Background="{DynamicResource BrushBackground}">
+
+    <UserControl.Styles>
+        <Style Selector="Border.panel">
+            <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+            <Setter Property="CornerRadius" Value="{StaticResource Radius.MD}" />
+            <Setter Property="Padding" Value="20" />
+        </Style>
+        <Style Selector="TextBlock.panelTitle">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="mi|MaterialIcon.panelIcon">
+            <Setter Property="Width" Value="20" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="Margin" Value="0,0,10,0" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushPrimary}" />
+        </Style>
+        <Style Selector="TextBlock.fieldLabel">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+        <Style Selector="TextBlock.secondary">
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="Border.banner">
+            <Setter Property="CornerRadius" Value="{StaticResource Radius.MD}" />
+            <Setter Property="Padding" Value="14,10" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource BrushSurface}" />
+        </Style>
+        <Style Selector="Border.banner.error">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushError}" />
+        </Style>
+        <Style Selector="Border.banner.warning">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushWarning}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*" Margin="40,28,40,24">
+        <components:PageHeaderView Grid.Row="0" Title="Card Encoding (RFID / NFC)" BackCommand="{Binding GoHomeCommand}" />
+
+        <!-- Errors -->
+        <StackPanel Grid.Row="1" Spacing="8" Margin="0,12,0,0">
+            <Border Classes="banner error" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <Grid ColumnDefinitions="Auto,*">
+                    <mi:MaterialIcon Kind="AlertOutline" Width="20" Height="20" Margin="0,0,10,0" Foreground="{DynamicResource BrushError}" />
+                    <TextBlock Grid.Column="1" Text="{Binding ErrorMessage}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="2" Margin="0,16,0,0" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Spacing="16" MaxWidth="900" HorizontalAlignment="Left">
+
+                <!-- ============================== Reader ============================== -->
+                <Border Classes="panel">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal">
+                            <mi:MaterialIcon Classes="panelIcon" Kind="Nfc" />
+                            <TextBlock Classes="panelTitle" Text="Card reader" />
+                        </StackPanel>
+
+                        <TextBlock Classes="secondary" FontSize="12"
+                                   Text="The contactless reader on this PC used to read and write cards, e.g. HID OMNIKEY 5427 CK (use its &quot;CL&quot; entry)." />
+
+                        <StackPanel>
+                            <TextBlock Classes="fieldLabel" Text="Reader" />
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" MaxWidth="560" HorizontalAlignment="Left">
+                                <ComboBox ItemsSource="{Binding Readers}" SelectedItem="{Binding SelectedReader}"
+                                          HorizontalAlignment="Stretch" MinWidth="380"
+                                          PlaceholderText="No reader found"
+                                          AutomationProperties.Name="Card reader" />
+                                <Button Grid.Column="1" Classes="secondary" Command="{Binding RefreshReadersCommand}"
+                                        ToolTip.Tip="Look for readers again (after plugging one in)">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <mi:MaterialIcon Kind="Refresh" Width="16" Height="16" />
+                                        <TextBlock Text="Refresh" />
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <mi:MaterialIcon Kind="CheckCircleOutline" Width="16" Height="16"
+                                             Foreground="{DynamicResource BrushSuccess}" IsVisible="{Binding IsReaderReady}" />
+                            <TextBlock Text="{Binding ReaderStatus}" Classes="secondary" VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <Border Classes="banner warning" IsVisible="{Binding NoReadersFound}">
+                            <TextBlock TextWrapping="Wrap" FontSize="12"
+                                       Text="No reader was found. Check that it is plugged in, that the HID OMNIKEY driver is installed, that the reader is in CCID mode (not keyboard mode), and that the Windows &quot;Smart Card&quot; service is running. Then click Refresh." />
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- ============================== Card test ============================== -->
+                <Border Classes="panel" IsEnabled="{Binding IsReaderReady}">
+                    <StackPanel Spacing="12">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <mi:MaterialIcon Classes="panelIcon" Kind="CreditCardOutline" />
+                            <TextBlock Grid.Column="1" Classes="panelTitle" Text="Test a card" />
+                            <Button Grid.Column="2" Classes="secondary" Command="{Binding ReadCardCommand}"
+                                    ToolTip.Tip="Read the card on the reader again">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <mi:MaterialIcon Kind="Refresh" Width="16" Height="16" />
+                                    <TextBlock Text="Read again" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+
+                        <TextBlock Classes="secondary" FontSize="12"
+                                   Text="Place a card flat on the reader. It is read automatically; nothing is written to the card here." />
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding CardStatus}" FontWeight="SemiBold" />
+                            <ProgressBar IsIndeterminate="True" Height="4" IsVisible="{Binding IsBusy}" />
+                        </StackPanel>
+
+                        <!-- Card details -->
+                        <ItemsControl ItemsSource="{Binding CardDetails}" IsVisible="{Binding HasCard}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CardDetailLine">
+                                    <Grid ColumnDefinitions="160,*" Margin="0,3">
+                                        <TextBlock Text="{Binding Label}" Classes="secondary" />
+                                        <SelectableTextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap"
+                                                             FontFamily="Consolas, Menlo, monospace" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Border Classes="banner warning" IsVisible="{Binding CardNote, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <TextBlock Text="{Binding CardNote}" TextWrapping="Wrap" FontSize="12" />
+                        </Border>
+
+                        <!-- NFC content -->
+                        <StackPanel Spacing="4" IsVisible="{Binding HasCard}">
+                            <TextBlock Classes="fieldLabel" Text="NFC content on the card" />
+                            <ItemsControl ItemsSource="{Binding CardContent}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="x:String">
+                                        <SelectableTextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,2" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

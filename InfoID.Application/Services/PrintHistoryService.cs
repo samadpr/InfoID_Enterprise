@@ -31,7 +31,7 @@ namespace InfoID.Application.Services;
 /// </summary>
 public class PrintHistoryService : IPrintHistoryService
 {
-    private const string LastCardNumberKey = "Issuance.LastCardNumber";
+   // private const string LastCardNumberKey = "Issuance.LastCardNumber";
     private const string GenericCardholderRef = "__GENERIC_CARD__";
 
     private readonly IUnitOfWork _uow;
@@ -86,6 +86,28 @@ public class PrintHistoryService : IPrintHistoryService
     }
 
     // ------------------------------------------------------------------ record ----
+
+    /// <summary>Draft cards per Person ID for this design: prepared before printing
+    /// (e.g. the NFC tag was written first). Printing that person issues this card.</summary>
+    private async Task<Dictionary<string, (Card Card, Cardholder Holder)>> LoadDraftCardsByPersonAsync(
+        long? templateId, List<string> keys, CancellationToken ct)
+    {
+        var result = new Dictionary<string, (Card, Cardholder)>(StringComparer.OrdinalIgnoreCase);
+        var holders = await _uow.Repository<Cardholder>().FindAsync(h => h.ExternalRefId != null && keys.Contains(h.ExternalRefId), ct);
+        if (holders.Count == 0) return result;
+
+        var holderIds = holders.Select(h => h.Id).ToList();
+        var drafts = await _uow.Repository<Card>().FindAsync(c =>
+            c.TemplateId == templateId && holderIds.Contains(c.CardholderId) && c.Status == CardStatus.Draft, ct);
+
+        var holderById = holders.ToDictionary(h => h.Id);
+        foreach (var card in drafts.OrderByDescending(c => c.CreatedDate))
+        {
+            var holder = holderById[card.CardholderId];
+            result.TryAdd(holder.ExternalRefId!, (card, holder));
+        }
+        return result;
+    }
 
     public async Task<RecordPrintJobResult> RecordJobAsync(RecordPrintJobRequest request, CancellationToken ct = default)
     {
@@ -175,6 +197,10 @@ public class PrintHistoryService : IPrintHistoryService
             ? await LoadActiveCardsByPersonAsync(request.TemplateId, keys, ct)
             : new Dictionary<string, (Card Card, Cardholder Holder)>(StringComparer.OrdinalIgnoreCase);
 
+        var drafts = keys.Count > 0
+            ? await LoadDraftCardsByPersonAsync(request.TemplateId, keys, ct)
+            : new Dictionary<string, (Card Card, Cardholder Holder)>(StringComparer.OrdinalIgnoreCase);
+
         // Same person twice in one run, or new people: one Cardholder per key.
         var holdersThisRun = new Dictionary<string, Cardholder>(StringComparer.OrdinalIgnoreCase);
         var generic = request.IsDataBound ? null : await EnsureGenericCardholderAsync(organizationId, ct);
@@ -188,6 +214,7 @@ public class PrintHistoryService : IPrintHistoryService
 
             Cardholder holder;
             Card? replaces = null;
+            Card? promote = null;
             if (generic is not null)
             {
                 holder = generic;
@@ -200,6 +227,17 @@ public class PrintHistoryService : IPrintHistoryService
             {
                 holder = found.Holder;
                 replaces = request.ReprintReason is null ? null : found.Card;
+                if (!string.Equals(holder.FullName, name, StringComparison.Ordinal))
+                {
+                    holder.FullName = name;
+                    holder.ModifiedDate = now;
+                    _uow.Repository<Cardholder>().Update(holder);
+                }
+            }
+            else if (key is not null && drafts.Remove(key, out var draft))
+            {
+                holder = draft.Holder;
+                promote = draft.Card;
                 if (!string.Equals(holder.FullName, name, StringComparison.Ordinal))
                 {
                     holder.FullName = name;
@@ -230,29 +268,66 @@ public class PrintHistoryService : IPrintHistoryService
                 expiryDate = originalExpiry;
             }
 
-            nextNumber++;
-            var card = new Card
+            //nextNumber++;
+            //var card = new Card
+            //{
+            //    Cardholder = holder,
+            //    TemplateId = request.TemplateId,
+            //    CardNumber = FormatCardNumber(nextNumber),
+            //    Status = CardStatus.Issued,
+            //    IssuedDate = now,
+            //    ExpiryDate = expiryDate,
+            //    ReplacesCard = replaces,
+            //};
+            //await _uow.Repository<Card>().AddAsync(card, ct);
+            //result.CardNumbers.Add(card.CardNumber);
+            //await _uow.Repository<CardStatusHistory>().AddAsync(new CardStatusHistory
+            //{
+            //    Card = card,
+            //    FromStatus = null,
+            //    ToStatus = CardStatus.Issued,
+            //    ChangedDate = now,
+            //    Reason = replaces is null ? "Printed" : $"Reprint: {request.ReprintReason}",
+            //    ChangedByUserId = userId,
+            //}, ct);
+
+          
+
+            Card card;
+            if (promote is not null)
             {
-                Cardholder = holder,
-                TemplateId = request.TemplateId,
-                CardNumber = FormatCardNumber(nextNumber),
-                Status = CardStatus.Issued,
-                IssuedDate = now,
-                ExpiryDate = expiryDate,
-                ReplacesCard = replaces,
-            };
-            await _uow.Repository<Card>().AddAsync(card, ct);
+                card = promote;
+                card.Status = CardStatus.Issued;
+                card.IssuedDate = now;
+                card.ExpiryDate = expiryDate;
+                card.ModifiedDate = now;
+                _uow.Repository<Card>().Update(card);
+            }
+            else
+            {
+                nextNumber++;
+                card = new Card
+                {
+                    Cardholder = holder,
+                    TemplateId = request.TemplateId,
+                    CardNumber = FormatCardNumber(nextNumber),
+                    Status = CardStatus.Issued,
+                    IssuedDate = now,
+                    ExpiryDate = expiryDate,
+                    ReplacesCard = replaces,
+                };
+                await _uow.Repository<Card>().AddAsync(card, ct);
+            }
             result.CardNumbers.Add(card.CardNumber);
             await _uow.Repository<CardStatusHistory>().AddAsync(new CardStatusHistory
             {
                 Card = card,
-                FromStatus = null,
+                FromStatus = promote is null ? null : CardStatus.Draft,
                 ToStatus = CardStatus.Issued,
                 ChangedDate = now,
                 Reason = replaces is null ? "Printed" : $"Reprint: {request.ReprintReason}",
                 ChangedByUserId = userId,
             }, ct);
-
             if (replaces is not null)
             {
                 var from = replaces.Status;
@@ -294,7 +369,7 @@ public class PrintHistoryService : IPrintHistoryService
         return result;
     }
 
-    // ------------------------------------------------------------------ queries ----
+    // ------------------ queries ----
 
     public async Task<IReadOnlyList<PrintJobSummaryDto>> GetJobsAsync(PrintJobFilter filter, CancellationToken ct = default)
     {
@@ -391,31 +466,31 @@ public class PrintHistoryService : IPrintHistoryService
 
     /// <summary>Same rule as CardDesignRepository: the first organization row, created
     /// as "My Organization" if none exists yet.</summary>
-    private async Task<long> EnsureOrganizationAsync(CancellationToken ct)
-    {
-        var orgs = _uow.Repository<Organization>();
-        var existing = (await orgs.GetAllAsync(ct)).OrderBy(o => o.CreatedDate).FirstOrDefault();
-        if (existing is not null) return existing.Id;
+    //private async Task<long> EnsureOrganizationAsync(CancellationToken ct)
+    //{
+    //    var orgs = _uow.Repository<Organization>();
+    //    var existing = (await orgs.GetAllAsync(ct)).OrderBy(o => o.CreatedDate).FirstOrDefault();
+    //    if (existing is not null) return existing.Id;
 
-        var org = new Organization { Name = "My Organization" };
-        await orgs.AddAsync(org, ct);
-        await _uow.SaveChangesAsync(ct);
-        return org.Id;
-    }
+    //    var org = new Organization { Name = "My Organization" };
+    //    await orgs.AddAsync(org, ct);
+    //    await _uow.SaveChangesAsync(ct);
+    //    return org.Id;
+    //}
 
     /// <summary>PrintJob.RequestedByUserId is required. InfoID has one local operator
     /// profile (SRS 3.3); create it if activation/sign-up hasn't yet.</summary>
-    private async Task<long> EnsureOperatorAsync(long organizationId, CancellationToken ct)
-    {
-        var users = _uow.Repository<AppUser>();
-        var existing = (await users.GetAllAsync(ct)).OrderBy(u => u.CreatedDate).FirstOrDefault();
-        if (existing is not null) return existing.Id;
+    //private async Task<long> EnsureOperatorAsync(long organizationId, CancellationToken ct)
+    //{
+    //    var users = _uow.Repository<AppUser>();
+    //    var existing = (await users.GetAllAsync(ct)).OrderBy(u => u.CreatedDate).FirstOrDefault();
+    //    if (existing is not null) return existing.Id;
 
-        var user = new AppUser { OrganizationId = organizationId, FullName = "InfoID Operator" };
-        await users.AddAsync(user, ct);
-        await _uow.SaveChangesAsync(ct);
-        return user.Id;
-    }
+    //    var user = new AppUser { OrganizationId = organizationId, FullName = "InfoID Operator" };
+    //    await users.AddAsync(user, ct);
+    //    await _uow.SaveChangesAsync(ct);
+    //    return user.Id;
+    //}
 
     private async Task<long> EnsurePrinterProfileAsync(long organizationId, string printerName, CancellationToken ct)
     {
@@ -454,36 +529,42 @@ public class PrintHistoryService : IPrintHistoryService
         return holder;
     }
 
-    private async Task<long> GetLastCardNumberAsync(CancellationToken ct)
-    {
-        var setting = await _uow.Repository<SystemSetting>().SingleOrDefaultAsync(s => s.SettingKey == LastCardNumberKey && s.OrganizationId == null, ct);
-        return long.TryParse(setting?.SettingValue, out var n) ? n : 0;
-    }
+    //private async Task<long> GetLastCardNumberAsync(CancellationToken ct)
+    //{
+    //    var setting = await _uow.Repository<SystemSetting>().SingleOrDefaultAsync(s => s.SettingKey == LastCardNumberKey && s.OrganizationId == null, ct);
+    //    return long.TryParse(setting?.SettingValue, out var n) ? n : 0;
+    //}
 
-    private async Task SetLastCardNumberAsync(long value, CancellationToken ct)
-    {
-        var repo = _uow.Repository<SystemSetting>();
-        var setting = await repo.SingleOrDefaultAsync(s => s.SettingKey == LastCardNumberKey && s.OrganizationId == null, ct);
-        if (setting is null)
-        {
-            await repo.AddAsync(new SystemSetting { SettingKey = LastCardNumberKey, SettingValue = value.ToString() }, ct);
-        }
-        else
-        {
-            setting.SettingValue = value.ToString();
-            setting.ModifiedDate = DateTime.UtcNow;
-            repo.Update(setting);
-        }
-    }
+    //private async Task SetLastCardNumberAsync(long value, CancellationToken ct)
+    //{
+    //    var repo = _uow.Repository<SystemSetting>();
+    //    var setting = await repo.SingleOrDefaultAsync(s => s.SettingKey == LastCardNumberKey && s.OrganizationId == null, ct);
+    //    if (setting is null)
+    //    {
+    //        await repo.AddAsync(new SystemSetting { SettingKey = LastCardNumberKey, SettingValue = value.ToString() }, ct);
+    //    }
+    //    else
+    //    {
+    //        setting.SettingValue = value.ToString();
+    //        setting.ModifiedDate = DateTime.UtcNow;
+    //        repo.Update(setting);
+    //    }
+    //}
 
     /// <summary>e.g. C-000123. Sequential per installation.</summary>
-    private static string FormatCardNumber(long n) => $"C-{n:D6}";
+    //private static string FormatCardNumber(long n) => $"C-{n:D6}";
 
     private static string ReprintReasonText(ReprintReasonCode? reason, string? note)
     {
         var text = reason?.ToString() ?? "Reprinted";
         return string.IsNullOrWhiteSpace(note) ? text : $"{text}: {note.Trim()}";
     }
+
+    private Task<long> EnsureOrganizationAsync(CancellationToken ct) => IssuanceStore.EnsureOrganizationAsync(_uow, ct);
+    private Task<long> EnsureOperatorAsync(long organizationId, CancellationToken ct) => IssuanceStore.EnsureOperatorAsync(_uow, organizationId, ct);
+    private Task<long> GetLastCardNumberAsync(CancellationToken ct) => IssuanceStore.GetLastCardNumberAsync(_uow, ct);
+    private Task SetLastCardNumberAsync(long value, CancellationToken ct) => IssuanceStore.SetLastCardNumberAsync(_uow, value, ct);
+    private static string FormatCardNumber(long n) => IssuanceStore.FormatCardNumber(n);
 
     private static string Truncate(string value, int max) => value.Length > max ? value[..max] : value;
 }

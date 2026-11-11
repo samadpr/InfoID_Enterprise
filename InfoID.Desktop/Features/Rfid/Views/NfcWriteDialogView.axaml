@@ -1,0 +1,144 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sys="using:System"
+             xmlns:vm="using:InfoID.Desktop.Features.Rfid.ViewModels"
+             xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="InfoID.Desktop.Features.Rfid.Views.NfcWriteDialogView"
+             x:DataType="vm:NfcWriteDialogViewModel"
+             Background="{DynamicResource BrushSurface}">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="20">
+
+        <!-- Header -->
+        <StackPanel Orientation="Horizontal" Spacing="10">
+            <mi:MaterialIcon Kind="Nfc" Width="28" Height="28" Foreground="{DynamicResource BrushPrimary}" />
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Write NFC tags" Classes="h3" />
+                <TextBlock Text="{Binding SubtitleText}" Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Current step -->
+        <Border Grid.Row="1" Margin="0,14,0,0" Padding="14" CornerRadius="8"
+                Background="{DynamicResource BrushCardBackground}"
+                BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+            <Panel>
+                <!-- Before starting -->
+                <StackPanel Spacing="10" IsVisible="{Binding IsReady}">
+                    <StackPanel Spacing="4" IsVisible="{Binding IsDataBound}">
+                        <TextBlock Text="Link each tag to the person by" Classes="label" />
+                        <ComboBox ItemsSource="{Binding PersonColumns}" SelectedItem="{Binding PersonIdColumn}"
+                                  HorizontalAlignment="Stretch" PlaceholderText="Choose the Person ID column"
+                                  ToolTip.Tip="The column that identifies each person (e.g. EmployeeNo). Print history uses the same column." />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4" IsVisible="{Binding CanSaveUidToData}">
+                        <CheckBox IsChecked="{Binding SaveUidToData}" Content="Also save each tag's UID into the data" />
+                        <ComboBox ItemsSource="{Binding UidColumns}" SelectedItem="{Binding UidColumn}"
+                                  IsEnabled="{Binding SaveUidToData}" HorizontalAlignment="Stretch"
+                                  PlaceholderText="Choose a text column, e.g. NfcUid"
+                                  ToolTip.Tip="The UID is written into this column of the InfoID Internal Database" />
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding UidOptionNote}" Classes="caption" TextWrapping="Wrap"
+                               Foreground="{DynamicResource BrushTextSecondary}" />
+                    <TextBlock Text="{Binding ValidationText}" IsVisible="{Binding HasValidationText}"
+                               Classes="body" TextWrapping="Wrap" Foreground="{DynamicResource BrushWarning}" />
+                    <TextBlock Text="{Binding ReaderText}" Classes="caption" TextWrapping="Wrap" />
+                    <TextBlock Classes="caption" TextWrapping="Wrap" Foreground="{DynamicResource BrushTextSecondary}"
+                               Text="Tags that already contain data are shown to you before anything is replaced. Tags are never locked." />
+                </StackPanel>
+
+                <!-- Running -->
+                <StackPanel Spacing="8" IsVisible="{Binding IsRunning}">
+                    <TextBlock Text="{Binding Heading}" Classes="h3" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Message}" Classes="body" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding CurrentContentText}" Classes="caption" TextWrapping="Wrap"
+                               Foreground="{DynamicResource BrushTextSecondary}" />
+                    <ProgressBar IsIndeterminate="{Binding IsWorking}" Value="{Binding ProgressValue}"
+                                 Minimum="0" Maximum="100" Height="6" />
+                    <TextBlock Text="{Binding ProgressText}" Classes="caption" />
+
+                    <Border IsVisible="{Binding IsConfirming}" Padding="10" CornerRadius="6"
+                            BorderBrush="{DynamicResource BrushWarning}" BorderThickness="1">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Content on this tag now" Classes="label" />
+                            <ItemsControl ItemsSource="{Binding ExistingContent}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="sys:String">
+                                        <TextBlock Text="{Binding}" Classes="body" TextWrapping="Wrap" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <WrapPanel IsVisible="{Binding IsConfirming}">
+                        <Button Classes="primary" Content="Overwrite" Command="{Binding OverwriteCommand}" Margin="0,0,8,8"
+                                ToolTip.Tip="Replace the content of this tag" />
+                        <Button Content="Overwrite all remaining" Command="{Binding OverwriteAllRemainingCommand}" Margin="0,0,8,8"
+                                ToolTip.Tip="Replace content without asking again for the rest of this batch" />
+                        <Button Content="Use another tag" Command="{Binding UseAnotherTagCommand}" Margin="0,0,8,8"
+                                ToolTip.Tip="Leave this tag as it is and place a different one" />
+                        <Button Classes="secondary" Content="Skip this record" Command="{Binding SkipRecordCommand}" Margin="0,0,8,8" />
+                    </WrapPanel>
+
+                    <WrapPanel IsVisible="{Binding CanWriteNow}">
+                        <Button Content="Retry with tag on reader" Command="{Binding WriteNowCommand}" Margin="0,0,8,8"
+                                ToolTip.Tip="Check and write the tag that is on the reader now" />
+                        <Button Classes="secondary" Content="Skip this record" Command="{Binding SkipRecordCommand}" Margin="0,0,8,8" />
+                    </WrapPanel>
+                </StackPanel>
+
+                <!-- Done -->
+                <StackPanel Spacing="6" IsVisible="{Binding IsFinished}">
+                    <TextBlock Text="{Binding Heading}" Classes="h3" />
+                    <TextBlock Text="{Binding Message}" Classes="body" TextWrapping="Wrap" />
+                </StackPanel>
+            </Panel>
+        </Border>
+
+        <!-- Records -->
+        <Border Grid.Row="2" Margin="0,12,0,0" CornerRadius="8"
+                BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+            <ScrollViewer>
+                <ItemsControl ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:NfcWriteItem">
+                            <Grid ColumnDefinitions="Auto,*,Auto" Margin="12,7">
+                                <Panel Width="18" Height="18" Margin="0,2,10,0" VerticalAlignment="Top">
+                                    <mi:MaterialIcon Kind="Nfc" IsVisible="{Binding IsCurrent}" Foreground="{DynamicResource BrushPrimary}" />
+                                    <mi:MaterialIcon Kind="ClockOutline" IsVisible="{Binding IsPending}" Foreground="{DynamicResource BrushTextSecondary}" />
+                                    <mi:MaterialIcon Kind="CheckCircle" IsVisible="{Binding IsWritten}" Foreground="{DynamicResource BrushSuccess}" />
+                                    <mi:MaterialIcon Kind="MinusCircleOutline" IsVisible="{Binding IsSkipped}" Foreground="{DynamicResource BrushWarning}" />
+                                    <mi:MaterialIcon Kind="AlertCircle" IsVisible="{Binding IsFailed}" Foreground="{DynamicResource BrushError}" />
+                                </Panel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="{Binding DisplayName}" Classes="body" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Label}" Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Text="{Binding StatusText}" Classes="caption" TextWrapping="Wrap"
+                                           MaxWidth="280" TextAlignment="Right" VerticalAlignment="Center" Margin="10,0,0,0" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Footer -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,14,0,0">
+            <Button Content="Cancel" Command="{Binding CancelCommand}" IsVisible="{Binding IsReady}" IsCancel="True" />
+            <Button Classes="primary" Command="{Binding StartCommand}" IsVisible="{Binding IsReady}" IsDefault="True"
+                    ToolTip.Tip="Start writing. Place the first tag on the reader.">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <mi:MaterialIcon Kind="Nfc" Width="16" Height="16" />
+                    <TextBlock Text="Start writing" />
+                </StackPanel>
+            </Button>
+            <Button Content="Stop" Command="{Binding StopCommand}" IsVisible="{Binding IsRunning}"
+                    ToolTip.Tip="Stop after this tag. Tags already written stay written and linked." />
+            <Button Classes="primary" Content="Close" Command="{Binding CloseCommand}" IsVisible="{Binding IsFinished}" IsDefault="True" />
+        </StackPanel>
+    </Grid>
+</UserControl>

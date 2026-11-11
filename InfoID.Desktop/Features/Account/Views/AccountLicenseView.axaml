@@ -91,7 +91,7 @@
         <Grid ColumnDefinitions="5*,6*" IsVisible="{Binding IsSignedOut}" MaxWidth="1180" Margin="32,24,32,24">
 
             <!-- Brand panel -->
-            <Border Grid.Column="0" CornerRadius="16" ClipToBounds="True" Margin="0,0,24,0" Padding="40">
+            <!--<Border Grid.Column="0" CornerRadius="16" ClipToBounds="True" Margin="0,0,24,0" Padding="40">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
                         <GradientStop Color="#DA3025" Offset="0" />
@@ -119,6 +119,103 @@
                         </StackPanel>
                     </StackPanel>
                 </Grid>
+            </Border>-->
+
+            <!-- Brand panel (teal, matches the Welcome banner and the designer) -->
+            <Border Grid.Column="0" CornerRadius="16" ClipToBounds="True" Margin="0,0,24,0"
+                    BorderBrush="#26FFFFFF" BorderThickness="1">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                        <GradientStop Color="#14B8A6" Offset="0" />
+                        <GradientStop Color="#0D9488" Offset="0.5" />
+                        <GradientStop Color="#134E4A" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+
+                <Panel>
+                    <!-- Decoration (behind the content, not clickable) -->
+                    <Viewbox Stretch="UniformToFill" IsHitTestVisible="False">
+                        <Canvas Width="640" Height="880">
+                            <Ellipse Canvas.Left="300" Canvas.Top="-260" Width="560" Height="520">
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="#40FFFFFF" Offset="0" />
+                                        <GradientStop Color="#00FFFFFF" Offset="1" />
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <Ellipse Canvas.Left="-260" Canvas.Top="560" Width="620" Height="560">
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="#40000000" Offset="0" />
+                                        <GradientStop Color="#00000000" Offset="1" />
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <Ellipse Canvas.Left="360" Canvas.Top="-180" Width="440" Height="440" Stroke="#1AFFFFFF" StrokeThickness="1.5" />
+                            <Ellipse Canvas.Left="420" Canvas.Top="-120" Width="320" Height="320" Stroke="#12FFFFFF" StrokeThickness="1" />
+                            <Path Data="M470,0 L560,0 L250,880 L160,880 Z" Fill="#0DFFFFFF" />
+                            <Path Data="M590,0 L625,0 L315,880 L280,880 Z" Fill="#0AFFFFFF" />
+                            <Path Data="M0,880 L0,770 C150,735 300,815 460,775 S600,735 640,750 L640,880 Z" Fill="#14000000" />
+                            <Path Data="M0,745 C160,700 300,790 450,745 S590,700 640,715" Stroke="#26FFFFFF" StrokeThickness="2" />
+                            <Path Data="M0,775 C170,735 320,805 470,770 S600,735 640,745" Stroke="#14FFFFFF" StrokeThickness="1.5" />
+                            <Path Fill="#33FFFFFF"
+                                  Data="M520,300 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M538,300 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M556,300 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M574,300 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M592,300 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M520,318 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M538,318 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M556,318 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M574,318 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M592,318 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M520,336 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M538,336 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M556,336 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M574,336 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M592,336 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M520,354 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M538,354 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M556,354 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M574,354 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0 M592,354 a1.8,1.8 0 1 0 3.6,0 a1.8,1.8 0 1 0 -3.6,0" />
+                        </Canvas>
+                    </Viewbox>
+
+                    <!-- Content -->
+                    <Grid RowDefinitions="Auto,*,Auto" Margin="40">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Image Source="avares://InfoID.Desktop/Assets/Images/InfoIDLogo.png" Width="40" Height="40" Stretch="Uniform" />
+                            <TextBlock Text="InfoID" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="14">
+                            <!-- ID card illustration -->
+                            <Viewbox Width="230" Height="177" Stretch="Uniform" HorizontalAlignment="Left" Margin="0,0,0,12">
+                                <Canvas Width="260" Height="200">
+                                    <Rectangle Canvas.Left="34" Canvas.Top="34" Width="176" Height="110" RadiusX="12" RadiusY="12"
+                                               Fill="#40FFFFFF" RenderTransformOrigin="50%,50%">
+                                        <Rectangle.RenderTransform>
+                                            <RotateTransform Angle="-9" />
+                                        </Rectangle.RenderTransform>
+                                    </Rectangle>
+                                    <Rectangle Canvas.Left="60" Canvas.Top="64" Width="180" Height="114" RadiusX="12" RadiusY="12" Fill="White" />
+                                    <Path Data="M72,64 H228 A12,12 0 0 1 240,76 V90 H60 V76 A12,12 0 0 1 72,64 Z" Fill="#0D9488" />
+                                    <Rectangle Canvas.Left="72" Canvas.Top="73" Width="40" Height="6" RadiusX="3" RadiusY="3" Fill="#80FFFFFF" />
+                                    <Rectangle Canvas.Left="72" Canvas.Top="100" Width="46" Height="58" RadiusX="8" RadiusY="8" Fill="#CCFBF1" />
+                                    <Ellipse Canvas.Left="85" Canvas.Top="108" Width="20" Height="20" Fill="#0F766E" />
+                                    <Path Data="M78,158 C78,138 112,138 112,158 Z" Fill="#0F766E" />
+                                    <Rectangle Canvas.Left="130" Canvas.Top="102" Width="70" Height="9" RadiusX="4.5" RadiusY="4.5" Fill="#115E59" />
+                                    <Rectangle Canvas.Left="130" Canvas.Top="118" Width="58" Height="6" RadiusX="3" RadiusY="3" Fill="#99E0D6" />
+                                    <Rectangle Canvas.Left="130" Canvas.Top="130" Width="66" Height="6" RadiusX="3" RadiusY="3" Fill="#99E0D6" />
+                                    <Path Fill="#2B2B2B"
+                                          Data="M130,146h2v16h-2z M134,146h1v16h-1z M137,146h3v16h-3z M142,146h1v16h-1z M145,146h2v16h-2z M149,146h1v16h-1z M152,146h3v16h-3z M157,146h1v16h-1z M160,146h2v16h-2z M164,146h1v16h-1z M167,146h3v16h-3z M172,146h1v16h-1z M175,146h2v16h-2z M179,146h1v16h-1z M182,146h3v16h-3z M187,146h1v16h-1z M190,146h2v16h-2z M194,146h1v16h-1z M197,146h3v16h-3z M202,146h1v16h-1z M205,146h2v16h-2z" />
+                                    <Path Data="M212,104 A8,8 0 0 1 212,120 M217,99 A14,14 0 0 1 217,125 M222,94 A20,20 0 0 1 222,130"
+                                          Stroke="#0D9488" StrokeThickness="2.5" StrokeLineCap="Round" />
+                                    <Ellipse Canvas.Left="196" Canvas.Top="20" Width="36" Height="36" Fill="White" />
+                                    <Path Data="M205,38 L211,44 L223,31" Stroke="#0D9488" StrokeThickness="3.5" StrokeLineCap="Round" StrokeJoin="Round" />
+                                </Canvas>
+                            </Viewbox>
+
+                            <TextBlock Text="Print every ID card you need" Foreground="White" FontSize="32" FontWeight="Bold" TextWrapping="Wrap" />
+                            <TextBlock Text="Design, issue and print professional ID cards. One account for all your licenses."
+                                       Foreground="#E6FFFA" FontSize="15" TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <mi:MaterialIcon Kind="CheckCircle" Width="16" Height="16" Foreground="#99F6E4" />
+                                <TextBlock Text="Sign in to see and activate your licenses" Foreground="#E6FFFA" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <mi:MaterialIcon Kind="CheckCircle" Width="16" Height="16" Foreground="#99F6E4" />
+                                <TextBlock Text="Request a plan and follow its approval" Foreground="#E6FFFA" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Panel>
             </Border>
 
             <ScrollViewer Grid.Column="1">

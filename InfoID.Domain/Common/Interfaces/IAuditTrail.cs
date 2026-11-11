@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace InfoID.Domain.Common.Interfaces;
 
 /// <summary>
@@ -51,10 +53,11 @@ public static class AuditModules
     public const string Reports = "Reports";
     public const string Visitors = "Visitors";
     public const string Audit = "Audit";
+    public const string Encoding = "Encoding";
 
     public static readonly IReadOnlyList<string> All = new[]
     {
-        Application, Account, Designs, Printing, Data, License, Backup, Reports, Visitors, Audit,
+        Application, Account, Designs, Printing, Data, License, Backup, Reports, Visitors, Audit,Encoding,
     };
 }
 

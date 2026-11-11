@@ -68,6 +68,7 @@ public sealed class AuditRow
         AuditModules.Reports => MaterialIconKind.FileChartOutline,
         AuditModules.Visitors => MaterialIconKind.BadgeAccountHorizontalOutline,
         AuditModules.Audit => MaterialIconKind.ShieldCheckOutline,
+        AuditModules.Encoding => MaterialIconKind.Nfc,
         _ => MaterialIconKind.InformationOutline,
     };
 }

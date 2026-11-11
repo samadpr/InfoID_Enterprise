@@ -202,7 +202,7 @@ public static class BarcodeRenderer
     private static WriteableBitmap ToBitmap(PixelData pixelData)
     {
         var size = new PixelSize(pixelData.Width, pixelData.Height);
-        var bitmap = new WriteableBitmap(size, new Vector(96, 96), PixelFormat.Rgba8888, AlphaFormat.Unpremul);
+        var bitmap = new WriteableBitmap(size, new Vector(96, 96), PixelFormat.Bgra8888, AlphaFormat.Unpremul);
 
         using var fb = bitmap.Lock();
         var sourceRowBytes = pixelData.Width * 4;
