@@ -19,47 +19,129 @@
 	<UserControl.Styles>
 
 		<!-- Compact, icon-button-like sizing shared by every toolbar/tool-rail button. -->
-		<Style Selector="Button.toolbtn">
-			<Setter Property="MinWidth" Value="34" />
-			<Setter Property="Height" Value="30" />
-			<Setter Property="Padding" Value="6,0" />
-			<Setter Property="HorizontalContentAlignment" Value="Center" />
-			<Setter Property="FontWeight" Value="Medium" />
-		</Style>
+        <!-- Toolbar buttons (Oct 2026 redesign): ONE style for every toolbar button.
+             Neutral grey icon; hover = subtle surface; on/checked = teal tint + teal icon;
+             disabled = faded, never a grey box. -->
+        <Style Selector="Button.toolbtn, ToggleButton.toolbtn">
+            <Setter Property="MinWidth" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="7,0" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+        <Style Selector="ToggleButton.toolbtn.compact">
+            <Setter Property="MinWidth" Value="30" />
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
 
-		<!-- Same footprint as .toolbtn but for short-word mode toggles where the clearest
-             label genuinely is a word/code rather than a glyph (e.g. "Fit"/"Fill"/
-             "Stretch", "Code128"/"Code39"/"EAN-13" in the Properties panel, "Preview" as
-             a named mode). Everything that has a clear, universal icon equivalent (Undo,
-             Copy, Align, Barcode, ...) now uses PathIcon + DesignerIcons instead — see
-             Views/Icons/DesignerIcons.cs. -->
-		<Style Selector="Button.toolbtn-wide">
-			<Setter Property="MinWidth" Value="34" />
-			<Setter Property="Height" Value="30" />
-			<Setter Property="Padding" Value="8,0" />
-			<Setter Property="HorizontalContentAlignment" Value="Center" />
-			<Setter Property="FontWeight" Value="Medium" />
-			<Setter Property="FontSize" Value="11" />
-		</Style>
+        <!-- Text segments (Front | Back | Both) and labelled toolbar buttons. -->
+        <Style Selector="Button.toolbtn-wide, ToggleButton.toolbtn-wide">
+            <Setter Property="MinWidth" Value="34" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="CornerRadius" Value="7" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
 
-		<Style Selector="ToggleButton.toolbtn">
-			<Setter Property="MinWidth" Value="34" />
-			<Setter Property="Height" Value="30" />
-			<Setter Property="Padding" Value="6,0" />
-			<Setter Property="HorizontalContentAlignment" Value="Center" />
-			<Setter Property="FontWeight" Value="Medium" />
-		</Style>
+        <!-- Order matters: hover first, then checked, so a checked button keeps its tint. -->
+        <Style Selector="Button.toolbtn:pointerover /template/ ContentPresenter#PART_ContentPresenter, ToggleButton.toolbtn:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.toolbtn-wide:pointerover /template/ ContentPresenter#PART_ContentPresenter, ToggleButton.toolbtn-wide:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource BrushSurfaceElevated}" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}" />
+        </Style>
+        <Style Selector="ToggleButton.toolbtn:checked /template/ ContentPresenter#PART_ContentPresenter, ToggleButton.toolbtn-wide:checked /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource BrushSelectionBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushPrimary}" />
+        </Style>
+        <Style Selector="ToggleButton.toolbtn:checked PathIcon">
+            <Setter Property="Foreground" Value="{DynamicResource BrushPrimary}" />
+        </Style>
+        <Style Selector="Button.toolbtn:disabled /template/ ContentPresenter#PART_ContentPresenter, ToggleButton.toolbtn:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Button.toolbtn:disabled, ToggleButton.toolbtn:disabled">
+            <Setter Property="Opacity" Value="0.38" />
+        </Style>
 
-		<!-- Selected/active tool-mode state (Select/Pan, Front/Back/Both): icon-first
-             buttons still need a clear "this is currently active" affordance (Part 10:
-             "Selected tool: visually indicate active state"), which the plain ghost/
-             toolbtn look alone doesn't give. -->
-		<Style Selector="ToggleButton.toolbtn:checked /template/ ContentPresenter">
-			<Setter Property="Background" Value="{DynamicResource BrushSelectionBackground}" />
-		</Style>
-		<Style Selector="ToggleButton.toolbtn:checked PathIcon">
-			<Setter Property="Foreground" Value="{DynamicResource BrushPrimary}" />
-		</Style>
+        <!-- Segmented group: tools, card side, zoom. -->
+        <Style Selector="Border.segment">
+            <Setter Property="Background" Value="{DynamicResource BrushBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="2" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <!-- Thin vertical separator between toolbar groups. -->
+        <Style Selector="Border.tbsep">
+            <Setter Property="Width" Value="1" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="Margin" Value="6,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Background" Value="{DynamicResource BrushBorder}" />
+        </Style>
+
+        <!-- Properties panel fields (Oct 2026): label inside the box, unit on the right,
+             no spinner buttons (arrow keys and mouse wheel still step the value). -->
+        <Style Selector="NumericUpDown.prop">
+            <Setter Property="ShowButtonSpinner" Value="False" />
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="2,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBlock.propPrefix">
+            <Setter Property="Margin" Value="10,0,2,0" />
+            <Setter Property="MinWidth" Value="12" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+        </Style>
+        <Style Selector="TextBlock.propUnit">
+            <Setter Property="Margin" Value="2,0,10,0" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+        </Style>
+        <Style Selector="TextBlock.propSection">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="LetterSpacing" Value="0.6" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+        </Style>
+
+        <!-- Design check pill: neutral when clean, amber when it found issues. -->
+        <Style Selector="Button.checkchip">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="CornerRadius" Value="15" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.checkchip.warn">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushWarning}" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushWarning}" />
+        </Style>
 
 		<!-- Left icon rail (Part 10): compact square icon buttons, one per insertable
              element type plus the Shapes flyout. Taller than the top-toolbar toolbtn so
@@ -387,174 +469,102 @@
 
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
 
-                        <StackPanel Spacing="10"
-                                    Margin="0,0,0,20">
+                        <StackPanel Spacing="10" Margin="0,8,0,20">
+                            <!-- ALIGNMENT: horizontal + vertical side by side -->
+                            <TextBlock Text="ALIGNMENT" Classes="propSection" Margin="0,6,0,0" />
+                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8" HorizontalAlignment="Left">
+                                <Border Grid.Column="0" Classes="segment">
+                                    <StackPanel Orientation="Horizontal" Spacing="2">
+                                        <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Align text left" AutomationProperties.Name="Align text left"
+                                                      IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Left}">
+                                            <mi:MaterialIcon Kind="FormatAlignLeft" Width="16" Height="16" />
+                                        </ToggleButton>
+                                        <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Centre text" AutomationProperties.Name="Centre text"
+                                                      IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Center}">
+                                            <mi:MaterialIcon Kind="FormatAlignCenter" Width="16" Height="16" />
+                                        </ToggleButton>
+                                        <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Align text right" AutomationProperties.Name="Align text right"
+                                                      IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Right}">
+                                            <mi:MaterialIcon Kind="FormatAlignRight" Width="16" Height="16" />
+                                        </ToggleButton>
+                                        <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Justify" AutomationProperties.Name="Justify"
+                                                      IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Justify}">
+                                            <mi:MaterialIcon Kind="FormatAlignJustify" Width="16" Height="16" />
+                                        </ToggleButton>
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Column="1" Classes="segment">
+                                    <StackPanel Orientation="Horizontal" Spacing="2">
+                                        <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Text at the top of the box" AutomationProperties.Name="Vertical align top"
+                                                      IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Top}">
+                                            <mi:MaterialIcon Kind="FormatVerticalAlignTop" Width="16" Height="16" />
+                                        </ToggleButton>
+                                        <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Text in the middle of the box" AutomationProperties.Name="Vertical align middle"
+                                                      IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Middle}">
+                                            <mi:MaterialIcon Kind="FormatVerticalAlignCenter" Width="16" Height="16" />
+                                        </ToggleButton>
+                                        <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Text at the bottom of the box" AutomationProperties.Name="Vertical align bottom"
+                                                      IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Bottom}">
+                                            <mi:MaterialIcon Kind="FormatVerticalAlignBottom" Width="16" Height="16" />
+                                        </ToggleButton>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                           
 
-                            <!-- Text content -->
-                            <TextBlock Text="Text content"
-                                       Classes="caption" />
+                            <!-- FONT -->
+                            <TextBlock Text="FONT" Classes="propSection" Margin="0,6,0,0" />
+                            <ComboBox ItemsSource="{x:Static services:SystemFontCatalog.FontFamilyNamesWithRecentFirst}"
+                                      Text="{Binding FontFamily, Mode=TwoWay}"
+                                      IsEditable="True" IsTextSearchEnabled="True" HorizontalAlignment="Stretch"
+                                      Height="32" CornerRadius="8" AutomationProperties.Name="Font family">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" FontFamily="{Binding Converter={x:Static conv:StringToFontFamilyConverter.Instance}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
 
-                            <TextBox Text="{Binding Text, Mode=TwoWay}"
-                                     AcceptsReturn="True"
-                                     MinHeight="60"
-                                     Watermark="Type the text shown on the card..." />
-
-
-                            <!-- Font family -->
-                            <StackPanel Spacing="4">
-
-                                <TextBlock Text="Font family"
-                                           Classes="caption" />
-
-                                <ComboBox ItemsSource="{x:Static services:SystemFontCatalog.FontFamilyNamesWithRecentFirst}"
-                                          Text="{Binding FontFamily, Mode=TwoWay}"
-                                          IsEditable="True"
-                                          IsTextSearchEnabled="True"
-                                          HorizontalAlignment="Stretch">
-
-                                    <ComboBox.ItemTemplate>
-
-                                        <DataTemplate>
-
-                                            <TextBlock Text="{Binding}"
-                                                       FontFamily="{Binding Converter={x:Static conv:StringToFontFamilyConverter.Instance}}" />
-
-                                        </DataTemplate>
-
-                                    </ComboBox.ItemTemplate>
-
-                                </ComboBox>
-
-                            </StackPanel>
-
-
-                            <!-- Font size + Color -->
-                            <Grid ColumnDefinitions="*,*">
-
-                                <StackPanel Grid.Column="0"
-                                            Spacing="4"
-                                            Margin="0,0,4,0">
-
-                                    <TextBlock Text="Font size"
-                                               Classes="caption" />
-
-                                    <NumericUpDown Value="{Binding FontSize, Mode=TwoWay}"
-                                                   Minimum="4"
-                                                   Maximum="200"
-                                                   Increment="1" />
-
-                                </StackPanel>
-
-
-                                <StackPanel Grid.Column="1"
-                                            Spacing="4"
-                                            Margin="4,0,0,0">
-
-                                    <TextBlock Text="Color"
-                                               Classes="caption" />
-
-                                    <controls:ColorPickerField
-                                        ColorHex="{Binding ColorHex, Mode=TwoWay}" />
-
-                                </StackPanel>
-
+                            <!-- Size + colour on one row -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <NumericUpDown Grid.Column="0" Classes="prop" Value="{Binding FontSize, Mode=TwoWay}"
+                                               Minimum="4" Maximum="200" Increment="1" FormatString="0.#"
+                                               ToolTip.Tip="Font size (arrow keys or mouse wheel to adjust)" AutomationProperties.Name="Font size">
+                                    <NumericUpDown.InnerLeftContent>
+                                        <mi:MaterialIcon Kind="FormatSize" Width="15" Height="15" Margin="10,0,2,0"
+                                                         Foreground="{DynamicResource BrushTextSecondary}" />
+                                    </NumericUpDown.InnerLeftContent>
+                                </NumericUpDown>
+                                <controls:ColorPickerField Grid.Column="1" VerticalAlignment="Center"
+                                                           ColorHex="{Binding ColorHex, Mode=TwoWay}"
+                                                           ToolTip.Tip="Text colour" />
                             </Grid>
 
+                            <!-- Bold / Italic / Underline as one segmented group -->
+                            <Border Classes="segment" HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal" Spacing="2">
+                                    <ToggleButton Classes="toolbtn" IsChecked="{Binding Bold, Mode=TwoWay}"
+                                                  ToolTip.Tip="Bold" AutomationProperties.Name="Bold">
+                                        <mi:MaterialIcon Kind="FormatBold" Width="18" Height="18" />
+                                    </ToggleButton>
+                                    <ToggleButton Classes="toolbtn" IsChecked="{Binding Italic, Mode=TwoWay}"
+                                                  ToolTip.Tip="Italic" AutomationProperties.Name="Italic">
+                                        <mi:MaterialIcon Kind="FormatItalic" Width="18" Height="18" />
+                                    </ToggleButton>
+                                    <ToggleButton Classes="toolbtn" IsChecked="{Binding Underline, Mode=TwoWay}"
+                                                  ToolTip.Tip="Underline" AutomationProperties.Name="Underline">
+                                        <mi:MaterialIcon Kind="FormatUnderline" Width="18" Height="18" />
+                                    </ToggleButton>
+                                </StackPanel>
+                            </Border>
 
-                            <!-- Bold / Italic / Underline -->
-                            <StackPanel Orientation="Horizontal"
-                                        Spacing="12">
-
-                                <CheckBox Content="Bold"
-                                          IsChecked="{Binding Bold, Mode=TwoWay}" />
-
-                                <CheckBox Content="Italic"
-                                          IsChecked="{Binding Italic, Mode=TwoWay}" />
-
-                                <CheckBox Content="Underline"
-                                          IsChecked="{Binding Underline, Mode=TwoWay}" />
-
-                            </StackPanel>
-
-
-                            <!-- Text alignment -->
-                            <TextBlock Text="Text alignment"
-                                       Classes="caption"
-                                       Margin="0,4,0,0" />
-
-                            <StackPanel Orientation="Horizontal"
-                                        Spacing="4">
-
-                                <ToggleButton Classes="toolbtn"
-                                              Content="&#8676;"
-                                              ToolTip.Tip="Text align left"
-                                              IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Left}" />
-
-                                <ToggleButton Classes="toolbtn"
-                                              Content="&#8596;"
-                                              ToolTip.Tip="Text align center"
-                                              IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Center}" />
-
-                                <ToggleButton Classes="toolbtn"
-                                              Content="&#8677;"
-                                              ToolTip.Tip="Text align right"
-                                              IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Right}" />
-
-                                <ToggleButton Classes="toolbtn"
-                                              Content="&#8801;"
-                                              ToolTip.Tip="Text justify"
-                                              IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Justify}" />
-
-                            </StackPanel>
-
-
-                            <!-- Vertical alignment -->
-                            <TextBlock Text="Vertical alignment"
-                                       Classes="caption"
-                                       Margin="0,4,0,0" />
-
-                            <StackPanel Orientation="Horizontal"
-                                        Spacing="4">
-
-                                <ToggleButton Classes="toolbtn"
-                                              Content="&#8613;"
-                                              ToolTip.Tip="Vertical align top"
-                                              IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Top}" />
-
-                                <ToggleButton Classes="toolbtn"
-                                              Content="&#8597;"
-                                              ToolTip.Tip="Vertical align middle"
-                                              IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Middle}" />
-
-                                <ToggleButton Classes="toolbtn"
-                                              Content="&#8615;"
-                                              ToolTip.Tip="Vertical align bottom"
-                                              IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Bottom}" />
-
-                            </StackPanel>
-
-
-                            <!-- Format -->
-                            <TextBlock Text="Format"
-                                       Classes="caption"
-                                       Margin="0,4,0,0" />
-
-                            <StackPanel Orientation="Horizontal"
-                                        Spacing="8">
-
-                                <Button Content="▧"
-                                        Width="36"
-                                        Height="36" />
-
-                                <Button Content="▣"
-                                        Width="36"
-                                        Height="36" />
-
-                                <Button Content="🖌"
-                                        Width="36"
-                                        Height="36" />
-
-                            </StackPanel>
+                            <!-- TEXT -->
+                            <TextBlock Text="TEXT" Classes="propSection" />
+                            <TextBox Text="{Binding Text, Mode=TwoWay}" AcceptsReturn="True" TextWrapping="Wrap"
+                                     MinHeight="64" MaxHeight="80" CornerRadius="8"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                     Watermark="Type the text shown on the card..."
+                                     AutomationProperties.Name="Text content" />
 
                         </StackPanel>
 
@@ -571,162 +581,100 @@
 
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
 
-                        <StackPanel Spacing="14"
-                                    Margin="0,0,0,20">
+                        <StackPanel Spacing="10" Margin="0,8,0,20">
 
+                            <!-- SOURCE: where the text comes from -->
+                            <TextBlock Text="SOURCE" Classes="propSection" />
+                            <Border Classes="segment" HorizontalAlignment="Stretch">
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="2">
+                                    <ToggleButton Grid.Column="0" Classes="toolbtn-wide" HorizontalAlignment="Stretch"
+                                                  ToolTip.Tip="The same text on every card" AutomationProperties.Name="Fixed text"
+                                                  IsChecked="{Binding SourceType, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Fixed}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <mi:MaterialIcon Kind="FormatText" Width="15" Height="15" />
+                                            <TextBlock Text="Fixed text" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </ToggleButton>
+                                    <ToggleButton Grid.Column="1" Classes="toolbtn-wide" HorizontalAlignment="Stretch"
+                                                  ToolTip.Tip="Each card shows its own record's value" AutomationProperties.Name="Database field"
+                                                  IsChecked="{Binding SourceType, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Database}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <mi:MaterialIcon Kind="DatabaseOutline" Width="15" Height="15" />
+                                            <TextBlock Text="Database" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </ToggleButton>
+                                </Grid>
+                            </Border>
 
-                            <!-- Text source -->
-                            <StackPanel Spacing="6">
-
-                                <TextBlock Text="Text source"
-                                           Classes="caption" />
-
-                                <StackPanel Orientation="Horizontal">
-
-                                    <!-- Fixed -->
-                                    <ToggleButton Content="Fixed"
-                                                  Padding="14,8"
-                                                  IsChecked="{Binding SourceType,
-                                              Mode=TwoWay,
-                                              Converter={x:Static conv:EnumToBoolConverter.Instance},
-                                              ConverterParameter=Fixed}" />
-
-                                    <!-- Link -->
-                                    <!--<ToggleButton Content="Link"
-                                                  Padding="14,8"
-                                                  IsChecked="{Binding SourceType,
-                                              Mode=TwoWay,
-                                              Converter={x:Static conv:EnumToBoolConverter.Instance},
-                                              ConverterParameter=Link}" />-->
-
-                                    <!-- Database -->
-                                    <ToggleButton Content="Database"
-                                                  Padding="14,8"
-                                                  IsChecked="{Binding SourceType,
-                                              Mode=TwoWay,
-                                              Converter={x:Static conv:EnumToBoolConverter.Instance},
-                                              ConverterParameter=Database}" />
-
-                                </StackPanel>
-
-                            </StackPanel>
-
-
-                            <!-- ================================================= -->
-                            <!-- DATABASE PARAMETERS                                -->
-                            <!-- ================================================= -->
-
-                            <StackPanel Spacing="8"
-                                        IsVisible="{Binding IsDatabaseBound}">
-
-                                <TextBlock Text="Database"
-                                           Classes="caption" />
-
-                                <TextBlock Text="{Binding DatabaseColumn,
-                                                  StringFormat='Connected field: {0}'}"
-                                           FontSize="13"
-                                           Opacity="0.7" />
-
-                                <TextBlock Text="Database Field"
-                                           Classes="caption" />
-
+                            <!-- Database: pick the column -->
+                            <StackPanel Spacing="6" IsVisible="{Binding IsDatabaseBound}">
+                                <TextBlock Text="Field" Classes="caption" />
                                 <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.ActiveTab.DatabaseFields}"
                                           SelectedValue="{Binding DatabaseColumn, Mode=TwoWay}"
                                           SelectedValueBinding="{Binding ColumnName}"
-                                          HorizontalAlignment="Stretch">
+                                          PlaceholderText="Connect a database, then choose a field"
+                                          HorizontalAlignment="Stretch" Height="32" CornerRadius="8"
+                                          AutomationProperties.Name="Database field">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding ColumnName}" />
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
+                                <TextBlock Classes="caption" TextWrapping="Wrap" Foreground="{DynamicResource BrushTextSecondary}"
+                                           Text="Turn on Preview in the toolbar to see the selected row's value on the card." />
                             </StackPanel>
 
-
-                            <!-- ================================================= -->
-                            <!-- DATA LENGTH                                        -->
-                            <!-- ================================================= -->
-
-                            <StackPanel Spacing="6">
-
-                                <TextBlock Text="Data Length"
-                                           Classes="caption" />
-
-                                <NumericUpDown Minimum="1"
-                                               Maximum="5000"
-                                               Value="500"
-                                               Increment="1" />
-
+                            <!-- Fixed: optionally mix text and fields (replaces the old Prefix/Suffix boxes,
+                                 which were not connected to anything) -->
+                            <StackPanel Spacing="6" IsVisible="{Binding !IsDatabaseBound}">
+                                <TextBlock Text="Text with fields (optional)" Classes="caption" />
+                                <TextBox Text="{Binding DataBindingExpression, Mode=TwoWay}" Height="32" CornerRadius="8"
+                                         Watermark="e.g. EMP-{{EmployeeID}}"
+                                         AutomationProperties.Name="Text with fields" />
+                                <TextBlock Classes="caption" TextWrapping="Wrap" Foreground="{DynamicResource BrushTextSecondary}"
+                                           Text="Put column names in double braces to add prefixes or suffixes, e.g. Dept: {{Department}}. When filled, it replaces the text in the Style tab." />
                             </StackPanel>
 
-
-                            <!-- ================================================= -->
-                            <!-- CONCATENATION                                      -->
-                            <!-- ================================================= -->
-
-                            <TextBlock Text="Concatenation"
-                                       Classes="caption"
-                                       Margin="0,8,0,0" />
-
-
-                            <!-- Prefix -->
-                            <Grid ColumnDefinitions="*,Auto"
-                                  ColumnSpacing="8">
-
-                                <StackPanel Grid.Column="0"
-                                            Spacing="4">
-
-                                    <TextBlock Text="Prefix"
-                                               Classes="caption" />
-
-                                    <TextBox />
-
-                                </StackPanel>
-
-                                <ToggleSwitch Grid.Column="1"
-                                              Content="Print"
-                                              IsChecked="True"
-                                              VerticalAlignment="Bottom" />
-
+                            <!-- PREFIX & SUFFIX: added around the value on every card -->
+                            <TextBlock Text="PREFIX &amp; SUFFIX" Classes="propSection" Margin="0,6,0,0" />
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                <TextBox Grid.Column="0" Text="{Binding Prefix, Mode=TwoWay}" Height="32" CornerRadius="8"
+                                         Watermark="e.g. EMP-" ToolTip.Tip="Added before the value" AutomationProperties.Name="Prefix">
+                                    <TextBox.InnerLeftContent>
+                                        <TextBlock Text="Before" Classes="propPrefix" />
+                                    </TextBox.InnerLeftContent>
+                                </TextBox>
+                                <TextBox Grid.Column="1" Text="{Binding Suffix, Mode=TwoWay}" Height="32" CornerRadius="8"
+                                         Watermark="e.g. (Staff)" ToolTip.Tip="Added after the value" AutomationProperties.Name="Suffix">
+                                    <TextBox.InnerLeftContent>
+                                        <TextBlock Text="After" Classes="propPrefix" />
+                                    </TextBox.InnerLeftContent>
+                                </TextBox>
                             </Grid>
+                            <TextBlock Classes="caption" TextWrapping="Wrap" Foreground="{DynamicResource BrushTextSecondary}"
+                                       Text="Example: Before &quot;EMP-&quot; + value 1001 prints EMP-1001. Not shown when the value is empty. Include spaces if you want them." />
+                            
+                            <!-- FIT -->
+                            <TextBlock Text="FIT" Classes="propSection" Margin="0,6,0,0" />
+                            <NumericUpDown Classes="prop" Value="{Binding MinFontSize, Mode=TwoWay}"
+                                           Minimum="2" Maximum="72" Increment="0.5" FormatString="0.#"
+                                           ToolTip.Tip="Long values shrink to fit the box, but never below this size"
+                                           AutomationProperties.Name="Smallest font size">
+                                <NumericUpDown.InnerLeftContent>
+                                    <TextBlock Text="Min size" Classes="propPrefix" />
+                                </NumericUpDown.InnerLeftContent>
+                            </NumericUpDown>
+                            <TextBlock Classes="caption" TextWrapping="Wrap" Foreground="{DynamicResource BrushTextSecondary}"
+                                       Text="Text that doesn't fit the box shrinks automatically, down to this size." />
 
-
-                            <!-- Suffix -->
-                            <Grid ColumnDefinitions="*,Auto"
-                                  ColumnSpacing="8">
-
-                                <StackPanel Grid.Column="0"
-                                            Spacing="4">
-
-                                    <TextBlock Text="Suffix"
-                                               Classes="caption" />
-
-                                    <TextBox />
-
-                                </StackPanel>
-
-                                <ToggleSwitch Grid.Column="1"
-                                              Content="Print"
-                                              IsChecked="True"
-                                              VerticalAlignment="Bottom" />
-
-                            </Grid>
-
-
-                            <!-- ================================================= -->
-                            <!-- VISIBILITY CONDITION                               -->
-                            <!-- ================================================= -->
-
-                            <StackPanel Spacing="6"
-                                        Margin="0,8,0,0">
-
-                                <TextBlock Text="Visibility condition"
-                                           Classes="caption" />
-
-                                <TextBox Text="{Binding VisibilityCondition, Mode=TwoWay}"
-                                         Watermark="e.g. Department == 'Security'" />
-
-                            </StackPanel>
+                            <!-- SHOW ONLY IF -->
+                            <TextBlock Text="SHOW ONLY IF" Classes="propSection" Margin="0,6,0,0" />
+                            <TextBox Text="{Binding VisibilityCondition, Mode=TwoWay}" Height="32" CornerRadius="8"
+                                     Watermark="e.g. Department == 'Security'"
+                                     AutomationProperties.Name="Visibility condition" />
+                            <TextBlock Classes="caption" TextWrapping="Wrap" Foreground="{DynamicResource BrushTextSecondary}"
+                                       Text="Leave empty to always show. Checked for each card when printing." />
 
                         </StackPanel>
 
@@ -737,12 +685,243 @@
             </TabControl>
 
         </DataTemplate>
-		<DataTemplate DataType="doc:DateTimeElement">
+        <DataTemplate DataType="doc:DateTimeElement">
+            <TabControl>
+
+                <!-- ======================= VALUE TAB ======================= -->
+                <TabItem Header="Value">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="14" Margin="0,8,0,20">
+
+                            <!-- Live preview -->
+                            <Border Background="{DynamicResource BrushSurfaceElevated}"
+                                    CornerRadius="8" Padding="12,10">
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="PREVIEW" Classes="propSection" />
+                                    <TextBlock Text="{Binding PreviewText}"
+                                               FontSize="15" FontWeight="SemiBold"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- SHOW -->
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="SHOW" Classes="propSection" />
+                                <Border Classes="segment" HorizontalAlignment="Stretch">
+                                    <UniformGrid Columns="3">
+                                        <ToggleButton Classes="toolbtn" Content="Date + Time" HorizontalAlignment="Stretch"
+                                                      IsChecked="{Binding DisplayFormat, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=DateTime}" />
+                                        <ToggleButton Classes="toolbtn" Content="Date" HorizontalAlignment="Stretch"
+                                                      IsChecked="{Binding DisplayFormat, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Date}" />
+                                        <ToggleButton Classes="toolbtn" Content="Time" HorizontalAlignment="Stretch"
+                                                      IsChecked="{Binding DisplayFormat, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Time}" />
+                                    </UniformGrid>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- SOURCE -->
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="SOURCE" Classes="propSection" />
+                                <Border Classes="segment" HorizontalAlignment="Stretch">
+                                    <UniformGrid Columns="2">
+                                        <ToggleButton Classes="toolbtn" HorizontalAlignment="Stretch"
+                                                      ToolTip.Tip="Use the date and time when each card is printed"
+                                                      IsChecked="{Binding Source, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=PrintTime}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <mi:MaterialIcon Kind="Printer" Width="14" Height="14" />
+                                                <TextBlock Text="Print date" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </ToggleButton>
+                                        <ToggleButton Classes="toolbtn" HorizontalAlignment="Stretch"
+                                                      ToolTip.Tip="Always print the same chosen date"
+                                                      IsChecked="{Binding Source, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Fixed}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <mi:MaterialIcon Kind="CalendarEdit" Width="14" Height="14" />
+                                                <TextBlock Text="Fixed date" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </ToggleButton>
+                                    </UniformGrid>
+                                </Border>
+
+                                <!-- Fixed date / time pickers -->
+                                <Grid ColumnDefinitions="*,8,*" IsVisible="{Binding IsFixed}">
+                                    <CalendarDatePicker Grid.Column="0"
+                                                        SelectedDate="{Binding FixedDate, Mode=TwoWay}"
+                                                        HorizontalAlignment="Stretch"
+                                                        IsVisible="{Binding ShowDateFormat}" />
+                                    <TimePicker Grid.Column="2"
+                                                SelectedTime="{Binding FixedTime, Mode=TwoWay}"
+                                                HorizontalAlignment="Stretch" MinWidth="0"
+                                                IsVisible="{Binding ShowTimeFormat}" />
+                                </Grid>
+                            </StackPanel>
+
+                            <!-- FORMAT -->
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="FORMAT" Classes="propSection" />
+
+                                <ComboBox IsVisible="{Binding ShowDateFormat}"
+                                          ItemsSource="{x:Static doc:DateTimeElement.DateFormatPresets}"
+                                          Text="{Binding DateFormat, Mode=TwoWay}"
+                                          IsEditable="True" HorizontalAlignment="Stretch"
+                                          PlaceholderText="Date format, e.g. dd-MM-yyyy"
+                                          ToolTip.Tip="dd = day · MM = month · MMM = Jan · yyyy = year. Pick a preset or type your own." />
+
+                                <ComboBox IsVisible="{Binding ShowTimeFormat}"
+                                          ItemsSource="{x:Static doc:DateTimeElement.TimeFormatPresets}"
+                                          Text="{Binding TimeFormat, Mode=TwoWay}"
+                                          IsEditable="True" HorizontalAlignment="Stretch"
+                                          PlaceholderText="Time format, e.g. HH:mm"
+                                          ToolTip.Tip="HH = 24-hour · hh = 12-hour · mm = minutes · ss = seconds · tt = AM/PM" />
+                            </StackPanel>
+
+                            <!-- ADD TO DATE (expiry) -->
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="ADD TO DATE" Classes="propSection"
+                                           ToolTip.Tip="For expiry / valid-until dates, e.g. 1 year after the print date" />
+                                <Grid ColumnDefinitions="*,6,*,6,*">
+                                    <NumericUpDown Grid.Column="0" Classes="prop" ShowButtonSpinner="False"
+                                                   Value="{Binding OffsetYears, Mode=TwoWay, Converter={x:Static conv:IntToDecimalConverter.Instance}}"
+                                                   Minimum="-100" Maximum="100" Increment="1" FormatString="0">
+                                        <NumericUpDown.InnerRightContent>
+                                            <TextBlock Text="yrs" Classes="propUnit" />
+                                        </NumericUpDown.InnerRightContent>
+                                    </NumericUpDown>
+                                    <NumericUpDown Grid.Column="2" Classes="prop" ShowButtonSpinner="False"
+                                                   Value="{Binding OffsetMonths, Mode=TwoWay, Converter={x:Static conv:IntToDecimalConverter.Instance}}"
+                                                   Minimum="-1200" Maximum="1200" Increment="1" FormatString="0">
+                                        <NumericUpDown.InnerRightContent>
+                                            <TextBlock Text="mo" Classes="propUnit" />
+                                        </NumericUpDown.InnerRightContent>
+                                    </NumericUpDown>
+                                    <NumericUpDown Grid.Column="4" Classes="prop" ShowButtonSpinner="False"
+                                                  Value="{Binding OffsetDays, Mode=TwoWay, Converter={x:Static conv:IntToDecimalConverter.Instance}}"
+                                                   Minimum="-36500" Maximum="36500" Increment="1" FormatString="0">
+                                        <NumericUpDown.InnerRightContent>
+                                            <TextBlock Text="days" Classes="propUnit" />
+                                        </NumericUpDown.InnerRightContent>
+                                    </NumericUpDown>
+                                </Grid>
+                            </StackPanel>
+
+                            <!-- PREFIX & SUFFIX -->
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="PREFIX &amp; SUFFIX" Classes="propSection" />
+                                <Grid ColumnDefinitions="*,8,*">
+                                    <TextBox Grid.Column="0" Text="{Binding Prefix, Mode=TwoWay}"
+                                             Watermark="e.g. Valid until: " />
+                                    <TextBox Grid.Column="2" Text="{Binding Suffix, Mode=TwoWay}"
+                                             Watermark="Suffix" />
+                                </Grid>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- ======================= STYLE TAB ======================= -->
+                <TabItem Header="Style">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="14" Margin="0,8,0,20">
+
+                            <!-- FONT -->
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="FONT" Classes="propSection" />
+
+                                <ComboBox ItemsSource="{x:Static services:SystemFontCatalog.FontFamilyNamesWithRecentFirst}"
+                                          Text="{Binding FontFamily, Mode=TwoWay}"
+                                          IsEditable="True" IsTextSearchEnabled="True"
+                                          HorizontalAlignment="Stretch">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}"
+                                                       FontFamily="{Binding Converter={x:Static conv:StringToFontFamilyConverter.Instance}}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+
+                                <Grid ColumnDefinitions="*,8,*">
+                                    <NumericUpDown Grid.Column="0" Classes="prop" ShowButtonSpinner="False"
+                                                   Value="{Binding FontSize, Mode=TwoWay}"
+                                                   Minimum="4" Maximum="200" Increment="1">
+                                        <NumericUpDown.InnerRightContent>
+                                            <TextBlock Text="pt" Classes="propUnit" />
+                                        </NumericUpDown.InnerRightContent>
+                                    </NumericUpDown>
+                                    <controls:ColorPickerField Grid.Column="2"
+                                                               ColorHex="{Binding ColorHex, Mode=TwoWay}" />
+                                </Grid>
+
+                                <Border Classes="segment" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Bold"
+                                                      IsChecked="{Binding Bold, Mode=TwoWay}">
+                                            <mi:MaterialIcon Kind="FormatBold" Width="16" Height="16" />
+                                        </ToggleButton>
+                                        <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Italic"
+                                                      IsChecked="{Binding Italic, Mode=TwoWay}">
+                                            <mi:MaterialIcon Kind="FormatItalic" Width="16" Height="16" />
+                                        </ToggleButton>
+                                        <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Underline"
+                                                      IsChecked="{Binding Underline, Mode=TwoWay}">
+                                            <mi:MaterialIcon Kind="FormatUnderline" Width="16" Height="16" />
+                                        </ToggleButton>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- ALIGNMENT (one row: horizontal | vertical) -->
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="ALIGNMENT" Classes="propSection" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Border Classes="segment">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Align left"
+                                                          IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Left}">
+                                                <mi:MaterialIcon Kind="FormatAlignLeft" Width="16" Height="16" />
+                                            </ToggleButton>
+                                            <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Align center"
+                                                          IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Center}">
+                                                <mi:MaterialIcon Kind="FormatAlignCenter" Width="16" Height="16" />
+                                            </ToggleButton>
+                                            <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Align right"
+                                                          IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Right}">
+                                                <mi:MaterialIcon Kind="FormatAlignRight" Width="16" Height="16" />
+                                            </ToggleButton>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Classes="segment">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Align top"
+                                                          IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Top}">
+                                                <mi:MaterialIcon Kind="FormatVerticalAlignTop" Width="16" Height="16" />
+                                            </ToggleButton>
+                                            <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Align middle"
+                                                          IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Middle}">
+                                                <mi:MaterialIcon Kind="FormatVerticalAlignCenter" Width="16" Height="16" />
+                                            </ToggleButton>
+                                            <ToggleButton Classes="toolbtn compact" ToolTip.Tip="Align bottom"
+                                                          IsChecked="{Binding VerticalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Bottom}">
+                                                <mi:MaterialIcon Kind="FormatVerticalAlignBottom" Width="16" Height="16" />
+                                            </ToggleButton>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+            </TabControl>
+        </DataTemplate>
+
+		<!--<DataTemplate DataType="doc:DateTimeElement">
 			<StackPanel Spacing="10">
 
 				<TextBlock Text="Date / Time" Classes="caption" />
 
-				<!-- Format -->
+				--><!-- Format --><!--
 				<StackPanel Spacing="4">
 					<TextBlock Text="Format" Classes="caption" />
 
@@ -756,7 +935,7 @@
 					</StackPanel>
 				</StackPanel>
 
-				<!-- Date format: only shown when DisplayFormat is Date or DateTime -->
+				--><!-- Date format: only shown when DisplayFormat is Date or DateTime --><!--
 				<StackPanel Spacing="4" IsVisible="{Binding ShowDateFormat}">
 					<TextBlock Text="Date format" Classes="caption" />
 
@@ -765,7 +944,7 @@
 						Watermark="dd-MM-yyyy" />
 				</StackPanel>
 
-				<!-- Time format: only shown when DisplayFormat is Time or DateTime -->
+				--><!-- Time format: only shown when DisplayFormat is Time or DateTime --><!--
 				<StackPanel Spacing="4" IsVisible="{Binding ShowTimeFormat}">
 					<TextBlock Text="Time format" Classes="caption" />
 
@@ -774,7 +953,7 @@
 						Watermark="HH:mm:ss" />
 				</StackPanel>
 
-				<!-- Font size + Color -->
+				--><!-- Font size + Color --><!--
 				<Grid ColumnDefinitions="*,*">
 
 					<StackPanel
@@ -806,7 +985,7 @@
 
 				</Grid>
 
-				<!-- Font style -->
+				--><!-- Font style --><!--
 				<StackPanel
 					Orientation="Horizontal"
 					Spacing="12">
@@ -825,7 +1004,7 @@
 
 				</StackPanel>
 
-				<!-- Horizontal alignment -->
+				--><!-- Horizontal alignment --><!--
 				<TextBlock
 					Text="Text alignment"
 					Classes="caption"
@@ -840,7 +1019,7 @@
 								  IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Right}" />
 				</StackPanel>
 
-				<!-- Vertical alignment -->
+				--><!-- Vertical alignment --><!--
 				<TextBlock
 					Text="Vertical alignment"
 					Classes="caption"
@@ -877,149 +1056,7 @@
 				</StackPanel>
 
 			</StackPanel>
-		</DataTemplate>
-
-		<DataTemplate DataType="doc:DateTimeElement">
-			<StackPanel Spacing="10">
-
-				<TextBlock Text="Date / Time" Classes="caption" />
-
-				<!-- Format -->
-				<StackPanel Spacing="4">
-					<TextBlock Text="Format" Classes="caption" />
-
-					<StackPanel Orientation="Horizontal" Spacing="4">
-						<ToggleButton Classes="toolbtn-wide" Content="Date + Time"
-									  IsChecked="{Binding DisplayFormat, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=DateTime}" />
-						<ToggleButton Classes="toolbtn-wide" Content="Date"
-									  IsChecked="{Binding DisplayFormat, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Date}" />
-						<ToggleButton Classes="toolbtn-wide" Content="Time"
-									  IsChecked="{Binding DisplayFormat, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Time}" />
-					</StackPanel>
-				</StackPanel>
-
-				<!-- Date format: only shown when DisplayFormat is Date or DateTime -->
-				<StackPanel Spacing="4" IsVisible="{Binding ShowDateFormat}">
-					<TextBlock Text="Date format" Classes="caption" />
-
-					<TextBox
-						Text="{Binding DateFormat, Mode=TwoWay}"
-						Watermark="dd-MM-yyyy" />
-				</StackPanel>
-
-				<!-- Time format: only shown when DisplayFormat is Time or DateTime -->
-				<StackPanel Spacing="4" IsVisible="{Binding ShowTimeFormat}">
-					<TextBlock Text="Time format" Classes="caption" />
-
-					<TextBox
-						Text="{Binding TimeFormat, Mode=TwoWay}"
-						Watermark="HH:mm:ss" />
-				</StackPanel>
-
-				<!-- Font size + Color -->
-				<Grid ColumnDefinitions="*,*">
-
-					<StackPanel
-						Grid.Column="0"
-						Spacing="4"
-						Margin="0,0,4,0">
-
-						<TextBlock Text="Font size" Classes="caption" />
-
-						<NumericUpDown
-							Value="{Binding FontSize, Mode=TwoWay}"
-							Minimum="4"
-							Maximum="200"
-							Increment="1" />
-
-					</StackPanel>
-
-					<StackPanel
-						Grid.Column="1"
-						Spacing="4"
-						Margin="4,0,0,0">
-
-						<TextBlock Text="Color" Classes="caption" />
-
-						<controls:ColorPickerField
-							ColorHex="{Binding ColorHex, Mode=TwoWay}" />
-
-					</StackPanel>
-
-				</Grid>
-
-				<!-- Font style -->
-				<StackPanel
-					Orientation="Horizontal"
-					Spacing="12">
-
-					<CheckBox
-						Content="Bold"
-						IsChecked="{Binding Bold, Mode=TwoWay}" />
-
-					<CheckBox
-						Content="Italic"
-						IsChecked="{Binding Italic, Mode=TwoWay}" />
-
-					<CheckBox
-						Content="Underline"
-						IsChecked="{Binding Underline, Mode=TwoWay}" />
-
-				</StackPanel>
-
-				<!-- Horizontal alignment -->
-				<TextBlock
-					Text="Text alignment"
-					Classes="caption"
-					Margin="0,4,0,0" />
-
-				<StackPanel Orientation="Horizontal" Spacing="4">
-					<ToggleButton Classes="toolbtn" Content="&#8676;" ToolTip.Tip="Text align left"
-								  IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Left}" />
-					<ToggleButton Classes="toolbtn" Content="&#8596;" ToolTip.Tip="Text align center"
-								  IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Center}" />
-					<ToggleButton Classes="toolbtn" Content="&#8677;" ToolTip.Tip="Text align right"
-								  IsChecked="{Binding HorizontalAlignment, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Right}" />
-				</StackPanel>
-
-				<!-- Vertical alignment -->
-				<TextBlock
-					Text="Vertical alignment"
-					Classes="caption"
-					Margin="0,4,0,0" />
-
-				<StackPanel
-					Orientation="Horizontal"
-					Spacing="4">
-
-					<ToggleButton
-						Classes="toolbtn"
-						Content="&#8613;"
-						ToolTip.Tip="Vertical align top"
-						IsChecked="{Binding VerticalAlignment, Mode=TwoWay,
-                    Converter={x:Static conv:EnumToBoolConverter.Instance},
-                    ConverterParameter=Top}" />
-
-					<ToggleButton
-						Classes="toolbtn"
-						Content="&#8597;"
-						ToolTip.Tip="Vertical align middle"
-						IsChecked="{Binding VerticalAlignment, Mode=TwoWay,
-                    Converter={x:Static conv:EnumToBoolConverter.Instance},
-                    ConverterParameter=Middle}" />
-
-					<ToggleButton
-						Classes="toolbtn"
-						Content="&#8615;"
-						ToolTip.Tip="Vertical align bottom"
-						IsChecked="{Binding VerticalAlignment, Mode=TwoWay,
-                    Converter={x:Static conv:EnumToBoolConverter.Instance},
-                    ConverterParameter=Bottom}" />
-
-				</StackPanel>
-
-			</StackPanel>
-		</DataTemplate>
+		</DataTemplate>-->
 
 		<DataTemplate DataType="doc:ShapeElement">
 			<StackPanel Spacing="10">
@@ -1216,92 +1253,154 @@
                     <StackPanel Spacing="14" Margin="0,12,0,4">
 
                         <!-- Position and size -->
-                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="10">
-                            <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
-                                <TextBlock Text="X (mm)" Classes="caption" />
-                                <NumericUpDown Value="{Binding X, Mode=TwoWay}" Increment="0.5" FormatString="0.##" />
-                            </StackPanel>
-                            <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
-                                <TextBlock Text="Y (mm)" Classes="caption" />
-                                <NumericUpDown Value="{Binding Y, Mode=TwoWay}" Increment="0.5" FormatString="0.##" />
-                            </StackPanel>
-                            <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4">
-                                <TextBlock Text="Width (mm)" Classes="caption" />
-                                <NumericUpDown Value="{Binding Width, Mode=TwoWay}" Increment="0.5" Minimum="1" FormatString="0.##" />
-                            </StackPanel>
-                            <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4">
-                                <TextBlock Text="Height (mm)" Classes="caption" />
-                                <NumericUpDown Value="{Binding Height, Mode=TwoWay}" Increment="0.5" Minimum="1" FormatString="0.##" />
-                            </StackPanel>
+                        <TextBlock Text="POSITION &amp; SIZE" Classes="propSection" />
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+                            <NumericUpDown Grid.Row="0" Grid.Column="0" Classes="prop" Value="{Binding X, Mode=TwoWay}" Increment="0.5" FormatString="0.##"
+                                           ToolTip.Tip="X position (mm) from the card's left edge" AutomationProperties.Name="X position in millimetres">
+                                <NumericUpDown.InnerLeftContent>
+                                    <TextBlock Text="X" Classes="propPrefix" />
+                                </NumericUpDown.InnerLeftContent>
+                                <NumericUpDown.InnerRightContent>
+                                    <TextBlock Text="mm" Classes="propUnit" />
+                                </NumericUpDown.InnerRightContent>
+                            </NumericUpDown>
+                            <NumericUpDown Grid.Row="0" Grid.Column="1" Classes="prop" Value="{Binding Y, Mode=TwoWay}" Increment="0.5" FormatString="0.##"
+                                           ToolTip.Tip="Y position (mm) from the card's top edge" AutomationProperties.Name="Y position in millimetres">
+                                <NumericUpDown.InnerLeftContent>
+                                    <TextBlock Text="Y" Classes="propPrefix" />
+                                </NumericUpDown.InnerLeftContent>
+                                <NumericUpDown.InnerRightContent>
+                                    <TextBlock Text="mm" Classes="propUnit" />
+                                </NumericUpDown.InnerRightContent>
+                            </NumericUpDown>
+                            <NumericUpDown Grid.Row="1" Grid.Column="0" Classes="prop" Value="{Binding Width, Mode=TwoWay}" Increment="0.5" Minimum="1" FormatString="0.##"
+                                           ToolTip.Tip="Width (mm)" AutomationProperties.Name="Width in millimetres">
+                                <NumericUpDown.InnerLeftContent>
+                                    <TextBlock Text="W" Classes="propPrefix" />
+                                </NumericUpDown.InnerLeftContent>
+                                <NumericUpDown.InnerRightContent>
+                                    <TextBlock Text="mm" Classes="propUnit" />
+                                </NumericUpDown.InnerRightContent>
+                            </NumericUpDown>
+                            <NumericUpDown Grid.Row="1" Grid.Column="1" Classes="prop" Value="{Binding Height, Mode=TwoWay}" Increment="0.5" Minimum="1" FormatString="0.##"
+                                           ToolTip.Tip="Height (mm)" AutomationProperties.Name="Height in millimetres">
+                                <NumericUpDown.InnerLeftContent>
+                                    <TextBlock Text="H" Classes="propPrefix" />
+                                </NumericUpDown.InnerLeftContent>
+                                <NumericUpDown.InnerRightContent>
+                                    <TextBlock Text="mm" Classes="propUnit" />
+                                </NumericUpDown.InnerRightContent>
+                            </NumericUpDown>
                         </Grid>
 
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="Rotation (deg)" Classes="caption" />
-                            <NumericUpDown Value="{Binding Rotation, Mode=TwoWay}" Increment="1" FormatString="0.##"
-                                           ToolTip.Tip="Type a value, or drag the round handle above the element on the canvas" />
-                        </StackPanel>
-
-                        <StackPanel Spacing="4">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="Opacity" Classes="caption" />
-                                <TextBlock Grid.Column="1" Classes="caption"
-                                           Text="{Binding Opacity, StringFormat={}{0:P0}}" />
-                            </Grid>
-                            <Slider Minimum="0" Maximum="1" Value="{Binding Opacity, Mode=TwoWay}" />
-                        </StackPanel>
+                        <TextBlock Text="ROTATION &amp; OPACITY" Classes="propSection" Margin="0,4,0,0" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <NumericUpDown Grid.Column="0" Classes="prop" Value="{Binding Rotation, Mode=TwoWay}" Increment="1" FormatString="0.##"
+                                           ToolTip.Tip="Type a value, or drag the small round handle above the selected element on the canvas" AutomationProperties.Name="Rotation in degrees">
+                                <NumericUpDown.InnerLeftContent>
+                                    <mi:MaterialIcon Kind="RotateRight" Width="15" Height="15" Margin="10,0,2,0"
+                                                     Foreground="{DynamicResource BrushTextSecondary}" />
+                                </NumericUpDown.InnerLeftContent>
+                                <NumericUpDown.InnerRightContent>
+                                    <TextBlock Text="°" Classes="propUnit" />
+                                </NumericUpDown.InnerRightContent>
+                            </NumericUpDown>
+                            <Border Grid.Column="1" Height="32" CornerRadius="8" BorderThickness="1"
+                                    BorderBrush="{DynamicResource BrushBorder}" Padding="10,0,10,0"
+                                    ToolTip.Tip="Opacity">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+                                    <mi:MaterialIcon Kind="Opacity" Width="15" Height="15" VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource BrushTextSecondary}" />
+                                    <Slider Grid.Column="1" Minimum="0" Maximum="1" VerticalAlignment="Center" Margin="0,-6"
+                                            Value="{Binding Opacity, Mode=TwoWay}" AutomationProperties.Name="Opacity" />
+                                    <TextBlock Grid.Column="2" Classes="caption" VerticalAlignment="Center" MinWidth="32" TextAlignment="Right"
+                                               Text="{Binding Opacity, StringFormat={}{0:P0}}" />
+                                </Grid>
+                            </Border>
+                        </Grid>
 
                         <Border Height="1" Background="{DynamicResource BrushBorder}" />
 
-                        <!-- Align to card -->
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="Align to card" Classes="caption" />
-                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                <Button Classes="ghost toolbtn" ToolTip.Tip="Align left" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignLeftCommand}">
+                        <!-- ALIGN TO CARD: lights up for the edge/centre the image sits on -->
+                        <TextBlock Text="ALIGN TO CARD" Classes="propSection" />
+                        <Border Classes="segment" HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal" Spacing="2">
+                                <ToggleButton Classes="toolbtn" ToolTip.Tip="Align to the card's left edge" AutomationProperties.Name="Align left"
+                                              IsChecked="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.IsAlignedLeftToCard, Mode=OneWay}"
+                                              Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignLeftCommand}">
                                     <PathIcon Data="{x:Static icons:DesignerIcons.AlignLeft}" Width="15" Height="15" />
-                                </Button>
-                                <Button Classes="ghost toolbtn" ToolTip.Tip="Align center (horizontal)" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignCenterHorizontalCommand}">
+                                </ToggleButton>
+                                <ToggleButton Classes="toolbtn" ToolTip.Tip="Centre horizontally on the card" AutomationProperties.Name="Centre horizontally"
+                                              IsChecked="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.IsAlignedCenterToCard, Mode=OneWay}"
+                                              Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignCenterHorizontalCommand}">
                                     <PathIcon Data="{x:Static icons:DesignerIcons.AlignCenterHorizontal}" Width="15" Height="15" />
-                                </Button>
-                                <Button Classes="ghost toolbtn" ToolTip.Tip="Align right" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignRightCommand}">
+                                </ToggleButton>
+                                <ToggleButton Classes="toolbtn" ToolTip.Tip="Align to the card's right edge" AutomationProperties.Name="Align right"
+                                              IsChecked="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.IsAlignedRightToCard, Mode=OneWay}"
+                                              Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignRightCommand}">
                                     <PathIcon Data="{x:Static icons:DesignerIcons.AlignRight}" Width="15" Height="15" />
-                                </Button>
-                                <Button Classes="ghost toolbtn" ToolTip.Tip="Align top" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignTopCommand}">
+                                </ToggleButton>
+                                <Border Classes="tbsep" Height="18" Margin="3,0" />
+                                <ToggleButton Classes="toolbtn" ToolTip.Tip="Align to the card's top edge" AutomationProperties.Name="Align top"
+                                              IsChecked="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.IsAlignedTopToCard, Mode=OneWay}"
+                                              Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignTopCommand}">
                                     <PathIcon Data="{x:Static icons:DesignerIcons.AlignTop}" Width="15" Height="15" />
-                                </Button>
-                                <Button Classes="ghost toolbtn" ToolTip.Tip="Align middle (vertical)" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignMiddleVerticalCommand}">
+                                </ToggleButton>
+                                <ToggleButton Classes="toolbtn" ToolTip.Tip="Centre vertically on the card" AutomationProperties.Name="Centre vertically"
+                                              IsChecked="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.IsAlignedMiddleToCard, Mode=OneWay}"
+                                              Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignMiddleVerticalCommand}">
                                     <PathIcon Data="{x:Static icons:DesignerIcons.AlignMiddleVertical}" Width="15" Height="15" />
-                                </Button>
-                                <Button Classes="ghost toolbtn" ToolTip.Tip="Align bottom" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignBottomCommand}">
+                                </ToggleButton>
+                                <ToggleButton Classes="toolbtn" ToolTip.Tip="Align to the card's bottom edge" AutomationProperties.Name="Align bottom"
+                                              IsChecked="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.IsAlignedBottomToCard, Mode=OneWay}"
+                                              Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignBottomCommand}">
                                     <PathIcon Data="{x:Static icons:DesignerIcons.AlignBottom}" Width="15" Height="15" />
-                                </Button>
+                                </ToggleButton>
                             </StackPanel>
-                        </StackPanel>
+                        </Border>
 
-                        <!-- Layer order -->
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="Order" Classes="caption" />
-                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                <Button Classes="ghost" Content="Forward" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BringForwardCommand}" />
-                                <Button Classes="ghost" Content="Backward" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SendBackwardCommand}" />
-                                <Button Classes="ghost toolbtn" ToolTip.Tip="Bring to front" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BringToFrontCommand}">
-                                    <PathIcon Data="{x:Static icons:DesignerIcons.BringToFront}" Width="15" Height="15" />
-                                </Button>
-                                <Button Classes="ghost toolbtn" ToolTip.Tip="Send to back" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SendToBackCommand}">
-                                    <PathIcon Data="{x:Static icons:DesignerIcons.SendToBack}" Width="15" Height="15" />
-                                </Button>
+                        <!-- LAYER ORDER + MIRROR side by side -->
+                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="12" HorizontalAlignment="Left">
+                            <StackPanel Grid.Column="0" Spacing="6">
+                                <TextBlock Text="LAYER ORDER" Classes="propSection" />
+                                <Border Classes="segment">
+                                    <StackPanel Orientation="Horizontal" Spacing="2">
+                                        <Button Classes="ghost toolbtn" ToolTip.Tip="Bring to front" AutomationProperties.Name="Bring to front"
+                                                Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BringToFrontCommand}">
+                                            <mi:MaterialIcon Kind="ArrangeBringToFront" Width="17" Height="17" />
+                                        </Button>
+                                        <Button Classes="ghost toolbtn" ToolTip.Tip="Bring forward" AutomationProperties.Name="Bring forward"
+                                                Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BringForwardCommand}">
+                                            <mi:MaterialIcon Kind="ArrangeBringForward" Width="17" Height="17" />
+                                        </Button>
+                                        <Button Classes="ghost toolbtn" ToolTip.Tip="Send backward" AutomationProperties.Name="Send backward"
+                                                Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SendBackwardCommand}">
+                                            <mi:MaterialIcon Kind="ArrangeSendBackward" Width="17" Height="17" />
+                                        </Button>
+                                        <Button Classes="ghost toolbtn" ToolTip.Tip="Send to back" AutomationProperties.Name="Send to back"
+                                                Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SendToBackCommand}">
+                                            <mi:MaterialIcon Kind="ArrangeSendToBack" Width="17" Height="17" />
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
-                        </StackPanel>
 
-                        <!-- Mirror -->
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="Mirror" Classes="caption" />
-                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                <ToggleButton Classes="toolbtn-wide" Content="Flip H" ToolTip.Tip="Flip horizontally"
-                                              IsChecked="{Binding FlipHorizontal, Mode=TwoWay}" />
-                                <ToggleButton Classes="toolbtn-wide" Content="Flip V" ToolTip.Tip="Flip vertically"
-                                              IsChecked="{Binding FlipVertical, Mode=TwoWay}" />
+                            <StackPanel Grid.Column="1" Spacing="6">
+                                <TextBlock Text="MIRROR" Classes="propSection" />
+                                <Border Classes="segment">
+                                    <StackPanel Orientation="Horizontal" Spacing="2">
+                                        <ToggleButton Classes="toolbtn" ToolTip.Tip="Flip horizontally (mirror left-right)" AutomationProperties.Name="Flip horizontally"
+                                                      IsChecked="{Binding FlipHorizontal, Mode=TwoWay}">
+                                            <mi:MaterialIcon Kind="FlipHorizontal" Width="17" Height="17" />
+                                        </ToggleButton>
+                                        <ToggleButton Classes="toolbtn" ToolTip.Tip="Flip vertically (upside down)" AutomationProperties.Name="Flip vertically"
+                                                      IsChecked="{Binding FlipVertical, Mode=TwoWay}">
+                                            <mi:MaterialIcon Kind="FlipVertical" Width="17" Height="17" />
+                                        </ToggleButton>
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
-                        </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </TabItem>
 
@@ -1486,10 +1585,55 @@
 
 					<TabItem Header="Barcode">
 						<StackPanel Spacing="10" Margin="4,10,4,4">
-							<StackPanel Spacing="4">
+							<!--<StackPanel Spacing="4">
 								<TextBlock Text="Value" Classes="caption" />
 								<TextBox Text="{Binding Value, Mode=TwoWay}" Watermark="e.g. 0000000000 or {{EmployeeId}}" />
-							</StackPanel>
+							</StackPanel>-->
+                            <!-- VALUE SOURCE: fixed value or a database field -->
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="SOURCE" Classes="propSection" />
+                                <Border Classes="segment" HorizontalAlignment="Stretch">
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="2">
+                                        <ToggleButton Grid.Column="0" Classes="toolbtn-wide" HorizontalAlignment="Stretch" Content="Fixed value"
+													  ToolTip.Tip="Encode the same value on every card"
+													  IsChecked="{Binding SourceType, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Fixed}" />
+                                        <ToggleButton Grid.Column="1" Classes="toolbtn-wide" HorizontalAlignment="Stretch" Content="Database field"
+													  ToolTip.Tip="Encode each record's own value, e.g. Employee ID"
+													  IsChecked="{Binding SourceType, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Database}" />
+                                    </Grid>
+                                </Border>
+
+                                <!-- Fixed -->
+                                <TextBox Text="{Binding Value, Mode=TwoWay}" Height="32" CornerRadius="8"
+										 Watermark="Value to encode, e.g. 0000000000"
+										 AutomationProperties.Name="Barcode value"
+										 IsVisible="{Binding SourceType, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Fixed}" />
+
+                                <!-- Database -->
+                                <StackPanel Spacing="6"
+											IsVisible="{Binding SourceType, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Database}">
+                                    <ComboBox ItemsSource="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.DatabaseColumns}"
+											  Text="{Binding DatabaseColumn, Mode=TwoWay}"
+											  IsEditable="True" HorizontalAlignment="Stretch" Height="32" CornerRadius="8"
+											  PlaceholderText="Choose a field, e.g. EmployeeID"
+											  ToolTip.Tip="Fields of the database connected to this design"
+											  AutomationProperties.Name="Database field" />
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                        <TextBox Grid.Column="0" Text="{Binding Prefix, Mode=TwoWay}" Height="32" CornerRadius="8" Watermark="Prefix, e.g. EMP-" />
+                                        <TextBox Grid.Column="1" Text="{Binding Suffix, Mode=TwoWay}" Height="32" CornerRadius="8" Watermark="Suffix" />
+                                    </Grid>
+                                    <Expander Header="Combine several fields (advanced)" HorizontalAlignment="Stretch">
+                                        <StackPanel Spacing="4">
+                                            <TextBox Text="{Binding DataBindingExpression, Mode=TwoWay}" Height="32" CornerRadius="8"
+													 Watermark="e.g. {{EmployeeID}}-{{Department}}" />
+                                            <TextBlock Text="When filled, this replaces the field above. Use {{FieldName}} for each field."
+													   Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Expander>
+                                    <TextBlock Text="The canvas and Preview show the selected record's value."
+											   Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </StackPanel>
 							<StackPanel Spacing="4">
 								<TextBlock Text="Symbology" Classes="caption" />
 								<ComboBox ItemsSource="{x:Static conv:BarcodeSymbologyOptions.All}" SelectedItem="{Binding Symbology, Mode=TwoWay}"
@@ -1564,7 +1708,7 @@
 						</StackPanel>
 					</TabItem>
 
-					<TabItem Header="Parameters">
+					<!--<TabItem Header="Parameters">
 						<StackPanel Spacing="10" Margin="4,10,4,4">
 							<StackPanel Spacing="4">
 								<TextBlock Text="Data binding" Classes="caption" />
@@ -1573,7 +1717,7 @@
 								<TextBox Text="{Binding DataBindingExpression, Mode=TwoWay}" Watermark="Fixed value (no binding)" />
 							</StackPanel>
 						</StackPanel>
-					</TabItem>
+					</TabItem>-->
 
 				</TabControl>
 			</StackPanel>
@@ -1592,135 +1736,260 @@
 			<StackPanel Spacing="10">
 				<TextBlock Text="QR Code" Classes="caption" />
 
-				<TabControl>
+                <TabControl Classes="propTabs">
 
-					<TabItem Header="Barcode">
-						<StackPanel Spacing="10" Margin="4,10,4,4">
-							<StackPanel Spacing="4">
-								<TextBlock Text="Value" Classes="caption" />
-								<TextBox Text="{Binding Value, Mode=TwoWay}" AcceptsReturn="True" MinHeight="50" Watermark="e.g. https://... or {{EmployeeId}}" />
-							</StackPanel>
-							<StackPanel Spacing="4">
-								<TextBlock Text="Code Page" Classes="caption" />
-								<ComboBox ItemsSource="{x:Static conv:QrCharacterSetOptions.All}" SelectedItem="{Binding CharacterSet, Mode=TwoWay, Converter={x:Static conv:QrCharacterSetOptions.DisplayConverter}}"
-                                          HorizontalAlignment="Stretch" />
-							</StackPanel>
-							<StackPanel Spacing="4">
-								<TextBlock Text="QR Code Format" Classes="caption" />
-								<StackPanel Orientation="Horizontal" Spacing="4">
-									<ToggleButton Classes="toolbtn-wide" Content="Standard"
-                                                  IsChecked="{Binding Format, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Standard}" />
-									<ToggleButton Classes="toolbtn-wide" Content="GS1" ToolTip.Tip="GS1 Application Identifier payload (supply-chain/product data)"
-                                                  IsChecked="{Binding Format, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Gs1}" />
-								</StackPanel>
-							</StackPanel>
-						</StackPanel>
-					</TabItem>
+                    <!-- ===================== CONTENT: what the code holds ===================== -->
+                    <TabItem Header="Content">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Spacing="10" Margin="0,10,0,16">
 
-					<TabItem Header="Style">
-						<StackPanel Spacing="10" Margin="4,10,4,4">
-							<Grid ColumnDefinitions="*,*">
-								<StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
-									<TextBlock Text="Module color" Classes="caption" />
-									<controls:ColorPickerField ColorHex="{Binding ForegroundColorHex, Mode=TwoWay}" />
-								</StackPanel>
-								<StackPanel Grid.Column="1" Spacing="4" Margin="4,0,0,0">
-									<TextBlock Text="Background" Classes="caption" />
-									<controls:ColorPickerField ColorHex="{Binding BackgroundColorHex, Mode=TwoWay}" />
-								</StackPanel>
-							</Grid>
+                                <!--<TextBlock Text="VALUE" Classes="propSection" />
+                                <TextBox Text="{Binding Value, Mode=TwoWay}" AcceptsReturn="True" TextWrapping="Wrap"
+                                         MinHeight="56" MaxHeight="120" CornerRadius="8"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         Watermark="e.g. https://example.com or {{EmployeeId}}"
+                                         AutomationProperties.Name="QR code value" />
+                                <TextBlock Classes="caption" TextWrapping="Wrap" Foreground="{DynamicResource BrushTextSecondary}"
+                                           Text="Use {{Column}} to encode each card's own value, e.g. {{EmployeeId}}." />
 
-							<StackPanel Spacing="4">
-								<TextBlock Text="EC Level" Classes="caption" ToolTip.Tip="How much of the code can be damaged/obscured and still scan -- higher survives more damage but needs more modules for the same data" />
-								<StackPanel Orientation="Horizontal" Spacing="4">
-									<ToggleButton Classes="toolbtn-wide" Content="Low" IsChecked="{Binding ErrorCorrection, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Low}" />
-									<ToggleButton Classes="toolbtn-wide" Content="Med" IsChecked="{Binding ErrorCorrection, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Medium}" />
-									<ToggleButton Classes="toolbtn-wide" Content="Qrt" IsChecked="{Binding ErrorCorrection, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Quartile}" />
-									<ToggleButton Classes="toolbtn-wide" Content="High" IsChecked="{Binding ErrorCorrection, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=High}" />
-								</StackPanel>
-							</StackPanel>
+                                --><!-- Was the separate Parameters tab --><!--
+                                <TextBlock Text="DATA BINDING (OPTIONAL)" Classes="propSection" Margin="0,6,0,0" />
+                                <TextBox Text="{Binding DataBindingExpression, Mode=TwoWay}" Height="32" CornerRadius="8"
+                                         Watermark="Leave empty to use Value"
+                                         AutomationProperties.Name="Data binding">
+                                    <TextBox.InnerLeftContent>
+                                        <mi:MaterialIcon Kind="CodeBraces" Width="15" Height="15" Margin="10,0,4,0"
+                                                         Foreground="{DynamicResource BrushTextSecondary}" />
+                                    </TextBox.InnerLeftContent>
+                                </TextBox>
+                                <TextBlock Classes="caption" TextWrapping="Wrap" Foreground="{DynamicResource BrushTextSecondary}"
+                                           Text="When filled, this replaces Value, e.g. {{VisitorId}}." />-->
 
-							<StackPanel Spacing="4">
-								<StackPanel Orientation="Horizontal" Spacing="8">
-									<TextBlock Text="Mask" Classes="caption" VerticalAlignment="Center" />
-									<CheckBox Content="Standard (Auto)" IsChecked="{Binding IsMaskAuto, Mode=TwoWay}" />
-								</StackPanel>
-								<NumericUpDown Value="{Binding MaskValue, Mode=TwoWay}" Minimum="0" Maximum="7" Increment="1"
-                                               IsEnabled="{Binding IsMaskAuto, Converter={x:Static conv:BoolNegationConverter.Instance}}" />
-							</StackPanel>
+                                <!-- VALUE SOURCE: fixed value or a database field -->
+                                <TextBlock Text="SOURCE" Classes="propSection" />
+                                <Border Classes="segment" HorizontalAlignment="Stretch">
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="2">
+                                        <ToggleButton Grid.Column="0" Classes="toolbtn-wide" HorizontalAlignment="Stretch" Content="Fixed value"
+                                                      ToolTip.Tip="Encode the same value on every card, e.g. a website link"
+                                                      IsChecked="{Binding SourceType, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Fixed}" />
+                                        <ToggleButton Grid.Column="1" Classes="toolbtn-wide" HorizontalAlignment="Stretch" Content="Database field"
+                                                      ToolTip.Tip="Encode each record's own value, e.g. Employee ID or verify link"
+                                                      IsChecked="{Binding SourceType, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Database}" />
+                                    </Grid>
+                                </Border>
 
-							<StackPanel Spacing="4">
-								<StackPanel Orientation="Horizontal" Spacing="8">
-									<TextBlock Text="Size / Version" Classes="caption" VerticalAlignment="Center" />
-									<CheckBox Content="Auto" IsChecked="{Binding IsVersionAuto, Mode=TwoWay}" />
-								</StackPanel>
-								<NumericUpDown Value="{Binding VersionValue, Mode=TwoWay}" Minimum="1" Maximum="40" Increment="1"
-                                               IsEnabled="{Binding IsVersionAuto, Converter={x:Static conv:BoolNegationConverter.Instance}}"
-                                               ToolTip.Tip="QR version 1-40 -- higher = a bigger module grid, holding more data at the same EC Level" />
-							</StackPanel>
+                                <!-- Fixed -->
+                                <TextBox Text="{Binding Value, Mode=TwoWay}" AcceptsReturn="True" TextWrapping="Wrap"
+                                         MinHeight="56" MaxHeight="120" CornerRadius="8"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         Watermark="e.g. https://example.com"
+                                         AutomationProperties.Name="QR code value"
+                                         IsVisible="{Binding SourceType, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Fixed}" />
 
-							<StackPanel Spacing="4">
-								<TextBlock Text="Margin (modules)" Classes="caption" />
-								<NumericUpDown Value="{Binding MarginMm, Mode=TwoWay}" Minimum="0" Maximum="10" Increment="1" />
-							</StackPanel>
-						</StackPanel>
-					</TabItem>
+                                <!-- Database -->
+                                <StackPanel Spacing="6"
+                                            IsVisible="{Binding SourceType, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Database}">
+                                    <ComboBox ItemsSource="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.DatabaseColumns}"
+                                              Text="{Binding DatabaseColumn, Mode=TwoWay}"
+                                              IsEditable="True" HorizontalAlignment="Stretch" Height="32" CornerRadius="8"
+                                              PlaceholderText="Choose a field, e.g. EmployeeID"
+                                              ToolTip.Tip="Fields of the database connected to this design"
+                                              AutomationProperties.Name="Database field" />
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                        <TextBox Grid.Column="0" Text="{Binding Prefix, Mode=TwoWay}" Height="32" CornerRadius="8"
+                                                 Watermark="Prefix, e.g. https://site/id/" />
+                                        <TextBox Grid.Column="1" Text="{Binding Suffix, Mode=TwoWay}" Height="32" CornerRadius="8"
+                                                 Watermark="Suffix" />
+                                    </Grid>
+                                    <Expander Header="Combine several fields (advanced)" HorizontalAlignment="Stretch">
+                                        <StackPanel Spacing="4">
+                                            <TextBox Text="{Binding DataBindingExpression, Mode=TwoWay}" Height="32" CornerRadius="8"
+                                                     Watermark="e.g. {{EmployeeID}}|{{FullName}}">
+                                                <TextBox.InnerLeftContent>
+                                                    <mi:MaterialIcon Kind="CodeBraces" Width="15" Height="15" Margin="10,0,4,0"
+                                                                     Foreground="{DynamicResource BrushTextSecondary}" />
+                                                </TextBox.InnerLeftContent>
+                                            </TextBox>
+                                            <TextBlock Classes="caption" TextWrapping="Wrap" Foreground="{DynamicResource BrushTextSecondary}"
+                                                       Text="When filled, this replaces the field above. Use {{FieldName}} for each field." />
+                                        </StackPanel>
+                                    </Expander>
+                                    <TextBlock Classes="caption" TextWrapping="Wrap" Foreground="{DynamicResource BrushTextSecondary}"
+                                               Text="The canvas and Preview show the selected record's value." />
+                                </StackPanel>
 
-					<TabItem Header="Position">
-						<StackPanel Spacing="10" Margin="4,10,4,4">
-							<TextBlock Text="Position/size/rotation are above; this adds alignment and layer order."
-                                       Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
-							<StackPanel Spacing="4">
-								<TextBlock Text="Align to card" Classes="caption" />
-								<StackPanel Orientation="Horizontal" Spacing="4">
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Align left" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignLeftCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.AlignLeft}" Width="15" Height="15" />
-									</Button>
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Align center (horizontal)" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignCenterHorizontalCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.AlignCenterHorizontal}" Width="15" Height="15" />
-									</Button>
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Align right" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignRightCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.AlignRight}" Width="15" Height="15" />
-									</Button>
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Align top" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignTopCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.AlignTop}" Width="15" Height="15" />
-									</Button>
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Align middle (vertical)" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignMiddleVerticalCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.AlignMiddleVertical}" Width="15" Height="15" />
-									</Button>
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Align bottom" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignBottomCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.AlignBottom}" Width="15" Height="15" />
-									</Button>
-								</StackPanel>
-							</StackPanel>
-							<StackPanel Spacing="4">
-								<TextBlock Text="Order" Classes="caption" />
-								<StackPanel Orientation="Horizontal" Spacing="4">
-									<Button Classes="ghost" Content="Forward" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BringForwardCommand}" />
-									<Button Classes="ghost" Content="Backward" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SendBackwardCommand}" />
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Bring to front" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BringToFrontCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.BringToFront}" Width="15" Height="15" />
-									</Button>
-									<Button Classes="ghost toolbtn" ToolTip.Tip="Send to back" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SendToBackCommand}">
-										<PathIcon Data="{x:Static icons:DesignerIcons.SendToBack}" Width="15" Height="15" />
-									</Button>
-								</StackPanel>
-							</StackPanel>
-						</StackPanel>
-					</TabItem>
+                                
+                                <TextBlock Text="ENCODING" Classes="propSection" Margin="0,6,0,0" />
+                                <ComboBox ItemsSource="{x:Static conv:QrCharacterSetOptions.All}"
+                                          SelectedItem="{Binding CharacterSet, Mode=TwoWay, Converter={x:Static conv:QrCharacterSetOptions.DisplayConverter}}"
+                                          HorizontalAlignment="Stretch" Height="32" CornerRadius="8"
+                                          ToolTip.Tip="Character set (code page) used for the value"
+                                          AutomationProperties.Name="Code page" />
+                                <Border Classes="segment" HorizontalAlignment="Stretch">
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="2">
+                                        <ToggleButton Grid.Column="0" Classes="toolbtn-wide" HorizontalAlignment="Stretch" Content="Standard QR"
+                                                      ToolTip.Tip="A normal QR code"
+                                                      IsChecked="{Binding Format, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Standard}" />
+                                        <ToggleButton Grid.Column="1" Classes="toolbtn-wide" HorizontalAlignment="Stretch" Content="GS1"
+                                                      ToolTip.Tip="GS1 Application Identifier payload (supply-chain/product data)"
+                                                      IsChecked="{Binding Format, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Gs1}" />
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
 
-					<TabItem Header="Parameters">
-						<StackPanel Spacing="10" Margin="4,10,4,4">
-							<StackPanel Spacing="4">
-								<TextBlock Text="Data binding" Classes="caption" />
-								<TextBlock Text="Leave empty to encode Value itself (e.g. {{EmployeeId}} in the Value field above), or enter a merge field here to override it."
-                                           Classes="caption" Foreground="{DynamicResource BrushTextSecondary}" TextWrapping="Wrap" />
-								<TextBox Text="{Binding DataBindingExpression, Mode=TwoWay}" Watermark="Fixed value (no binding)" />
-							</StackPanel>
-						</StackPanel>
-					</TabItem>
+                    <!-- ===================== STYLE: how it looks and scans ===================== -->
+                    <TabItem Header="Style">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Spacing="10" Margin="0,10,0,16">
 
-				</TabControl>
+                                <TextBlock Text="COLOURS" Classes="propSection" />
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                    <StackPanel Grid.Column="0" Spacing="4">
+                                        <TextBlock Text="Code" Classes="caption" />
+                                        <controls:ColorPickerField ColorHex="{Binding ForegroundColorHex, Mode=TwoWay}" ToolTip.Tip="Colour of the QR modules" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="4">
+                                        <TextBlock Text="Background" Classes="caption" />
+                                        <controls:ColorPickerField ColorHex="{Binding BackgroundColorHex, Mode=TwoWay}" ToolTip.Tip="Background behind the code" />
+                                    </StackPanel>
+                                </Grid>
+                                <TextBlock Classes="caption" TextWrapping="Wrap" Foreground="{DynamicResource BrushTextSecondary}"
+                                           Text="Keep a dark code on a light background, or phones may not scan it." />
+
+                                <TextBlock Text="ERROR CORRECTION" Classes="propSection" Margin="0,6,0,0"
+                                           ToolTip.Tip="How much of the code can be damaged or covered and still scan. Higher survives more damage but makes a denser code." />
+                                <Border Classes="segment" HorizontalAlignment="Stretch">
+                                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="2">
+                                        <ToggleButton Grid.Column="0" Classes="toolbtn-wide" HorizontalAlignment="Stretch" Padding="4,0" Content="L 7%"
+                                                      ToolTip.Tip="Low: about 7% can be damaged"
+                                                      IsChecked="{Binding ErrorCorrection, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Low}" />
+                                        <ToggleButton Grid.Column="1" Classes="toolbtn-wide" HorizontalAlignment="Stretch" Padding="4,0" Content="M 15%"
+                                                      ToolTip.Tip="Medium: about 15% can be damaged (recommended)"
+                                                      IsChecked="{Binding ErrorCorrection, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Medium}" />
+                                        <ToggleButton Grid.Column="2" Classes="toolbtn-wide" HorizontalAlignment="Stretch" Padding="4,0" Content="Q 25%"
+                                                      ToolTip.Tip="Quartile: about 25% can be damaged"
+                                                      IsChecked="{Binding ErrorCorrection, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Quartile}" />
+                                        <ToggleButton Grid.Column="3" Classes="toolbtn-wide" HorizontalAlignment="Stretch" Padding="4,0" Content="H 30%"
+                                                      ToolTip.Tip="High: about 30% can be damaged (use when a logo covers part of the code)"
+                                                      IsChecked="{Binding ErrorCorrection, Mode=TwoWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=High}" />
+                                    </Grid>
+                                </Border>
+
+                                <TextBlock Text="QUIET ZONE" Classes="propSection" Margin="0,6,0,0" />
+                                <NumericUpDown Classes="prop" Value="{Binding MarginMm, Mode=TwoWay}" Minimum="0" Maximum="10" Increment="1" FormatString="0"
+                                               ToolTip.Tip="Empty border around the code, in modules (squares). Scanners need about 2-4."
+                                               AutomationProperties.Name="Quiet zone in modules">
+                                    <NumericUpDown.InnerLeftContent>
+                                        <mi:MaterialIcon Kind="BorderOutside" Width="15" Height="15" Margin="10,0,4,0"
+                                                         Foreground="{DynamicResource BrushTextSecondary}" />
+                                    </NumericUpDown.InnerLeftContent>
+                                    <NumericUpDown.InnerRightContent>
+                                        <TextBlock Text="modules" Classes="propUnit" />
+                                    </NumericUpDown.InnerRightContent>
+                                </NumericUpDown>
+
+                                <!-- ADVANCED: rarely changed, collapsed by default -->
+                                <Expander Header="Advanced" HorizontalAlignment="Stretch" Margin="0,6,0,0">
+                                    <StackPanel Spacing="10" Margin="0,4,0,0">
+
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                            <TextBlock Text="Size (version)" Classes="caption" VerticalAlignment="Center" />
+                                            <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsVersionAuto, Mode=TwoWay}"
+                                                          OnContent="Auto" OffContent="Fixed" AutomationProperties.Name="Automatic size" />
+                                        </Grid>
+                                        <NumericUpDown Classes="prop" Value="{Binding VersionValue, Mode=TwoWay}" Minimum="1" Maximum="40" Increment="1" FormatString="0"
+                                                       IsEnabled="{Binding IsVersionAuto, Converter={x:Static conv:BoolNegationConverter.Instance}}"
+                                                       ToolTip.Tip="QR version 1-40: higher is a bigger grid that holds more data. Auto picks the smallest that fits."
+                                                       AutomationProperties.Name="QR version">
+                                            <NumericUpDown.InnerLeftContent>
+                                                <TextBlock Text="V" Classes="propPrefix" />
+                                            </NumericUpDown.InnerLeftContent>
+                                        </NumericUpDown>
+
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                            <TextBlock Text="Mask pattern" Classes="caption" VerticalAlignment="Center" />
+                                            <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsMaskAuto, Mode=TwoWay}"
+                                                          OnContent="Auto" OffContent="Fixed" AutomationProperties.Name="Automatic mask" />
+                                        </Grid>
+                                        <NumericUpDown Classes="prop" Value="{Binding MaskValue, Mode=TwoWay}" Minimum="0" Maximum="7" Increment="1" FormatString="0"
+                                                       IsEnabled="{Binding IsMaskAuto, Converter={x:Static conv:BoolNegationConverter.Instance}}"
+                                                       ToolTip.Tip="Mask 0-7. Auto picks the best one for scanning; fix it only to match a specification."
+                                                       AutomationProperties.Name="Mask pattern">
+                                            <NumericUpDown.InnerLeftContent>
+                                                <TextBlock Text="M" Classes="propPrefix" />
+                                            </NumericUpDown.InnerLeftContent>
+                                        </NumericUpDown>
+
+                                    </StackPanel>
+                                </Expander>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <!-- ===================== POSITION: align and order ===================== -->
+                    <TabItem Header="Position">
+                        <StackPanel Spacing="10" Margin="0,10,0,16">
+
+                            <TextBlock Text="ALIGN TO CARD" Classes="propSection" />
+                            <Border Classes="segment" HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal" Spacing="2">
+                                    <ToggleButton Classes="toolbtn" ToolTip.Tip="Align to the card's left edge" AutomationProperties.Name="Align left"
+                                                  IsChecked="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.IsAlignedLeftToCard, Mode=OneWay}"
+                                                  Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignLeftCommand}">
+                                        <PathIcon Data="{x:Static icons:DesignerIcons.AlignLeft}" Width="15" Height="15" />
+                                    </ToggleButton>
+                                    <ToggleButton Classes="toolbtn" ToolTip.Tip="Centre horizontally on the card" AutomationProperties.Name="Centre horizontally"
+                                                  IsChecked="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.IsAlignedCenterToCard, Mode=OneWay}"
+                                                  Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignCenterHorizontalCommand}">
+                                        <PathIcon Data="{x:Static icons:DesignerIcons.AlignCenterHorizontal}" Width="15" Height="15" />
+                                    </ToggleButton>
+                                    <ToggleButton Classes="toolbtn" ToolTip.Tip="Align to the card's right edge" AutomationProperties.Name="Align right"
+                                                  IsChecked="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.IsAlignedRightToCard, Mode=OneWay}"
+                                                  Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignRightCommand}">
+                                        <PathIcon Data="{x:Static icons:DesignerIcons.AlignRight}" Width="15" Height="15" />
+                                    </ToggleButton>
+                                    <Border Classes="tbsep" Height="18" Margin="3,0" />
+                                    <ToggleButton Classes="toolbtn" ToolTip.Tip="Align to the card's top edge" AutomationProperties.Name="Align top"
+                                                  IsChecked="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.IsAlignedTopToCard, Mode=OneWay}"
+                                                  Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignTopCommand}">
+                                        <PathIcon Data="{x:Static icons:DesignerIcons.AlignTop}" Width="15" Height="15" />
+                                    </ToggleButton>
+                                    <ToggleButton Classes="toolbtn" ToolTip.Tip="Centre vertically on the card" AutomationProperties.Name="Centre vertically"
+                                                  IsChecked="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.IsAlignedMiddleToCard, Mode=OneWay}"
+                                                  Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignMiddleVerticalCommand}">
+                                        <PathIcon Data="{x:Static icons:DesignerIcons.AlignMiddleVertical}" Width="15" Height="15" />
+                                    </ToggleButton>
+                                    <ToggleButton Classes="toolbtn" ToolTip.Tip="Align to the card's bottom edge" AutomationProperties.Name="Align bottom"
+                                                  IsChecked="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.IsAlignedBottomToCard, Mode=OneWay}"
+                                                  Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignBottomCommand}">
+                                        <PathIcon Data="{x:Static icons:DesignerIcons.AlignBottom}" Width="15" Height="15" />
+                                    </ToggleButton>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Text="LAYER ORDER" Classes="propSection" Margin="0,6,0,0" />
+                            <Border Classes="segment" HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal" Spacing="2">
+                                    <Button Classes="ghost toolbtn" ToolTip.Tip="Bring to front" AutomationProperties.Name="Bring to front" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BringToFrontCommand}">
+                                        <mi:MaterialIcon Kind="ArrangeBringToFront" Width="17" Height="17" />
+                                    </Button>
+                                    <Button Classes="ghost toolbtn" ToolTip.Tip="Bring forward" AutomationProperties.Name="Bring forward" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BringForwardCommand}">
+                                        <mi:MaterialIcon Kind="ArrangeBringForward" Width="17" Height="17" />
+                                    </Button>
+                                    <Button Classes="ghost toolbtn" ToolTip.Tip="Send backward" AutomationProperties.Name="Send backward" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SendBackwardCommand}">
+                                        <mi:MaterialIcon Kind="ArrangeSendBackward" Width="17" Height="17" />
+                                    </Button>
+                                    <Button Classes="ghost toolbtn" ToolTip.Tip="Send to back" AutomationProperties.Name="Send to back" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SendToBackCommand}">
+                                        <mi:MaterialIcon Kind="ArrangeSendToBack" Width="17" Height="17" />
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                </TabControl>
 			</StackPanel>
 		</DataTemplate>
 
@@ -1789,8 +2058,12 @@
                     </Button>
                     <Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,2" />
                 </StackPanel>
-				<Button DockPanel.Dock="Right" Classes="ghost" Content="+ New" Command="{Binding NewBlankTabCommand}"
-                        ToolTip.Tip="New blank design (Ctrl+N)" />
+				<!--<Button DockPanel.Dock="Right" Classes="ghost" Content="+ New" Command="{Binding NewBlankTabCommand}"
+                        ToolTip.Tip="New blank design (Ctrl+N)" />-->
+                <Button DockPanel.Dock="Right" Classes="ghost toolbtn" Command="{Binding NewBlankTabCommand}"
+                        ToolTip.Tip="New blank design (Ctrl+N)" AutomationProperties.Name="New design">
+                    <PathIcon Data="{x:Static icons:DesignerIcons.Add}" Width="14" Height="14" />
+                </Button>
 				<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
 					<ItemsControl ItemsSource="{Binding Tabs}">
 						<ItemsControl.ItemsPanel>
@@ -1800,7 +2073,8 @@
 						</ItemsControl.ItemsPanel>
 						<ItemsControl.ItemTemplate>
 							<DataTemplate x:DataType="vm:CardDesignTabViewModel">
-								<Border CornerRadius="{StaticResource Radius.SM}" Padding="10,6"
+                                <Border CornerRadius="{StaticResource Radius.SM}" Padding="10,6"
+                                        BorderThickness="0,2,0,0" BorderBrush="Transparent"
                                         Classes.active="{Binding IsActive}">
 									<Border.Styles>
 										<Style Selector="Border">
@@ -1808,6 +2082,7 @@
 										</Style>
 										<Style Selector="Border.active">
 											<Setter Property="Background" Value="{DynamicResource BrushSelectionBackground}" />
+                                            <Setter Property="BorderBrush" Value="{DynamicResource BrushPrimary}" />
 										</Style>
 									</Border.Styles>
 									<StackPanel Orientation="Horizontal" Spacing="8">
@@ -1820,7 +2095,9 @@
                                                     IsVisible="{Binding IsRenaming, Converter={x:Static conv:BoolNegationConverter.Instance}}">
 												<StackPanel Orientation="Horizontal" Spacing="0">
 													<TextBlock Text="{Binding Title}" />
-													<TextBlock Text=" *" IsVisible="{Binding IsDirty}" />
+                                                    <Ellipse Width="7" Height="7" Margin="8,0,0,0" VerticalAlignment="Center"
+                                                             Fill="{DynamicResource BrushWarning}" IsVisible="{Binding IsDirty}"
+                                                             ToolTip.Tip="Unsaved changes" />
 												</StackPanel>
 											</Button>
 											<!-- Rename Design (Part 20): double-click the tab title to edit it
@@ -1830,10 +2107,13 @@
                                                      IsVisible="{Binding IsRenaming}" MinWidth="90" Padding="6,3"
                                                      KeyDown="OnTabRenameKeyDown" LostFocus="OnTabRenameLostFocus" />
 										</Panel>
-										<Button Classes="ghost" Content="x" Padding="4,0"
+                                        <Button Classes="ghost toolbtn" MinWidth="22" Height="22" Padding="0"
+                                                AutomationProperties.Name="Close tab"
                                                 Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).CloseTabCommand}"
                                                 CommandParameter="{Binding}"
-                                                ToolTip.Tip="Close tab (Ctrl+W)" />
+                                                ToolTip.Tip="Close tab (Ctrl+W)" >
+                                            <mi:MaterialIcon Kind="Close" Width="13" Height="13" />
+                                        </Button>
 									</StackPanel>
 								</Border>
 							</DataTemplate>
@@ -1869,7 +2149,7 @@
 			<DockPanel Margin="12,6"
                        IsEnabled="{Binding ActiveTab, Converter={x:Static ObjectConverters.IsNotNull}}">
 
-				<StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+				<!--<StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
 					<Button Classes="ghost toolbtn" ToolTip.Tip="Print Preview" AutomationProperties.Name="Print preview"
                             Command="{Binding ActiveTab.ShowPrintPreviewCommand}">
 						<PathIcon Data="{x:Static icons:DesignerIcons.Print}" Width="16" Height="16" />
@@ -1888,9 +2168,29 @@
 						<PathIcon Data="{x:Static icons:DesignerIcons.Redo}" Width="15" Height="15" />
 					</Button>
 					<Button Classes="primary" Content="Save" ToolTip.Tip="Save design (Ctrl+S)" Command="{Binding ActiveTab.SaveCommand}" Margin="4,0,0,0" />
-				</StackPanel>
+				</StackPanel>-->
 
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <!--<Button Classes="toolbtn-wide" Height="32" ToolTip.Tip="Print Preview" AutomationProperties.Name="Print preview"
+                            Command="{Binding ActiveTab.ShowPrintPreviewCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <mi:MaterialIcon Kind="EyeOutline" Width="16" Height="16" />
+                            <TextBlock Text="Preview" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>-->
+                    <Button Classes="secondary" ToolTip.Tip="Print... (Ctrl+P)" AutomationProperties.Name="Print"
+                            Command="{Binding ActiveTab.ShowPrintDialogCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <PathIcon Data="{x:Static printing:PrintingIcons.Printer}" Width="15" Height="15" />
+                            <TextBlock Text="Print" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="primary" Content="Save" ToolTip.Tip="Save design (Ctrl+S)" Command="{Binding ActiveTab.SaveCommand}" />
+                </StackPanel>
+                
 				<WrapPanel VerticalAlignment="Center">
+                    <Border Classes="segment">
+                        <StackPanel Orientation="Horizontal" Spacing="2">
 
 					<!-- Tool mode: Select / Pan (moved here from the left rail, Part 11).
                      Exactly one is ever checked; SelectToolActive is the inverse of
@@ -1924,16 +2224,37 @@
                     <PathIcon Data="{x:Static icons:DesignerIcons.Pen}" Width="15" Height="15" />
                 </ToggleButton>
 
-					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="tbsep" />
+
+                    <!-- History (moved here from the right group). -->
+                    <Button Classes="ghost toolbtn" ToolTip.Tip="Undo (Ctrl+Z)" AutomationProperties.Name="Undo"
+                            Command="{Binding ActiveTab.UndoCommand}" IsEnabled="{Binding ActiveTab.CanUndo}">
+                        <PathIcon Data="{x:Static icons:DesignerIcons.Undo}" Width="15" Height="15" />
+                    </Button>
+                    <Button Classes="ghost toolbtn" ToolTip.Tip="Redo (Ctrl+Y)" AutomationProperties.Name="Redo"
+                            Command="{Binding ActiveTab.RedoCommand}" IsEnabled="{Binding ActiveTab.CanRedo}">
+                        <PathIcon Data="{x:Static icons:DesignerIcons.Redo}" Width="15" Height="15" />
+                    </Button>
+
+                    <Border Classes="tbsep" />
 
 					<!-- Data Preview (Part 43): swaps every dynamic-field/data-bound text
                      element and evaluates every element's conditional visibility against
                      a sample record instead of showing raw "{{Field}}" placeholders.
                      Sample records only — the real Cardholder Management module doesn't
                      exist in this codebase yet, see SamplePreviewDataProvider. -->
-					<ToggleButton Classes="toolbtn-wide" Content="Preview" ToolTip.Tip="Toggle Data Preview"
-								  IsChecked="{Binding ActiveTab.PreviewModeEnabled, Mode=TwoWay}" />
-					<Button Classes="ghost toolbtn" ToolTip.Tip="Previous sample record" AutomationProperties.Name="Previous record"
+                    <ToggleButton Classes="toolbtn-wide" Height="32" AutomationProperties.Name="Preview"
+								  ToolTip.Tip="Preview: show the selected database row's values on the card (sample data when no database is connected)"
+								  IsChecked="{Binding ActiveTab.PreviewModeEnabled, Mode=TwoWay}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <mi:MaterialIcon Kind="EyeOutline" Width="16" Height="16" />
+                            <TextBlock Text="Preview" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </ToggleButton>
+					<!--<Button Classes="ghost toolbtn" ToolTip.Tip="Previous sample record" AutomationProperties.Name="Previous record"
 							Command="{Binding ActiveTab.PreviousPreviewRecordCommand}" IsVisible="{Binding ActiveTab.PreviewModeEnabled}">
 						<PathIcon Data="{x:Static icons:DesignerIcons.ChevronLeft}" Width="12" Height="12" />
 					</Button>
@@ -1942,11 +2263,11 @@
 					<Button Classes="ghost toolbtn" ToolTip.Tip="Next sample record" AutomationProperties.Name="Next record"
 							Command="{Binding ActiveTab.NextPreviewRecordCommand}" IsVisible="{Binding ActiveTab.PreviewModeEnabled}">
 						<PathIcon Data="{x:Static icons:DesignerIcons.ChevronRight}" Width="12" Height="12" />
-					</Button>
+					</Button>-->
 
 					<!-- Paste is a "general" tool (it doesn't need a selection to be useful),
                      so it stays outside the contextual/selection-only group below. -->
-					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+                    <Border Classes="tbsep" />
 					<Button Classes="ghost toolbtn" ToolTip.Tip="Paste (Ctrl+V)" AutomationProperties.Name="Paste"
 							Command="{Binding ActiveTab.PasteCommand}" IsEnabled="{Binding ActiveTab.CanPaste}">
 						<PathIcon Data="{x:Static icons:DesignerIcons.Paste}" Width="15" Height="15" />
@@ -1956,111 +2277,143 @@
                      selected (Part 8's "Multiple objects selected: align/distribute/
                      group/z-order/duplicate/copy/delete" plus the single-selection
                      equivalents), so the whole group is hidden otherwise. -->
-					<StackPanel Orientation="Horizontal" Spacing="0" IsVisible="{Binding ActiveTab.HasSelection}">
-						<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Delete selected (Del)" AutomationProperties.Name="Delete"
-								Command="{Binding ActiveTab.DeleteSelectedCommand}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.Delete}" Width="15" Height="15" />
-						</Button>
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Copy (Ctrl+C)" AutomationProperties.Name="Copy"
-								Command="{Binding ActiveTab.CopyCommand}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.Copy}" Width="15" Height="15" />
-						</Button>
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Duplicate (Ctrl+D)" AutomationProperties.Name="Duplicate"
+                    <!-- Arrange (contextual). Always visible so the toolbar doesn't jump; enabled
+                     only with a selection. Align/Order are dropdowns instead of 10 buttons. -->
+                    <StackPanel Orientation="Horizontal" Spacing="2" IsEnabled="{Binding ActiveTab.HasSelection}">
+                        <Border Classes="tbsep" />
+                        <Button Classes="ghost toolbtn" ToolTip.Tip="Duplicate (Ctrl+D)" AutomationProperties.Name="Duplicate"
 								Command="{Binding ActiveTab.DuplicateSelectedCommand}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.Duplicate}" Width="15" Height="15" />
-						</Button>
+                            <PathIcon Data="{x:Static icons:DesignerIcons.Duplicate}" Width="15" Height="15" />
+                        </Button>
+                        <Button Classes="ghost toolbtn" ToolTip.Tip="Copy (Ctrl+C)" AutomationProperties.Name="Copy"
+								Command="{Binding ActiveTab.CopyCommand}">
+                            <PathIcon Data="{x:Static icons:DesignerIcons.Copy}" Width="15" Height="15" />
+                        </Button>
+                        <Button Classes="ghost toolbtn" ToolTip.Tip="Delete selected (Del)" AutomationProperties.Name="Delete"
+								Command="{Binding ActiveTab.DeleteSelectedCommand}">
+                            <PathIcon Data="{x:Static icons:DesignerIcons.Delete}" Width="15" Height="15" />
+                        </Button>
 
-						<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+                        <Border Classes="tbsep" />
 
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Group selected objects (Ctrl+G)" AutomationProperties.Name="Group"
+                        <!-- Align: one dropdown (6 align + 2 distribute). -->
+                        <Button Classes="ghost toolbtn" ToolTip.Tip="Align and distribute" AutomationProperties.Name="Align">
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                <PathIcon Data="{x:Static icons:DesignerIcons.AlignLeft}" Width="15" Height="15" />
+                                <mi:MaterialIcon Kind="ChevronDown" Width="12" Height="12" />
+                            </StackPanel>
+                            <Button.Flyout>
+                                <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                                    <MenuItem Header="Align left" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignLeftCommand}">
+                                        <MenuItem.Icon>
+                                            <PathIcon Data="{x:Static icons:DesignerIcons.AlignLeft}" Width="14" Height="14" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Align centre" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignCenterHorizontalCommand}">
+                                        <MenuItem.Icon>
+                                            <PathIcon Data="{x:Static icons:DesignerIcons.AlignCenterHorizontal}" Width="14" Height="14" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Align right" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignRightCommand}">
+                                        <MenuItem.Icon>
+                                            <PathIcon Data="{x:Static icons:DesignerIcons.AlignRight}" Width="14" Height="14" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator />
+                                    <MenuItem Header="Align top" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignTopCommand}">
+                                        <MenuItem.Icon>
+                                            <PathIcon Data="{x:Static icons:DesignerIcons.AlignTop}" Width="14" Height="14" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Align middle" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignMiddleVerticalCommand}">
+                                        <MenuItem.Icon>
+                                            <PathIcon Data="{x:Static icons:DesignerIcons.AlignMiddleVertical}" Width="14" Height="14" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Align bottom" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.AlignBottomCommand}">
+                                        <MenuItem.Icon>
+                                            <PathIcon Data="{x:Static icons:DesignerIcons.AlignBottom}" Width="14" Height="14" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator />
+                                    <MenuItem Header="Distribute horizontally (3+)" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.DistributeHorizontalCommand}">
+                                        <MenuItem.Icon>
+                                            <PathIcon Data="{x:Static icons:DesignerIcons.DistributeHorizontal}" Width="14" Height="14" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Distribute vertically (3+)" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.DistributeVerticalCommand}">
+                                        <MenuItem.Icon>
+                                            <PathIcon Data="{x:Static icons:DesignerIcons.DistributeVertical}" Width="14" Height="14" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </MenuFlyout>
+                            </Button.Flyout>
+                        </Button>
+
+                        <!-- Order: one dropdown. -->
+                        <Button Classes="ghost toolbtn" ToolTip.Tip="Order" AutomationProperties.Name="Order">
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                <PathIcon Data="{x:Static icons:DesignerIcons.BringToFront}" Width="15" Height="15" />
+                                <mi:MaterialIcon Kind="ChevronDown" Width="12" Height="12" />
+                            </StackPanel>
+                            <Button.Flyout>
+                                <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                                    <MenuItem Header="Bring to front (Ctrl+Shift+])" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BringToFrontCommand}">
+                                        <MenuItem.Icon>
+                                            <PathIcon Data="{x:Static icons:DesignerIcons.BringToFront}" Width="14" Height="14" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Bring forward" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.BringForwardCommand}">
+                                        <MenuItem.Icon>
+                                            <PathIcon Data="{x:Static icons:DesignerIcons.BringToFront}" Width="14" Height="14" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Send backward" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SendBackwardCommand}">
+                                        <MenuItem.Icon>
+                                            <PathIcon Data="{x:Static icons:DesignerIcons.SendToBack}" Width="14" Height="14" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Send to back (Ctrl+Shift+[)" Command="{Binding #Root.((vm:CardDesignerViewModel)DataContext).ActiveTab.SendToBackCommand}">
+                                        <MenuItem.Icon>
+                                            <PathIcon Data="{x:Static icons:DesignerIcons.SendToBack}" Width="14" Height="14" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </MenuFlyout>
+                            </Button.Flyout>
+                        </Button>
+
+                        <Button Classes="ghost toolbtn" ToolTip.Tip="Group selected objects (Ctrl+G)" AutomationProperties.Name="Group"
 								Command="{Binding ActiveTab.GroupCommand}" IsEnabled="{Binding ActiveTab.HasMultiSelection}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.Group}" Width="15" Height="15" />
-						</Button>
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Ungroup selected objects (Ctrl+Shift+G)" AutomationProperties.Name="Ungroup"
+                            <PathIcon Data="{x:Static icons:DesignerIcons.Group}" Width="15" Height="15" />
+                        </Button>
+                        <Button Classes="ghost toolbtn" ToolTip.Tip="Ungroup selected objects (Ctrl+Shift+G)" AutomationProperties.Name="Ungroup"
 								Command="{Binding ActiveTab.UngroupCommand}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.Ungroup}" Width="15" Height="15" />
-						</Button>
-
-						<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
-
-						<!-- OBJECT alignment: moves the selected element(s) relative to each
-                         other. Kept intentionally distinct from the "Text alignment"
-                         controls in the Properties panel, which set paragraph alignment
-                         inside a text box (Part 1). -->
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Align objects: left" AutomationProperties.Name="Align left"
-								Command="{Binding ActiveTab.AlignLeftCommand}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.AlignLeft}" Width="15" Height="15" />
-						</Button>
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Align objects: center (horizontal)" AutomationProperties.Name="Align center horizontal"
-								Command="{Binding ActiveTab.AlignCenterHorizontalCommand}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.AlignCenterHorizontal}" Width="15" Height="15" />
-						</Button>
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Align objects: right" AutomationProperties.Name="Align right"
-								Command="{Binding ActiveTab.AlignRightCommand}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.AlignRight}" Width="15" Height="15" />
-						</Button>
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Align objects: top" AutomationProperties.Name="Align top"
-								Command="{Binding ActiveTab.AlignTopCommand}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.AlignTop}" Width="15" Height="15" />
-						</Button>
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Align objects: middle (vertical)" AutomationProperties.Name="Align middle vertical"
-								Command="{Binding ActiveTab.AlignMiddleVerticalCommand}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.AlignMiddleVertical}" Width="15" Height="15" />
-						</Button>
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Align objects: bottom" AutomationProperties.Name="Align bottom"
-								Command="{Binding ActiveTab.AlignBottomCommand}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.AlignBottom}" Width="15" Height="15" />
-						</Button>
-
-						<!-- Distribute only makes sense with 3+ selected: the commands
-                         themselves no-op below that (matching Align's own convention of
-                         a plain guard clause rather than CanExecute-driven disabling),
-                         so these stay visible whenever there's a multi-selection at all,
-                         consistent with the rest of this group. -->
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Distribute horizontal spacing evenly (3+ objects)" AutomationProperties.Name="Distribute horizontally"
-								Command="{Binding ActiveTab.DistributeHorizontalCommand}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.DistributeHorizontal}" Width="15" Height="15" />
-						</Button>
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Distribute vertical spacing evenly (3+ objects)" AutomationProperties.Name="Distribute vertically"
-								Command="{Binding ActiveTab.DistributeVerticalCommand}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.DistributeVertical}" Width="15" Height="15" />
-						</Button>
-
-						<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
-
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Bring to front (Ctrl+Shift+])" AutomationProperties.Name="Bring to front"
-								Command="{Binding ActiveTab.BringToFrontCommand}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.BringToFront}" Width="15" Height="15" />
-						</Button>
-						<Button Classes="ghost toolbtn" ToolTip.Tip="Send to back (Ctrl+Shift+[)" AutomationProperties.Name="Send to back"
-								Command="{Binding ActiveTab.SendToBackCommand}">
-							<PathIcon Data="{x:Static icons:DesignerIcons.SendToBack}" Width="15" Height="15" />
-						</Button>
-					</StackPanel>
-
-					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+                            <PathIcon Data="{x:Static icons:DesignerIcons.Ungroup}" Width="15" Height="15" />
+                        </Button>
+                    </StackPanel>
+                    <TextBlock Text="" Classes="caption" VerticalAlignment="Center" Margin="6,0"
+							   Foreground="{DynamicResource BrushTextSecondary}"
+							   IsVisible="{Binding !ActiveTab.HasSelection}" />
+                    <Border Classes="tbsep" />
 
 					<!-- OneWay here too, for the same reason as Select/Pan above: the Command
                      is the single source of truth for the mutation, the binding only
                      reflects state back onto the button. -->
-					<ToggleButton Classes="toolbtn" ToolTip.Tip="Show Front only" AutomationProperties.Name="Front side"
-								  IsChecked="{Binding ActiveTab.ActiveSideView, Mode=OneWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Front}"
-								  Command="{Binding ActiveTab.SetSideFrontCommand}">
-						<PathIcon Data="{x:Static icons:DesignerIcons.CardFront}" Width="16" Height="16" />
-					</ToggleButton>
-					<ToggleButton Classes="toolbtn" ToolTip.Tip="Show Back only" AutomationProperties.Name="Back side"
-								  IsChecked="{Binding ActiveTab.ActiveSideView, Mode=OneWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Back}"
-								  Command="{Binding ActiveTab.SetSideBackCommand}">
-						<PathIcon Data="{x:Static icons:DesignerIcons.CardBack}" Width="16" Height="16" />
-					</ToggleButton>
-					<ToggleButton Classes="toolbtn" ToolTip.Tip="Show Front + Back" AutomationProperties.Name="Front and back"
-								  IsChecked="{Binding ActiveTab.ActiveSideView, Mode=OneWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Both}"
-								  Command="{Binding ActiveTab.SetSideBothCommand}">
-						<PathIcon Data="{x:Static icons:DesignerIcons.CardBoth}" Width="16" Height="16" />
-					</ToggleButton>
-
-					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+                    <!-- Card side (segmented, text labels). -->
+                    <Border Classes="segment">
+                        <StackPanel Orientation="Horizontal" Spacing="2">
+                            <ToggleButton Classes="toolbtn-wide" Content="Front" ToolTip.Tip="Show front only" AutomationProperties.Name="Show front only"
+										  IsChecked="{Binding ActiveTab.ActiveSideView, Mode=OneWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Front}"
+										  Command="{Binding ActiveTab.SetSideFrontCommand}" />
+                            <ToggleButton Classes="toolbtn-wide" Content="Back" ToolTip.Tip="Show back only" AutomationProperties.Name="Show back only"
+										  IsChecked="{Binding ActiveTab.ActiveSideView, Mode=OneWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Back}"
+										  Command="{Binding ActiveTab.SetSideBackCommand}" />
+                            <ToggleButton Classes="toolbtn-wide" Content="Both" ToolTip.Tip="Show front and back" AutomationProperties.Name="Show front and back"
+										  IsChecked="{Binding ActiveTab.ActiveSideView, Mode=OneWay, Converter={x:Static conv:EnumToBoolConverter.Instance}, ConverterParameter=Both}"
+										  Command="{Binding ActiveTab.SetSideBothCommand}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="tbsep" />
 
 					<!-- Print Preview moved to the right-docked action group (Priority 10) —
                      see the DockPanel.Dock="Right" StackPanel above. -->
@@ -2068,18 +2421,21 @@
 					<!-- Design Checker (Part 79): on-demand, not run automatically on every
                      edit (see RunDesignCheckCommand's own doc comment for why). Clicking
                      an issue selects the affected element and switches side if needed. -->
-					<Button Classes="ghost toolbtn" ToolTip.Tip="Check design for issues" AutomationProperties.Name="Check design"
+                    <!-- Design check (Part 79) as one pill: runs the check and opens the result. -->
+                    <Button Classes="checkchip" AutomationProperties.Name="Check design"
+							Classes.warn="{Binding ActiveTab.DesignIssues.Count, Converter={x:Static conv:CountToBoolConverter.Instance}}"
+							ToolTip.Tip="Check the design for issues"
 							Command="{Binding ActiveTab.RunDesignCheckCommand}">
-						<Panel>
-							<PathIcon Data="{x:Static icons:DesignerIcons.CheckCircle}" Width="16" Height="16" />
-							<Border IsVisible="{Binding ActiveTab.DesignIssues.Count, Converter={x:Static conv:CountToBoolConverter.Instance}}"
-									Background="#DA3025" CornerRadius="6"
-									Width="8" Height="8" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-2,-2,0" />
-						</Panel>
-					</Button>
-					<Button Classes="ghost toolbtn" ToolTip.Tip="View issues found" AutomationProperties.Name="View design issues"
-							IsEnabled="{Binding ActiveTab.DesignIssues.Count, Converter={x:Static conv:CountToBoolConverter.Instance}}">
-						<PathIcon Data="{x:Static icons:DesignerIcons.AlertTriangle}" Width="16" Height="16" />
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <PathIcon Data="{x:Static icons:DesignerIcons.CheckCircle}" Width="14" Height="14"
+									  IsVisible="{Binding ActiveTab.DesignIssues.Count, Converter={x:Static conv:CountToBoolConverter.Instance}, ConverterParameter=Zero}" />
+                            <PathIcon Data="{x:Static icons:DesignerIcons.AlertTriangle}" Width="14" Height="14"
+									  IsVisible="{Binding ActiveTab.DesignIssues.Count, Converter={x:Static conv:CountToBoolConverter.Instance}}" />
+                            <TextBlock Text="Check design" VerticalAlignment="Center"
+									   IsVisible="{Binding ActiveTab.DesignIssues.Count, Converter={x:Static conv:CountToBoolConverter.Instance}, ConverterParameter=Zero}" />
+                            <TextBlock Text="{Binding ActiveTab.DesignIssues.Count, StringFormat='{}{0} issue(s)'}" VerticalAlignment="Center"
+									   IsVisible="{Binding ActiveTab.DesignIssues.Count, Converter={x:Static conv:CountToBoolConverter.Instance}}" />
+                        </StackPanel>
 						<Button.Flyout>
 							<Flyout Placement="Bottom">
 								<StackPanel Width="320" Spacing="6" MaxHeight="360">
@@ -2107,7 +2463,7 @@
 						</Button.Flyout>
 					</Button>
 
-					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+                    <Border Classes="tbsep" />
 
                 <!-- Grid/Snap/Rulers toggles removed from here; they're duplicated
                      one-for-one in the header's View menu (Show/Hide Grid, Snap to Grid,
@@ -2123,22 +2479,43 @@
 					<ToggleButton Classes="toolbtn-wide" Content="Rulers" ToolTip.Tip="Show/hide the mm rulers"
 								  IsChecked="{Binding ActiveTab.ShowRulers, Mode=OneWay}"
 								  Command="{Binding ActiveTab.ToggleShowRulersCommand}" />-->
+                    <!--<ToggleButton Classes="toolbtn" ToolTip.Tip="Show/hide the design grid" AutomationProperties.Name="Grid"
+								  IsChecked="{Binding ActiveTab.ShowGrid, Mode=OneWay}"
+								  Command="{Binding ActiveTab.ToggleShowGridCommand}">
+                        <mi:MaterialIcon Kind="Grid" Width="16" Height="16" />
+                    </ToggleButton>
+                    <ToggleButton Classes="toolbtn" ToolTip.Tip="Snap elements to the grid while dragging" AutomationProperties.Name="Snap"
+								  IsChecked="{Binding ActiveTab.SnapToGrid, Mode=OneWay}"
+								  Command="{Binding ActiveTab.ToggleSnapToGridCommand}">
+                        <mi:MaterialIcon Kind="Magnet" Width="16" Height="16" />
+                    </ToggleButton>
+                    <ToggleButton Classes="toolbtn" ToolTip.Tip="Show/hide the mm rulers" AutomationProperties.Name="Rulers"
+								  IsChecked="{Binding ActiveTab.ShowRulers, Mode=OneWay}"
+								  Command="{Binding ActiveTab.ToggleShowRulersCommand}">
+                        <mi:MaterialIcon Kind="Ruler" Width="16" Height="16" />
+                    </ToggleButton>-->
 
-					<Border Width="1" Background="{DynamicResource BrushBorder}" Margin="4,4" />
+                    <Border Classes="tbsep" />
 
-					<Button Classes="ghost toolbtn" ToolTip.Tip="Zoom out (Ctrl+-)" AutomationProperties.Name="Zoom out"
-							Command="{Binding ActiveTab.ZoomOutCommand}">
-						<PathIcon Data="{x:Static icons:DesignerIcons.ZoomOut}" Width="14" Height="14" />
-					</Button>
-					<TextBlock Text="{Binding ActiveTab.Zoom, StringFormat={}{0:P0}}" VerticalAlignment="Center" Width="52" TextAlignment="Center" Classes="caption" />
-					<Button Classes="ghost toolbtn" ToolTip.Tip="Zoom in (Ctrl++)" AutomationProperties.Name="Zoom in"
-							Command="{Binding ActiveTab.ZoomInCommand}">
-						<PathIcon Data="{x:Static icons:DesignerIcons.ZoomIn}" Width="14" Height="14" />
-					</Button>
-					<Button Classes="ghost toolbtn" ToolTip.Tip="Reset zoom to 100% (Ctrl+1)" AutomationProperties.Name="Reset zoom"
-							Command="{Binding ActiveTab.ZoomResetCommand}">
-						<PathIcon Data="{x:Static icons:DesignerIcons.ZoomReset}" Width="14" Height="14" />
-					</Button>
+                    <!-- Zoom (one pill). -->
+                    <Border Classes="segment">
+                        <StackPanel Orientation="Horizontal" Spacing="0">
+                            <Button Classes="ghost toolbtn" ToolTip.Tip="Zoom out (Ctrl+-)" AutomationProperties.Name="Zoom out"
+									Command="{Binding ActiveTab.ZoomOutCommand}">
+                                <PathIcon Data="{x:Static icons:DesignerIcons.ZoomOut}" Width="14" Height="14" />
+                            </Button>
+                            <TextBlock Text="{Binding ActiveTab.Zoom, StringFormat={}{0:P0}}" VerticalAlignment="Center" Width="48" TextAlignment="Center" Classes="caption" />
+                            <Button Classes="ghost toolbtn" ToolTip.Tip="Zoom in (Ctrl++)" AutomationProperties.Name="Zoom in"
+									Command="{Binding ActiveTab.ZoomInCommand}">
+                                <PathIcon Data="{x:Static icons:DesignerIcons.ZoomIn}" Width="14" Height="14" />
+                            </Button>
+                            <Border Classes="tbsep" Height="18" Margin="2,0" />
+                            <Button Classes="ghost toolbtn" ToolTip.Tip="Reset zoom to 100% (Ctrl+1)" AutomationProperties.Name="Reset zoom"
+									Command="{Binding ActiveTab.ZoomResetCommand}">
+                                <PathIcon Data="{x:Static icons:DesignerIcons.ZoomReset}" Width="14" Height="14" />
+                            </Button>
+                        </StackPanel>
+                    </Border>
 
 				</WrapPanel>
 			</DockPanel>
@@ -2368,7 +2745,16 @@
 				<controls:RulerView Name="VerticalRuler" Grid.Row="1" Grid.Column="0" Orientation="Vertical" Tab="{Binding ActiveTab}"
                                      IsVisible="{Binding ActiveTab.ShowRulers}" />
 
-				<Grid Grid.Row="1" Grid.Column="1" Name="CanvasArea" RowDefinitions="*,8,80">
+				<!--<Grid Grid.Row="1" Grid.Column="1" Name="CanvasArea" RowDefinitions="*,8,80">-->
+                <Grid Grid.Row="1" Grid.Column="1" Name="CanvasArea">
+                    <!-- Canvas | splitter | database panel. The panel can't be dragged smaller than
+	     MinHeight (its toolbar plus a couple of rows stay visible) or larger than
+	     MaxHeight; the canvas keeps at least 200px. -->
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" MinHeight="150" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="150"  MaxHeight="600" />
+                    </Grid.RowDefinitions>
 
 					<!-- Canvas area -->
 					<Grid Grid.Row="0">
@@ -2405,7 +2791,9 @@
                                   VerticalAlignment="Stretch"
                                   ResizeDirection="Rows"
                                   ResizeBehavior="PreviousAndNext"
-                                  Background="Transparent">
+                                  Background="Transparent"
+                                  DragCompleted="OnDataSplitterDragCompleted"
+                                  DoubleTapped="OnDataSplitterDoubleTapped">
                         <GridSplitter.Template>
                             <ControlTemplate>
                                 <Border HorizontalAlignment="Center"
@@ -2669,35 +3057,71 @@
                                 <!-- Shared position fields: hidden for Image, which has its own Position tab -->
                                 <StackPanel Spacing="12" IsVisible="{Binding ActiveTab.ShowCommonTransformFields}">
 
-                                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
-                                        <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4" Margin="0,0,4,4">
-                                            <TextBlock Text="X (mm)" Classes="caption" />
-                                            <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.X, Mode=TwoWay}" Increment="0.5" FormatString="0.##" />
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4" Margin="4,0,0,4">
-                                            <TextBlock Text="Y (mm)" Classes="caption" />
-                                            <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Y, Mode=TwoWay}" Increment="0.5" FormatString="0.##" />
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4" Margin="0,0,4,0">
-                                            <TextBlock Text="Width (mm)" Classes="caption" />
-                                            <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Width, Mode=TwoWay}" Increment="0.5" Minimum="1" FormatString="0.##" />
-                                        </StackPanel>
-                                        <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4" Margin="4,0,0,0">
-                                            <TextBlock Text="Height (mm)" Classes="caption" />
-                                            <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Height, Mode=TwoWay}" Increment="0.5" Minimum="1" FormatString="0.##" />
-                                        </StackPanel>
+                                    <TextBlock Text="POSITION &amp; SIZE" Classes="propSection" />
+                                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+                                        <NumericUpDown Grid.Row="0" Grid.Column="0" Classes="prop" Value="{Binding ActiveTab.PrimarySelection.X, Mode=TwoWay}" Increment="0.5" FormatString="0.##"
+                                                       ToolTip.Tip="X position (mm) from the card's left edge" AutomationProperties.Name="X position in millimetres">
+                                            <NumericUpDown.InnerLeftContent>
+                                                <TextBlock Text="X" Classes="propPrefix" />
+                                            </NumericUpDown.InnerLeftContent>
+                                            <NumericUpDown.InnerRightContent>
+                                                <TextBlock Text="mm" Classes="propUnit" />
+                                            </NumericUpDown.InnerRightContent>
+                                        </NumericUpDown>
+                                        <NumericUpDown Grid.Row="0" Grid.Column="1" Classes="prop" Value="{Binding ActiveTab.PrimarySelection.Y, Mode=TwoWay}" Increment="0.5" FormatString="0.##"
+                                                       ToolTip.Tip="Y position (mm) from the card's top edge" AutomationProperties.Name="Y position in millimetres">
+                                            <NumericUpDown.InnerLeftContent>
+                                                <TextBlock Text="Y" Classes="propPrefix" />
+                                            </NumericUpDown.InnerLeftContent>
+                                            <NumericUpDown.InnerRightContent>
+                                                <TextBlock Text="mm" Classes="propUnit" />
+                                            </NumericUpDown.InnerRightContent>
+                                        </NumericUpDown>
+                                        <NumericUpDown Grid.Row="1" Grid.Column="0" Classes="prop" Value="{Binding ActiveTab.PrimarySelection.Width, Mode=TwoWay}" Increment="0.5" Minimum="1" FormatString="0.##"
+                                                       ToolTip.Tip="Width (mm)" AutomationProperties.Name="Width in millimetres">
+                                            <NumericUpDown.InnerLeftContent>
+                                                <TextBlock Text="W" Classes="propPrefix" />
+                                            </NumericUpDown.InnerLeftContent>
+                                            <NumericUpDown.InnerRightContent>
+                                                <TextBlock Text="mm" Classes="propUnit" />
+                                            </NumericUpDown.InnerRightContent>
+                                        </NumericUpDown>
+                                        <NumericUpDown Grid.Row="1" Grid.Column="1" Classes="prop" Value="{Binding ActiveTab.PrimarySelection.Height, Mode=TwoWay}" Increment="0.5" Minimum="1" FormatString="0.##"
+                                                       ToolTip.Tip="Height (mm)" AutomationProperties.Name="Height in millimetres">
+                                            <NumericUpDown.InnerLeftContent>
+                                                <TextBlock Text="H" Classes="propPrefix" />
+                                            </NumericUpDown.InnerLeftContent>
+                                            <NumericUpDown.InnerRightContent>
+                                                <TextBlock Text="mm" Classes="propUnit" />
+                                            </NumericUpDown.InnerRightContent>
+                                        </NumericUpDown>
                                     </Grid>
 
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="Rotation (deg)" Classes="caption" />
-                                        <NumericUpDown Value="{Binding ActiveTab.PrimarySelection.Rotation, Mode=TwoWay}" Increment="1" FormatString="0.##"
-                                                       ToolTip.Tip="Type a value, or drag the small round handle above the selected element on the canvas" />
-                                    </StackPanel>
-
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="Opacity" Classes="caption" />
-                                        <Slider Minimum="0" Maximum="1" Value="{Binding ActiveTab.PrimarySelection.Opacity, Mode=TwoWay}" />
-                                    </StackPanel>
+                                    <TextBlock Text="ROTATION &amp; OPACITY" Classes="propSection" Margin="0,4,0,0" />
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                        <NumericUpDown Grid.Column="0" Classes="prop" Value="{Binding ActiveTab.PrimarySelection.Rotation, Mode=TwoWay}" Increment="1" FormatString="0.##"
+                                                       ToolTip.Tip="Type a value, or drag the small round handle above the selected element on the canvas" AutomationProperties.Name="Rotation in degrees">
+                                            <NumericUpDown.InnerLeftContent>
+                                                <mi:MaterialIcon Kind="RotateRight" Width="15" Height="15" Margin="10,0,2,0"
+                                                                 Foreground="{DynamicResource BrushTextSecondary}" />
+                                            </NumericUpDown.InnerLeftContent>
+                                            <NumericUpDown.InnerRightContent>
+                                                <TextBlock Text="°" Classes="propUnit" />
+                                            </NumericUpDown.InnerRightContent>
+                                        </NumericUpDown>
+                                        <Border Grid.Column="1" Height="32" CornerRadius="8" BorderThickness="1"
+                                                BorderBrush="{DynamicResource BrushBorder}" Padding="10,0,10,0"
+                                                ToolTip.Tip="Opacity">
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+                                                <mi:MaterialIcon Kind="Opacity" Width="15" Height="15" VerticalAlignment="Center"
+                                                                 Foreground="{DynamicResource BrushTextSecondary}" />
+                                                <Slider Grid.Column="1" Minimum="0" Maximum="1" VerticalAlignment="Center" Margin="0,-6"
+                                                        Value="{Binding ActiveTab.PrimarySelection.Opacity, Mode=TwoWay}" AutomationProperties.Name="Opacity" />
+                                                <TextBlock Grid.Column="2" Classes="caption" VerticalAlignment="Center" MinWidth="32" TextAlignment="Right"
+                                                           Text="{Binding ActiveTab.PrimarySelection.Opacity, StringFormat={}{0:P0}}" />
+                                            </Grid>
+                                        </Border>
+                                    </Grid>
 
                                     <Border Height="1" Background="{DynamicResource BrushBorder}" />
 

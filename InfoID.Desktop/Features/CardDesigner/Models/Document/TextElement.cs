@@ -38,6 +38,22 @@ public sealed partial class TextElement : DesignerElement
     [ObservableProperty] private double _minFontSize = 6;
     [ObservableProperty] private double _maxFontSize = 72;
     [ObservableProperty] private bool _wrapText = true;
+
+    /// <summary>Text added before the value, e.g. "EMP-" for "EMP-1001". Not shown when
+    /// the value is empty, so a record without an ID doesn't print a lone "EMP-".</summary>
+    [ObservableProperty] private string _prefix = string.Empty;
+
+    /// <summary>Text added after the value, e.g. " (Visitor)".</summary>
+    [ObservableProperty] private string _suffix = string.Empty;
+
+    /// <summary>The value with Prefix and Suffix around it. Used by the canvas, Print
+    /// Preview, printing and thumbnails so they always agree.</summary>
+    public string WithAffixes(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return value ?? string.Empty;
+        if (string.IsNullOrEmpty(Prefix) && string.IsNullOrEmpty(Suffix)) return value;
+        return (Prefix ?? string.Empty) + value + (Suffix ?? string.Empty);
+    }
 }
 
 public enum TextAlignmentX { Left, Center, Right, Justify }

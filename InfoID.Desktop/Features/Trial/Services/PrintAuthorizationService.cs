@@ -118,6 +118,15 @@ public sealed class PrintAuthorizationService
                 : new PrintAuthorization(false, false, cards, PrintDenial.LicenseProblem, problem) { CountsTowardCardLimit = counts };
         }
 
+        // Offline trial (TrialPolicy): no login, no server, no limit -- watermark on every card.
+        if (TrialPolicy.OfflineWatermarkTrial)
+        {
+            if (cards == 0)
+                return new PrintAuthorization(false, true, 0, PrintDenial.TrialNotEnough, "Nothing to print.");
+            Log.Info($"Offline trial print authorized: {cards} card(s), watermarked");
+            return new PrintAuthorization(true, true, cards, PrintDenial.None, null);   // no ReservationId
+        }
+
         // 2) Not activated and not signed in: log in to start the trial.
         if (!_session.IsSignedIn || _session.Token is not { } token)
             return new PrintAuthorization(false, false, cards, PrintDenial.SignInRequired, SignInMessage(_state.CardLimit));
@@ -184,7 +193,15 @@ public sealed class PrintAuthorizationService
         }
 
         cardsPrinted = Math.Min(cardsPrinted, authorization.Cards);
-        var id = authorization.ReservationId!.Value;
+        //var id = authorization.ReservationId!.Value;
+        // Offline trial: nothing to report to a server; just record it in the audit log.
+        if (authorization.ReservationId is not { } id)
+        {
+            InfoID.Desktop.Core.Services.Audit.Record(InfoID.Domain.Common.Interfaces.AuditModules.License, "TrialCardsPrinted",
+                $"{cardsPrinted} trial card{(cardsPrinted == 1 ? "" : "s")} printed with watermark (offline trial)",
+                after: new { Cards = cardsPrinted, Offline = true });
+            return;
+        }
         for (var attempt = 1; attempt <= 3; attempt++)
         {
             try
@@ -220,7 +237,8 @@ public sealed class PrintAuthorizationService
     {
         if (!authorization.IsAllowed || authorization.Finished) return;
         authorization.Finished = true;
-        if (!authorization.IsTrial || _session.Token is not { } token) return;
+       // if (!authorization.IsTrial || _session.Token is not { } token) return;
+        if (!authorization.IsTrial || authorization.ReservationId is null || _session.Token is not { } token) return;
         try
         {
             var status = await _portal.ReleaseTrialCardsAsync(token, authorization.ReservationId!.Value);

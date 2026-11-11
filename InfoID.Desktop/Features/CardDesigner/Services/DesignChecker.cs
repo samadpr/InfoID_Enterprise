@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
@@ -81,8 +81,12 @@ public sealed class DesignChecker : IDesignChecker
                 case SignatureElement { AssetReference: null or "" }:
                     Add(issues, DesignIssueSeverity.Warning, $"\"{element.Name}\" has no signature image selected yet.", element, side.Side);
                     break;
-                case BarcodeElement { Value: null or "" }:
-                    Add(issues, DesignIssueSeverity.Error, $"\"{element.Name}\" has no barcode value.", element, side.Side);
+                case BarcodeElement or QrCodeElement when string.IsNullOrWhiteSpace(CodeValueBinding.Expression(element)):
+                    Add(issues, DesignIssueSeverity.Error,
+                        CodeValueBinding.IsDatabaseSource(element)
+                            ? $"\"{element.Name}\" is set to use a database field, but no field is selected."
+                            : $"\"{element.Name}\" has no value to encode.",
+                        element, side.Side);
                     break;
                 case DataFieldElement { FieldKey: null or "" }:
                     Add(issues, DesignIssueSeverity.Warning, $"\"{element.Name}\" has no field selected.", element, side.Side);

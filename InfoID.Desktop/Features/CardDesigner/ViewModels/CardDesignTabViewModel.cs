@@ -214,6 +214,11 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 
     private void OnElementPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
+        if (e.PropertyName is nameof(DesignerElement.X) or nameof(DesignerElement.Y)
+           or nameof(DesignerElement.Width) or nameof(DesignerElement.Height) or nameof(DesignerElement.Rotation))
+        {
+            RaiseCardAlignmentChanged();
+        }
         // Id/GroupId churn (e.g. during paste) already goes through explicit
         // NotifyDocumentChanged()/MarkDirty() calls at the call site; everything else --
         // Text, FontSize, ColorHex, X/Y/Width/Height/Rotation, alignment, etc. -- needs
@@ -1022,6 +1027,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         OnPropertyChanged(nameof(HasSelection));
         OnPropertyChanged(nameof(HasMultiSelection));
         OnPropertyChanged(nameof(ShowCommonTransformFields));
+        RaiseCardAlignmentChanged();
         RefreshLayerSelectionHighlight();
     }
 
@@ -1949,7 +1955,7 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 
             // Search: rebuild the column dropdown when the columns change
             RefreshSearchColumns();
-
+            RefreshDatabaseColumns();
             // Checkboxes: forget ticks that belong to a previous table (new connection / disconnect)
             _checkedDatabaseRows.RemoveWhere(r => r.Table != DatabaseData);
             DatabaseRowChecksChanged?.Invoke(this, EventArgs.Empty);
@@ -3885,6 +3891,22 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
         SelectedSearchColumn = AllColumnsOption;
     }
 
+    /// <summary>Keeps DatabaseColumns (the "Database field" dropdowns of QR codes and
+    /// barcodes) equal to the connected table's column names, for every data source.
+    /// Updated in place so open dropdowns don't lose their state when nothing changed.</summary>
+    private void RefreshDatabaseColumns()
+    {
+        var names = DatabaseData?.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList()
+                    ?? new List<string>();
+
+        if (DatabaseColumns.SequenceEqual(names))
+            return;
+
+        DatabaseColumns.Clear();
+        foreach (var name in names)
+            DatabaseColumns.Add(name);
+    }
+
     private static string GetApiTableName(string url)
     {
         if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
@@ -4003,6 +4025,38 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     /// work reliably"), most obvious with even a small accidental rotation like the one
     /// left over from a rotate-handle drag. Aligning on this rect instead always matches
     /// what the user actually sees on the canvas.</summary>
+    ///
+
+
+    /// <summary>Within this distance (mm) an element counts as aligned to a card edge or
+    /// centre, so values like 0.004 after rounding still highlight.</summary>
+    private const double CardAlignTolerance = 0.05;
+
+    /// <summary>Visual bounds of the single selected element, or null when nothing or
+    /// several elements are selected (the highlight only applies to one element).</summary>
+    private Avalonia.Rect? SingleSelectionBounds =>
+        SelectedElements.Count == 1 ? GetVisualBounds(SelectedElements[0]) : null;
+
+    private static bool Near(double a, double b) => Math.Abs(a - b) <= CardAlignTolerance;
+
+    /// <summary>"Align to card" buttons light up for the edge/centre the selected
+    /// element currently sits on.</summary>
+    public bool IsAlignedLeftToCard => SingleSelectionBounds is { } b && Near(b.Left, 0);
+    public bool IsAlignedCenterToCard => SingleSelectionBounds is { } b && Near(b.Left + b.Width / 2, Document.WidthMm / 2);
+    public bool IsAlignedRightToCard => SingleSelectionBounds is { } b && Near(b.Right, Document.WidthMm);
+    public bool IsAlignedTopToCard => SingleSelectionBounds is { } b && Near(b.Top, 0);
+    public bool IsAlignedMiddleToCard => SingleSelectionBounds is { } b && Near(b.Top + b.Height / 2, Document.HeightMm / 2);
+    public bool IsAlignedBottomToCard => SingleSelectionBounds is { } b && Near(b.Bottom, Document.HeightMm);
+
+    private void RaiseCardAlignmentChanged()
+    {
+        OnPropertyChanged(nameof(IsAlignedLeftToCard));
+        OnPropertyChanged(nameof(IsAlignedCenterToCard));
+        OnPropertyChanged(nameof(IsAlignedRightToCard));
+        OnPropertyChanged(nameof(IsAlignedTopToCard));
+        OnPropertyChanged(nameof(IsAlignedMiddleToCard));
+        OnPropertyChanged(nameof(IsAlignedBottomToCard));
+    }
     private static Avalonia.Rect GetVisualBounds(DesignerElement el)
     {
         if (el.Rotation == 0) return new Avalonia.Rect(el.X, el.Y, el.Width, el.Height);
@@ -4026,8 +4080,13 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     [RelayCommand]
     private void AlignCenterHorizontal()
     {
-        if (SelectedElements.Count < 2) return;
-        var target = (SelectedElements.Min(e => GetVisualBounds(e).Left) + SelectedElements.Max(e => GetVisualBounds(e).Right)) / 2;
+        //if (SelectedElements.Count < 2) return;
+        //var target = (SelectedElements.Min(e => GetVisualBounds(e).Left) + SelectedElements.Max(e => GetVisualBounds(e).Right)) / 2;
+        if (SelectedElements.Count == 0) return;
+        // One element: centre it on the card. Several: centre them on each other.
+        var target = SelectedElements.Count == 1
+            ? Document.WidthMm / 2
+            : (SelectedElements.Min(e => GetVisualBounds(e).Left) + SelectedElements.Max(e => GetVisualBounds(e).Right)) / 2;
         foreach (var e in SelectedElements)
         {
             var bounds = GetVisualBounds(e);
@@ -4046,8 +4105,13 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
     [RelayCommand]
     private void AlignMiddleVertical()
     {
-        if (SelectedElements.Count < 2) return;
-        var target = (SelectedElements.Min(e => GetVisualBounds(e).Top) + SelectedElements.Max(e => GetVisualBounds(e).Bottom)) / 2;
+        //if (SelectedElements.Count < 2) return;
+        //var target = (SelectedElements.Min(e => GetVisualBounds(e).Top) + SelectedElements.Max(e => GetVisualBounds(e).Bottom)) / 2;
+        if (SelectedElements.Count == 0) return;
+        var target = SelectedElements.Count == 1
+            ? Document.HeightMm / 2
+            : (SelectedElements.Min(e => GetVisualBounds(e).Top) + SelectedElements.Max(e => GetVisualBounds(e).Bottom)) / 2;
+
         foreach (var e in SelectedElements)
         {
             var bounds = GetVisualBounds(e);
@@ -4059,8 +4123,13 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 
     private void Align(Func<DesignerElement, double> selector, Action<DesignerElement, double> apply, bool useMin)
     {
-        if (SelectedElements.Count < 2) return;
-        var target = useMin ? SelectedElements.Min(selector) : SelectedElements.Max(selector);
+        //if (SelectedElements.Count < 2) return;
+        //var target = useMin ? SelectedElements.Min(selector) : SelectedElements.Max(selector);
+        if (SelectedElements.Count == 0) return;
+        // One element: align to the card's left/right edge. Several: to each other.
+        var target = SelectedElements.Count == 1
+            ? (useMin ? 0 : Document.WidthMm)
+            : useMin ? SelectedElements.Min(selector) : SelectedElements.Max(selector);
         foreach (var e in SelectedElements) apply(e, target);
         NotifyDocumentChanged();
         MarkDirty();
@@ -4111,8 +4180,13 @@ public sealed partial class CardDesignTabViewModel : DocumentViewModelBase
 
     private void AlignVertical(Func<DesignerElement, double> selector, Action<DesignerElement, double> apply, bool useMin)
     {
-        if (SelectedElements.Count < 2) return;
-        var target = useMin ? SelectedElements.Min(selector) : SelectedElements.Max(selector);
+        //if (SelectedElements.Count < 2) return;
+        //var target = useMin ? SelectedElements.Min(selector) : SelectedElements.Max(selector);
+        if (SelectedElements.Count == 0) return;
+        // One element: align to the card's top/bottom edge. Several: to each other.
+        var target = SelectedElements.Count == 1
+            ? (useMin ? 0 : Document.HeightMm)
+            : useMin ? SelectedElements.Min(selector) : SelectedElements.Max(selector);
         foreach (var e in SelectedElements) apply(e, target);
         NotifyDocumentChanged();
         MarkDirty();

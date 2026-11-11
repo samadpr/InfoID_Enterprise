@@ -110,22 +110,26 @@ public static class CardTextRenderer
     }
 
     /// <summary>The text a Date/Time element shows (same format rules as the canvas).</summary>
-    public static string FormatDateTime(DateTimeElement element)
-    {
-        try
-        {
-            var value = element.Value;
-            return element.DisplayFormat switch
-            {
-                DateTimeDisplayFormat.DateTime => $"{value.ToString(element.DateFormat)} {value.ToString(element.TimeFormat)}",
-                DateTimeDisplayFormat.Date => value.ToString(element.DateFormat),
-                DateTimeDisplayFormat.Time => value.ToString(element.TimeFormat),
-                _ => string.Empty,
-            };
-        }
-        catch (FormatException)
-        {
-            return element.Value.ToString("g");
-        }
-    }
+    //public static string FormatDateTime(DateTimeElement element)
+    //{
+    //    try
+    //    {
+    //        var value = element.Value;
+    //        return element.DisplayFormat switch
+    //        {
+    //            DateTimeDisplayFormat.DateTime => $"{value.ToString(element.DateFormat)} {value.ToString(element.TimeFormat)}",
+    //            DateTimeDisplayFormat.Date => value.ToString(element.DateFormat),
+    //            DateTimeDisplayFormat.Time => value.ToString(element.TimeFormat),
+    //            _ => string.Empty,
+    //        };
+    //    }
+    //    catch (FormatException)
+    //    {
+    //        return element.Value.ToString("g");
+    //    }
+    //}
+
+    /// <summary>The text a Date/Time element shows (prefix + date/time + suffix, offset applied).
+    /// "Print date" elements use the current time, so each printed card gets the real print date.</summary>
+    public static string FormatDateTime(DateTimeElement element) => element.FormatValue(DateTime.Now);
 }

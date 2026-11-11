@@ -74,7 +74,7 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
     public override bool CanResize => true;
     /// <summary>Standard working size for the Print dialog. DialogService clamps this to
     /// the main window so it never opens larger than the screen the app is on.</summary>
-    public override (double Width, double Height)? PreferredSize => (1180, 820);
+    public override (double Width, double Height)? PreferredSize => (1000,  700);
 
     public CardDesignDocument Document { get; }
 
@@ -793,6 +793,8 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
         get
         {
             if (_trialState is not { } t) return string.Empty;
+            if (InfoID.Desktop.Features.Trial.Services.TrialPolicy.OfflineWatermarkTrial)
+                return $"InfoID isn't activated. Printed cards carry an \"{InfoID.Desktop.Features.Trial.Services.TrialWatermark.Text}\" watermark. Activate InfoID to print without it.";
             if (t.TrialUsedUp) return $"You've used all {t.CardLimit} trial cards. Activate InfoID to keep printing. You can still design, save and preview cards.";
             var counts = t.HasTrialStatus ? $"{t.TrialUsageText} · {t.TrialRemainingText}" : "checking your trial cards...";
             var offline = t.TrialError is null ? "" : " (couldn't reach the server: printing needs an internet connection)";
@@ -881,7 +883,9 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
     private async Task<InfoID.Desktop.Features.Trial.Services.PrintAuthorization?> AuthorizeAsync(int cards)
     {
         if (_printAuthorization is null) return null;
-        StatusMessage = _trialState?.IsTrialMode == true ? "Reserving trial cards..." : StatusMessage;
+        // StatusMessage = _trialState?.IsTrialMode == true ? "Reserving trial cards..." : StatusMessage;
+        StatusMessage = _trialState?.IsTrialMode == true && !InfoID.Desktop.Features.Trial.Services.TrialPolicy.OfflineWatermarkTrial
+     ? "Reserving trial cards..." : StatusMessage;
         return await _printAuthorization.AuthorizeAsync(cards, Document.Name, feature: _licensedFeature);
     }
 
@@ -1112,6 +1116,56 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
         }
     }
 
+
+    /// <summary>Null when every visible QR code / barcode can be encoded for every record
+    /// about to print; otherwise a message naming the first problems (an empty field, or a
+    /// value the symbology can't hold, e.g. letters in an EAN-13). Prevents cards from being
+    /// printed with a missing or unreadable code.</summary>
+    private string? FindUnencodableCodes(IReadOnlyList<PrintQueueRow> rows)
+    {
+        var sides = new List<CardDesignSide>();
+        if (PrintFront) sides.Add(Document.Front);
+        if (PrintBack) sides.Add(Document.Back);
+
+        var codes = sides.SelectMany(s => s.Elements)
+            .Where(e => e.Visible && (e is QrCodeElement || e is BarcodeElement))
+            .ToList();
+        if (codes.Count == 0) return null;
+
+        var problems = new List<string>();
+        var affectedRecords = 0;
+        foreach (var row in rows)
+        {
+            var fields = row.Record.Fields;
+            foreach (var code in codes)
+            {
+                if (!_evaluator.EvaluateCondition(code.VisibilityCondition, fields)) continue; // hidden for this record
+
+                var value = CodeValueBinding.Resolve(code, fields, _evaluator);
+                var encodable = !string.IsNullOrEmpty(value) && code switch
+                {
+                    QrCodeElement qr => BarcodeRenderer.TryGenerate(qr, value) is not null,
+                    BarcodeElement bc => BarcodeRenderer.TryGenerate(bc, value) is not null,
+                    _ => true,
+                };
+                if (encodable) continue;
+
+                affectedRecords++;
+                if (problems.Count < 3)
+                    problems.Add(string.IsNullOrEmpty(value)
+                        ? $"{row.Record.Label}: \"{code.Name}\" has no value"
+                        : $"{row.Record.Label}: \"{code.Name}\" can't encode \"{value}\"");
+                break; // one problem per record is enough
+            }
+        }
+
+        if (affectedRecords == 0) return null;
+        var more = affectedRecords > problems.Count ? $" (and {affectedRecords - problems.Count} more)" : "";
+        return $"{affectedRecords} record{(affectedRecords == 1 ? "" : "s")} can't get a valid QR code / barcode: "
+               + string.Join("; ", problems) + more + ". Fix the data or the code settings, or untick those records.";
+    }
+
+
     // ---------------------------------------------------------------- range helpers ----
 
     /// <summary>The records the current Print Range selects, in print order.</summary>
@@ -1254,6 +1308,11 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
             if (recordsToPrint.Count == 0)
             {
                 StatusMessage = "No records match the print range.";
+                return;
+            }
+            if (FindUnencodableCodes(recordsToPrint) is { } codeProblem)
+            {
+                StatusMessage = codeProblem;
                 return;
             }
 
@@ -1417,6 +1476,7 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
             if (success && DigitalCopyMode != DigitalCopyMode.Off)
             {
                 await SaveAutomaticDigitalCopyAsync(pagePaths, pdfPages);
+                RecordDigitalCopyAudit(recordsToPrint, DigitalCopyMode == DigitalCopyMode.PdfFile ? $"{Document.Name}.pdf" : "PNG images",automatic: true);
             }
 
             var trialNote = authorization is { IsTrial: true } && success && _trialState is { HasTrialStatus: true } trial
@@ -1715,9 +1775,27 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
                 _ => string.Empty,
             };
 
+            //if (_printAuthorization is not null)
+            //{
+            //    var isLicensed = _trialState?.IsActivated == true;
+            // Same records as Print (All / Current / Custom range), one card each.
+            var rowsToSave = GetRecordsToPrint();
+            if (rowsToSave.Count == 0)
+            {
+                StatusMessage = "No records to save. Check the Print range.";
+                return;
+            }
+
+            if (FindUnencodableCodes(rowsToSave) is { } codeProblem)
+            {
+                StatusMessage = codeProblem;
+                return;
+            }
+
             if (_printAuthorization is not null)
             {
                 var isLicensed = _trialState?.IsActivated == true;
+                authorization = await AuthorizeAsync(isLicensed ? 0 : rowsToSave.Count);
                 authorization = await AuthorizeAsync(isLicensed ? 0 : 1);
                 if (authorization is { IsAllowed: false })
                 {
@@ -1730,8 +1808,8 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
                 "Save Digital Copy", "PDF", new[] { "*.pdf" }, $"{Document.Name}_DigitalCopy{suffix}", "pdf");
             if (path is null) return;
 
-            var record = PreviewRecord ?? Records.FirstOrDefault()?.Record;
-            var options = BuildRenderOptions(record, trialWatermark: authorization?.Watermark == true);
+            //var record = PreviewRecord ?? Records.FirstOrDefault()?.Record;
+            //var options = BuildRenderOptions(record, trialWatermark: authorization?.Watermark == true);
             var disableAntialiasing = AntialiasMode == PrintAntialiasMode.No;
             var applyRotation = ShouldApplyRotation;
 
@@ -1740,14 +1818,29 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
             if (PrintBack) sides.Add(CardSide.Back);
             if (sides.Count == 0) sides.Add(CardSide.Front);
 
-            var pages = new List<CardPdfWriter.PdfPage>();
-            foreach (var side in sides)
-            {
-                if (ColorMode is PrintColorMode.Composite or PrintColorMode.CompositeAndMonoChrome)
-                    pages.Add(ToPdfPage(RenderPagePixels(side, options, disableAntialiasing, applyRotation, monoChrome: false)));
+            //var pages = new List<CardPdfWriter.PdfPage>();
+            //foreach (var side in sides)
+            //{
+            //    if (ColorMode is PrintColorMode.Composite or PrintColorMode.CompositeAndMonoChrome)
+            //        pages.Add(ToPdfPage(RenderPagePixels(side, options, disableAntialiasing, applyRotation, monoChrome: false)));
 
-                if (ColorMode is PrintColorMode.MonoChrome or PrintColorMode.CompositeAndMonoChrome)
-                    pages.Add(ToPdfPage(RenderPagePixels(side, options, disableAntialiasing, applyRotation, monoChrome: true)));
+            //    if (ColorMode is PrintColorMode.MonoChrome or PrintColorMode.CompositeAndMonoChrome)
+            //        pages.Add(ToPdfPage(RenderPagePixels(side, options, disableAntialiasing, applyRotation, monoChrome: true)));
+            //}
+
+            // One card per record, in print order: each record's front (and back) pages.
+            var pages = new List<CardPdfWriter.PdfPage>();
+            foreach (var row in rowsToSave)
+            {
+                var options = BuildRenderOptions(row.Record, trialWatermark: authorization?.Watermark == true);
+                foreach (var side in sides)
+                {
+                    if (ColorMode is PrintColorMode.Composite or PrintColorMode.CompositeAndMonoChrome)
+                        pages.Add(ToPdfPage(RenderPagePixels(side, options, disableAntialiasing, applyRotation, monoChrome: false)));
+
+                    if (ColorMode is PrintColorMode.MonoChrome or PrintColorMode.CompositeAndMonoChrome)
+                        pages.Add(ToPdfPage(RenderPagePixels(side, options, disableAntialiasing, applyRotation, monoChrome: true)));
+                }
             }
 
             var bytes = CardPdfWriter.Build(pages);
@@ -1761,10 +1854,13 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
             };
             if (authorization is not null && _printAuthorization is not null)
                 await _printAuthorization.CompleteAsync(authorization, authorization.Cards);
-            StatusMessage = $"Digital copy ({modeText}) saved to {path}." +
-                            (authorization is { IsTrial: true } && _trialState is { HasTrialStatus: true } trial
-                                ? $" Trial: {trial.TrialUsageText}, {trial.TrialRemainingText}."
+             var cardsText = rowsToSave.Count == 1 ? "1 card" : $"{rowsToSave.Count} cards";
+            RecordDigitalCopyAudit(rowsToSave, Path.GetFileName(path), automatic: false);
+            StatusMessage = $"Digital copy ({modeText}, {cardsText}) saved to {path}." +
+                           (authorization is { IsTrial: true } && _trialState is { HasTrialStatus: true } trial
+                               ? $" Trial: {trial.TrialUsageText}, {trial.TrialRemainingText}."
                                 : "");
+
         }
         catch (Exception ex)
         {
@@ -1775,6 +1871,42 @@ public sealed partial class PrintDialogViewModel : DialogViewModelBase<bool>
             if (authorization is { IsAllowed: true, Finished: false } && _printAuthorization is not null)
                 await _printAuthorization.CancelAsync(authorization);
         }
+    }
+
+    /// <summary>Most record IDs listed in one audit entry; the count is always exact.</summary>
+    private const int MaxAuditRecordIds = 50;
+
+    /// <summary>Audit log entry for a digital copy (PDF / images). A digital copy is an
+    /// export, not an issued card, so it is NOT written to Print history or Reports --
+    /// only here, so there is a trace of who exported which cards and when. Holds
+    /// record IDs (e.g. "Employees/1001") only, never names or other personal data;
+    /// sample-data copies say so instead of listing sample names.</summary>
+    private void RecordDigitalCopyAudit(IReadOnlyList<PrintQueueRow> rows, string fileName, bool automatic)
+    {
+        var count = rows.Count;
+        var cardsText = count == 1 ? "1 card" : $"{count} cards";
+        var how = automatic ? " (saved automatically with a print)" : "";
+        var description = $"Digital copy saved: design '{Document.Name}', {cardsText}{how}";
+
+        var recordIds = IsDataBound
+            ? rows.Select(r => r.Record.Label).Take(MaxAuditRecordIds).ToList()
+            : new List<string>();
+
+        InfoID.Desktop.Core.Services.Audit.Record(
+            InfoID.Domain.Common.Interfaces.AuditModules.Printing,
+            "DigitalCopySaved",
+            description,
+            "Template", Document.PersistedTemplateId,
+            after: new
+            {
+                Design = Document.Name,
+                Cards = count,
+                Format = automatic ? DigitalCopyMode.ToString() : "PdfFile",
+                File = fileName,
+                Source = IsDataBound ? "Database records" : "Sample data",
+                RecordIds = recordIds,
+                RecordIdsTruncated = IsDataBound && count > MaxAuditRecordIds,
+            });
     }
 
     private CardPdfWriter.PdfPage ToPdfPage((byte[] Bgra, int Width, int Height) page) =>

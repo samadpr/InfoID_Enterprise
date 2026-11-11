@@ -6,6 +6,10 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 	<ApplicationIcon>Assets\Icons\InfoID.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
+    <Company>Infome Technologies</Company>
+    <Product>InfoID</Product>
+    <Copyright>© 2026 Infome Technologies</Copyright>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.1.1" />

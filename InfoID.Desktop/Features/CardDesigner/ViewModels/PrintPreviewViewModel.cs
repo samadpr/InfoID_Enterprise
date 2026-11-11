@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -69,10 +69,19 @@ public sealed partial class PrintPreviewViewModel : DialogViewModelBase<bool>
     /// -- exactly what a print preview needs to be trustworthy before printing.</summary>
     public string? ResolveAssetPath(string? assetReference) => _assetService.ResolveToFullPath(assetReference);
 
-    public string ResolveText(TextElement text) =>
-        string.IsNullOrEmpty(text.DataBindingExpression)
+    public string ResolveText(TextElement text)
+    {
+        var fields = SelectedRecord?.Fields ?? EmptyRecord;
+
+        // Text bound to a database column shows that column's value (same rule as the
+        // Print dialog); before, Print Preview showed the design text instead.
+        if (text.IsDatabaseBound && !string.IsNullOrWhiteSpace(text.DatabaseColumn))
+            return fields.TryGetValue(text.DatabaseColumn, out var value) ? value : string.Empty;
+
+        return string.IsNullOrEmpty(text.DataBindingExpression)
             ? text.Text
-            : _evaluator.Evaluate(text.DataBindingExpression, SelectedRecord?.Fields ?? EmptyRecord);
+            : _evaluator.Evaluate(text.DataBindingExpression, fields);
+    }
 
     /// <summary>The value a QR code / barcode encodes for the selected record.</summary>
     public string? ResolveCodeValue(DesignerElement element) =>
